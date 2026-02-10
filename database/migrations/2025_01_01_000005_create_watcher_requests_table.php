@@ -1,0 +1,30 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::create('watcher_requests', function (Blueprint $table) {
+            $table->id();
+            $table->unsignedBigInteger('requester_device_id')->comment('申請者');
+            $table->unsignedBigInteger('target_device_id')->comment('見守り対象');
+            $table->enum('status', ['pending', 'approved', 'rejected', 'cancelled'])->default('pending');
+            $table->string('message', 200)->nullable()->comment('申請メッセージ');
+            $table->dateTime('responded_at')->nullable();
+            $table->timestamp('created_at')->useCurrent();
+
+            $table->index(['target_device_id', 'status']);
+            $table->foreign('requester_device_id')->references('id')->on('devices')->onDelete('cascade');
+            $table->foreign('target_device_id')->references('id')->on('devices')->onDelete('cascade');
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::dropIfExists('watcher_requests');
+    }
+};
