@@ -8,5 +8,5 @@ Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
 
-// 未検知チェック: 30分ごとに実行
-Schedule::command('devices:check-undetected')->everyThirtyMinutes();
+// スケジュールに基づくaway_mode自動ON/OFF（毎分実行）
+Schedule::command('schedules:process')->everyMinute();

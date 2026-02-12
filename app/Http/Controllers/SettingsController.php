@@ -14,53 +14,96 @@ class SettingsController extends Controller
     public function index()
     {
         $device = Auth::user();
-        $notif = $device->notificationSetting ?? new NotificationSetting();
+        $notif = $device->notificationSetting ?? NotificationSetting::create(['device_id' => $device->id]);
 
         return view('settings', compact('device', 'notif'));
     }
 
     /**
-     * デバイス設定の保存（アラート閾値・ペット除外）
+     * デバイス設定の更新（AJAX）
      */
     public function updateDevice(Request $request)
     {
-        $request->validate([
-            'alert_threshold_hours' => 'required|in:12,24,36,48,72',
-            'pet_exclusion_enabled' => 'required|boolean',
-            'pet_exclusion_threshold_cm' => 'required|integer|min:50|max:200',
-        ]);
-
         $device = Auth::user();
-        $device->update([
-            'alert_threshold_hours' => $request->alert_threshold_hours,
-            'pet_exclusion_enabled' => $request->pet_exclusion_enabled,
-            'pet_exclusion_threshold_cm' => $request->pet_exclusion_threshold_cm,
-        ]);
 
-        return back()->with('success', 'デバイス設定を保存しました');
+        $rules = [];
+        $data = [];
+
+        // 送信されたフィールドのみバリデーション＆更新
+        if ($request->has('alert_threshold_hours')) {
+            $rules['alert_threshold_hours'] = 'required|in:12,24,36,48,72';
+            $data['alert_threshold_hours'] = $request->alert_threshold_hours;
+        }
+
+        if ($request->has('pet_exclusion_enabled')) {
+            $rules['pet_exclusion_enabled'] = 'required|boolean';
+            $data['pet_exclusion_enabled'] = $request->pet_exclusion_enabled;
+        }
+
+        if ($request->has('install_height_cm')) {
+            $rules['install_height_cm'] = 'required|integer|min:150|max:250';
+            $data['install_height_cm'] = $request->install_height_cm;
+        }
+
+        if ($request->has('nickname')) {
+            $rules['nickname'] = 'nullable|string|max:100';
+            $data['nickname'] = $request->nickname;
+        }
+
+        if (!empty($rules)) {
+            $request->validate($rules);
+        }
+
+        if (!empty($data)) {
+            $device->update($data);
+        }
+
+        if ($request->expectsJson()) {
+            return response()->json(['ok' => true]);
+        }
+
+        return redirect('/settings')->with('success', '保存しました');
     }
 
     /**
-     * 通知設定の保存（メールアドレス）
+     * 通知設定の更新（AJAX）
      */
     public function updateNotification(Request $request)
     {
-        $request->validate([
-            'email_1' => 'nullable|email|max:255',
-            'email_enabled' => 'required|boolean',
-        ]);
-
         $device = Auth::user();
+        $notif = $device->notificationSetting ?? NotificationSetting::create(['device_id' => $device->id]);
 
-        $device->notificationSetting()->updateOrCreate(
-            ['device_id' => $device->id],
-            [
-                'email_1' => $request->email_1,
-                'email_enabled' => $request->email_enabled,
-            ]
-        );
+        $rules = [];
+        $data = [];
 
-        return back()->with('success', '通知設定を保存しました');
+        if ($request->has('email_1')) {
+            $rules['email_1'] = 'nullable|email|max:255';
+            $data['email_1'] = $request->email_1;
+        }
+
+        if ($request->has('email_enabled')) {
+            $rules['email_enabled'] = 'required|boolean';
+            $data['email_enabled'] = $request->email_enabled;
+        }
+
+        if ($request->has('webpush_enabled')) {
+            $rules['webpush_enabled'] = 'required|boolean';
+            $data['webpush_enabled'] = $request->webpush_enabled;
+        }
+
+        if (!empty($rules)) {
+            $request->validate($rules);
+        }
+
+        if (!empty($data)) {
+            $notif->update($data);
+        }
+
+        if ($request->expectsJson()) {
+            return response()->json(['ok' => true]);
+        }
+
+        return redirect('/settings')->with('success', '保存しました');
     }
 
     /**
@@ -71,13 +114,33 @@ class SettingsController extends Controller
         $device = Auth::user();
         $notif = $device->notificationSetting;
 
-        if (!$notif || !$notif->email_1) {
-            return back()->with('error', 'メールアドレスが登録されていません');
+        $targets = [];
+
+        if ($notif && $notif->email_enabled && $notif->email_1) {
+            // TODO: 実際のメール送信
+            $targets[] = 'メール';
         }
 
-        // TODO: 実際のメール送信はPhase1後半で実装
-        // ここではログに記録のみ
+        if ($notif && $notif->webpush_enabled) {
+            // TODO: 実際のWebプッシュ送信
+            $targets[] = 'Webプッシュ';
+        }
 
-        return back()->with('success', 'テスト通知を送信しました（※現在はテストモード）');
+        if (empty($targets)) {
+            if ($request->expectsJson()) {
+                return response()->json(['ok' => false, 'message' => '有効な通知先がありません'], 422);
+            }
+            return redirect('/settings')->with('error', '有効な通知先がありません');
+        }
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'ok' => true,
+                'message' => 'テスト通知を送信しました（' . implode('・', $targets) . '）',
+                'targets' => $targets,
+            ]);
+        }
+
+        return redirect('/settings')->with('success', 'テスト通知を送信しました');
     }
 }

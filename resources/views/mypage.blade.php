@@ -794,6 +794,13 @@
 
 @section('scripts')
 <script>
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+    const headers = {
+        'Content-Type': 'application/json',
+        'X-CSRF-TOKEN': csrfToken,
+        'Accept': 'application/json',
+    };
+
     // ==== 見守りON/OFF ====
     let watchEnabled = {{ $device->away_mode ? 'false' : 'true' }};
 
@@ -807,13 +814,9 @@
 
         watchEnabled = !watchEnabled;
 
-        // サーバーに送信
         fetch('/mypage/toggle-watch', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-            },
+            headers: headers,
             body: JSON.stringify({ away_mode: !watchEnabled })
         });
 
@@ -841,6 +844,7 @@
     // ==== タイマーモーダル ====
     function showScheduleModal() {
         document.getElementById('scheduleModal').classList.add('show');
+        loadSchedules();
     }
     function hideScheduleModal() {
         document.getElementById('scheduleModal').classList.remove('show');
@@ -859,9 +863,27 @@
         }
     }
 
-    // ==== 単発予定 ====
+    // ==== サーバーからスケジュール読み込み ====
     let oneshotSchedules = [];
+    let recurringSchedules = [];
+    const dayNames = ['日', '月', '火', '水', '木', '金', '土'];
 
+    async function loadSchedules() {
+        try {
+            const res = await fetch('/schedules', { headers: { 'Accept': 'application/json' } });
+            const data = await res.json();
+
+            oneshotSchedules = data.filter(s => s.type === 'oneshot');
+            recurringSchedules = data.filter(s => s.type === 'recurring');
+
+            renderOneshotList();
+            renderRecurringList();
+        } catch (e) {
+            console.error('スケジュール読み込みエラー:', e);
+        }
+    }
+
+    // ==== 単発予定 ====
     function toggleOneshotForm() {
         const form = document.getElementById('oneshotForm');
         form.classList.toggle('show');
@@ -870,6 +892,7 @@
             const tomorrow = new Date(now.getTime() + 24 * 60 * 60 * 1000);
             document.getElementById('scheduleStart').value = formatDatetimeLocal(now);
             document.getElementById('scheduleEnd').value = formatDatetimeLocal(tomorrow);
+            setTimeout(() => form.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
         }
     }
 
@@ -882,59 +905,65 @@
         return `${y}-${m}-${d}T${h}:${mi}`;
     }
 
+    function formatDateTime(dtStr) {
+        if (!dtStr) return '未定（手動復帰）';
+        const d = new Date(dtStr);
+        return `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+    }
+
     function renderOneshotList() {
         const container = document.getElementById('oneshotList');
         if (oneshotSchedules.length === 0) {
             container.innerHTML = '<div class="schedule-empty">設定済みの予定はありません</div>';
             return;
         }
-        container.innerHTML = oneshotSchedules.map((s, i) => {
-            const sd = new Date(s.start);
-            const startStr = `${sd.getMonth()+1}/${sd.getDate()} ${String(sd.getHours()).padStart(2,'0')}:${String(sd.getMinutes()).padStart(2,'0')}`;
-            let endStr = '未定（手動復帰）';
-            if (s.end) {
-                const ed = new Date(s.end);
-                endStr = `${ed.getMonth()+1}/${ed.getDate()} ${String(ed.getHours()).padStart(2,'0')}:${String(ed.getMinutes()).padStart(2,'0')}`;
-            }
-            return `
-                <div class="schedule-item">
-                    <div class="schedule-item-info">
-                        <p class="schedule-item-main">${startStr} 〜 ${endStr}</p>
-                        <p class="schedule-item-sub">${s.memo || '（メモなし）'}</p>
-                    </div>
-                    <button class="schedule-item-delete" onclick="deleteOneshot(${i})" title="削除">×</button>
-                </div>`;
-        }).join('');
+        container.innerHTML = oneshotSchedules.map(s => `
+            <div class="schedule-item">
+                <div class="schedule-item-info">
+                    <p class="schedule-item-main">${formatDateTime(s.start_at)} 〜 ${formatDateTime(s.end_at)}</p>
+                    <p class="schedule-item-sub">${s.memo || '（メモなし）'}</p>
+                </div>
+                <button class="schedule-item-delete" onclick="deleteSchedule(${s.id}, 'oneshot')" title="削除">×</button>
+            </div>`).join('');
     }
 
-    function saveOneshot() {
+    async function saveOneshot() {
         const start = document.getElementById('scheduleStart').value;
         const end = document.getElementById('scheduleEnd').value;
         const memo = document.getElementById('scheduleMemo').value;
         if (!start) { alert('開始日時を入力してください'); return; }
-        oneshotSchedules.push({ start, end: end || null, memo });
-        renderOneshotList();
-        toggleOneshotForm();
-        document.getElementById('scheduleMemo').value = '';
-        showToast('予定を追加しました');
-    }
 
-    function deleteOneshot(index) {
-        if (confirm('この予定を削除しますか？')) {
-            oneshotSchedules.splice(index, 1);
+        try {
+            const res = await fetch('/schedules', {
+                method: 'POST',
+                headers: headers,
+                body: JSON.stringify({
+                    type: 'oneshot',
+                    start_at: start,
+                    end_at: end || null,
+                    memo: memo || null,
+                })
+            });
+            if (!res.ok) { alert('保存に失敗しました'); return; }
+
+            const saved = await res.json();
+            oneshotSchedules.push(saved);
             renderOneshotList();
-            showToast('予定を削除しました');
+            toggleOneshotForm();
+            document.getElementById('scheduleMemo').value = '';
+            showToast('予定を追加しました');
+        } catch (e) {
+            alert('通信エラーが発生しました');
         }
     }
 
     // ==== 定期スケジュール ====
-    let recurringSchedules = [];
-    const dayNames = ['日', '月', '火', '水', '木', '金', '土'];
-
     function toggleRecurringForm() {
         const form = document.getElementById('recurringForm');
         form.classList.toggle('show');
-        if (!form.classList.contains('show')) {
+        if (form.classList.contains('show')) {
+            setTimeout(() => form.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
+        } else {
             document.querySelectorAll('.weekday-btn').forEach(btn => btn.classList.remove('selected'));
             document.getElementById('recurringStart').value = '10:00';
             document.getElementById('recurringEnd').value = '16:00';
@@ -953,21 +982,22 @@
             container.innerHTML = '<div class="schedule-empty">設定済みの定期スケジュールはありません</div>';
             return;
         }
-        container.innerHTML = recurringSchedules.map((s, i) => {
-            const daysStr = s.days.map(d => dayNames[d]).join('・');
-            const timeStr = s.nextDay ? `${s.start}〜翌${s.end}` : `${s.start}〜${s.end}`;
+        container.innerHTML = recurringSchedules.map(s => {
+            const days = s.days_of_week || [];
+            const daysStr = days.map(d => dayNames[d]).join('・');
+            const timeStr = s.next_day ? `${s.start_time}〜翌${s.end_time}` : `${s.start_time}〜${s.end_time}`;
             return `
                 <div class="schedule-item">
                     <div class="schedule-item-info">
                         <p class="schedule-item-main">毎週 ${daysStr} ${timeStr}</p>
                         <p class="schedule-item-sub">${s.memo || '（メモなし）'}</p>
                     </div>
-                    <button class="schedule-item-delete" onclick="deleteRecurring(${i})" title="削除">×</button>
+                    <button class="schedule-item-delete" onclick="deleteSchedule(${s.id}, 'recurring')" title="削除">×</button>
                 </div>`;
         }).join('');
     }
 
-    function saveRecurring() {
+    async function saveRecurring() {
         const selectedDays = [];
         document.querySelectorAll('.weekday-btn.selected').forEach(btn => {
             selectedDays.push(parseInt(btn.dataset.day));
@@ -978,17 +1008,53 @@
         const nextDay = document.getElementById('recurringNextDay').checked;
         const memo = document.getElementById('recurringMemo').value;
         if (!start || !end) { alert('時間帯を入力してください'); return; }
-        recurringSchedules.push({ days: selectedDays.sort(), start, end, nextDay, memo });
-        renderRecurringList();
-        toggleRecurringForm();
-        showToast('定期スケジュールを追加しました');
+
+        try {
+            const res = await fetch('/schedules', {
+                method: 'POST',
+                headers: headers,
+                body: JSON.stringify({
+                    type: 'recurring',
+                    days_of_week: selectedDays.sort(),
+                    start_time: start,
+                    end_time: end,
+                    next_day: nextDay,
+                    memo: memo || null,
+                })
+            });
+            if (!res.ok) { alert('保存に失敗しました'); return; }
+
+            const saved = await res.json();
+            recurringSchedules.push(saved);
+            renderRecurringList();
+            toggleRecurringForm();
+            showToast('定期スケジュールを追加しました');
+        } catch (e) {
+            alert('通信エラーが発生しました');
+        }
     }
 
-    function deleteRecurring(index) {
-        if (confirm('この定期スケジュールを削除しますか？')) {
-            recurringSchedules.splice(index, 1);
-            renderRecurringList();
-            showToast('定期スケジュールを削除しました');
+    // ==== 共通削除 ====
+    async function deleteSchedule(id, type) {
+        if (!confirm('このスケジュールを削除しますか？')) return;
+
+        try {
+            const res = await fetch(`/schedules/${id}`, {
+                method: 'DELETE',
+                headers: headers,
+            });
+            if (!res.ok) { alert('削除に失敗しました'); return; }
+
+            if (type === 'oneshot') {
+                oneshotSchedules = oneshotSchedules.filter(s => s.id !== id);
+                renderOneshotList();
+            } else {
+                recurringSchedules = recurringSchedules.filter(s => s.id !== id);
+                renderRecurringList();
+            }
+            showToast('スケジュールを削除しました');
+        } catch (e) {
+            alert('通信エラーが発生しました');
         }
     }
 

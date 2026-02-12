@@ -66,41 +66,15 @@
             text-decoration: none;
             color: inherit;
         }
-        .header-logo-icon {
-            width: 36px;
-            height: 36px;
-            background: var(--cream);
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-        }
-        .header-logo-text {
-            font-size: 16px;
-            font-weight: 500;
-        }
-        .header-menu {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
+        .header-logo-text { font-size: 16px; font-weight: 500; }
+        .header-menu { display: flex; align-items: center; gap: 8px; }
         .header-btn {
-            padding: 8px 12px;
-            font-size: 13px;
-            color: var(--gray-600);
-            background: transparent;
-            border: none;
-            border-radius: var(--radius);
-            cursor: pointer;
-            transition: all 0.2s;
-            text-decoration: none;
+            padding: 8px 12px; font-size: 13px; color: var(--gray-600);
+            background: transparent; border: none; border-radius: var(--radius);
+            cursor: pointer; transition: all 0.2s; text-decoration: none;
             font-family: 'Noto Sans JP', sans-serif;
         }
-        .header-btn:hover {
-            background: var(--beige);
-            color: var(--gray-800);
-        }
+        .header-btn:hover { background: var(--beige); color: var(--gray-800); }
 
         .main-content {
             max-width: 640px;
@@ -110,17 +84,10 @@
 
         /* 汎用 */
         .btn {
-            display: inline-block;
-            padding: 12px 20px;
-            font-size: 14px;
-            font-weight: 600;
-            font-family: 'Noto Sans JP', sans-serif;
-            border: none;
-            border-radius: var(--radius);
-            cursor: pointer;
-            transition: all 0.2s;
-            text-decoration: none;
-            text-align: center;
+            display: inline-block; padding: 12px 20px; font-size: 14px;
+            font-weight: 600; font-family: 'Noto Sans JP', sans-serif;
+            border: none; border-radius: var(--radius); cursor: pointer;
+            transition: all 0.2s; text-decoration: none; text-align: center;
         }
         .btn:hover { opacity: 0.85; }
         .btn-primary { background: var(--gray-800); color: var(--white); }
@@ -128,74 +95,40 @@
         .btn-block { display: block; width: 100%; }
 
         .card {
-            background: var(--white);
-            border-radius: var(--radius-lg);
-            padding: 24px;
-            margin-bottom: 16px;
-            box-shadow: var(--shadow-sm);
-            border: 1px solid var(--gray-200);
+            background: var(--white); border-radius: var(--radius-lg);
+            padding: 24px; margin-bottom: 16px;
+            box-shadow: var(--shadow-sm); border: 1px solid var(--gray-200);
         }
-        .card-title {
-            font-size: 14px;
-            font-weight: 500;
-            color: var(--gray-500);
-            margin-bottom: 16px;
-        }
-
-        /* レガシー互換（settings, logs用） */
-        .section-title {
-            font-size: 13px;
-            font-weight: 500;
-            color: var(--gray-500);
-            margin-bottom: 12px;
-            padding-bottom: 8px;
-            border-bottom: 1px solid var(--gray-200);
-        }
+        .card-title { font-size: 14px; font-weight: 500; color: var(--gray-500); margin-bottom: 16px; }
 
         /* トースト通知 */
         .toast {
-            position: fixed;
-            top: 80px;
-            left: 50%;
+            position: fixed; top: 80px; left: 50%;
             transform: translateX(-50%) translateY(-20px);
-            background: var(--gray-800);
-            color: var(--white);
-            padding: 12px 24px;
-            border-radius: var(--radius);
-            font-size: 14px;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.3s ease;
-            z-index: 200;
+            background: var(--gray-800); color: var(--white);
+            padding: 12px 24px; border-radius: var(--radius);
+            font-size: 14px; font-weight: 500;
+            display: flex; align-items: center; gap: 8px;
+            opacity: 0; visibility: hidden;
+            transition: all 0.3s ease; z-index: 200;
             box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         }
         .toast.show {
-            opacity: 1;
-            visibility: visible;
+            opacity: 1; visibility: visible;
             transform: translateX(-50%) translateY(0);
         }
         .toast-icon { color: var(--green); }
 
         /* フラッシュメッセージ */
         .flash-success {
-            background: var(--green-light);
-            color: var(--green-dark);
-            padding: 12px 16px;
-            border-radius: var(--radius);
-            margin-bottom: 16px;
-            font-size: 13px;
+            background: var(--green-light); color: var(--green-dark);
+            padding: 12px 16px; border-radius: var(--radius);
+            margin-bottom: 16px; font-size: 13px;
         }
         .flash-error {
-            background: var(--red-light);
-            color: var(--red);
-            padding: 12px 16px;
-            border-radius: var(--radius);
-            margin-bottom: 16px;
-            font-size: 13px;
+            background: var(--red-light); color: var(--red);
+            padding: 12px 16px; border-radius: var(--radius);
+            margin-bottom: 16px; font-size: 13px;
         }
 
         @keyframes fadeIn {
@@ -211,7 +144,6 @@
     </style>
 </head>
 <body>
-
     <!-- トースト通知 -->
     <div id="toast" class="toast">
         <span class="toast-icon">✓</span>
@@ -219,21 +151,22 @@
     </div>
 
     @auth
-    <header class="header">
-        <div class="header-inner">
-            <a href="/mypage" class="header-logo">
-                <div class="header-logo-icon">🧈</div>
-                <span class="header-logo-text">みまもりデバイス</span>
-            </a>
-            <div class="header-menu">
-                <a href="/settings" class="header-btn">⚙️ 設定</a>
-                <form method="POST" action="/logout" style="display:inline;">
-                    @csrf
-                    <button type="submit" class="header-btn">ログアウト</button>
-                </form>
+        @section('header')
+        <header class="header">
+            <div class="header-inner">
+                <a href="/mypage" class="header-logo">
+                    <span class="header-logo-text">みまもりデバイス</span>
+                </a>
+                <div class="header-menu">
+                    <a href="/settings" class="header-btn">⚙️ 設定</a>
+                    <form method="POST" action="/logout" style="display:inline;">
+                        @csrf
+                        <button type="submit" class="header-btn">ログアウト</button>
+                    </form>
+                </div>
             </div>
-        </div>
-    </header>
+        </header>
+        @show
     @endauth
 
     <div class="main-content">
@@ -248,12 +181,12 @@
     </div>
 
     <script>
-    function showToast(message) {
-        const toast = document.getElementById('toast');
-        document.getElementById('toastText').textContent = message || '保存しました';
-        toast.classList.add('show');
-        setTimeout(() => { toast.classList.remove('show'); }, 2000);
-    }
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastText').textContent = message || '保存しました';
+            toast.classList.add('show');
+            setTimeout(() => { toast.classList.remove('show'); }, 2000);
+        }
     </script>
 
     @yield('scripts')

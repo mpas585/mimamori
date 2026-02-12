@@ -104,4 +104,12 @@ class Device extends Authenticatable
     {
         return $this->hasMany(Watcher::class, 'target_device_id');
     }
+
+    /**
+     * スケジュール（単発・定期）
+     */
+    public function schedules(): HasMany
+    {
+        return $this->hasMany(DeviceSchedule::class);
+    }
 }
