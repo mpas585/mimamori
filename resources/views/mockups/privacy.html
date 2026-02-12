@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>プライバシーポリシー - みまもりデバイス（仮）</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+:root {
+  --white: #ffffff;
+  --cream: #faf9f7;
+  --beige: #f5f4f0;
+  --gray-100: #f0efeb;
+  --gray-200: #e5e2dc;
+  --gray-300: #d1ccc3;
+  --gray-400: #a8a29e;
+  --gray-500: #78716c;
+  --gray-600: #57534e;
+  --gray-700: #44403c;
+  --gray-800: #292524;
+  --green: #22c55e;
+  --green-dark: #16a34a;
+  --green-light: #dcfce7;
+  --blue: #3b82f6;
+  --blue-light: #eff6ff;
+  --red: #ef4444;
+  --red-light: #fef2f2;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+  --radius: 8px;
+  --radius-lg: 12px;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Noto Sans JP', sans-serif; background: var(--cream); color: var(--gray-800); line-height: 1.8; min-height: 100vh; }
+
+.header { background: var(--white); border-bottom: 1px solid var(--gray-200); padding: 16px 20px; position: sticky; top: 0; z-index: 100; }
+.header-inner { max-width: 800px; margin: 0 auto; display: flex; align-items: center; gap: 16px; }
+.back-btn { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; background: var(--beige); border: none; border-radius: var(--radius); cursor: pointer; font-size: 18px; transition: all 0.2s; text-decoration: none; color: var(--gray-700); }
+.back-btn:hover { background: var(--gray-200); }
+.header-title { font-size: 16px; font-weight: 600; }
+
+.container { max-width: 800px; margin: 0 auto; padding: 32px 20px 60px; }
+
+.page-title { font-size: 24px; font-weight: 700; text-align: center; margin-bottom: 8px; }
+.page-subtitle { font-size: 14px; color: var(--gray-500); text-align: center; margin-bottom: 32px; }
+
+.card { background: var(--white); border-radius: var(--radius-lg); padding: 32px; box-shadow: var(--shadow-sm); border: 1px solid var(--gray-200); }
+
+.intro-box { background: var(--green-light); border-radius: var(--radius); padding: 20px; margin-bottom: 32px; }
+.intro-box p { font-size: 14px; color: var(--gray-700); }
+.intro-box strong { color: var(--green-dark); }
+
+.toc { background: var(--beige); border-radius: var(--radius); padding: 20px 24px; margin-bottom: 32px; }
+.toc-title { font-size: 14px; font-weight: 600; color: var(--gray-700); margin-bottom: 12px; }
+.toc-list { list-style: none; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 8px; }
+.toc-list a { font-size: 13px; color: var(--gray-600); text-decoration: none; display: block; padding: 4px 0; }
+.toc-list a:hover { color: var(--gray-800); text-decoration: underline; }
+
+.article { margin-bottom: 32px; padding-bottom: 32px; border-bottom: 1px solid var(--gray-200); }
+.article:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+.article-title { font-size: 16px; font-weight: 700; color: var(--gray-800); margin-bottom: 16px; padding-left: 12px; border-left: 4px solid var(--green-dark); }
+.article-content { font-size: 14px; color: var(--gray-700); }
+.article-content p { margin-bottom: 12px; }
+.article-content p:last-child { margin-bottom: 0; }
+.article-content ol, .article-content ul { margin: 12px 0; padding-left: 24px; }
+.article-content li { margin-bottom: 8px; }
+
+.data-table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 13px; }
+.data-table th, .data-table td { padding: 12px 16px; text-align: left; border: 1px solid var(--gray-200); }
+.data-table th { background: var(--beige); font-weight: 600; color: var(--gray-700); }
+.data-table td { background: var(--white); }
+.data-table tr:hover td { background: var(--gray-100); }
+
+.highlight-box { background: var(--blue-light); border-radius: var(--radius); padding: 16px; margin: 16px 0; font-size: 13px; }
+.highlight-box.warning { background: var(--red-light); }
+.highlight-box.info { background: var(--beige); }
+
+.update-info { text-align: center; margin-top: 32px; padding-top: 24px; border-top: 1px solid var(--gray-200); font-size: 13px; color: var(--gray-500); }
+
+@media (max-width: 480px) {
+  .card { padding: 24px 20px; }
+  .toc-list { grid-template-columns: 1fr; }
+  .data-table { font-size: 12px; }
+  .data-table th, .data-table td { padding: 8px 10px; }
+}
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="header-inner">
+      <a href="javascript:history.back()" class="back-btn">←</a>
+      <h1 class="header-title">プライバシーポリシー</h1>
+    </div>
+  </header>
+
+  <div class="container">
+    <h1 class="page-title">プライバシーポリシー</h1>
+    <p class="page-subtitle">個人情報の取扱いについて</p>
+
+    <div class="card">
+      <div class="intro-box">
+        <p><strong>🛡️ プライバシーを最優先に設計しています</strong></p>
+        <p>みまもりデバイス（仮）は「生活インフラ監視」として、個人を特定する情報を極力取得しない設計を採用しています。カメラやマイクは搭載しておらず、映像・音声の記録は一切行いません。</p>
+      </div>
+
+      <nav class="toc">
+        <p class="toc-title">📋 目次</p>
+        <ul class="toc-list">
+          <li><a href="#article1">第1条 基本方針</a></li>
+          <li><a href="#article2">第2条 取得する情報</a></li>
+          <li><a href="#article3">第3条 利用目的</a></li>
+          <li><a href="#article4">第4条 第三者提供</a></li>
+          <li><a href="#article5">第5条 情報の保管</a></li>
+          <li><a href="#article6">第6条 開示・訂正・削除</a></li>
+          <li><a href="#article7">第7条 Cookie等の使用</a></li>
+          <li><a href="#article8">第8条 お問い合わせ</a></li>
+        </ul>
+      </nav>
+
+      <article class="article" id="article1">
+        <h2 class="article-title">第1条（基本方針）</h2>
+        <div class="article-content">
+          <p>[屋号/氏名]（以下「当方」）は、「みまもりデバイス（仮）」サービス（以下「本サービス」）において、利用者のプライバシーを尊重し、個人情報の保護に努めます。</p>
+          <p>本サービスは、見守り対象者のプライバシーに配慮し、以下の設計思想に基づいて開発されています。</p>
+          <ul>
+            <li>カメラ・マイク非搭載（映像・音声の記録なし）</li>
+            <li>位置情報の取得なし</li>
+            <li>個人を特定する情報の最小化</li>
+            <li>検知データは匿名化して処理</li>
+          </ul>
+        </div>
+      </article>
+
+      <article class="article" id="article2">
+        <h2 class="article-title">第2条（取得する情報）</h2>
+        <div class="article-content">
+          <p>本サービスでは、以下の情報を取得します。</p>
+          
+          <h4 style="font-size: 14px; margin: 16px 0 8px; color: var(--gray-700);">■ デバイスから取得する情報</h4>
+          <table class="data-table">
+            <tr>
+              <th>情報</th>
+              <th>内容</th>
+              <th>目的</th>
+            </tr>
+            <tr>
+              <td>検知回数</td>
+              <td>人感センサーの反応回数</td>
+              <td>見守り判定</td>
+            </tr>
+            <tr>
+              <td>検知距離</td>
+              <td>センサーと検知対象の距離（cm）</td>
+              <td>ペット除外判定</td>
+            </tr>
+            <tr>
+              <td>電池残量</td>
+              <td>電池の電圧値</td>
+              <td>電池切れ通知</td>
+            </tr>
+            <tr>
+              <td>電波強度</td>
+              <td>LTE信号の強度</td>
+              <td>通信品質の確認</td>
+            </tr>
+            <tr>
+              <td>デバイスID</td>
+              <td>製品固有の識別子（6文字）</td>
+              <td>製品の識別</td>
+            </tr>
+          </table>
+
+          <h4 style="font-size: 14px; margin: 16px 0 8px; color: var(--gray-700);">■ 利用者から取得する情報</h4>
+          <table class="data-table">
+            <tr>
+              <th>情報</th>
+              <th>取得タイミング</th>
+              <th>目的</th>
+            </tr>
+            <tr>
+              <td>メールアドレス</td>
+              <td>通知設定時（任意）</td>
+              <td>アラート通知</td>
+            </tr>
+            <tr>
+              <td>電話番号</td>
+              <td>SMS/電話通知設定時（任意）</td>
+              <td>アラート通知</td>
+            </tr>
+            <tr>
+              <td>LINE ID</td>
+              <td>LINE通知連携時（任意）</td>
+              <td>アラート通知</td>
+            </tr>
+          </table>
+
+          <div class="highlight-box">
+            <strong>取得しない情報：</strong>氏名、住所、生年月日、位置情報（GPS）、映像、音声、行動履歴
+          </div>
+        </div>
+      </article>
+
+      <article class="article" id="article3">
+        <h2 class="article-title">第3条（利用目的）</h2>
+        <div class="article-content">
+          <p>取得した情報は、以下の目的にのみ利用します。</p>
+          <ol>
+            <li>見守りアラートの送信</li>
+            <li>デバイスの状態監視（電池残量、通信状態）</li>
+            <li>サービスの改善・品質向上</li>
+            <li>故障対応・カスタマーサポート</li>
+            <li>利用状況の統計分析（匿名化したデータのみ）</li>
+          </ol>
+        </div>
+      </article>
+
+      <article class="article" id="article4">
+        <h2 class="article-title">第4条（第三者提供）</h2>
+        <div class="article-content">
+          <p>当方は、以下の場合を除き、利用者の個人情報を第三者に提供しません。</p>
+          <ol>
+            <li>利用者の同意がある場合</li>
+            <li>法令に基づく場合（警察・裁判所等からの照会）</li>
+            <li>人の生命、身体または財産の保護のために必要な場合</li>
+          </ol>
+
+          <h4 style="font-size: 14px; margin: 16px 0 8px; color: var(--gray-700);">■ 業務委託先</h4>
+          <p>以下のサービスを利用しており、それぞれのプライバシーポリシーに従って情報が取り扱われます。</p>
+          <table class="data-table">
+            <tr>
+              <th>サービス</th>
+              <th>用途</th>
+              <th>提供する情報</th>
+            </tr>
+            <tr>
+              <td>1NCE（SIM事業者）</td>
+              <td>LTE通信</td>
+              <td>通信データ（暗号化）</td>
+            </tr>
+            <tr>
+              <td>SendGrid / Amazon SES</td>
+              <td>メール送信</td>
+              <td>メールアドレス</td>
+            </tr>
+            <tr>
+              <td>Twilio</td>
+              <td>SMS・電話送信</td>
+              <td>電話番号</td>
+            </tr>
+            <tr>
+              <td>LINE Notify</td>
+              <td>LINE通知</td>
+              <td>LINEトークン</td>
+            </tr>
+            <tr>
+              <td>Stripe</td>
+              <td>決済処理</td>
+              <td>決済情報</td>
+            </tr>
+          </table>
+        </div>
+      </article>
+
+      <article class="article" id="article5">
+        <h2 class="article-title">第5条（情報の保管）</h2>
+        <div class="article-content">
+          <table class="data-table">
+            <tr>
+              <th>情報</th>
+              <th>保管期間</th>
+            </tr>
+            <tr>
+              <td>検知ログ</td>
+              <td>無料プラン：90日 / プレミアムプラン：1年</td>
+            </tr>
+            <tr>
+              <td>アカウント情報</td>
+              <td>サービス利用終了後1年</td>
+            </tr>
+            <tr>
+              <td>問い合わせ履歴</td>
+              <td>対応完了後3年</td>
+            </tr>
+          </table>
+          <p style="margin-top: 12px;">保管期間を過ぎたデータは、適切な方法で削除または匿名化いたします。</p>
+        </div>
+      </article>
+
+      <article class="article" id="article6">
+        <h2 class="article-title">第6条（開示・訂正・削除）</h2>
+        <div class="article-content">
+          <p>利用者は、当方が保有する自己の個人情報について、以下の請求をすることができます。</p>
+          <ol>
+            <li><strong>開示請求：</strong>保有している個人情報の内容を確認できます</li>
+            <li><strong>訂正請求：</strong>誤った情報の訂正を求めることができます</li>
+            <li><strong>削除請求：</strong>個人情報の削除を求めることができます</li>
+          </ol>
+          <p>請求はお問い合わせフォームまたはメールにてお申し出ください。本人確認の上、対応いたします。</p>
+        </div>
+      </article>
+
+      <article class="article" id="article7">
+        <h2 class="article-title">第7条（Cookie等の使用）</h2>
+        <div class="article-content">
+          <p>本サービスのウェブサイトでは、以下の目的でCookieを使用しています。</p>
+          <ul>
+            <li>ログイン状態の維持</li>
+            <li>アクセス解析（匿名データ）</li>
+          </ul>
+          <p>ブラウザの設定でCookieを無効にすることができますが、一部機能が制限される場合があります。</p>
+        </div>
+      </article>
+
+      <article class="article" id="article8">
+        <h2 class="article-title">第8条（お問い合わせ）</h2>
+        <div class="article-content">
+          <p>個人情報の取扱いに関するお問い合わせは、以下の窓口までご連絡ください。</p>
+          <div class="highlight-box info">
+            <p><strong>お問い合わせ先</strong></p>
+            <p>メール：[準備中]</p>
+            <p>お問い合わせフォーム：<a href="contact.html">こちら</a></p>
+          </div>
+        </div>
+      </article>
+
+      <div class="update-info">
+        <p>制定日：2025年1月20日</p>
+        <p>最終更新日：2025年1月20日</p>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

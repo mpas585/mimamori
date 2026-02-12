@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>プラン変更 - みまもりデバイス（仮）</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+:root {
+  --white: #ffffff;
+  --cream: #faf9f7;
+  --beige: #f5f4f0;
+  --gray-100: #f0efeb;
+  --gray-200: #e5e2dc;
+  --gray-300: #d1ccc3;
+  --gray-400: #a8a29e;
+  --gray-500: #78716c;
+  --gray-600: #57534e;
+  --gray-700: #44403c;
+  --gray-800: #292524;
+  --green: #22c55e;
+  --green-dark: #16a34a;
+  --green-light: #dcfce7;
+  --blue: #3b82f6;
+  --blue-light: #eff6ff;
+  --red: #ef4444;
+  --red-light: #fef2f2;
+  --yellow: #eab308;
+  --yellow-light: #fef9c3;
+  --gold: #d97706;
+  --gold-light: #fef3c7;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+  --radius: 8px;
+  --radius-lg: 12px;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Noto Sans JP', sans-serif; background: var(--cream); color: var(--gray-800); line-height: 1.6; min-height: 100vh; }
+
+.header { background: var(--white); border-bottom: 1px solid var(--gray-200); padding: 16px 20px; position: sticky; top: 0; z-index: 100; }
+.header-inner { max-width: 640px; margin: 0 auto; display: flex; align-items: center; gap: 16px; }
+.back-btn { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; background: var(--beige); border: none; border-radius: var(--radius); cursor: pointer; font-size: 18px; transition: all 0.2s; text-decoration: none; color: var(--gray-700); }
+.back-btn:hover { background: var(--gray-200); }
+.header-title { font-size: 16px; font-weight: 600; }
+
+.container { max-width: 640px; margin: 0 auto; padding: 24px 20px; }
+
+.current-plan { background: var(--white); border-radius: var(--radius-lg); padding: 24px; margin-bottom: 24px; box-shadow: var(--shadow-sm); border: 1px solid var(--gray-200); }
+.current-label { font-size: 12px; color: var(--gray-500); margin-bottom: 8px; }
+.current-name { font-size: 20px; font-weight: 700; color: var(--gray-800); display: flex; align-items: center; gap: 8px; }
+.current-badge { font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 12px; background: var(--beige); color: var(--gray-600); }
+.current-badge.premium { background: var(--gold-light); color: var(--gold); }
+.current-expiry { font-size: 13px; color: var(--gray-500); margin-top: 8px; }
+
+.plan-grid { display: grid; gap: 16px; }
+.plan-card { background: var(--white); border-radius: var(--radius-lg); padding: 24px; box-shadow: var(--shadow-sm); border: 2px solid var(--gray-200); transition: all 0.2s; cursor: pointer; position: relative; }
+.plan-card:hover { border-color: var(--gray-400); }
+.plan-card.selected { border-color: var(--gray-800); }
+.plan-card.premium { border-color: var(--gold); }
+.plan-card.premium:hover { border-color: var(--gold); }
+.plan-recommend { position: absolute; top: -10px; right: 16px; background: var(--gold); color: var(--white); font-size: 11px; font-weight: 600; padding: 4px 12px; border-radius: 12px; }
+.plan-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 16px; }
+.plan-name { font-size: 18px; font-weight: 700; }
+.plan-price { text-align: right; }
+.plan-price-value { font-size: 28px; font-weight: 700; }
+.plan-price-value span { font-size: 14px; font-weight: 500; }
+.plan-price-note { font-size: 11px; color: var(--gray-500); }
+.plan-features { list-style: none; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--gray-100); }
+.plan-feature { display: flex; align-items: center; gap: 10px; padding: 8px 0; font-size: 14px; color: var(--gray-700); }
+.plan-feature-icon { font-size: 16px; }
+.plan-feature-icon.check { color: var(--green); }
+.plan-feature-icon.cross { color: var(--gray-400); }
+.plan-feature.disabled { color: var(--gray-400); }
+
+.payment-section { background: var(--white); border-radius: var(--radius-lg); padding: 24px; margin-top: 24px; box-shadow: var(--shadow-sm); border: 1px solid var(--gray-200); }
+.payment-title { font-size: 15px; font-weight: 600; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+.payment-title span { font-size: 18px; }
+
+.payment-options { display: flex; flex-direction: column; gap: 12px; }
+.payment-option { display: flex; align-items: center; gap: 12px; padding: 16px; border: 1px solid var(--gray-200); border-radius: var(--radius); cursor: pointer; transition: all 0.2s; }
+.payment-option:hover { border-color: var(--gray-400); background: var(--gray-100); }
+.payment-option.selected { border-color: var(--gray-800); background: var(--beige); }
+.payment-radio { width: 20px; height: 20px; border: 2px solid var(--gray-300); border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.payment-option.selected .payment-radio { border-color: var(--gray-800); }
+.payment-option.selected .payment-radio::after { content: ''; width: 10px; height: 10px; background: var(--gray-800); border-radius: 50%; }
+.payment-info { flex: 1; }
+.payment-name { font-size: 14px; font-weight: 600; }
+.payment-desc { font-size: 12px; color: var(--gray-500); margin-top: 2px; }
+.payment-discount { font-size: 11px; font-weight: 600; color: var(--green-dark); background: var(--green-light); padding: 4px 8px; border-radius: 4px; }
+
+.btn { display: block; width: 100%; padding: 16px; font-size: 15px; font-weight: 600; font-family: inherit; border: none; border-radius: var(--radius); cursor: pointer; transition: all 0.2s; text-align: center; margin-top: 24px; text-decoration: none; }
+.btn-primary { background: var(--gray-800); color: var(--white); }
+.btn-primary:hover { background: var(--gray-700); }
+.btn-primary:disabled { background: var(--gray-300); cursor: not-allowed; }
+
+.note-box { margin-top: 20px; padding: 16px; background: var(--beige); border-radius: var(--radius); }
+.note-title { font-size: 13px; font-weight: 600; color: var(--gray-700); margin-bottom: 8px; }
+.note-text { font-size: 12px; color: var(--gray-600); line-height: 1.8; }
+
+.cancel-link { display: block; text-align: center; margin-top: 24px; font-size: 13px; color: var(--gray-500); }
+.cancel-link a { color: var(--red); text-decoration: none; }
+.cancel-link a:hover { text-decoration: underline; }
+
+/* 支払い履歴リンク */
+.history-link { display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 16px; padding: 14px; background: var(--beige); border-radius: var(--radius); text-decoration: none; color: var(--gray-700); font-size: 14px; font-weight: 500; transition: all 0.2s; }
+.history-link:hover { background: var(--gray-200); }
+
+@media (max-width: 480px) {
+  .plan-header { flex-direction: column; gap: 8px; }
+  .plan-price { text-align: left; }
+}
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="header-inner">
+      <a href="mypage.html" class="back-btn">←</a>
+      <h1 class="header-title">プラン変更</h1>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="current-plan">
+      <p class="current-label">現在のプラン</p>
+      <p class="current-name">
+        無料プラン
+        <span class="current-badge">利用中</span>
+      </p>
+      <!-- Premium会員の場合はこちら表示
+      <p class="current-name">
+        プレミアムプラン
+        <span class="current-badge premium">利用中</span>
+      </p>
+      <p class="current-expiry">有効期限：2025年12月31日</p>
+      -->
+    </div>
+
+    <div class="plan-grid">
+      <div class="plan-card" onclick="selectPlan('free')">
+        <div class="plan-header">
+          <div>
+            <p class="plan-name">無料プラン</p>
+          </div>
+          <div class="plan-price">
+            <p class="plan-price-value">¥0</p>
+          </div>
+        </div>
+        <ul class="plan-features">
+          <li class="plan-feature"><span class="plan-feature-icon check">✓</span>メール通知</li>
+          <li class="plan-feature"><span class="plan-feature-icon check">✓</span>Webプッシュ通知</li>
+          <li class="plan-feature"><span class="plan-feature-icon check">✓</span>見守り共有（2人まで）</li>
+          <li class="plan-feature"><span class="plan-feature-icon check">✓</span>検知ログ（90日）</li>
+          <li class="plan-feature disabled"><span class="plan-feature-icon cross">✗</span>SMS通知</li>
+          <li class="plan-feature disabled"><span class="plan-feature-icon cross">✗</span>電話通知（自動音声）</li>
+          <li class="plan-feature disabled"><span class="plan-feature-icon cross">✗</span>毎日安否レポート</li>
+        </ul>
+      </div>
+
+      <div class="plan-card premium selected" onclick="selectPlan('premium')">
+        <span class="plan-recommend">おすすめ</span>
+        <div class="plan-header">
+          <div>
+            <p class="plan-name">プレミアムプラン</p>
+          </div>
+          <div class="plan-price">
+            <p class="plan-price-value">¥500<span>/月</span></p>
+            <p class="plan-price-note">税込</p>
+          </div>
+        </div>
+        <ul class="plan-features">
+          <li class="plan-feature"><span class="plan-feature-icon check">✓</span>メール通知</li>
+          <li class="plan-feature"><span class="plan-feature-icon check">✓</span>Webプッシュ通知</li>
+          <li class="plan-feature"><span class="plan-feature-icon check">✓</span>見守り共有（5人まで）</li>
+          <li class="plan-feature"><span class="plan-feature-icon check">✓</span>検知ログ（1年）</li>
+          <li class="plan-feature"><span class="plan-feature-icon check">✓</span><strong>SMS通知</strong></li>
+          <li class="plan-feature"><span class="plan-feature-icon check">✓</span><strong>電話通知（自動音声）</strong></li>
+          <li class="plan-feature"><span class="plan-feature-icon check">✓</span><strong>毎日安否レポート</strong></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="payment-section" id="paymentSection">
+      <h2 class="payment-title"><span>💳</span>お支払い方法</h2>
+      <div class="payment-options">
+        <div class="payment-option selected" onclick="selectPayment('monthly')">
+          <div class="payment-radio"></div>
+          <div class="payment-info">
+            <p class="payment-name">月払い（クレジットカード）</p>
+            <p class="payment-desc">毎月 ¥500（税込）・自動更新</p>
+          </div>
+        </div>
+        <div class="payment-option" onclick="selectPayment('yearly')">
+          <div class="payment-radio"></div>
+          <div class="payment-info">
+            <p class="payment-name">年払い（クレジットカード）</p>
+            <p class="payment-desc">年間 ¥6,000（税込）・自動更新</p>
+          </div>
+          <span class="payment-discount">実質月500円</span>
+        </div>
+        <div class="payment-option" onclick="selectPayment('transfer')">
+          <div class="payment-radio"></div>
+          <div class="payment-info">
+            <p class="payment-name">銀行振込（年払いのみ）</p>
+            <p class="payment-desc">年間 ¥6,000（税込）・手動更新</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <button class="btn btn-primary" id="upgradeBtn" onclick="upgradePlan()">プレミアムにアップグレード</button>
+
+    <a href="payment-history.html" class="history-link">
+      📋 お支払い履歴を確認
+    </a>
+
+    <div class="note-box">
+      <p class="note-title">📌 ご注意</p>
+      <p class="note-text">
+        ・クレジットカード払いは自動更新です<br>
+        ・銀行振込は入金確認後にプランが有効になります<br>
+        ・年払いは途中解約でも返金不可<br>
+        ・解約後も契約期間終了まで利用可能
+      </p>
+    </div>
+
+    <p class="cancel-link">
+      プレミアムを解約したい場合は<a href="#">こちら</a>
+    </p>
+  </div>
+
+  <script>
+let selectedPlan = 'premium';
+let selectedPayment = 'monthly';
+
+function selectPlan(plan) {
+  selectedPlan = plan;
+  document.querySelectorAll('.plan-card').forEach(card => {
+    card.classList.remove('selected');
+  });
+  event.currentTarget.classList.add('selected');
+  
+  // 無料プラン選択時は支払いセクション非表示
+  const paymentSection = document.getElementById('paymentSection');
+  const upgradeBtn = document.getElementById('upgradeBtn');
+  
+  if (plan === 'free') {
+    paymentSection.style.display = 'none';
+    upgradeBtn.textContent = '無料プランに変更';
+  } else {
+    paymentSection.style.display = 'block';
+    upgradeBtn.textContent = 'プレミアムにアップグレード';
+  }
+}
+
+function selectPayment(method) {
+  selectedPayment = method;
+  document.querySelectorAll('.payment-option').forEach(opt => {
+    opt.classList.remove('selected');
+  });
+  event.currentTarget.classList.add('selected');
+}
+
+function upgradePlan() {
+  if (selectedPlan === 'free') {
+    if (confirm('無料プランに変更しますか？\nプレミアム機能が使えなくなります。')) {
+      alert('無料プランに変更しました');
+      location.href = 'mypage.html';
+    }
+    return;
+  }
+  
+  // プレミアムプランの場合
+  if (selectedPayment === 'transfer') {
+    // 銀行振込
+    location.href = 'payment-transfer.html';
+  } else {
+    // クレジットカード（月払い/年払い）
+    location.href = 'payment.html?cycle=' + selectedPayment;
+  }
+}
+  </script>
+</body>
+</html>

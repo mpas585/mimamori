@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>サーバーエラー - みまもりデバイス（仮）</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+:root {
+  --white: #ffffff;
+  --cream: #faf9f7;
+  --beige: #f5f3ef;
+  --gray-100: #f0eeea;
+  --gray-200: #e5e2dc;
+  --gray-300: #d1ccc3;
+  --gray-400: #a8a29e;
+  --gray-500: #78716c;
+  --gray-600: #57534e;
+  --gray-700: #44403c;
+  --gray-800: #292524;
+  --red-light: #fef2f2;
+  --red: #ef4444;
+  --shadow: 0 4px 20px rgba(0,0,0,0.06);
+  --radius: 8px;
+  --radius-lg: 12px;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Noto Sans JP', sans-serif; background: var(--cream); color: var(--gray-800); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+
+.container { text-align: center; max-width: 400px; }
+.icon { font-size: 80px; margin-bottom: 24px; }
+.code { font-size: 72px; font-weight: 700; color: var(--red); opacity: 0.3; margin-bottom: 8px; letter-spacing: -0.02em; }
+.title { font-size: 20px; font-weight: 600; color: var(--gray-800); margin-bottom: 12px; }
+.message { font-size: 14px; color: var(--gray-500); line-height: 1.8; margin-bottom: 32px; }
+
+.btn-group { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+.btn { display: inline-block; padding: 14px 28px; font-size: 15px; font-weight: 600; font-family: inherit; border: none; border-radius: var(--radius); cursor: pointer; transition: all 0.2s; text-decoration: none; }
+.btn-primary { background: var(--gray-800); color: var(--white); }
+.btn-primary:hover { background: var(--gray-700); transform: translateY(-1px); box-shadow: var(--shadow); }
+.btn-secondary { background: var(--white); color: var(--gray-700); border: 1px solid var(--gray-300); }
+.btn-secondary:hover { background: var(--beige); }
+
+.hint { margin-top: 32px; padding: 16px; background: var(--beige); border-radius: var(--radius); font-size: 13px; color: var(--gray-600); line-height: 1.7; }
+.hint-title { font-weight: 600; margin-bottom: 4px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="icon">⚠️</div>
+    <p class="code">500</p>
+    <h1 class="title">サーバーエラーが発生しました</h1>
+    <p class="message">
+      申し訳ございません。<br>
+      一時的な問題が発生しています。<br>
+      しばらく時間をおいて再度お試しください。
+    </p>
+    <div class="btn-group">
+      <button onclick="location.reload()" class="btn btn-primary">再読み込み</button>
+      <a href="mypage.html" class="btn btn-secondary">マイページへ</a>
+    </div>
+    <div class="hint">
+      <p class="hint-title">問題が続く場合</p>
+      <p>時間をおいても解決しない場合は、<a href="contact.html" style="color: var(--gray-800);">お問い合わせ</a>よりご連絡ください。</p>
+    </div>
+  </div>
+</body>
+</html>

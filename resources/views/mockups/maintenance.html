@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>メンテナンス中 - みまもりデバイス（仮）</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+:root {
+  --white: #ffffff;
+  --cream: #faf9f7;
+  --beige: #f5f3ef;
+  --gray-100: #f0eeea;
+  --gray-200: #e5e2dc;
+  --gray-300: #d1ccc3;
+  --gray-400: #a8a29e;
+  --gray-500: #78716c;
+  --gray-600: #57534e;
+  --gray-700: #44403c;
+  --gray-800: #292524;
+  --blue-light: #eff6ff;
+  --blue: #3b82f6;
+  --shadow: 0 4px 20px rgba(0,0,0,0.06);
+  --radius: 8px;
+  --radius-lg: 12px;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Noto Sans JP', sans-serif; background: var(--cream); color: var(--gray-800); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+
+.container { text-align: center; max-width: 440px; }
+.icon { font-size: 80px; margin-bottom: 24px; }
+.title { font-size: 22px; font-weight: 600; color: var(--gray-800); margin-bottom: 12px; }
+.message { font-size: 14px; color: var(--gray-500); line-height: 1.8; margin-bottom: 32px; }
+
+.schedule-box { background: var(--white); border: 1px solid var(--gray-200); border-radius: var(--radius-lg); padding: 24px; margin-bottom: 24px; box-shadow: var(--shadow); }
+.schedule-label { font-size: 12px; font-weight: 600; color: var(--gray-500); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.05em; }
+.schedule-time { font-size: 20px; font-weight: 700; color: var(--gray-800); }
+.schedule-note { font-size: 13px; color: var(--gray-500); margin-top: 8px; }
+
+.info-box { background: var(--blue-light); border-radius: var(--radius); padding: 16px; font-size: 13px; color: var(--gray-700); line-height: 1.7; text-align: left; }
+.info-box-title { font-weight: 600; margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
+
+.footer { margin-top: 32px; font-size: 12px; color: var(--gray-400); }
+.footer a { color: var(--gray-500); text-decoration: none; }
+.footer a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="icon">🔧</div>
+    <h1 class="title">メンテナンス中です</h1>
+    <p class="message">
+      サービス向上のため、現在メンテナンスを行っております。<br>
+      ご不便をおかけして申し訳ございません。
+    </p>
+
+    <div class="schedule-box">
+      <p class="schedule-label">メンテナンス予定時間</p>
+      <p class="schedule-time">2025年1月20日 02:00 〜 06:00</p>
+      <p class="schedule-note">※作業状況により前後する場合があります</p>
+    </div>
+
+    <div class="info-box">
+      <p class="info-box-title">ℹ️ 見守り機能について</p>
+      <p>メンテナンス中もセンサーは正常に動作しています。<br>異常検知時の通知は、メンテナンス終了後に配信されます。</p>
+    </div>
+
+    <div class="footer">
+      <p>お問い合わせ: <a href="/cdn-cgi/l/email-protection#64171114140b161024011c05091408014a070b09"><span class="__cf_emai

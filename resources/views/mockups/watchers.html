@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>見守り共有 - みまもりデバイス（仮）</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+:root {
+  --white: #ffffff;
+  --cream: #faf9f7;
+  --beige: #f5f4f0;
+  --gray-100: #f0efeb;
+  --gray-200: #e5e2dc;
+  --gray-300: #d1ccc3;
+  --gray-400: #a8a29e;
+  --gray-500: #78716c;
+  --gray-600: #57534e;
+  --gray-700: #44403c;
+  --gray-800: #292524;
+  --green: #22c55e;
+  --green-dark: #16a34a;
+  --green-light: #dcfce7;
+  --blue: #3b82f6;
+  --blue-light: #eff6ff;
+  --red: #ef4444;
+  --red-light: #fef2f2;
+  --yellow: #eab308;
+  --yellow-light: #fef9c3;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+  --radius: 8px;
+  --radius-lg: 12px;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Noto Sans JP', sans-serif; background: var(--cream); color: var(--gray-800); line-height: 1.6; min-height: 100vh; }
+
+.header { background: var(--white); border-bottom: 1px solid var(--gray-200); padding: 16px 20px; position: sticky; top: 0; z-index: 100; }
+.header-inner { max-width: 640px; margin: 0 auto; display: flex; align-items: center; gap: 16px; }
+.back-btn { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; background: var(--beige); border: none; border-radius: var(--radius); cursor: pointer; font-size: 18px; transition: all 0.2s; text-decoration: none; color: var(--gray-700); }
+.back-btn:hover { background: var(--gray-200); }
+.header-title { font-size: 16px; font-weight: 600; }
+
+.toast { position: fixed; top: 80px; left: 50%; transform: translateX(-50%) translateY(-20px); background: var(--gray-800); color: var(--white); padding: 12px 24px; border-radius: var(--radius); font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 8px; opacity: 0; visibility: hidden; transition: all 0.3s ease; z-index: 200; box-shadow: var(--shadow-md); }
+.toast.show { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); }
+.toast-icon { color: var(--green); }
+
+.container { max-width: 640px; margin: 0 auto; padding: 24px 20px; }
+
+.tab-bar { display: flex; background: var(--white); border-radius: var(--radius-lg); padding: 4px; margin-bottom: 24px; box-shadow: var(--shadow-sm); border: 1px solid var(--gray-200); }
+.tab { flex: 1; padding: 12px 16px; font-size: 14px; font-weight: 600; text-align: center; color: var(--gray-500); background: transparent; border: none; border-radius: var(--radius); cursor: pointer; transition: all 0.2s; }
+.tab.active { background: var(--gray-800); color: var(--white); }
+.tab:not(.active):hover { background: var(--beige); color: var(--gray-700); }
+
+.section { background: var(--white); border-radius: var(--radius-lg); padding: 24px; margin-bottom: 20px; box-shadow: var(--shadow-sm); border: 1px solid var(--gray-200); }
+.section-title { font-size: 15px; font-weight: 600; color: var(--gray-800); margin-bottom: 16px; display: flex; align-items: center; gap: 8px; padding-bottom: 12px; border-bottom: 2px solid var(--gray-200); }
+.section-title span { font-size: 18px; }
+.section-count { font-size: 13px; font-weight: 600; color: var(--gray-500); margin-left: auto; }
+
+/* 見守りリスト */
+.watch-list { list-style: none; }
+.watch-item { display: flex; align-items: center; padding: 16px 0; border-bottom: 1px solid var(--gray-100); }
+.watch-item:last-child { border-bottom: none; }
+.watch-status { width: 12px; height: 12px; border-radius: 50%; margin-right: 14px; flex-shrink: 0; }
+.watch-status.ok { background: var(--green); }
+.watch-status.warning { background: var(--yellow); }
+.watch-status.error { background: var(--red); }
+.watch-status.offline { background: var(--gray-400); }
+.watch-status.pending { background: var(--gray-300); }
+.watch-info { flex: 1; min-width: 0; }
+.watch-id { font-size: 15px; font-weight: 600; font-family: monospace; color: var(--gray-800); letter-spacing: 0.05em; }
+.watch-meta { font-size: 12px; color: var(--gray-500); margin-top: 2px; display: flex; align-items: center; gap: 8px; }
+.watch-name { font-size: 13px; color: var(--gray-600); font-weight: 500; }
+.watch-action { flex-shrink: 0; }
+
+/* 承認待ちアイテム */
+.pending-item { display: flex; align-items: center; padding: 16px; background: var(--yellow-light); border: 1px solid #fde68a; border-radius: var(--radius); margin-bottom: 12px; }
+.pending-item:last-child { margin-bottom: 0; }
+.pending-icon { font-size: 24px; margin-right: 14px; }
+.pending-info { flex: 1; }
+.pending-title { font-size: 14px; font-weight: 600; color: var(--gray-800); }
+.pending-title strong { font-family: monospace; letter-spacing: 0.05em; }
+.pending-time { font-size: 12px; color: var(--gray-500); margin-top: 2px; }
+.pending-actions { display: flex; gap: 8px; }
+
+.btn { padding: 10px 16px; font-size: 13px; font-weight: 600; font-family: inherit; border: none; border-radius: var(--radius); cursor: pointer; transition: all 0.2s; }
+.btn-sm { padding: 8px 14px; font-size: 12px; }
+.btn-primary { background: var(--gray-800); color: var(--white); }
+.btn-primary:hover { background: var(--gray-700); }
+.btn-success { background: var(--green); color: var(--white); }
+.btn-success:hover { background: var(--green-dark); }
+.btn-secondary { background: var(--beige); color: var(--gray-700); border: 1px solid var(--gray-300); }
+.btn-secondary:hover { background: var(--gray-200); }
+.btn-danger { background: transparent; color: var(--red); border: 1px solid #fecaca; }
+.btn-danger:hover { background: var(--red-light); }
+.btn-outline { background: transparent; color: var(--gray-700); border: 1px solid var(--gray-300); }
+.btn-outline:hover { background: var(--beige); }
+
+/* 申請フォーム */
+.apply-form { padding: 20px; background: var(--beige); border-radius: var(--radius); }
+.form-group { margin-bottom: 16px; }
+.form-group:last-child { margin-bottom: 0; }
+.form-label { display: block; font-size: 13px; font-weight: 600; color: var(--gray-700); margin-bottom: 8px; }
+.form-input { width: 100%; padding: 14px 16px; font-size: 16px; font-family: inherit; border: 1px solid var(--gray-300); border-radius: var(--radius); background: var(--white); transition: all 0.2s; }
+.form-input:focus { outline: none; border-color: var(--gray-500); }
+.form-input.id-input { text-transform: uppercase; letter-spacing: 0.15em; font-family: monospace; }
+.form-hint { font-size: 12px; color: var(--gray-500); margin-top: 6px; }
+
+.empty-state { text-align: center; padding: 40px 20px; }
+.empty-icon { font-size: 48px; margin-bottom: 16px; }
+.empty-text { font-size: 14px; color: var(--gray-500); }
+
+/* モーダル */
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 1000; padding: 20px; }
+.modal-overlay.show { display: flex; align-items: center; justify-content: center; }
+.modal { background: var(--white); width: 100%; max-width: 400px; border-radius: var(--radius-lg); overflow: hidden; box-shadow: 0 10px 40px rgba(0,0,0,0.15); }
+.modal-header { padding: 20px; border-bottom: 1px solid var(--gray-200); display: flex; justify-content: space-between; align-items: center; }
+.modal-header h3 { font-size: 16px; font-weight: 600; }
+.modal-close { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; background: var(--beige); border: none; border-radius: 6px; cursor: pointer; font-size: 18px; }
+.modal-close:hover { background: var(--gray-200); }
+.modal-body { padding: 20px; }
+.modal-footer { padding: 16px 20px; border-top: 1px solid var(--gray-200); display: flex; gap: 12px; justify-content: flex-end; }
+
+.info-box { padding: 14px 16px; background: var(--blue-light); border-radius: var(--radius); font-size: 13px; color: var(--gray-700); line-height: 1.7; margin-bottom: 20px; }
+.info-box strong { color: var(--gray-800); }
+
+.premium-badge { display: inline-block; padding: 2px 8px; font-size: 11px; font-weight: 500; color: var(--white); background: linear-gradient(135deg, #667eea, #764ba2); border-radius: 10px; margin-left: 8px; }
+
+.limit-bar { display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: var(--beige); border-radius: var(--radius); margin-bottom: 20px; }
+.limit-text { font-size: 13px; color: var(--gray-600); }
+.limit-text strong { color: var(--gray-800); }
+.limit-upgrade { font-size: 12px; color: var(--blue); text-decoration: none; margin-left: auto; }
+.limit-upgrade:hover { text-decoration: underline; }
+
+@media (max-width: 480px) {
+  .pending-item { flex-direction: column; align-items: flex-start; gap: 12px; }
+  .pending-actions { width: 100%; }
+  .pending-actions .btn { flex: 1; }
+}
+  </style>
+</head>
+<body>
+  <div id="toast" class="toast">
+    <span class="toast-icon">✓</span>
+    <span id="toastText">保存しました</span>
+  </div>
+
+  <header class="header">
+    <div class="header-inner">
+      <a href="mypage.html" class="back-btn">←</a>
+      <h1 class="header-title">見守り共有</h1>
+    </div>
+  </header>
+
+  <div class="container">
+    <!-- タブ切り替え -->
+    <div class="tab-bar">
+      <button class="tab active" onclick="switchTab('watching')">見守っている</button>
+      <button class="tab" onclick="switchTab('watched')">見守られている</button>
+    </div>
+
+    <!-- 見守っているタブ -->
+    <div id="watchingTab">
+      <div class="info-box">
+        <strong>👁️ 見守り機能とは</strong><br>
+        他の人のデバイスIDを登録すると、その人の見守り状況を確認できます。相手の承認が必要です。
+      </div>
+
+      <div class="limit-bar">
+        <span class="limit-text">登録数: <strong>1</strong> / 2人</span>
+        <a href="plan.html" class="limit-upgrade">上限を増やす（Premium）</a>
+      </div>
+
+      <!-- 見守り申請フォーム -->
+      <div class="section">
+        <h2 class="section-title"><span>➕</span>見守り申請</h2>
+        <div class="apply-form">
+          <div class="form-group">
+            <label class="form-label">デバイスID</label>
+            <input type="text" class="form-input id-input" id="applyDeviceId" placeholder="A3K9X2" maxlength="6">
+            <p class="form-hint">見守りたい方のデバイスIDを入力</p>
+          </div>
+          <button class="btn btn-primary" style="width: 100%;" onclick="sendApply()">申請を送る</button>
+        </div>
+      </div>
+
+      <!-- 見守っているリスト -->
+      <div class="section">
+        <h2 class="section-title">
+          <span>👁️</span>見守っている人
+          <span class="section-count">1人</span>
+        </h2>
+        <ul class="watch-list">
+          <li class="watch-item">
+            <span class="watch-status ok"></span>
+            <div class="watch-info">
+              <p class="watch-id">B7X2K9</p>
+              <p class="watch-name">田中さん（お母さん）</p>
+              <p class="watch-meta">正常稼働中 • 最終検知 5分前</p>
+            </div>
+            <button class="btn btn-sm btn-outline" onclick="showRemoveModal('B7X2K9', '田中さん')">解除</button>
+          </li>
+        </ul>
+      </div>
+
+      <!-- 申請中 -->
+      <div class="section">
+        <h2 class="section-title">
+          <span>⏳</span>申請中
+          <span class="section-count">1件</span>
+        </h2>
+        <ul class="watch-list">
+          <li class="watch-item">
+            <span class="watch-status pending"></span>
+            <div class="watch-info">
+              <p class="watch-id">C4M8P2</p>
+              <p class="watch-meta">承認待ち • 申請日: 1/14</p>
+            </div>
+            <button class="btn btn-sm btn-danger" onclick="cancelApply('C4M8P2')">取消</button>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- 見守られているタブ -->
+    <div id="watchedTab" style="display: none;">
+      <div class="info-box">
+        <strong>🔔 見守られている人</strong><br>
+        あなたを見守っている人の一覧です。承認した人だけがあなたの見守り状況を確認できます。
+      </div>
+
+      <!-- 承認待ち -->
+      <div class="section">
+        <h2 class="section-title">
+          <span>📬</span>承認待ち
+          <span class="section-count">1件</span>
+        </h2>
+        <div class="pending-item">
+          <span class="pending-icon">👤</span>
+          <div class="pending-info">
+            <p class="pending-title"><strong>D9L3Q7</strong> さんから申請</p>
+            <p class="pending-time">2025/01/14 10:30</p>
+          </div>
+          <div class="pending-actions">
+            <button class="btn btn-sm btn-success" onclick="approveRequest('D9L3Q7')">許可</button>
+            <button class="btn btn-sm btn-secondary" onclick="rejectRequest('D9L3Q7')">拒否</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 見守られているリスト -->
+      <div class="section">
+        <h2 class="section-title">
+          <span>👥</span>見守ってくれている人
+          <span class="section-count">2人</span>
+        </h2>
+        <ul class="watch-list">
+          <li class="watch-item">
+            <span class="watch-status ok"></span>
+            <div class="watch-info">
+              <p class="watch-id">E2P7R4</p>
+              <p class="watch-name">鈴木さん（息子）</p>
+              <p class="watch-meta">承認日: 2024/06/15</p>
+            </div>
+            <button class="btn btn-sm btn-danger" onclick="showRevokeModal('E2P7R4', '鈴木さん')">取消</button>
+          </li>
+          <li class="watch-item">
+            <span class="watch-status ok"></span>
+            <div class="watch-info">
+              <p class="watch-id">F8K2M6</p>
+              <p class="watch-name">高橋さん（娘）</p>
+              <p class="watch-meta">承認日: 2024/08/20</p>
+            </div>
+            <button class="btn btn-sm btn-danger" onclick="showRevokeModal('F8K2M6', '高橋さん')">取消</button>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- 解除確認モーダル -->
+  <div id="removeModal" class="modal-overlay" onclick="if(event.target===this)hideRemoveModal()">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>見守り解除</h3>
+        <button class="modal-close" onclick="hideRemoveModal()">×</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size: 14px; color: var(--gray-700); line-height: 1.8;">
+          <strong id="removeTargetName">田中さん</strong>（<span id="removeTargetId" style="font-family: monospace;">B7X2K9</span>）の見守りを解除しますか？<br><br>
+          解除すると、この方の見守り状況を確認できなくなります。
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="hideRemoveModal()">キャンセル</button>
+        <button class="btn btn-danger" onclick="confirmRemove()">解除する</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 承認取消モーダル -->
+  <div id="revokeModal" class="modal-overlay" onclick="if(event.target===this)hideRevokeModal()">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>承認取消</h3>
+        <button class="modal-close" onclick="hideRevokeModal()">×</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size: 14px; color: var(--gray-700); line-height: 1.8;">
+          <strong id="revokeTargetName">鈴木さん</strong>（<span id="revokeTargetId" style="font-family: monospace;">E2P7R4</span>）の見守り承認を取り消しますか？<br><br>
+          取り消すと、この方はあなたの見守り状況を確認できなくなります。
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="hideRevokeModal()">キャンセル</button>
+        <button class="btn btn-danger" onclick="confirmRevoke()">取り消す</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+// トースト表示
+function showToast(message) {
+  const toast = document.getElementById('toast');
+  document.getElementById('toastText').textContent = message;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 2000);
+}
+
+// タブ切り替え
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  event.target.classList.add('active');
+  
+  if (tab === 'watching') {
+    document.getElementById('watchingTab').style.display = 'block';
+    document.getElementById('watchedTab').style.display = 'none';
+  } else {
+    document.getElementById('watchingTab').style.display = 'none';
+    document.getElementById('watchedTab').style.display = 'block';
+  }
+}
+
+// 見守り申請
+function sendApply() {
+  const deviceId = document.getElementById('applyDeviceId').value.toUpperCase().trim();
+  if (!deviceId || deviceId.length !== 6) {
+    alert('デバイスIDは6文字で入力してください');
+    return;
+  }
+  
+  if (confirm(`${deviceId} に見守り申請を送りますか？`)) {
+    showToast('申請を送信しました');
+    document.getElementById('applyDeviceId').value = '';
+  }
+}
+
+// 申請取消
+function cancelApply(deviceId) {
+  if (confirm(`${deviceId} への申請を取り消しますか？`)) {
+    showToast('申請を取り消しました');
+  }
+}
+
+// 承認
+function approveRequest(deviceId) {
+  if (confirm(`${deviceId} さんの見守り申請を許可しますか？`)) {
+    showToast('申請を許可しました');
+  }
+}
+
+// 拒否
+function rejectRequest(deviceId) {
+  if (confirm(`${deviceId} さんの見守り申請を拒否しますか？`)) {
+    showToast('申請を拒否しました');
+  }
+}
+
+// 解除モーダル
+let removeTarget = { id: '', name: '' };
+
+function showRemoveModal(deviceId, name) {
+  removeTarget = { id: deviceId, name: name };
+  document.getElementById('removeTargetId').textContent = deviceId;
+  document.getElementById('removeTargetName').textContent = name;
+  document.getElementById('removeModal').classList.add('show');
+}
+
+function hideRemoveModal() {
+  document.getElementById('removeModal').classList.remove('show');
+}
+
+function confirmRemove() {
+  showToast(`${removeTarget.name}の見守りを解除しました`);
+  hideRemoveModal();
+}
+
+// 承認取消モーダル
+let revokeTarget = { id: '', name: '' };
+
+function showRevokeModal(deviceId, name) {
+  revokeTarget = { id: deviceId, name: name };
+  document.getElementById('revokeTargetId').textContent = deviceId;
+  document.getElementById('revokeTargetName').textContent = name;
+  document.getElementById('revokeModal').classList.add('show');
+}
+
+function hideRevokeModal() {
+  document.getElementById('revokeModal').classList.remove('show');
+}
+
+function confirmRevoke() {
+  showToast(`${revokeTarget.name}の承認を取り消しました`);
+  hideRevokeModal();
+}
+
+// デバイスID入力フォーマット
+document.getElementById('applyDeviceId').addEventListener('input', function() {
+  this.value = this.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+  if (this.value.length > 6) this.value = this.value.slice(0, 6);
+});
+  </script>
+</body>
+</html>

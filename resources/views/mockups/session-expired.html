@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>セッションの有効期限切れ - みまもりデバイス（仮）</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+:root {
+  --white: #ffffff;
+  --cream: #faf9f7;
+  --beige: #f5f3ef;
+  --gray-100: #f0eeea;
+  --gray-200: #e5e2dc;
+  --gray-300: #d1ccc3;
+  --gray-400: #a8a29e;
+  --gray-500: #78716c;
+  --gray-600: #57534e;
+  --gray-700: #44403c;
+  --gray-800: #292524;
+  --yellow-light: #fef9c3;
+  --yellow: #eab308;
+  --shadow: 0 4px 20px rgba(0,0,0,0.06);
+  --radius: 8px;
+  --radius-lg: 12px;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Noto Sans JP', sans-serif; background: var(--cream); color: var(--gray-800); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+
+.container { text-align: center; max-width: 400px; }
+.icon { font-size: 80px; margin-bottom: 24px; }
+.title { font-size: 20px; font-weight: 600; color: var(--gray-800); margin-bottom: 12px; }
+.message { font-size: 14px; color: var(--gray-500); line-height: 1.8; margin-bottom: 32px; }
+
+.btn { display: inline-block; padding: 16px 40px; font-size: 16px; font-weight: 600; font-family: inherit; border: none; border-radius: var(--radius); cursor: pointer; transition: all 0.2s; text-decoration: none; }
+.btn-primary { background: var(--gray-800); color: var(--white); }
+.btn-primary:hover { background: var(--gray-700); transform: translateY(-1px); box-shadow: var(--shadow); }
+
+.hint { margin-top: 32px; padding: 16px; background: var(--yellow-light); border-radius: var(--radius); font-size: 13px; color: var(--gray-700); line-height: 1.7; }
+
+.auto-redirect { margin-top: 24px; font-size: 13px; color: var(--gray-400); }
+.countdown { font-weight: 600; color: var(--gray-600); }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="icon">⏰</div>
+    <h1 class="title">セッションの有効期限が切れました</h1>
+    <p class="message">
+      セキュリティのため、一定時間操作がなかったため<br>
+      自動的にログアウトされました。<br>
+      再度ログインしてください。
+    </p>
+    <a href="login.html" class="btn btn-primary">ログインページへ</a>
+
+    <div class="hint">
+      💡 ブラウザの「戻る」ボタンでは復帰できません。<br>
+      再度ログインをお願いします。
+    </div>
+
+    <p class="auto-redirect">
+      <span class="countdown" id="countdown">10</span>秒後に自動でログインページへ移動します
+    </p>
+  </div>
+
+  <script>
+let seconds = 10;
+const countdownEl = document.getElementById('countdown');
+
+const timer = setInterval(() => {
+  seconds--;
+  countdownEl.textContent = seconds;
+  if (seconds <= 0) {
+    clearInterval(timer);
+    window.location.href = 'login.html';
+  }
+}, 1000);
+  </script>
+</body>
+</html>

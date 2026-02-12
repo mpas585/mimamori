@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PIN再設定 - みまもりデバイス（仮）</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+:root {
+  --white: #ffffff;
+  --cream: #faf9f7;
+  --beige: #f5f3ef;
+  --gray-100: #f0eeea;
+  --gray-200: #e5e2dc;
+  --gray-300: #d1ccc3;
+  --gray-400: #a8a29e;
+  --gray-500: #78716c;
+  --gray-600: #57534e;
+  --gray-700: #44403c;
+  --gray-800: #292524;
+  --green-light: #f0fdf4;
+  --green: #22c55e;
+  --green-dark: #15803d;
+  --red-light: #fef2f2;
+  --red: #ef4444;
+  --yellow-light: #fefce8;
+  --yellow: #eab308;
+  --yellow-dark: #a16207;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+  --shadow: 0 4px 20px rgba(0,0,0,0.06);
+  --radius: 8px;
+  --radius-lg: 12px;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Noto Sans JP', sans-serif; background: var(--cream); color: var(--gray-800); min-height: 100vh; line-height: 1.7; }
+
+.container { max-width: 640px; margin: 0 auto; padding: 24px 20px 100px; display: flex; flex-direction: column; justify-content: center; min-height: calc(100vh - 120px); padding-bottom: 40px; }
+
+.logo-area { text-align: center; margin-bottom: 48px; animation: fadeIn 0.6s ease; }
+.logo { display: inline-flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+.logo-icon { width: 56px; height: 56px; background: var(--white); border-radius: 12px; box-shadow: var(--shadow); display: flex; align-items: center; justify-content: center; font-size: 28px; }
+.logo-text { font-size: 24px; font-weight: 500; letter-spacing: 0.02em; color: var(--gray-800); }
+.logo-subtitle { font-size: 14px; color: var(--gray-500); font-weight: 300; }
+
+.card { background: var(--white); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); overflow: hidden; border: 1px solid var(--gray-200); padding: 32px; }
+.card-title { font-size: 17px; font-weight: 700; margin-bottom: 8px; display: flex; align-items: center; justify-content: center; gap: 10px; color: var(--gray-800); }
+.card-desc { font-size: 14px; color: var(--gray-500); text-align: center; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 2px solid var(--gray-200); }
+
+.form-group { margin-bottom: 20px; }
+.form-label { display: block; font-size: 13px; font-weight: 600; color: var(--gray-700); margin-bottom: 8px; }
+.form-input { width: 100%; padding: 14px 16px; font-size: 15px; font-family: inherit; border: 1px solid var(--gray-300); border-radius: var(--radius); background: var(--cream); color: var(--gray-800); transition: all 0.2s; }
+.form-input:focus { outline: none; border-color: var(--gray-500); background: var(--white); box-shadow: 0 0 0 3px rgba(168, 162, 158, 0.15); }
+.form-input::placeholder { color: var(--gray-400); }
+.form-input.id-input { text-transform: uppercase; letter-spacing: 0.15em; text-align: center; font-size: 18px; }
+.form-input.pin-input { letter-spacing: 0.3em; text-align: center; font-size: 20px; }
+.form-hint { font-size: 12px; color: var(--gray-500); margin-top: 6px; font-weight: 500; }
+
+.btn { display: block; width: 100%; padding: 16px 24px; font-size: 16px; font-weight: 600; font-family: inherit; border: none; border-radius: var(--radius); cursor: pointer; transition: all 0.2s ease; text-decoration: none; text-align: center; }
+.btn-primary { background: var(--gray-800); color: var(--white); }
+.btn-primary:hover { background: var(--gray-700); transform: translateY(-1px); box-shadow: var(--shadow); }
+.btn-primary:disabled { background: var(--gray-300); cursor: not-allowed; transform: none; }
+.btn-secondary { background: var(--gray-100); color: var(--gray-700); border: 1px solid var(--gray-300); }
+.btn-secondary:hover { background: var(--gray-200); }
+
+.back-link { text-align: center; margin-top: 24px; }
+.back-link a { font-size: 14px; color: var(--gray-500); text-decoration: none; font-weight: 500; display: inline-flex; align-items: center; gap: 6px; transition: color 0.2s; }
+.back-link a:hover { color: var(--gray-700); }
+.back-link a::before { content: '←'; }
+
+.security-note { font-size: 11px; color: var(--gray-400); text-align: center; margin-top: 16px; }
+
+.mail-help { background: var(--beige); border-radius: var(--radius); padding: 16px; margin-top: 24px; text-align: left; }
+.mail-help-title { font-size: 13px; font-weight: 600; color: var(--gray-700); margin-bottom: 8px; }
+.mail-help-list { font-size: 12px; color: var(--gray-500); margin: 0; padding-left: 20px; }
+.mail-help-list li { margin-bottom: 4px; }
+.mail-help-list li:last-child { margin-bottom: 0; }
+
+/* Screens */
+.screen { display: none; animation: fadeIn 0.4s ease; }
+.screen.active { display: block; }
+
+/* Messages */
+.message { padding: 16px 20px; border-radius: var(--radius); margin-bottom: 20px; font-size: 14px; display: none; }
+.message.error { background: var(--red-light); color: var(--red); border: 1px solid var(--red); }
+.message.show { display: block; }
+
+/* Option cards */
+.option-cards { display: flex; flex-direction: column; gap: 16px; margin-bottom: 24px; }
+.option-card { padding: 20px; border: 2px solid var(--gray-200); border-radius: var(--radius-lg); cursor: pointer; transition: all 0.2s; }
+.option-card:hover { border-color: var(--gray-400); background: var(--cream); }
+.option-card.selected { border-color: var(--gray-800); background: var(--beige); }
+.option-card-title { font-size: 15px; font-weight: 600; color: var(--gray-800); margin-bottom: 6px; display: flex; align-items: center; gap: 8px; }
+.option-card-desc { font-size: 13px; color: var(--gray-500); line-height: 1.5; }
+
+/* Info box */
+.info-box { background: var(--beige); border-radius: var(--radius); padding: 16px; margin-bottom: 24px; }
+.info-box-title { font-size: 13px; font-weight: 600; color: var(--gray-700); margin-bottom: 6px; display: flex; align-items: center; gap: 8px; }
+.info-box-title::before { content: 'ℹ️'; }
+.info-box-text { font-size: 13px; color: var(--gray-600); line-height: 1.6; }
+
+/* Success screen */
+.success-icon { width: 80px; height: 80px; background: var(--green-light); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px; font-size: 40px; }
+.success-title { font-size: 18px; font-weight: 600; text-align: center; margin-bottom: 12px; color: var(--gray-800); }
+.success-text { font-size: 14px; color: var(--gray-500); text-align: center; line-height: 1.7; }
+.success-highlight { font-weight: 600; color: var(--gray-700); }
+
+/* Highlight box */
+.highlight-box { background: var(--beige); border-radius: var(--radius); padding: 20px; margin: 24px 0; text-align: center; }
+.highlight-label { font-size: 12px; color: var(--gray-500); margin-bottom: 8px; }
+.highlight-value { font-size: 14px; font-weight: 600; color: var(--gray-800); }
+
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+@media (max-width: 480px) {
+  .logo-icon { width: 48px; height: 48px; font-size: 24px; }
+  .logo-text { font-size: 20px; }
+}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="logo-area">
+      <div class="logo">
+        <div class="logo-icon"></div>
+        <span class="logo-text">みまもりデバイス（仮）</span>
+      </div>
+      <p class="logo-subtitle">高齢者見守りセンサー</p>
+    </div>
+
+    <div class="card">
+      <!-- Step 1: デバイスID入力 -->
+      <div id="screen1" class="screen active">
+        <h1 class="card-title">🔑 PIN再設定</h1>
+        <p class="card-desc">デバイスIDを入力してください</p>
+        
+        <div id="error1" class="message error"></div>
+        
+        <form id="form1">
+          <div class="form-group">
+            <label class="form-label" for="deviceId">デバイスID</label>
+            <input type="text" id="deviceId" class="form-input id-input" placeholder="A3K9X2" maxlength="6" autocomplete="off" required>
+            <p class="form-hint">製品ラベルに記載の6文字</p>
+          </div>
+          <button type="submit" class="btn btn-primary">次へ</button>
+        </form>
+        <p class="back-link"><a href="login.html">ログインに戻る</a></p>
+        <p class="security-note">※連続して入力を間違えると一定時間操作できなくなります</p>
+      </div>
+
+      <!-- Step 2: 方法選択 -->
+      <div id="screen2" class="screen">
+        <h1 class="card-title">📋 再設定方法の選択</h1>
+        <p class="card-desc">デバイス <span id="displayDeviceId" class="success-highlight"></span></p>
+        
+        <div class="option-cards">
+          <div class="option-card" data-option="email">
+            <p class="option-card-title">📧 メールでPIN再設定</p>
+            <p class="option-card-desc">登録済みメールアドレスに再設定リンクを送信します。</p>
+          </div>
+          <div class="option-card" data-option="reset">
+            <p class="option-card-title">🔄 初期PINにリセット</p>
+            <p class="option-card-desc">製品ラベル記載の初期PINに戻します。初期PINの入力が必要です。</p>
+          </div>
+        </div>
+
+        <button type="button" id="btnNext2" class="btn btn-primary" disabled>次へ</button>
+        <p class="back-link"><a href="#" id="backToStep1">デバイスIDを修正</a></p>
+      </div>
+
+      <!-- Step 3a: メールでPIN再設定 -->
+      <div id="screen3a" class="screen">
+        <h1 class="card-title">📧 メールでPIN再設定</h1>
+        <p class="card-desc">登録済みのメールアドレスを入力してください</p>
+        
+        <div id="error3a" class="message error"></div>
+        
+        <form id="form3a">
+          <div class="form-group">
+            <label class="form-label" for="emailReset">メールアドレス</label>
+            <input type="email" id="emailReset" class="form-input" placeholder="example@email.com" autocomplete="email" required>
+            <p class="form-hint">通知設定で登録したメールアドレス</p>
+          </div>
+          <button type="submit" class="btn btn-primary">再設定リンクを送信</button>
+        </form>
+        <p class="back-link"><a href="#" class="backToStep2">操作選択に戻る</a></p>
+      </div>
+
+      <!-- Step 3b: 初期PINにリセット -->
+      <div id="screen3b" class="screen">
+        <h1 class="card-title">🔄 初期PINにリセット</h1>
+        <p class="card-desc">製品ラベル記載の初期PINを入力してください</p>
+        
+        <div class="info-box">
+          <p class="info-box-title">初期PINとは</p>
+          <p class="info-box-text">製品ラベルに記載されている4桁の数字です。リセット後はこのPINでログインできます。</p>
+        </div>
+
+        <div id="error3b" class="message error"></div>
+        
+        <form id="form3b">
+          <div class="form-group">
+            <label class="form-label" for="initialPin">初期PIN</label>
+            <input type="password" id="initialPin" class="form-input pin-input" placeholder="••••" maxlength="4" inputmode="numeric" required>
+            <p class="form-hint">製品ラベルに記載の4桁</p>
+          </div>
+          <button type="submit" class="btn btn-primary">初期PINにリセットする</button>
+        </form>
+        <p class="back-link"><a href="#" class="backToStep2">操作選択に戻る</a></p>
+      </div>
+
+      <!-- Step 4a: PIN再設定メール送信完了 -->
+      <div id="screen4a" class="screen">
+        <div class="success-icon">✉️</div>
+        <h2 class="success-title">メールを送信しました</h2>
+        <p class="success-text">
+          <span id="maskedEmailReset" class="success-highlight"></span> に<br>
+          PIN再設定リンクを送信しました。<br><br>
+          メール内のリンクから<br>
+          新しいPINを設定してください。<br><br>
+          <small style="color: var(--gray-400);">リンクの有効期限は24時間です</small>
+        </p>
+        <div class="mail-help">
+          <p class="mail-help-title">メールが届かない場合</p>
+          <ul class="mail-help-list">
+            <li>迷惑メールフォルダをご確認ください</li>
+            <li>メールアドレスが正しいかご確認ください</li>
+            <li>数分待っても届かない場合は再度お試しください</li>
+          </ul>
+        </div>
+        <div style="margin-top: 24px;">
+          <a href="login.html" class="btn btn-secondary">ログインページに戻る</a>
+        </div>
+      </div>
+
+      <!-- Step 4b: リセット完了 -->
+      <div id="screen4b" class="screen">
+        <div class="success-icon">✅</div>
+        <h2 class="success-title">リセットが完了しました</h2>
+        <p class="success-text">
+          PINが初期値にリセットされました。
+        </p>
+        <div class="highlight-box">
+          <p class="highlight-label">ログインに使用するPIN</p>
+          <p class="highlight-value">製品ラベルに記載の4桁</p>
+        </div>
+        <p class="success-text">
+          <small style="color: var(--gray-400);">セキュリティのため、ログイン後に<br>PINを変更することをおすすめします</small>
+        </p>
+        <div style="margin-top: 24px;">
+          <a href="login.html" class="btn btn-primary">ログインする</a>
+        </div>
+      </div>
+
+      </div>
+  </div>
+
+  <script>
+// State
+let currentDeviceId = '';
+let selectedOption = null;
+
+// Elements
+const screens = {
+  screen1: document.getElementById('screen1'),
+  screen2: document.getElementById('screen2'),
+  screen3a: document.getElementById('screen3a'),
+  screen3b: document.getElementById('screen3b'),
+  screen4a: document.getElementById('screen4a'),
+  screen4b: document.getElementById('screen4b')
+};
+
+// Forms
+const form1 = document.getElementById('form1');
+const form3a = document.getElementById('form3a');
+const form3b = document.getElementById('form3b');
+
+// Inputs
+const deviceIdInput = document.getElementById('deviceId');
+const emailResetInput = document.getElementById('emailReset');
+const initialPinInput = document.getElementById('initialPin');
+
+// Display elements
+const displayDeviceId = document.getElementById('displayDeviceId');
+const maskedEmailReset = document.getElementById('maskedEmailReset');
+
+// Error elements
+const error1 = document.getElementById('error1');
+const error3a = document.getElementById('error3a');
+const error3b = document.getElementById('error3b');
+
+// Buttons
+const optionCards = document.querySelectorAll('.option-card');
+const btnNext2 = document.getElementById('btnNext2');
+
+// Input validation: Device ID
+deviceIdInput.addEventListener('input', function() {
+  this.value = this.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+  if (this.value.length > 6) this.value = this.value.slice(0, 6);
+});
+
+// Input validation: PIN
+initialPinInput.addEventListener('input', function() {
+  this.value = this.value.replace(/[^0-9]/g, '');
+  if (this.value.length > 4) this.value = this.value.slice(0, 4);
+});
+
+// Step 1: Device ID
+form1.addEventListener('submit', function(e) {
+  e.preventDefault();
+  const deviceId = deviceIdInput.value.trim();
+  
+  if (deviceId.length !== 6) {
+    showError(error1, 'デバイスIDは6文字で入力してください');
+    return;
+  }
+  
+  currentDeviceId = deviceId;
+  displayDeviceId.textContent = deviceId;
+  hideError(error1);
+  showScreen('screen2');
+});
+
+// Step 2: Option selection
+optionCards.forEach(card => {
+  card.addEventListener('click', function() {
+    optionCards.forEach(c => c.classList.remove('selected'));
+    this.classList.add('selected');
+    selectedOption = this.dataset.option;
+    btnNext2.disabled = false;
+  });
+});
+
+btnNext2.addEventListener('click', function() {
+  if (selectedOption === 'email') {
+    showScreen('screen3a');
+  } else if (selectedOption === 'reset') {
+    showScreen('screen3b');
+  }
+});
+
+// Step 3a: Email for PIN reset
+form3a.addEventListener('submit', function(e) {
+  e.preventDefault();
+  const email = emailResetInput.value.trim();
+  
+  if (!email || !isValidEmail(email)) {
+    showError(error3a, '有効なメールアドレスを入力してください');
+    return;
+  }
+  
+  // TODO: API call to verify email matches device
+  hideError(error3a);
+  maskedEmailReset.textContent = maskEmail(email);
+  showScreen('screen4a');
+});
+
+// Step 3b: Initial PIN reset
+form3b.addEventListener('submit', function(e) {
+  e.preventDefault();
+  const pin = initialPinInput.value.trim();
+  
+  if (pin.length !== 4) {
+    showError(error3b, '初期PINは4桁で入力してください');
+    return;
+  }
+  
+  // TODO: API call to verify initial PIN and reset
+  hideError(error3b);
+  showScreen('screen4b');
+});
+
+// Back links
+document.getElementById('backToStep1').addEventListener('click', function(e) {
+  e.preventDefault();
+  resetStep2();
+  showScreen('screen1');
+});
+
+document.querySelectorAll('.backToStep2').forEach(link => {
+  link.addEventListener('click', function(e) {
+    e.preventDefault();
+    showScreen('screen2');
+  });
+});
+
+// Helper functions
+function showScreen(screenId) {
+  Object.values(screens).forEach(s => s.classList.remove('active'));
+  screens[screenId].classList.add('active');
+}
+
+function showError(element, message) {
+  element.textContent = message;
+  element.classList.add('show');
+}
+
+function hideError(element) {
+  element.classList.remove('show');
+}
+
+function resetStep2() {
+  selectedOption = null;
+  optionCards.forEach(c => c.classList.remove('selected'));
+  btnNext2.disabled = true;
+}
+
+function isValidEmail(email) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+function maskEmail(email) {
+  const [local, domain] = email.split('@');
+  if (local.length <= 2) {
+    return local[0] + '***@' + domain;
+  }
+  return local[0] + local[1] + '***@' + domain;
+}
+  </script>
+</body>
+</html>

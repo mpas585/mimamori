@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>メールアドレス設定 - みまもりデバイス（仮）</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+:root {
+  --white: #ffffff;
+  --cream: #faf9f7;
+  --beige: #f5f3ef;
+  --gray-100: #f0eeea;
+  --gray-200: #e5e2dc;
+  --gray-300: #d1ccc3;
+  --gray-400: #a8a29e;
+  --gray-500: #78716c;
+  --gray-600: #57534e;
+  --gray-700: #44403c;
+  --gray-800: #292524;
+  --green-light: #f0fdf4;
+  --green: #22c55e;
+  --green-dark: #15803d;
+  --red-light: #fef2f2;
+  --red: #ef4444;
+  --blue: #3b82f6;
+  --blue-light: #eff6ff;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+  --shadow: 0 4px 20px rgba(0,0,0,0.06);
+  --radius: 8px;
+  --radius-lg: 12px;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Noto Sans JP', sans-serif; background: var(--cream); color: var(--gray-800); min-height: 100vh; line-height: 1.7; }
+
+.header { background: var(--white); border-bottom: 1px solid var(--gray-200); padding: 16px 20px; position: sticky; top: 0; z-index: 100; }
+.header-inner { max-width: 640px; margin: 0 auto; display: flex; align-items: center; gap: 16px; }
+.back-btn { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; background: var(--beige); border: none; border-radius: var(--radius); cursor: pointer; font-size: 18px; transition: all 0.2s; text-decoration: none; color: var(--gray-700); }
+.back-btn:hover { background: var(--gray-200); }
+.header-title { font-size: 16px; font-weight: 600; }
+
+.container { max-width: 640px; margin: 0 auto; padding: 24px 20px; }
+
+.card { background: var(--white); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); border: 1px solid var(--gray-200); padding: 32px; margin-bottom: 20px; }
+.card-title { font-size: 17px; font-weight: 700; margin-bottom: 8px; display: flex; align-items: center; gap: 10px; color: var(--gray-800); }
+.card-desc { font-size: 14px; color: var(--gray-500); margin-bottom: 24px; padding-bottom: 16px; border-bottom: 2px solid var(--gray-200); }
+
+.current-email { background: var(--beige); border-radius: var(--radius); padding: 16px; margin-bottom: 24px; }
+.current-email-label { font-size: 12px; color: var(--gray-500); margin-bottom: 4px; }
+.current-email-value { font-size: 15px; font-weight: 600; color: var(--gray-800); }
+.current-email-none { font-size: 14px; color: var(--gray-400); font-style: italic; }
+
+.form-group { margin-bottom: 20px; }
+.form-label { display: block; font-size: 13px; font-weight: 600; color: var(--gray-700); margin-bottom: 8px; }
+.form-input { width: 100%; padding: 14px 16px; font-size: 15px; font-family: inherit; border: 1px solid var(--gray-300); border-radius: var(--radius); background: var(--cream); color: var(--gray-800); transition: all 0.2s; }
+.form-input:focus { outline: none; border-color: var(--gray-500); background: var(--white); box-shadow: 0 0 0 3px rgba(168, 162, 158, 0.15); }
+.form-input::placeholder { color: var(--gray-400); }
+.form-hint { font-size: 12px; color: var(--gray-500); margin-top: 6px; }
+
+.btn { display: block; width: 100%; padding: 16px 24px; font-size: 16px; font-weight: 600; font-family: inherit; border: none; border-radius: var(--radius); cursor: pointer; transition: all 0.2s ease; text-decoration: none; text-align: center; }
+.btn-primary { background: var(--gray-800); color: var(--white); }
+.btn-primary:hover { background: var(--gray-700); transform: translateY(-1px); box-shadow: var(--shadow); }
+.btn-secondary { background: var(--gray-100); color: var(--gray-700); border: 1px solid var(--gray-300); }
+.btn-secondary:hover { background: var(--gray-200); }
+.btn-danger { background: var(--white); color: var(--red); border: 1px solid var(--red); }
+.btn-danger:hover { background: var(--red-light); }
+
+.message { padding: 16px 20px; border-radius: var(--radius); margin-bottom: 20px; font-size: 14px; display: none; }
+.message.error { background: var(--red-light); color: var(--red); border: 1px solid var(--red); }
+.message.show { display: block; }
+
+.info-box { background: var(--blue-light); border-radius: var(--radius); padding: 16px; margin-bottom: 24px; font-size: 13px; color: var(--gray-700); line-height: 1.6; }
+.info-box-title { font-weight: 600; margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
+.info-box-title::before { content: 'ℹ️'; }
+
+/* Screens */
+.screen { display: none; }
+.screen.active { display: block; }
+
+/* Success screen */
+.success-icon { width: 80px; height: 80px; background: var(--green-light); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px; font-size: 40px; }
+.success-title { font-size: 18px; font-weight: 600; text-align: center; margin-bottom: 12px; color: var(--gray-800); }
+.success-text { font-size: 14px; color: var(--gray-500); text-align: center; line-height: 1.7; }
+.success-highlight { font-weight: 600; color: var(--gray-700); }
+
+/* Delete section */
+.delete-section { margin-top: 32px; padding-top: 24px; border-top: 1px solid var(--gray-200); }
+.delete-section-title { font-size: 13px; font-weight: 600; color: var(--gray-500); margin-bottom: 12px; }
+
+.mail-help { background: var(--beige); border-radius: var(--radius); padding: 16px; margin-top: 24px; text-align: left; }
+.mail-help-title { font-size: 13px; font-weight: 600; color: var(--gray-700); margin-bottom: 8px; }
+.mail-help-list { font-size: 12px; color: var(--gray-500); margin: 0; padding-left: 20px; }
+.mail-help-list li { margin-bottom: 4px; }
+.mail-help-list li:last-child { margin-bottom: 0; }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="header-inner">
+      <a href="settings.html" class="back-btn">←</a>
+      <h1 class="header-title">メールアドレス設定</h1>
+    </div>
+  </header>
+
+  <div class="container">
+    <!-- 入力画面 -->
+    <div id="screenInput" class="screen active">
+      <div class="card">
+        <h2 class="card-title">✉️ メールアドレスの登録・変更</h2>
+        <p class="card-desc">通知を受け取るメールアドレスを設定します</p>
+
+        <!-- 現在のメールアドレス（登録済みの場合） -->
+        <div class="current-email" id="currentEmailBox">
+          <p class="current-email-label">現在のメールアドレス</p>
+          <p class="current-email-value" id="currentEmailValue"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="690c11080419050c290c04080005470a0604">[email&#160;protected]</a></p>
+        </div>
+
+        <!-- 未登録の場合 -->
+        <!-- 
+        <div class="current-email" id="currentEmailBox">
+          <p class="current-email-label">現在のメールアドレス</p>
+          <p class="current-email-none">未登録</p>
+        </div>
+        -->
+
+        <div class="info-box">
+          <p class="info-box-title">確認メールをお送りします</p>
+          <p>入力したメールアドレス宛に確認メールを送信します。メール内のリンクをクリックすると登録が完了します。</p>
+        </div>
+
+        <div id="errorInput" class="message error"></div>
+
+        <form id="formInput">
+          <div class="form-group">
+            <label class="form-label" for="newEmail">新しいメールアドレス</label>
+            <input type="email" id="newEmail" class="form-input" placeholder="new@email.com" autocomplete="email" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="newEmailConfirm">新しいメールアドレス（確認）</label>
+            <input type="email" id="newEmailConfirm" class="form-input" placeholder="new@email.com" autocomplete="off" required>
+            <p class="form-hint">確認のためもう一度入力してください</p>
+          </div>
+          <button type="submit" class="btn btn-primary">確認メールを送信</button>
+        </form>
+
+        <!-- メアド削除（登録済みの場合のみ表示） -->
+        <div class="delete-section" id="deleteSection">
+          <p class="delete-section-title">メールアドレスの削除</p>
+          <button type="button" class="btn btn-danger" onclick="deleteEmail()">メールアドレスを削除する</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 送信完了画面 -->
+    <div id="screenSent" class="screen">
+      <div class="card">
+        <div class="success-icon">✉️</div>
+        <h2 class="success-title">確認メールを送信しました</h2>
+        <p class="success-text">
+          <span id="maskedEmail" class="success-highlight"></span> に<br>
+          確認メールを送信しました。<br><br>
+          メール内のリンクをクリックすると<br>
+          メールアドレスの登録が完了します。<br><br>
+          <small style="color: var(--gray-400);">リンクの有効期限は24時間です</small>
+        </p>
+        <div class="mail-help">
+          <p class="mail-help-title">メールが届かない場合</p>
+          <ul class="mail-help-list">
+            <li>迷惑メールフォルダをご確認ください</li>
+            <li>メールアドレスが正しいかご確認ください</li>
+            <li>数分待っても届かない場合は再度お試しください</li>
+          </ul>
+        </div>
+        <div style="margin-top: 24px;">
+          <a href="settings.html" class="btn btn-secondary">設定に戻る</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- 削除完了画面 -->
+    <div id="screenDeleted" class="screen">
+      <div class="card">
+        <div class="success-icon">✅</div>
+        <h2 class="success-title">削除しました</h2>
+        <p class="success-text">
+          メールアドレスを削除しました。<br><br>
+          メール通知は無効になりました。
+        </p>
+        <div style="margin-top: 32px;">
+          <a href="settings.html" class="btn btn-secondary">設定に戻る</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+// Elements
+const screenInput = document.getElementById('screenInput');
+const screenSent = document.getElementById('screenSent');
+const screenDeleted = document.getElementById('screenDeleted');
+const formInput = document.getElementById('formInput');
+const newEmailInput = document.getElementById('newEmail');
+const newEmailConfirmInput = document.getElementById('newEmailConfirm');
+const errorInput = document.getElementById('errorInput');
+const maskedEmail = document.getElementById('maskedEmail');
+const currentEmailValue = document.getElementById('currentEmailValue');
+const deleteSection = document.getElementById('deleteSection');
+
+// Check if email is registered (mock - would be set by server)
+const isEmailRegistered = currentEmailValue && currentEmailValue.textContent !== '未登録';
+
+// Hide delete section if no email registered
+if (!isEmailRegistered) {
+  deleteSection.style.display = 'none';
+}
+
+// Form submission
+formInput.addEventListener('submit', function(e) {
+  e.preventDefault();
+  
+  const newEmail = newEmailInput.value.trim();
+  const newEmailConfirm = newEmailConfirmInput.value.trim();
+  
+  if (!newEmail || !isValidEmail(newEmail)) {
+    showError(errorInput, '有効なメールアドレスを入力してください');
+    return;
+  }
+  
+  if (newEmail !== newEmailConfirm) {
+    showError(errorInput, 'メールアドレスが一致しません');
+    return;
+  }
+  
+  if (isEmailRegistered && newEmail === currentEmailValue.textContent) {
+    showError(errorInput, '現在のメールアドレスと同じです');
+    return;
+  }
+  
+  // TODO: API call to send confirmation email
+  hideError(errorInput);
+  maskedEmail.textContent = maskEmail(newEmail);
+  showScreen('screenSent');
+});
+
+// Delete email
+function deleteEmail() {
+  if (confirm('メールアドレスを削除しますか？\nメール通知は無効になります。')) {
+    // TODO: API call to delete email
+    showScreen('screenDeleted');
+  }
+}
+
+// Helper functions
+function showScreen(screenId) {
+  [screenInput, screenSent, screenDeleted].forEach(s => s.classList.remove('active'));
+  document.getElementById(screenId).classList.add('active');
+}
+
+function showError(element, message) {
+  element.textContent = message;
+  element.classList.add('show');
+}
+
+function hideError(element) {
+  element.classList.remove('show');
+}
+
+function isValidEmail(email) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(ema

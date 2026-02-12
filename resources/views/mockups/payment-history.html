@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>お支払い履歴 - みまもりデバイス（仮）</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+:root {
+  --white: #ffffff;
+  --cream: #faf9f7;
+  --beige: #f5f3ef;
+  --gray-100: #f0eeea;
+  --gray-200: #e5e2dc;
+  --gray-300: #d1ccc3;
+  --gray-400: #a8a29e;
+  --gray-500: #78716c;
+  --gray-600: #57534e;
+  --gray-700: #44403c;
+  --gray-800: #292524;
+  --green-light: #dcfce7;
+  --green: #22c55e;
+  --green-dark: #16a34a;
+  --red-light: #fef2f2;
+  --red: #ef4444;
+  --yellow-light: #fef9c3;
+  --yellow: #eab308;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+  --shadow: 0 4px 20px rgba(0,0,0,0.06);
+  --radius: 8px;
+  --radius-lg: 12px;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Noto Sans JP', sans-serif; background: var(--cream); color: var(--gray-800); min-height: 100vh; line-height: 1.7; }
+
+.header { background: var(--white); border-bottom: 1px solid var(--gray-200); padding: 16px 20px; position: sticky; top: 0; z-index: 100; }
+.header-inner { max-width: 640px; margin: 0 auto; display: flex; align-items: center; gap: 16px; }
+.back-btn { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; background: var(--beige); border: none; border-radius: var(--radius); cursor: pointer; font-size: 18px; transition: all 0.2s; text-decoration: none; color: var(--gray-700); }
+.back-btn:hover { background: var(--gray-200); }
+.header-title { font-size: 16px; font-weight: 600; }
+
+.container { max-width: 640px; margin: 0 auto; padding: 24px 20px; }
+
+/* 現在のプラン */
+.current-plan { background: var(--white); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); border: 1px solid var(--gray-200); padding: 20px; margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between; }
+.current-plan-info { display: flex; align-items: center; gap: 12px; }
+.current-plan-badge { padding: 8px 16px; background: linear-gradient(135deg, #667eea, #764ba2); border-radius: 20px; color: var(--white); font-size: 13px; font-weight: 600; }
+.current-plan-badge.free { background: var(--gray-300); color: var(--gray-700); }
+.current-plan-text { font-size: 14px; color: var(--gray-600); }
+.current-plan-text strong { color: var(--gray-800); }
+.current-plan-action { font-size: 13px; color: var(--gray-500); text-decoration: none; }
+.current-plan-action:hover { color: var(--gray-700); text-decoration: underline; }
+
+/* 支払い方法 */
+.payment-method { background: var(--white); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); border: 1px solid var(--gray-200); padding: 20px; margin-bottom: 24px; }
+.payment-method-title { font-size: 13px; font-weight: 600; color: var(--gray-500); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.05em; }
+.payment-method-card { display: flex; align-items: center; gap: 12px; }
+.card-icon { width: 48px; height: 32px; background: var(--beige); border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; color: var(--gray-600); border: 1px solid var(--gray-200); }
+.card-info { flex: 1; }
+.card-number { font-size: 14px; font-weight: 600; color: var(--gray-800); font-family: monospace; }
+.card-expiry { font-size: 12px; color: var(--gray-500); }
+.change-card-btn { font-size: 13px; color: var(--gray-500); text-decoration: none; padding: 8px 12px; background: var(--beige); border-radius: var(--radius); }
+.change-card-btn:hover { background: var(--gray-200); }
+
+/* 履歴リスト */
+.history-section { background: var(--white); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); border: 1px solid var(--gray-200); overflow: hidden; }
+.history-header { padding: 16px 20px; border-bottom: 2px solid var(--gray-200); display: flex; align-items: center; justify-content: space-between; }
+.history-title { font-size: 15px; font-weight: 600; color: var(--gray-700); display: flex; align-items: center; gap: 8px; }
+.history-title span { font-size: 18px; }
+.history-filter { padding: 8px 12px; font-size: 13px; font-family: inherit; border: 1px solid var(--gray-300); border-radius: var(--radius); background: var(--cream); color: var(--gray-700); }
+
+.history-list { list-style: none; }
+.history-item { display: flex; align-items: center; padding: 16px 20px; border-bottom: 1px solid var(--gray-100); transition: background 0.2s; }
+.history-item:last-child { border-bottom: none; }
+.history-item:hover { background: var(--gray-100); }
+
+.history-date { width: 100px; font-size: 13px; color: var(--gray-500); }
+.history-info { flex: 1; }
+.history-desc { font-size: 14px; font-weight: 500; color: var(--gray-800); }
+.history-order { font-size: 12px; color: var(--gray-400); font-family: monospace; margin-top: 2px; }
+.history-amount { width: 100px; text-align: right; font-size: 15px; font-weight: 600; color: var(--gray-800); }
+.history-status { width: 80px; text-align: right; }
+
+.status-badge { display: inline-block; padding: 4px 10px; font-size: 11px; font-weight: 600; border-radius: 12px; }
+.status-badge.success { background: var(--green-light); color: var(--green-dark); }
+.status-badge.pending { background: var(--yellow-light); color: var(--yellow); }
+.status-badge.failed { background: var(--red-light); color: var(--red); }
+.status-badge.refund { background: var(--gray-200); color: var(--gray-600); }
+
+.history-action { width: 60px; text-align: right; }
+.receipt-btn { font-size: 12px; color: var(--gray-500); text-decoration: none; padding: 6px 10px; background: var(--beige); border-radius: var(--radius); }
+.receipt-btn:hover { background: var(--gray-200); color: var(--gray-700); }
+
+/* 空状態 */
+.empty-state { text-align: center; padding: 60px 20px; }
+.empty-icon { font-size: 48px; margin-bottom: 16px; opacity: 0.5; }
+.empty-text { font-size: 14px; color: var(--gray-500); }
+
+/* もっと見る */
+.load-more { display: block; width: 100%; padding: 14px; font-size: 14px; font-weight: 500; font-family: inherit; color: var(--gray-600); background: var(--beige); border: none; cursor: pointer; transition: all 0.2s; }
+.load-more:hover { background: var(--gray-200); }
+
+@media (max-width: 480px) {
+  .history-item { flex-wrap: wrap; gap: 8px; }
+  .history-date { width: auto; }
+  .history-info { width: 100%; order: 3; }
+  .history-amount { width: auto; flex: 1; text-align: left; order: 2; }
+  .history-status { width: auto; order: 4; }
+  .history-action { width: auto; order: 5; }
+}
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="header-inner">
+      <a href="settings.html" class="back-btn">←</a>
+      <h1 class="header-title">お支払い履歴</h1>
+    </div>
+  </header>
+
+  <div class="container">
+    <!-- 現在のプラン -->
+    <div class="current-plan">
+      <div class="current-plan-info">
+        <span class="current-plan-badge">プレミアム</span>
+        <span class="current-plan-text">次回請求日: <strong>2025年2月20日</strong></span>
+      </div>
+      <a href="plan.html" class="current-plan-action">プラン変更</a>
+    </div>
+
+    <!-- 支払い方法 -->
+    <div class="payment-method">
+      <p class="payment-method-title">お支払い方法</p>
+      <div class="payment-method-card">
+        <div class="card-icon">VISA</div>
+        <div class="card-info">
+          <p class="card-number">•••• •••• •••• 4242</p>
+          <p class="card-expiry">有効期限: 12/26</p>
+        </div>
+        <a href="#" class="change-card-btn">変更</a>
+      </div>
+    </div>
+
+    <!-- 履歴リスト -->
+    <div class="history-section">
+      <div class="history-header">
+        <h2 class="history-title"><span>📜</span>お支払い履歴</h2>
+        <select class="history-filter">
+          <option>すべて</option>
+          <option>2025年</option>
+          <option>2024年</option>
+        </select>
+      </div>
+
+      <ul class="history-list">
+        <li class="history-item">
+          <span class="history-date">2025/01/20</span>
+          <div class="history-info">
+            <p class="history-desc">プレミアムプラン（月払い）</p>
+            <p class="history-order">ORD-20250120-A3K9X2</p>
+          </div>
+          <span class="history-amount">¥500</span>
+          <span class="history-status"><span class="status-badge success">完了</span></span>
+          <span class="history-action"><a href="#" class="receipt-btn">領収書</a></span>
+        </li>
+        <li class="history-item">
+          <span class="history-date">2024/12/20</span>
+          <div class="history-info">
+            <p class="history-desc">プレミアムプラン（月払い）</p>
+            <p class="history-order">ORD-20241220-A3K9X2</p>
+          </div>
+          <span class="history-amount">¥500</span>
+          <span class="history-status"><span class="status-badge success">完了</span></span>
+          <span class="history-action"><a href="#" class="receipt-btn">領収書</a></span>
+        </li>
+        <li class="history-item">
+          <span class="history-date">2024/11/20</span>
+          <div class="history-info">
+            <p class="history-desc">プレミアムプラン（月払い）</p>
+            <p class="history-order">ORD-20241120-A3K9X2</p>
+          </div>
+          <span class="history-amount">¥500</span>
+          <span class="history-status"><span class="status-badge success">完了</span></span>
+          <span class="history-action"><a href="#" class="receipt-btn">領収書</a></span>
+        </li>
+        <li class="history-item">
+          <span class="history-date">2024/10/20</span>
+          <div class="history-info">
+            <p class="history-desc">プレミアムプラン（月払い）</p>
+            <p class="history-order">ORD-20241020-A3K9X2</p>
+          </div>
+          <span class="history-amount">¥500</span>
+          <span class="history-status"><span class="status-badge success">完了</span></span>
+          <span class="history-action"><a href="#" class="receipt-btn">領収書</a></span>
+        </li>
+        <li class="history-item">
+          <span class="history-date">2024/09/15</span>
+          <div class="history-info">
+            <p class="history-desc">プレミアムプラン（月払い）- 初回</p>
+            <p class="history-order">ORD-20240915-A3K9X2</p>
+          </div>
+          <span class="history-amount">¥500</span>
+          <span class="history-status"><span class="status-badge success">完了</span></span>
+          <span class="history-action"><a href="#" class="receipt-btn">領収書</a></span>
+        </li>
+      </ul>
+
+      <button class="load-more">もっと見る</button>
+    </div>
+  </div>
+</body>
+</html>

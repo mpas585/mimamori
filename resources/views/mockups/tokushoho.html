@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>特定商取引法に基づく表記 - みまもりデバイス（仮）</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+:root {
+  --white: #ffffff;
+  --cream: #faf9f7;
+  --beige: #f5f4f0;
+  --gray-100: #f0efeb;
+  --gray-200: #e5e2dc;
+  --gray-300: #d1ccc3;
+  --gray-400: #a8a29e;
+  --gray-500: #78716c;
+  --gray-600: #57534e;
+  --gray-700: #44403c;
+  --gray-800: #292524;
+  --green: #22c55e;
+  --green-dark: #16a34a;
+  --green-light: #dcfce7;
+  --blue: #3b82f6;
+  --blue-light: #eff6ff;
+  --red: #ef4444;
+  --red-light: #fef2f2;
+  --yellow: #eab308;
+  --yellow-light: #fef9c3;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+  --radius: 8px;
+  --radius-lg: 12px;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Noto Sans JP', sans-serif; background: var(--cream); color: var(--gray-800); line-height: 1.8; min-height: 100vh; }
+
+.header { background: var(--white); border-bottom: 1px solid var(--gray-200); padding: 16px 20px; position: sticky; top: 0; z-index: 100; }
+.header-inner { max-width: 800px; margin: 0 auto; display: flex; align-items: center; gap: 16px; }
+.back-btn { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; background: var(--beige); border: none; border-radius: var(--radius); cursor: pointer; font-size: 18px; transition: all 0.2s; text-decoration: none; color: var(--gray-700); }
+.back-btn:hover { background: var(--gray-200); }
+.header-title { font-size: 16px; font-weight: 600; }
+
+.container { max-width: 800px; margin: 0 auto; padding: 32px 20px 60px; }
+
+.page-title { font-size: 24px; font-weight: 700; text-align: center; margin-bottom: 8px; }
+.page-subtitle { font-size: 14px; color: var(--gray-500); text-align: center; margin-bottom: 32px; }
+
+.card { background: var(--white); border-radius: var(--radius-lg); padding: 32px; box-shadow: var(--shadow-sm); border: 1px solid var(--gray-200); }
+
+.info-table { width: 100%; border-collapse: collapse; }
+.info-table tr { border-bottom: 1px solid var(--gray-200); }
+.info-table tr:last-child { border-bottom: none; }
+.info-table th, .info-table td { padding: 16px 12px; text-align: left; vertical-align: top; font-size: 14px; }
+.info-table th { width: 180px; background: var(--beige); color: var(--gray-700); font-weight: 600; }
+.info-table td { background: var(--white); color: var(--gray-800); }
+
+.placeholder { color: var(--gray-400); font-style: italic; }
+.note { font-size: 12px; color: var(--gray-500); margin-top: 8px; }
+
+.price-table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 13px; }
+.price-table th, .price-table td { padding: 8px 12px; border: 1px solid var(--gray-200); text-align: left; }
+.price-table th { background: var(--gray-100); font-weight: 600; }
+
+.update-info { text-align: center; margin-top: 32px; padding-top: 24px; border-top: 1px solid var(--gray-200); font-size: 13px; color: var(--gray-500); }
+
+@media (max-width: 600px) {
+  .info-table, .info-table tbody, .info-table tr, .info-table th, .info-table td { display: block; width: 100%; }
+  .info-table th { border-bottom: none; padding-bottom: 4px; }
+  .info-table td { padding-top: 4px; padding-bottom: 20px; }
+  .card { padding: 24px 16px; }
+}
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="header-inner">
+      <a href="javascript:history.back()" class="back-btn">←</a>
+      <h1 class="header-title">特定商取引法に基づく表記</h1>
+    </div>
+  </header>
+
+  <div class="container">
+    <h1 class="page-title">特定商取引法に基づく表記</h1>
+    <p class="page-subtitle">通信販売に関する表示事項</p>
+
+    <div class="card">
+      <table class="info-table">
+        <tr>
+          <th>販売業者</th>
+          <td><span class="placeholder">[屋号/氏名]</span></td>
+        </tr>
+        <tr>
+          <th>運営統括責任者</th>
+          <td><span class="placeholder">[氏名]</span></td>
+        </tr>
+        <tr>
+          <th>所在地</th>
+          <td>
+            <span class="placeholder">[住所]</span>
+            <p class="note">※請求があった場合は遅滞なく開示いたします</p>
+          </td>
+        </tr>
+        <tr>
+          <th>電話番号</th>
+          <td>
+            <span class="placeholder">[電話番号]</span>
+            <p class="note">※請求があった場合は遅滞なく開示いたします</p>
+          </td>
+        </tr>
+        <tr>
+          <th>メールアドレス</th>
+          <td><span class="placeholder">[準備中]</span></td>
+        </tr>
+        <tr>
+          <th>URL</th>
+          <td><span class="placeholder">[サービスURL]</span></td>
+        </tr>
+        <tr>
+          <th>販売価格</th>
+          <td>
+            <table class="price-table">
+              <tr>
+                <th>台数</th>
+                <th>単価（税込）</th>
+              </tr>
+              <tr>
+                <td>1台</td>
+                <td>¥14,800</td>
+              </tr>
+              <tr>
+                <td>2〜4台</td>
+                <td>¥14,300（3%オフ）</td>
+              </tr>
+              <tr>
+                <td>5〜9台</td>
+                <td>¥13,800（7%オフ）</td>
+              </tr>
+              <tr>
+                <td>10〜29台</td>
+                <td>¥13,300（10%オフ）</td>
+              </tr>
+              <tr>
+                <td>30〜49台</td>
+                <td>¥12,800（14%オフ）</td>
+              </tr>
+              <tr>
+                <td>50〜99台</td>
+                <td>¥12,300（17%オフ）</td>
+              </tr>
+              <tr>
+                <td>100台以上</td>
+                <td>¥11,800（20%オフ）</td>
+              </tr>
+            </table>
+            <p class="note">※価格はすべて税込表示です</p>
+          </td>
+        </tr>
+        <tr>
+          <th>販売価格以外の必要料金</th>
+          <td>
+            <ul style="padding-left: 20px; margin: 0;">
+              <li>送料：全国一律無料</li>
+              <li>月額プラン（任意）：プレミアムプラン ¥500/月</li>
+            </ul>
+          </td>
+        </tr>
+        <tr>
+          <th>支払方法</th>
+          <td>
+            <ul style="padding-left: 20px; margin: 0;">
+              <li>クレジットカード（VISA、Mastercard、JCB、AMEX）</li>
+              <li>銀行振込（法人・10台以上のご注文）</li>
+            </ul>
+          </td>
+        </tr>
+        <tr>
+          <th>支払時期</th>
+          <td>
+            <ul style="padding-left: 20px; margin: 0;">
+              <li>クレジットカード：ご注文時に決済</li>
+              <li>銀行振込：ご注文後7日以内</li>
+            </ul>
+          </td>
+        </tr>
+        <tr>
+          <th>商品の引渡時期</th>
+          <td>
+            ご注文・ご入金確認後、7営業日以内に発送いたします。
+            <p class="note">※在庫状況により、お届けまでにお時間をいただく場合があります</p>
+          </td>
+        </tr>
+        <tr>
+          <th>商品の引渡方法</th>
+          <td>宅配便（ヤマト運輸または日本郵便）</td>
+        </tr>
+        <tr>
+          <th>返品・交換</th>
+          <td>
+            <p><strong>初期不良の場合</strong></p>
+            <p>商品到着後14日以内にご連絡いただいた場合、無償で交換いたします。</p>
+            <br>
+            <p><strong>お客様都合の返品</strong></p>
+            <p>商品の性質上、開封後の返品はお受けできません。</p>
+            <p>未開封・未使用の場合のみ、商品到着後7日以内に限り返品を承ります（送料はお客様負担）。</p>
+            <br>
+            <p><strong>電波状況による返品</strong></p>
+            <p>設置場所の電波状況による返品・返金はお受けできません。ご購入前に必ず電波状況をご確認ください。</p>
+          </td>
+        </tr>
+        <tr>
+          <th>保証期間</th>
+          <td>
+            購入日より1年間
+            <p class="note">※電池の消耗は保証対象外です</p>
+          </td>
+        </tr>
+        <tr>
+          <th>動作環境</th>
+          <td>
+            <ul style="padding-left: 20px; margin: 0;">
+              <li>対応エリア：SoftBankまたはKDDI（au）のLTE電波が届く場所</li>
+              <li>使用温度：0℃〜40℃</li>
+              <li>屋内専用（防水非対応）</li>
+            </ul>
+          </td>
+        </tr>
+        <tr>
+          <th>申込みの撤回</th>
+          <td>
+            ご注文後、発送前であればキャンセルが可能です。<br>
+            発送後のキャンセルは、返品扱いとなります。
+          </td>
+        </tr>
+        <tr>
+          <th>特別な販売条件</th>
+          <td>
+            なし
+          </td>
+        </tr>
+      </table>
+
+      <div class="update-info">
+        <p>最終更新日：2025年1月20日</p>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>購入前チェック - みまもりデバイス（仮）</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+:root {
+  --white: #ffffff;
+  --cream: #faf9f7;
+  --beige: #f5f4f0;
+  --gray-100: #f0efeb;
+  --gray-200: #e5e2dc;
+  --gray-300: #d1ccc3;
+  --gray-400: #a8a29e;
+  --gray-500: #78716c;
+  --gray-600: #57534e;
+  --gray-700: #44403c;
+  --gray-800: #292524;
+  --green: #22c55e;
+  --green-dark: #16a34a;
+  --green-light: #dcfce7;
+  --blue: #3b82f6;
+  --blue-light: #eff6ff;
+  --red: #ef4444;
+  --red-light: #fef2f2;
+  --yellow: #eab308;
+  --yellow-light: #fef9c3;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+  --shadow-lg: 0 10px 40px rgba(0,0,0,0.12);
+  --radius: 8px;
+  --radius-lg: 12px;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Noto Sans JP', sans-serif; background: var(--cream); color: var(--gray-800); line-height: 1.6; min-height: 100vh; }
+
+.container { max-width: 640px; margin: 0 auto; min-height: 100vh; display: flex; flex-direction: column; }
+
+.header { padding: 20px; display: flex; align-items: center; justify-content: space-between; }
+.logo { display: flex; align-items: center; gap: 10px; text-decoration: none; color: inherit; }
+.logo-icon { width: 40px; height: 40px; background: var(--white); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; box-shadow: var(--shadow-sm); }
+.logo-text { font-size: 16px; font-weight: 600; }
+.skip-btn { font-size: 13px; color: var(--gray-500); text-decoration: none; padding: 8px 16px; border-radius: var(--radius); transition: all 0.2s; }
+.skip-btn:hover { background: var(--beige); color: var(--gray-700); }
+
+.progress-bar { padding: 0 20px; margin-bottom: 20px; }
+.progress-track { height: 4px; background: var(--gray-200); border-radius: 2px; overflow: hidden; }
+.progress-fill { height: 100%; background: var(--green); border-radius: 2px; transition: width 0.5s ease; }
+.progress-text { font-size: 12px; color: var(--gray-500); margin-top: 8px; text-align: center; }
+
+.slide-container { flex: 1; padding: 0 20px; overflow: hidden; }
+.slide { display: none; animation: fadeIn 0.4s ease; }
+.slide.active { display: block; }
+
+.slide-card { background: var(--white); border-radius: var(--radius-lg); padding: 32px 24px; box-shadow: var(--shadow-md); border: 1px solid var(--gray-200); text-align: center; }
+.slide-icon { font-size: 64px; margin-bottom: 24px; }
+.slide-title { font-size: 20px; font-weight: 700; margin-bottom: 12px; color: var(--gray-800); }
+.slide-desc { font-size: 15px; color: var(--gray-600); line-height: 1.8; margin-bottom: 24px; }
+
+.check-list { text-align: left; margin: 24px 0; }
+.check-item { display: flex; align-items: flex-start; gap: 12px; padding: 14px 0; border-bottom: 1px solid var(--gray-100); }
+.check-item:last-child { border-bottom: none; }
+.check-icon { font-size: 20px; flex-shrink: 0; margin-top: 2px; }
+.check-icon.ok { color: var(--green); }
+.check-icon.warn { color: var(--yellow); }
+.check-icon.ng { color: var(--red); }
+.check-content { flex: 1; }
+.check-title { font-size: 15px; font-weight: 600; color: var(--gray-800); margin-bottom: 2px; }
+.check-desc { font-size: 13px; color: var(--gray-500); }
+
+.carrier-check { background: var(--beige); border-radius: var(--radius); padding: 20px; margin: 20px 0; }
+.carrier-title { font-size: 14px; font-weight: 600; color: var(--gray-700); margin-bottom: 12px; }
+.carrier-list { display: flex; gap: 16px; justify-content: center; }
+.carrier-item { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.carrier-logo { width: 48px; height: 48px; background: var(--white); border-radius: var(--radius); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; color: var(--gray-600); border: 1px solid var(--gray-200); }
+.carrier-logo.available { border-color: var(--green); color: var(--green-dark); }
+.carrier-logo.unavailable { opacity: 0.4; }
+.carrier-name { font-size: 11px; color: var(--gray-500); }
+.carrier-status { font-size: 10px; font-weight: 600; }
+.carrier-status.ok { color: var(--green-dark); }
+.carrier-status.ng { color: var(--red); }
+
+.info-box { background: var(--blue-light); border-radius: var(--radius); padding: 16px; margin: 20px 0; text-align: left; }
+.info-box-title { font-size: 13px; font-weight: 600; color: var(--blue); margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
+.info-box-text { font-size: 13px; color: var(--gray-700); line-height: 1.7; }
+
+.warning-box { background: var(--yellow-light); border: 1px solid #fde68a; border-radius: var(--radius); padding: 16px; margin: 20px 0; text-align: left; }
+.warning-box-title { font-size: 13px; font-weight: 600; color: var(--yellow); margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
+.warning-box-text { font-size: 13px; color: var(--gray-700); line-height: 1.7; }
+
+.agree-section { margin-top: 24px; text-align: left; }
+.agree-item { display: flex; align-items: flex-start; gap: 12px; padding: 12px 0; }
+.agree-checkbox { width: 22px; height: 22px; border: 2px solid var(--gray-300); border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.2s; margin-top: 2px; }
+.agree-checkbox.checked { background: var(--green); border-color: var(--green); color: var(--white); }
+.agree-text { font-size: 14px; color: var(--gray-700); cursor: pointer; }
+.agree-text a { color: var(--blue); }
+
+.nav { padding: 20px; display: flex; gap: 12px; }
+.btn { flex: 1; padding: 16px 24px; font-size: 15px; font-weight: 600; font-family: inherit; border: none; border-radius: var(--radius); cursor: pointer; transition: all 0.2s; text-align: center; }
+.btn-primary { background: var(--gray-800); color: var(--white); }
+.btn-primary:hover { background: var(--gray-700); }
+.btn-primary:disabled { background: var(--gray-300); cursor: not-allowed; }
+.btn-secondary { background: var(--beige); color: var(--gray-700); border: 1px solid var(--gray-300); }
+.btn-secondary:hover { background: var(--gray-200); }
+.btn-success { background: var(--green); color: var(--white); }
+.btn-success:hover { background: var(--green-dark); }
+.btn-success:disabled { background: var(--gray-300); cursor: not-allowed; }
+
+/* イラスト用 */
+.illustration-container { margin: 20px 0; display: flex; justify-content: center; }
+.illustration-container canvas { border-radius: var(--radius); }
+
+/* 完了画面 */
+.complete-card { background: linear-gradient(135deg, var(--green-light) 0%, var(--white) 100%); }
+.complete-icon { width: 80px; height: 80px; background: var(--green); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px; font-size: 40px; color: var(--white); }
+.complete-title { font-size: 22px; font-weight: 700; color: var(--green-dark); margin-bottom: 12px; }
+
+.summary-box { background: var(--white); border-radius: var(--radius); padding: 20px; margin: 24px 0; text-align: left; border: 1px solid var(--gray-200); }
+.summary-title { font-size: 13px; font-weight: 600; color: var(--gray-500); margin-bottom: 12px; }
+.summary-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--gray-100); }
+.summary-item:last-child { border-bottom: none; }
+.summary-label { font-size: 14px; color: var(--gray-600); }
+.summary-value { font-size: 14px; font-weight: 600; color: var(--gray-800); }
+.summary-value.ok { color: var(--green-dark); }
+
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+@media (max-width: 480px) {
+  .slide-card { padding: 24px 20px; }
+  .slide-icon { font-size: 48px; }
+  .slide-title { font-size: 18px; }
+  .carrier-list { gap: 12px; }
+  .carrier-logo { width: 40px; height: 40px; font-size: 10px; }
+}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <a href="#" class="logo">
+        <div class="logo-icon"></div>
+        <span class="logo-text">みまもりデバイス（仮）</span>
+      </a>
+      <a href="#" class="skip-btn" onclick="skipAll()">スキップ</a>
+    </header>
+
+    <div class="progress-bar">
+      <div class="progress-track">
+        <div class="progress-fill" id="progressFill" style="width: 33.3%;"></div>
+      </div>
+      <p class="progress-text"><span id="currentStep">1</span> / 3</p>
+    </div>
+
+    <div class="slide-container">
+      <!-- スライド1: 電波確認 -->
+      <div class="slide active" id="slide1">
+        <div class="slide-card">
+          <div class="slide-icon">📡</div>
+          <h2 class="slide-title">電波状況の確認</h2>
+          <p class="slide-desc">
+            みまもりデバイス（仮）はLTE回線で通信します。<br>
+            設置場所の電波状況をご確認ください。
+          </p>
+
+          <div class="carrier-check">
+            <p class="carrier-title">対応キャリア</p>
+            <div class="carrier-list">
+              <div class="carrier-item">
+                <div class="carrier-logo available">SB</div>
+                <span class="carrier-name">ソフトバンク</span>
+                <span class="carrier-status ok">対応</span>
+              </div>
+              <div class="carrier-item">
+                <div class="carrier-logo available">au</div>
+                <span class="carrier-name">KDDI</span>
+                <span class="carrier-status ok">対応</span>
+              </div>
+              <div class="carrier-item">
+                <div class="carrier-logo unavailable">docomo</div>
+                <span class="carrier-name">ドコモ</span>
+                <span class="carrier-status ng">非対応</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="check-list">
+            <div class="check-item">
+              <span class="check-icon ok">✓</span>
+              <div class="check-content">
+                <p class="check-title">ソフトバンクまたはau回線が入る</p>
+                <p class="check-desc">スマホで確認するか、各社のエリアマップをご覧ください<br>
+                  <a href="https://www.softbank.jp/mobile/network/area/map/" target="_blank" rel="noopener">SoftBankエリアマップ</a> ／ 
+                  <a href="https://www.au.com/mobile/area/" target="_blank" rel="noopener">auエリアマップ</a>
+                </p>
+              </div>
+            </div>
+            <div class="check-item">
+              <span class="check-icon ok">✓</span>
+              <div class="check-content">
+                <p class="check-title">窓から離れた場所でも電波が入る</p>
+                <p class="check-desc">設置予定場所で電波状況を確認してください</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="warning-box">
+            <p class="warning-box-title">⚠️ ご注意</p>
+            <p class="warning-box-text">
+              地下や鉄筋コンクリート造の建物内では電波が弱くなる場合があります。設置後に電波が入らない場合でも返品・返金はできません。
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- スライド2: 設置場所 -->
+      <div class="slide" id="slide2">
+        <div class="slide-card">
+          <div class="slide-icon">🚪</div>
+          <h2 class="slide-title">設置場所の確認</h2>
+          <p class="slide-desc">
+            ドア枠の上部に両面テープで固定します。<br>
+            以下の条件を満たす場所をご用意ください。
+          </p>
+
+          <!-- Canvasイラスト -->
+          <div class="illustration-container">
+            <canvas id="doorIllustration" width="280" height="200"></canvas>
+          </div>
+
+          <div class="check-list">
+            <div class="check-item">
+              <span class="check-icon ok">✓</span>
+              <div class="check-content">
+                <p class="check-title">毎日必ず通るドア</p>
+                <p class="check-desc">リビング入口、トイレ前などがおすすめ</p>
+              </div>
+            </div>
+            <div class="check-item">
+              <span class="check-icon ok">✓</span>
+              <div class="check-content">
+                <p class="check-title">ドア枠の上部に5cm以上の幅がある</p>
+                <p class="check-desc">製品サイズ: 幅4cm × 奥行3cm × 高さ8cm</p>
+              </div>
+            </div>
+            <div class="check-item">
+              <span class="check-icon ok">✓</span>
+              <div class="check-content">
+                <p class="check-title">湿気が少ない場所</p>
+                <p class="check-desc">浴室やキッチン換気扇の近くは避けてください</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="info-box">
+            <p class="info-box-title">💡 設置のコツ</p>
+            <p class="info-box-text">
+              センサーが真下を向くように設置してください。斜めに設置すると検知精度が下がります。
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- スライド3: 同意確認 -->
+      <div class="slide" id="slide3">
+        <div class="slide-card">
+          <div class="slide-icon">📋</div>
+          <h2 class="slide-title">ご購入前の確認</h2>
+          <p class="slide-desc">
+            以下の内容をご確認・ご同意の上、<br>
+            ご購入手続きにお進みください。
+          </p>
+
+          <div class="agree-section">
+            <div class="agree-item" onclick="toggleAgree(0)">
+              <div class="agree-checkbox" id="agree0"></div>
+              <p class="agree-text">設置予定場所でソフトバンクまたはauの電波が入ることを確認しました</p>
+            </div>
+            <div class="agree-item" onclick="toggleAgree(1)">
+              <div class="agree-checkbox" id="agree1"></div>
+              <p class="agree-text">本製品は安否を100%保証するものではないことを理解しました</p>
+            </div>
+            <div class="agree-item" onclick="toggleAgree(2)">
+              <div class="agree-checkbox" id="agree2"></div>
+              <p class="agree-text">電波状況による返品・返金には応じられないことを理解しました</p>
+            </div>
+            <div class="agree-item" onclick="toggleAgree(3)">
+              <div class="agree-checkbox" id="agree3"></div>
+              <p class="agree-text"><a href="#" onclick="event.stopPropagation()">利用規約</a>および<a href="#" onclick="event.stopPropagation()">プライバシーポリシー</a>に同意します</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 完了画面 -->
+      <div class="slide" id="slide4">
+        <div class="slide-card complete-card">
+          <div class="complete-icon">✓</div>
+          <h2 class="complete-title">確認完了！</h2>
+          <p class="slide-desc">
+            すべての確認が完了しました。<br>
+            ご購入手続きにお進みください。
+          </p>
+
+          <div class="summary-box">
+            <p class="summary-title">確認結果</p>
+            <div class="summary-item">
+              <span class="summary-label">電波状況</span>
+              <span class="summary-value ok">確認済み ✓</span>
+            </div>
+            <div class="summary-item">
+              <span class="summary-label">設置場所</span>
+              <span class="summary-value ok">確認済み ✓</span>
+            </div>
+            <div class="summary-item">
+              <span class="summary-label">同意事項</span>
+              <span class="summary-value ok">同意済み ✓</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <nav class="nav">
+      <button class="btn btn-secondary" id="prevBtn" onclick="prevSlide()" style="display: none;">戻る</button>
+      <button class="btn btn-primary" id="nextBtn" onclick="nextSlide()">次へ</button>
+    </nav>
+  </div>
+
+  <script>
+let currentSlide = 1;
+const totalSlides = 3;
+const agrees = [false, false, false, false];
+
+function updateUI() {
+  // スライド表示切替
+  document.querySelectorAll('.slide').forEach((slide, i) => {
+    slide.classList.remove('active');
+    if (i + 1 === currentSlide || (currentSlide === 4 && i === 3)) {
+      slide.classList.add('active');
+    }
+  });
+  
+  // プログレスバー
+  const progress = currentSlide <= totalSlides ? (currentSlide / totalSlides) * 100 : 100;
+  document.getElementById('progressFill').style.width = progress + '%';
+  document.getElementById('currentStep').textContent = Math.min(currentSlide, totalSlides);
+  
+  // ボタン表示
+  const prevBtn = document.getElementById('prevBtn');
+  const nextBtn = document.getElementById('nextBtn');
+  
+  if (currentSlide === 1) {
+    prevBtn.style.display = 'none';
+    nextBtn.textContent = '次へ';
+    nextBtn.className = 'btn btn-primary';
+    nextBtn.disabled = false;
+  } else if (currentSlide === 3) {
+    prevBtn.style.display = 'block';
+    nextBtn.textContent = '確認完了';
+    nextBtn.className = 'btn btn-success';
+    nextBtn.disabled = !agrees.every(a => a);
+  } else if (currentSlide === 4) {
+    prevBtn.style.display = 'none';
+    nextBtn.textContent = '購入手続きへ';
+    nextBtn.className = 'btn btn-success';
+    nextBtn.disabled = false;
+  } else {
+    prevBtn.style.display = 'block';
+    nextBtn.textContent = '次へ';
+    nextBtn.className = 'btn btn-primary';
+    nextBtn.disabled = false;
+  }
+  
+  // スライド2が表示されたらイラストを描画
+  if (currentSlide === 2) {
+    drawDoorIllustration();
+  }
+}
+
+function drawDoorIllustration() {
+  const canvas = document.getElementById('doorIllustration');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const w = canvas.width;
+  const h = canvas.height;
+  
+  // 背景
+  ctx.fillStyle = '#f5f4f0';
+  ctx.fillRect(0, 0, w, h);
+  
+  // 壁
+  ctx.fillStyle = '#e8e4dc';
+  ctx.fillRect(0, 0, w, h);
+  
+  // ドア枠（左）
+  ctx.fillStyle = '#8b7355';
+  ctx.fillRect(60, 30, 12, 170);
+  
+  // ドア枠（右）
+  ctx.fillRect(208, 30, 12, 170);
+  
+  // ドア枠（上）
+  ctx.fillRect(60, 30, 160, 14);
+  
+  // ドア本体
+  ctx.fillStyle = '#a0826d';
+  ctx.fillRect(72, 44, 136, 156);
+  
+  // ドアパネル装飾（上）
+  ctx.fillStyle = '#8b7355';
+  ctx.strokeStyle = '#7a6548';
+  ctx.lineWidth = 2;
+  ctx.strokeRect(85, 56, 110, 50);
+  
+  // ドアパネル装飾（下）
+  ctx.strokeRect(85, 120, 110, 70);
+  
+  // ドアノブ
+  ctx.fillStyle = '#d4af37';
+  ctx.beginPath();
+  ctx.arc(180, 130, 8, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = '#c9a227';
+  ctx.beginPath();
+  ctx.arc(180, 130, 5, 0, Math.PI * 2);
+  ctx.fill();
+  
+  // みまもりデバイス（仮）本体
+  const tofu_x = 125;
+  const tofu_y = 18;
+  const tofu_w = 30;
+  const tofu_h = 22;
+  
+  // トーフ本体（丸みを帯びた四角形）
+  ctx.fillStyle = '#faf8f5';
+  ctx.strokeStyle = '#e0dcd4';
+  ctx.lineWidth = 1;
+  roundRect(ctx, tofu_x, tofu_y, tofu_w, tofu_h, 4);
+  ctx.fill();
+  ctx.stroke();
+  
+  // トーフの顔（かわいい）
+  ctx.fillStyle = '#44403c';
+  // 左目
+  ctx.beginPath();
+  ctx.arc(tofu_x + 10, tofu_y + 10, 2, 0, Math.PI * 2);
+  ctx.fill();
+  // 右目
+  ctx.beginPath();
+  ctx.arc(tofu_x + 20, tofu_y + 10, 2, 0, Math.PI * 2);
+  ctx.fill();
+  // 口（にっこり）
+  ctx.beginPath();
+  ctx.arc(tofu_x + 15, tofu_y + 14, 4, 0.1 * Math.PI, 0.9 * Math.PI);
+  ctx.stroke();
+  
+  // センサー光線（点線）
+  ctx.strokeStyle = '#22c55e';
+  ctx.lineWidth = 1.5;
+  ctx.setLineDash([4, 4]);
+  ctx.beginPath();
+  ctx.moveTo(tofu_x + 15, tofu_y + tofu_h);
+  ctx.lineTo(tofu_x + 15, 85);
+  ctx.stroke();
+  
+  // 光線の広がり
+  ctx.beginPath();
+  ctx.moveTo(tofu_x + 15, tofu_y + tofu_h);
+  ctx.lineTo(tofu_x - 5, 85);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(tofu_x + 15, tofu_y + tofu_h);
+  ctx.lineTo(tofu_x + 35, 85);
+  ctx.stroke();
+  ctx.setLineDash([]);
+  
+  // 検知エリアの円
+  ctx.strokeStyle = '#22c55e';
+  ctx.lineWidth = 1;
+  ctx.globalAlpha = 0.3;
+  ctx.beginPath();
+  ctx.ellipse(tofu_x + 15, 85, 25, 10, 0, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.globalAlpha = 1;
+  
+  // ラベル：設置位置
+  ctx.fillStyle = '#57534e';
+  ctx.font = '10px "Noto Sans JP", sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('ドア枠の上に設置', tofu_x + 15, tofu_y - 4);
+  
+  // 矢印
+  ctx.fillStyle = '#22c55e';
+  ctx.beginPath();
+  ctx.moveTo(tofu_x + 15, 95);
+  ctx.lineTo(tofu_x + 10, 88);
+  ctx.lineTo(tofu_x + 20, 88);
+  ctx.closePath();
+  ctx.fill();
+  
+  // 通過検知テキスト
+  ctx.fillStyle = '#22c55e';
+  ctx.font = 'bold 10px "Noto Sans JP", sans-serif';
+  ctx.fillText('通過を検知', tofu_x + 15, 108);
+}
+
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  ctx.lineTo(x + r, y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.closePath();
+}
+
+function nextSlide() {
+  if (currentSlide === 4) {
+    // 購入ページへ遷移（モック）
+    alert('購入ページに遷移します');
+    return;
+  }
+  
+  if (currentSlide === 3 && !agrees.every(a => a)) {
+    alert('すべての項目に同意してください');
+    return;
+  }
+  
+  currentSlide++;
+  updateUI();
+}
+
+function prevSlide() {
+  if (currentSlide > 1) {
+    currentSlide--;
+    updateUI();
+  }
+}
+
+function toggleAgree(index) {
+  agrees[index] = !agrees[index];
+  const checkbox = document.getElementById('agree' + index);
+  if (agrees[index]) {
+    checkbox.classList.add('checked');
+    checkbox.innerHTML = '✓';
+  } else {
+    checkbox.classList.remove('checked');
+    checkbox.innerHTML = '';
+  }
+  updateUI();
+}
+
+function skipAll() {
+  if (confirm('確認をスキップして購入ページに進みますか？\n\n※電波状況等の確認は自己責任となります')) {
+    alert('購入ページに遷移します');
+  }
+}
+
+// 初期化
+updateUI();
+  </script>
+</body>
+</html>

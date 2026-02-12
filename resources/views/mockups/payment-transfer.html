@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>銀行振込でお支払い - みまもりデバイス（仮）</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+:root {
+  --white: #ffffff;
+  --cream: #faf9f7;
+  --beige: #f5f3ef;
+  --gray-100: #f0eeea;
+  --gray-200: #e5e2dc;
+  --gray-300: #d1ccc3;
+  --gray-400: #a8a29e;
+  --gray-500: #78716c;
+  --gray-600: #57534e;
+  --gray-700: #44403c;
+  --gray-800: #292524;
+  --green-light: #dcfce7;
+  --green: #22c55e;
+  --green-dark: #16a34a;
+  --blue-light: #dbeafe;
+  --blue: #3b82f6;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+  --shadow: 0 4px 20px rgba(0,0,0,0.06);
+  --radius: 8px;
+  --radius-lg: 12px;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Noto Sans JP', sans-serif; background: var(--cream); color: var(--gray-800); min-height: 100vh; line-height: 1.7; }
+
+.header { background: var(--white); border-bottom: 1px solid var(--gray-200); padding: 16px 20px; position: sticky; top: 0; z-index: 100; }
+.header-inner { max-width: 640px; margin: 0 auto; display: flex; align-items: center; gap: 16px; }
+.back-btn { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; background: var(--beige); border: none; border-radius: var(--radius); cursor: pointer; font-size: 18px; transition: all 0.2s; text-decoration: none; color: var(--gray-700); }
+.back-btn:hover { background: var(--gray-200); }
+.header-title { font-size: 16px; font-weight: 600; }
+
+.container { max-width: 640px; margin: 0 auto; padding: 24px 20px; }
+
+/* ステップ表示 */
+.steps { display: flex; justify-content: center; gap: 8px; margin-bottom: 32px; }
+.step { display: flex; align-items: center; gap: 8px; }
+.step-num { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; background: var(--gray-200); color: var(--gray-500); }
+.step.active .step-num { background: var(--gray-800); color: var(--white); }
+.step.done .step-num { background: var(--green); color: var(--white); }
+.step-label { font-size: 13px; color: var(--gray-500); font-weight: 500; }
+.step.active .step-label { color: var(--gray-800); font-weight: 600; }
+.step-arrow { color: var(--gray-300); font-size: 12px; }
+
+/* カード */
+.card { background: var(--white); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); border: 1px solid var(--gray-200); padding: 24px; margin-bottom: 20px; }
+.card-title { font-size: 17px; font-weight: 700; margin-bottom: 8px; color: var(--gray-800); display: flex; align-items: center; gap: 8px; }
+.card-title span { font-size: 20px; }
+.card-desc { font-size: 14px; color: var(--gray-500); margin-bottom: 20px; padding-bottom: 16px; border-bottom: 2px solid var(--gray-200); }
+
+/* 注文内容 */
+.order-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--gray-100); }
+.order-item:last-child { border-bottom: none; }
+.order-item-name { font-size: 14px; color: var(--gray-700); }
+.order-item-price { font-size: 14px; font-weight: 600; color: var(--gray-800); }
+.order-total { display: flex; justify-content: space-between; align-items: center; padding-top: 16px; margin-top: 8px; border-top: 2px solid var(--gray-200); }
+.order-total-label { font-size: 15px; font-weight: 600; color: var(--gray-800); }
+.order-total-price { font-size: 24px; font-weight: 700; color: var(--gray-800); }
+
+/* 振込先情報 */
+.bank-info { background: var(--beige); border-radius: var(--radius); padding: 20px; }
+.bank-info-title { font-size: 13px; font-weight: 600; color: var(--gray-600); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.05em; }
+.bank-info-row { display: flex; padding: 10px 0; border-bottom: 1px solid var(--gray-200); }
+.bank-info-row:last-child { border-bottom: none; }
+.bank-info-label { width: 100px; font-size: 13px; color: var(--gray-500); flex-shrink: 0; }
+.bank-info-value { font-size: 15px; font-weight: 600; color: var(--gray-800); }
+
+/* 注意事項 */
+.notice { background: var(--blue-light); border-radius: var(--radius); padding: 16px; margin-top: 20px; }
+.notice-title { font-size: 13px; font-weight: 600; color: var(--blue); margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+.notice-list { font-size: 13px; color: var(--gray-700); margin: 0; padding-left: 20px; line-height: 1.8; }
+
+/* デバイスID表示 */
+.device-id-box { background: var(--gray-800); color: var(--white); padding: 16px 20px; border-radius: var(--radius); text-align: center; margin: 20px 0; }
+.device-id-label { font-size: 12px; color: var(--gray-400); margin-bottom: 4px; }
+.device-id-value { font-size: 24px; font-weight: 700; font-family: monospace; letter-spacing: 0.1em; }
+.device-id-note { font-size: 11px; color: var(--gray-400); margin-top: 8px; }
+
+/* ボタン */
+.btn { display: block; width: 100%; padding: 16px 24px; font-size: 16px; font-weight: 600; font-family: inherit; border: none; border-radius: var(--radius); cursor: pointer; transition: all 0.2s; text-decoration: none; text-align: center; margin-bottom: 12px; }
+.btn-primary { background: var(--gray-800); color: var(--white); }
+.btn-primary:hover { background: var(--gray-700); }
+.btn-secondary { background: var(--beige); color: var(--gray-700); border: 1px solid var(--gray-300); }
+.btn-secondary:hover { background: var(--gray-200); }
+
+/* 完了画面 */
+.screen { display: none; }
+.screen.active { display: block; }
+
+.success-icon { width: 80px; height: 80px; background: var(--green-light); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px; font-size: 40px; }
+.success-title { font-size: 20px; font-weight: 700; text-align: center; margin-bottom: 12px; }
+.success-text { font-size: 14px; color: var(--gray-500); text-align: center; line-height: 1.8; }
+
+.timeline { margin: 24px 0; padding: 0; list-style: none; }
+.timeline-item { display: flex; gap: 16px; padding-bottom: 20px; position: relative; }
+.timeline-item:last-child { padding-bottom: 0; }
+.timeline-item::before { content: ''; position: absolute; left: 11px; top: 24px; bottom: 0; width: 2px; background: var(--gray-200); }
+.timeline-item:last-child::before { display: none; }
+.timeline-dot { width: 24px; height: 24px; border-radius: 50%; background: var(--beige); border: 2px solid var(--gray-300); display: flex; align-items: center; justify-content: center; font-size: 12px; flex-shrink: 0; z-index: 1; }
+.timeline-dot.done { background: var(--green); border-color: var(--green); color: var(--white); }
+.timeline-content { flex: 1; }
+.timeline-title { font-size: 14px; font-weight: 600; color: var(--gray-800); }
+.timeline-desc { font-size: 13px; color: var(--gray-500); margin-top: 2px; }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="header-inner">
+      <a href="plan.html" class="back-btn">←</a>
+      <h1 class="header-title">銀行振込でお支払い</h1>
+    </div>
+  </header>
+
+  <div class="container">
+    <!-- 確認画面 -->
+    <div id="screenConfirm" class="screen active">
+      <div class="steps">
+        <div class="step active">
+          <span class="step-num">1</span>
+          <span class="step-label">確認</span>
+        </div>
+        <span class="step-arrow">→</span>
+        <div class="step">
+          <span class="step-num">2</span>
+          <span class="step-label">申請完了</span>
+        </div>
+        <span class="step-arrow">→</span>
+        <div class="step">
+          <span class="step-num">3</span>
+          <span class="step-label">入金</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 class="card-title"><span>📋</span>お申し込み内容</h2>
+        <p class="card-desc">振込完了後、プランが有効になります</p>
+        
+        <div class="order-item">
+          <span class="order-item-name">Premiumプラン（年払い）</span>
+          <span class="order-item-price">¥6,000</span>
+        </div>
+        <div class="order-item">
+          <span class="order-item-name">有効期間</span>
+          <span class="order-item-price">1年間</span>
+        </div>
+        <div class="order-total">
+          <span class="order-total-label">お振込金額</span>
+          <span class="order-total-price">¥6,000</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 class="card-title"><span>🏦</span>振込先</h2>
+        <p class="card-desc">以下の口座にお振込みください</p>
+        
+        <div class="bank-info">
+          <p class="bank-info-title">振込先口座</p>
+          <div class="bank-info-row">
+            <span class="bank-info-label">銀行名</span>
+            <span class="bank-info-value">○○銀行</span>
+          </div>
+          <div class="bank-info-row">
+            <span class="bank-info-label">支店名</span>
+            <span class="bank-info-value">△△支店（123）</span>
+          </div>
+          <div class="bank-info-row">
+            <span class="bank-info-label">口座種別</span>
+            <span class="bank-info-value">普通</span>
+          </div>
+          <div class="bank-info-row">
+            <span class="bank-info-label">口座番号</span>
+            <span class="bank-info-value">1234567</span>
+          </div>
+          <div class="bank-info-row">
+            <span class="bank-info-label">口座名義</span>
+            <span class="bank-info-value">ウエダショウジ（カ</span>
+          </div>
+        </div>
+
+        <div class="device-id-box">
+          <p class="device-id-label">振込名義に以下のIDを追加してください</p>
+          <p class="device-id-value">A3K9X2</p>
+          <p class="device-id-note">例：ヤマダタロウ A3K9X2</p>
+        </div>
+
+        <div class="notice">
+          <p class="notice-title">⚠️ ご注意</p>
+          <ul class="notice-list">
+            <li>振込名義にデバイスIDがないと、入金確認ができません</li>
+            <li>振込手数料はお客様負担となります</li>
+            <li>入金確認まで1〜3営業日かかります</li>
+            <li>入金確認後、マイページでプランが有効になります</li>
+          </ul>
+        </div>
+      </div>
+
+      <button class="btn btn-primary" onclick="submitTransferRequest()">振込申請する</button>
+      <a href="plan.html" class="btn btn-secondary">キャンセル</a>
+    </div>
+
+    <!-- 完了画面 -->
+    <div id="screenComplete" class="screen">
+      <div class="steps">
+        <div class="step done">
+          <span class="step-num">✓</span>
+          <span class="step-label">確認</span>
+        </div>
+        <span class="step-arrow">→</span>
+        <div class="step active">
+          <span class="step-num">2</span>
+          <span class="step-label">申請完了</span>
+        </div>
+        <span class="step-arrow">→</span>
+        <div class="step">
+          <span class="step-num">3</span>
+          <span class="step-label">入金</span>
+        </div>
+      </div>
+
+      <div class="card" style="text-align: center;">
+        <div class="success-icon">✓</div>
+        <h2 class="success-title">振込申請を受け付けました</h2>
+        <p class="success-text">
+          下記の口座にお振込みください。<br>
+          入金確認後、プランが有効になります。
+        </p>
+
+        <div class="bank-info" style="margin-top: 24px; text-align: left;">
+          <p class="bank-info-title">振込先口座</p>
+          <div class="bank-info-row">
+            <span class="bank-info-label">銀行名</span>
+            <span class="bank-info-value">○○銀行</span>
+          </div>
+          <div class="bank-info-row">
+            <span class="bank-info-label">支店名</span>
+            <span class="bank-info-value">△△支店（123）</span>
+          </div>
+          <div class="bank-info-row">
+            <span class="bank-info-label">口座種別</span>
+            <span class="bank-info-value">普通</span>
+          </div>
+          <div class="bank-info-row">
+            <span class="bank-info-label">口座番号</span>
+            <span class="bank-info-value">1234567</span>
+          </div>
+          <div class="bank-info-row">
+            <span class="bank-info-label">口座名義</span>
+            <span class="bank-info-value">ウエダショウジ（カ</span>
+          </div>
+        </div>
+
+        <div class="device-id-box">
+          <p class="device-id-label">振込名義にこのIDを追加</p>
+          <p class="device-id-value">A3K9X2</p>
+          <p class="device-id-note">例：ヤマダタロウ A3K9X2</p>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3 class="card-title"><span>📍</span>今後の流れ</h3>
+        <ul class="timeline">
+          <li class="timeline-item">
+            <span class="timeline-dot done">✓</span>
+            <div class="timeline-content">
+              <p class="timeline-title">振込申請完了</p>
+              <p class="timeline-desc">たった今</p>
+            </div>
+          </li>
+          <li class="timeline-item">
+            <span class="timeline-dot">2</span>
+            <div class="timeline-content">
+              <p class="timeline-title">お客様がお振込み</p>
+              <p class="timeline-desc">上記口座へ6,000円をお振込みください</p>
+            </div>
+          </li>
+          <li class="timeline-item">
+            <span class="timeline-dot">3</span>
+            <div class="timeline-content">
+              <p class="timeline-title">入金確認（1〜3営業日）</p>
+              <p class="timeline-desc">確認でき次第、プランが有効になります</p>
+            </div>
+          </li>
+          <li class="timeline-item">
+            <span class="timeline-dot">4</span>
+            <div class="timeline-content">
+              <p class="timeline-title">プラン有効化</p>
+              <p class="timeline-desc">マイページでPremium機能が使えるようになります</p>
+            </div>
+          </li>
+        </ul>
+      </div>
+
+      <a href="mypage.html" class="btn btn-primary">マイページに戻る</a>
+    </div>
+  </div>
+
+  <script>
+function submitTransferRequest() {
+  // TODO: API call
+  document.getElementById('screenConfirm').classList.remove('active');
+  document.getElementById('screenComplete').classList.add('active');
+  window.scrollTo(0, 0);
+}
+  </script>
+</body>
+</html>

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ページが見つかりません - みまもりデバイス（仮）</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+:root {
+  --white: #ffffff;
+  --cream: #faf9f7;
+  --beige: #f5f3ef;
+  --gray-100: #f0eeea;
+  --gray-200: #e5e2dc;
+  --gray-300: #d1ccc3;
+  --gray-400: #a8a29e;
+  --gray-500: #78716c;
+  --gray-600: #57534e;
+  --gray-700: #44403c;
+  --gray-800: #292524;
+  --shadow: 0 4px 20px rgba(0,0,0,0.06);
+  --radius: 8px;
+  --radius-lg: 12px;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Noto Sans JP', sans-serif; background: var(--cream); color: var(--gray-800); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+
+.container { text-align: center; max-width: 400px; }
+.icon { font-size: 80px; margin-bottom: 24px; opacity: 0.8; }
+.code { font-size: 72px; font-weight: 700; color: var(--gray-300); margin-bottom: 8px; letter-spacing: -0.02em; }
+.title { font-size: 20px; font-weight: 600; color: var(--gray-800); margin-bottom: 12px; }
+.message { font-size: 14px; color: var(--gray-500); line-height: 1.8; margin-bottom: 32px; }
+
+.btn { display: inline-block; padding: 14px 32px; font-size: 15px; font-weight: 600; font-family: inherit; border: none; border-radius: var(--radius); cursor: pointer; transition: all 0.2s; text-decoration: none; }
+.btn-primary { background: var(--gray-800); color: var(--white); }
+.btn-primary:hover { background: var(--gray-700); transform: translateY(-1px); box-shadow: var(--shadow); }
+
+.links { margin-top: 24px; }
+.links a { font-size: 13px; color: var(--gray-500); text-decoration: none; margin: 0 12px; }
+.links a:hover { color: var(--gray-700); text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="icon"></div>
+    <p class="code">404</p>
+    <h1 class="title">ページが見つかりません</h1>
+    <p class="message">
+      お探しのページは移動または削除された可能性があります。<br>
+      URLをご確認のうえ、再度お試しください。
+    </p>
+    <a href="mypage.html" class="btn btn-primary">マイページへ戻る</a>
+    <div class="links">
+      <a href="login.html">ログイン</a>
+      <a href="contact.html">お問い合わせ</a>
+    </div>
+  </div>
+</body>
+</html>

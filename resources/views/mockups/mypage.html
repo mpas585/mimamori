@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>マイページ - みまもりデバイス（仮）</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+:root {
+  --white: #ffffff;
+  --cream: #faf9f7;
+  --beige: #f5f3ef;
+  --gray-100: #f0eeea;
+  --gray-200: #e5e2dc;
+  --gray-300: #d1ccc3;
+  --gray-400: #a8a29e;
+  --gray-500: #78716c;
+  --gray-600: #57534e;
+  --gray-700: #44403c;
+  --gray-800: #292524;
+  --green-light: #dcfce7;
+  --green: #22c55e;
+  --green-dark: #16a34a;
+  --yellow-light: #fef9c3;
+  --yellow: #eab308;
+  --red-light: #fee2e2;
+  --red: #ef4444;
+  --blue-light: #dbeafe;
+  --blue: #3b82f6;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+  --shadow: 0 4px 20px rgba(0,0,0,0.06);
+  --radius: 8px;
+  --radius-lg: 12px;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Noto Sans JP', sans-serif; background: var(--cream); color: var(--gray-800); min-height: 100vh; line-height: 1.7; }
+
+.header { background: var(--white); border-bottom: 1px solid var(--gray-100); position: sticky; top: 0; z-index: 100; }
+.header-inner { max-width: 640px; margin: 0 auto; padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; }
+.header-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; color: inherit; }
+.header-logo-icon { width: 36px; height: 36px; background: var(--cream); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+.header-logo-text { font-size: 16px; font-weight: 500; }
+.header-menu { display: flex; align-items: center; gap: 8px; }
+.header-btn { padding: 8px 12px; font-size: 13px; color: var(--gray-600); background: transparent; border: none; border-radius: var(--radius); cursor: pointer; transition: all 0.2s; text-decoration: none; }
+.header-btn:hover { background: var(--beige); color: var(--gray-800); }
+
+.container { max-width: 640px; margin: 0 auto; padding: 24px 20px 100px; }
+
+/* 通知先未登録バナー */
+.notify-banner { background: var(--yellow-light); border: 1px solid #fde68a; border-radius: var(--radius-lg); padding: 12px 16px; margin-bottom: 12px; animation: fadeIn 0.4s ease; }
+.notify-banner.hidden { display: none; }
+.notify-banner-inner { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.notify-banner-text { display: flex; align-items: center; gap: 10px; flex: 1; }
+.notify-banner-text span { font-size: 18px; }
+.notify-banner-text p { font-size: 14px; font-weight: 600; color: var(--gray-700); }
+.notify-banner-btn { padding: 8px 16px; font-size: 13px; font-weight: 600; color: var(--gray-800); background: var(--white); border: 1px solid var(--gray-300); border-radius: var(--radius); cursor: pointer; transition: all 0.2s; white-space: nowrap; text-decoration: none; }
+.notify-banner-btn:hover { background: var(--gray-100); }
+
+.pwa-float { background: var(--blue-light); border: 1px solid #bfdbfe; border-radius: var(--radius-lg); padding: 12px 16px; display: flex; align-items: center; gap: 16px; margin-bottom: 20px; animation: fadeIn 0.4s ease; }
+.pwa-float.hidden { display: none; }
+.pwa-float-inner { display: flex; align-items: center; gap: 16px; width: 100%; }
+.pwa-float-text { display: flex; align-items: center; gap: 10px; flex: 1; }
+.pwa-float-text span { font-size: 18px; }
+.pwa-float-text p { font-size: 14px; font-weight: 500; color: var(--gray-700); }
+.pwa-float-btn { padding: 8px 16px; font-size: 13px; font-weight: 600; color: var(--white); background: var(--blue); border: none; border-radius: var(--radius); cursor: pointer; transition: all 0.2s; white-space: nowrap; }
+.pwa-float-btn:hover { opacity: 0.9; }
+.pwa-float-close { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; background: transparent; border: none; border-radius: 50%; cursor: pointer; font-size: 18px; color: var(--gray-500); transition: all 0.2s; flex-shrink: 0; }
+.pwa-float-close:hover { background: rgba(0,0,0,0.1); color: var(--gray-700); }
+
+.status-card { background: var(--white); border-radius: var(--radius-lg); box-shadow: var(--shadow); padding: 24px; margin-bottom: 24px; border: 1px solid var(--gray-200); animation: fadeIn 0.4s ease; }
+.status-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 20px; }
+.status-main { display: flex; align-items: center; gap: 16px; }
+.status-indicator { width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; position: relative; }
+.status-indicator.ok { background: var(--green-light); }
+.status-indicator.warning { background: var(--yellow-light); }
+.status-indicator.error { background: var(--red-light); }
+.status-indicator.offline { background: var(--gray-200); }
+.status-indicator .status-dot-inner { width: 20px; height: 20px; border-radius: 50%; position: relative; z-index: 2; }
+.status-indicator.ok .status-dot-inner { background: var(--green); }
+.status-indicator.warning .status-dot-inner { background: var(--yellow); }
+.status-indicator.error .status-dot-inner { background: var(--red); }
+.status-indicator.offline .status-dot-inner { background: var(--gray-400); }
+.status-indicator.ok::before, .status-indicator.ok::after { content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); border-radius: 50%; border: 2px solid var(--green); opacity: 0; animation: radar-pulse 3.5s ease-out infinite; }
+.status-indicator.ok::after { animation-delay: 1.75s; }
+@keyframes radar-pulse { 0% { width: 20px; height: 20px; opacity: 0.6; } 100% { width: 80px; height: 80px; opacity: 0; } }
+/* 見守り停止中 */
+.status-indicator.paused { background: var(--gray-100); }
+.status-indicator.paused .status-dot-inner { background: var(--gray-300); }
+.status-indicator.paused::before, .status-indicator.paused::after { display: none; }
+.status-card.paused { opacity: 0.7; }
+.status-card.paused .status-text h2 { color: var(--gray-500); }
+.status-card.paused .status-text p { color: var(--gray-400); }
+.status-text h2 { font-size: 18px; font-weight: 600; margin-bottom: 4px; color: var(--gray-800); }
+.status-text p { font-size: 14px; color: var(--gray-500); font-weight: 500; }
+.status-id { font-size: 13px; font-weight: 600; font-family: monospace; color: var(--gray-600); background: var(--beige); padding: 6px 12px; border-radius: 20px; }
+.status-details { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; padding-top: 20px; border-top: 1px solid var(--gray-100); }
+.detail-item { text-align: center; padding: 0 8px; border-right: 1px solid var(--gray-200); }
+.detail-item:last-child { border-right: none; }
+.detail-label { font-size: 11px; font-weight: 500; color: var(--gray-500); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.03em; }
+.detail-value { font-size: 15px; font-weight: 600; color: var(--gray-800); display: flex; align-items: center; justify-content: center; gap: 4px; }
+.detail-value.good { color: var(--green-dark); }
+.battery-icon { display: inline-block; vertical-align: middle; }
+.signal-icon { display: inline-block; vertical-align: middle; }
+.meter-icon { display: inline-block; vertical-align: middle; }
+
+/* 見守り設定バー */
+.watch-status-bar { position: fixed; bottom: 0; left: 0; right: 0; background: var(--white); border-top: 1px solid var(--gray-200); padding: 12px 20px; z-index: 100; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); }
+.watch-status-bar-inner { max-width: 640px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; }
+.watch-status-left { display: flex; align-items: center; gap: 8px; }
+.watch-status-label { font-size: 16px; color: var(--gray-600); font-weight: 500; }
+.watch-status-text { font-size: 18px; font-weight: 700; color: var(--gray-800); }
+.watch-status-text.paused { color: var(--gray-400); }
+.watch-toggle { position: relative; width: 52px; height: 30px; background: var(--gray-300); border-radius: 15px; cursor: pointer; transition: all 0.2s; border: none; flex-shrink: 0; }
+.watch-toggle.active { background: var(--green); }
+.watch-toggle::after { content: ''; position: absolute; top: 3px; left: 3px; width: 24px; height: 24px; background: var(--white); border-radius: 50%; transition: all 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+.watch-toggle.active::after { left: 25px; }
+.watch-status-btn { padding: 10px 20px; font-size: 14px; font-weight: 600; color: var(--gray-700); background: var(--beige); border: 1px solid var(--gray-300); border-radius: var(--radius); cursor: pointer; transition: all 0.2s; margin-left: 12px; }
+.watch-status-btn:hover { background: var(--gray-200); }
+
+.section { margin-bottom: 28px; animation: fadeIn 0.4s ease both; }
+.section:nth-child(2) { animation-delay: 0.05s; }
+.section:nth-child(3) { animation-delay: 0.1s; }
+.section:nth-child(4) { animation-delay: 0.15s; }
+.section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 2px solid var(--gray-300); }
+.section-title { font-size: 15px; font-weight: 600; color: var(--gray-700); display: flex; align-items: center; gap: 8px; }
+.section-action { font-size: 13px; font-weight: 500; color: var(--gray-600); text-decoration: none; padding: 6px 12px; border-radius: var(--radius); background: var(--beige); transition: all 0.2s; }
+.section-action:hover { background: var(--gray-200); color: var(--gray-800); }
+
+.card { background: var(--white); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); overflow: hidden; border: 1px solid var(--gray-200); }
+.card-body { padding: 16px 20px; }
+
+.log-list { list-style: none; }
+.log-item { display: flex; align-items: center; padding: 14px 0; border-bottom: 1px solid var(--gray-100); font-size: 14px; }
+.log-item:last-child { border-bottom: none; }
+.log-time { width: 56px; color: var(--gray-600); font-size: 13px; font-weight: 500; }
+.log-distance { width: 56px; font-weight: 600; color: var(--gray-800); }
+.log-type { flex: 1; font-size: 13px; font-weight: 500; }
+.log-type.human { color: var(--green-dark); }
+.log-type.pet { color: var(--gray-400); }
+.log-battery { color: var(--gray-400); font-size: 12px; }
+
+.watch-list { list-style: none; }
+.watch-item { display: flex; align-items: center; padding: 14px 0; border-bottom: 1px solid var(--gray-100); }
+.watch-item:last-child { border-bottom: none; }
+.watch-status { width: 12px; height: 12px; border-radius: 50%; margin-right: 14px; flex-shrink: 0; }
+.watch-status.ok { background: var(--green); }
+.watch-status.warning { background: var(--yellow); }
+.watch-status.error { background: var(--red); }
+.watch-status.offline { background: var(--gray-400); }
+.watch-status.pending { background: var(--gray-300); }
+.watch-info { flex: 1; }
+.watch-id { font-size: 14px; font-weight: 600; font-family: monospace; color: var(--gray-800); }
+.watch-name { font-size: 13px; color: var(--gray-500); }
+.watch-detail { font-size: 13px; color: var(--gray-500); font-weight: 500; }
+
+.pending-list { list-style: none; }
+.pending-item { display: flex; align-items: center; justify-content: space-between; padding: 14px 0; border-bottom: 1px solid var(--gray-100); }
+.pending-item:last-child { border-bottom: none; }
+.pending-info { display: flex; align-items: center; gap: 12px; }
+.pending-icon { font-size: 20px; }
+.pending-text { font-size: 14px; color: var(--gray-700); }
+.pending-text strong { font-family: monospace; color: var(--gray-800); }
+.pending-actions { display: flex; gap: 8px; }
+.pending-btn { padding: 8px 16px; font-size: 13px; font-weight: 600; border: none; border-radius: var(--radius); cursor: pointer; transition: all 0.2s; }
+.pending-btn.accept { background: var(--green); color: var(--white); }
+.pending-btn.accept:hover { background: var(--green-dark); }
+.pending-btn.reject { background: var(--gray-200); color: var(--gray-600); }
+.pending-btn.reject:hover { background: var(--gray-300); }
+
+.footer { text-align: center; padding: 32px 20px; margin-top: 20px; border-top: 1px solid var(--gray-200); color: var(--gray-400); font-size: 12px; }
+.footer-links { margin-top: 8px; }
+.footer-links a { color: var(--gray-400); text-decoration: none; }
+.footer-links a:hover { color: var(--gray-600); text-decoration: underline; }
+.footer-sep { margin: 0 4px; }
+
+/* モーダル */
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 1000; padding: 20px; }
+.modal-overlay.show { display: block; }
+.modal { background: var(--white); max-width: 400px; margin: 80px auto; border-radius: var(--radius-lg); overflow: hidden; box-shadow: 0 10px 40px rgba(0,0,0,0.08); }
+.modal-header { padding: 20px; border-bottom: 1px solid var(--gray-100); display: flex; align-items: center; justify-content: space-between; }
+.modal-header h3 { font-size: 16px; font-weight: 600; }
+.modal-close { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; background: var(--beige); border: none; border-radius: 6px; cursor: pointer; font-size: 18px; color: var(--gray-600); }
+.modal-close:hover { background: var(--gray-200); }
+.modal-body { padding: 20px; }
+.modal-footer { padding: 16px 20px; border-top: 1px solid var(--gray-100); display: flex; gap: 12px; justify-content: flex-end; }
+
+.form-group { margin-bottom: 20px; }
+.form-group:last-child { margin-bottom: 0; }
+.form-label { display: block; font-size: 13px; font-weight: 600; color: var(--gray-700); margin-bottom: 8px; }
+.form-input { width: 100%; padding: 12px 14px; font-size: 15px; font-family: inherit; border: 1px solid var(--gray-300); border-radius: var(--radius); background: var(--cream); }
+.form-input:focus { outline: none; border-color: var(--gray-500); background: var(--white); }
+.form-hint { font-size: 12px; color: var(--gray-500); margin-top: 6px; }
+
+.btn { padding: 12px 20px; font-size: 14px; font-weight: 600; font-family: inherit; border: none; border-radius: var(--radius); cursor: pointer; transition: all 0.2s; }
+.btn-primary { background: var(--gray-800); color: var(--white); }
+.btn-primary:hover { background: var(--gray-700); }
+.btn-secondary { background: var(--beige); color: var(--gray-700); border: 1px solid var(--gray-300); }
+.btn-secondary:hover { background: var(--gray-200); }
+
+/* 停止予定 */
+.schedule-info { padding: 16px; background: var(--yellow-light); border: 1px solid #fde68a; border-radius: var(--radius); margin-bottom: 20px; }
+.schedule-info-title { font-size: 13px; font-weight: 600; color: var(--gray-700); margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
+.schedule-info-text { font-size: 14px; color: var(--gray-800); font-weight: 500; }
+.schedule-info-hint { font-size: 12px; color: var(--gray-500); margin-top: 4px; }
+
+/* タイマーモーダル拡張 */
+.modal.wide { max-width: 480px; }
+.timer-tabs { display: flex; gap: 4px; background: var(--beige); padding: 4px; border-radius: var(--radius); margin-bottom: 20px; }
+.timer-tab { flex: 1; padding: 10px 16px; font-size: 13px; font-weight: 600; text-align: center; color: var(--gray-500); background: transparent; border: none; border-radius: 6px; cursor: pointer; transition: all 0.2s; }
+.timer-tab.active { background: var(--white); color: var(--gray-800); box-shadow: var(--shadow-sm); }
+.timer-tab:not(.active):hover { color: var(--gray-700); }
+.timer-content { display: none; }
+.timer-content.active { display: block; }
+
+/* スケジュール一覧 */
+.schedule-list { margin-bottom: 20px; }
+.schedule-list-title { font-size: 13px; font-weight: 600; color: var(--gray-600); margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+.schedule-items { border: 1px solid var(--gray-200); border-radius: var(--radius); overflow: hidden; }
+.schedule-item { display: flex; align-items: center; padding: 12px 14px; background: var(--white); border-bottom: 1px solid var(--gray-100); }
+.schedule-item:last-child { border-bottom: none; }
+.schedule-item:nth-child(even) { background: var(--cream); }
+.schedule-item-info { flex: 1; }
+.schedule-item-main { font-size: 14px; font-weight: 600; color: var(--gray-800); margin-bottom: 2px; }
+.schedule-item-sub { font-size: 12px; color: var(--gray-500); }
+.schedule-item-delete { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; background: transparent; border: none; border-radius: 4px; cursor: pointer; color: var(--gray-400); font-size: 16px; transition: all 0.2s; }
+.schedule-item-delete:hover { background: var(--red-light); color: var(--red); }
+.schedule-empty { padding: 20px; text-align: center; color: var(--gray-400); font-size: 13px; background: var(--cream); }
+
+/* 曜日選択 */
+.weekday-selector { display: flex; gap: 6px; margin-bottom: 16px; }
+.weekday-btn { width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; color: var(--gray-500); background: var(--cream); border: 1px solid var(--gray-200); border-radius: var(--radius); cursor: pointer; transition: all 0.2s; }
+.weekday-btn:hover { border-color: var(--gray-400); color: var(--gray-700); }
+.weekday-btn.selected { background: var(--gray-800); color: var(--white); border-color: var(--gray-800); }
+.weekday-btn.sun { color: var(--red); }
+.weekday-btn.sun.selected { background: var(--red); border-color: var(--red); color: var(--white); }
+.weekday-btn.sat { color: var(--blue); }
+.weekday-btn.sat.selected { background: var(--blue); border-color: var(--blue); color: var(--white); }
+
+/* 時間入力 */
+.time-row { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+.time-row input[type="time"] { flex: 1; padding: 10px 12px; font-size: 14px; font-family: inherit; border: 1px solid var(--gray-300); border-radius: var(--radius); background: var(--cream); }
+.time-row input[type="time"]:focus { outline: none; border-color: var(--gray-500); background: var(--white); }
+.time-row span { color: var(--gray-500); font-size: 14px; }
+
+/* チェックボックス */
+.checkbox-row { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; }
+.checkbox-row input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--gray-800); cursor: pointer; }
+.checkbox-row label { font-size: 13px; color: var(--gray-700); cursor: pointer; }
+
+/* 追加フォーム折りたたみ */
+.add-form-toggle { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 12px; font-size: 13px; font-weight: 600; color: var(--gray-600); background: var(--beige); border: 1px dashed var(--gray-300); border-radius: var(--radius); cursor: pointer; transition: all 0.2s; margin-bottom: 16px; }
+.add-form-toggle:hover { background: var(--gray-100); color: var(--gray-800); }
+.add-form { display: none; padding: 16px; background: var(--beige); border-radius: var(--radius); }
+.add-form.show { display: block; }
+.add-form-title { font-size: 13px; font-weight: 600; color: var(--gray-700); margin-bottom: 12px; }
+.add-form-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px; }
+.btn-sm { padding: 8px 16px; font-size: 13px; }
+
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+/* トースト通知 */
+.toast { position: fixed; top: 80px; left: 50%; transform: translateX(-50%) translateY(-20px); background: var(--gray-800); color: var(--white); padding: 12px 24px; border-radius: var(--radius); font-size: 14px; font-weight: 500; display: flex; align-items: center; gap: 8px; opacity: 0; visibility: hidden; transition: all 0.3s ease; z-index: 200; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+.toast.show { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); }
+.toast-icon { color: var(--green); }
+
+@media (max-width: 480px) {
+  .container { padding: 16px 16px 100px; }
+  .status-card { padding: 20px; }
+  .status-details { grid-template-columns: repeat(3, 1fr); }
+  .detail-item { padding: 8px 6px; }
+  .pwa-float { padding: 10px 16px; }
+  .pwa-float-inner { gap: 12px; }
+  .pwa-float-text p { font-size: 13px; }
+  .pwa-float-btn { padding: 6px 12px; font-size: 12px; }
+}
+  </style>
+</head>
+<body>
+  <!-- トースト通知 -->
+  <div id="toast" class="toast">
+    <span class="toast-icon">✓</span>
+    <span id="toastText">保存しました</span>
+  </div>
+
+  <header class="header">
+    <div class="header-inner">
+      <a href="mypage.html" class="header-logo">
+        <div class="header-logo-icon"></div>
+        <span class="header-logo-text">みまもりデバイス（仮）</span>
+      </a>
+      <div class="header-menu">
+        <a href="settings.html" class="header-btn">⚙️ 設定</a>
+        <a href="login.html" class="header-btn">ログアウト</a>
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+    <!-- 通知先未登録バナー（登録済みなら非表示） -->
+    <div id="notifyBanner" class="notify-banner">
+      <div class="notify-banner-inner">
+        <div class="notify-banner-text">
+          <span>⚠️</span>
+          <p>通知先を登録してください</p>
+        </div>
+        <a href="settings.html" class="notify-banner-btn">登録する</a>
+      </div>
+    </div>
+
+    <!-- PWAバナー -->
+    <div id="pwaBanner" class="pwa-float">
+      <div class="pwa-float-inner">
+        <div class="pwa-float-text">
+          <span>📱</span>
+          <p>ホーム画面に追加すると便利です</p>
+        </div>
+        <button class="pwa-float-btn">追加する</button>
+        <button class="pwa-float-close" onclick="closePwaBanner()">×</button>
+      </div>
+    </div>
+
+    <!-- ステータスカード -->
+    <div class="status-card">
+      <div class="status-header">
+        <div class="status-main">
+          <div class="status-indicator ok" id="statusIndicator">
+            <div class="status-dot-inner"></div>
+          </div>
+          <div class="status-text">
+            <h2 id="statusTitle">正常稼働中</h2>
+            <p id="statusSubtitle">最終検知: 3分前</p>
+          </div>
+        </div>
+        <span class="status-id">A3K9X2</span>
+      </div>
+      <div class="status-details">
+        <div class="detail-item">
+          <p class="detail-label">電池残量</p>
+          <p class="detail-value good">
+            <svg class="battery-icon" width="22" height="11" viewBox="0 0 24 12">
+              <rect x="0" y="0" width="20" height="12" rx="2" fill="none" stroke="#16a34a" stroke-width="1.5"/>
+              <rect x="2" y="2" width="13.6" height="8" rx="1" fill="#22c55e"/>
+              <rect x="20" y="3" width="3" height="6" rx="1" fill="#16a34a"/>
+            </svg>
+            85%
+          </p>
+        </div>
+        <div class="detail-item">
+          <p class="detail-label">電波状況</p>
+          <p class="detail-value good">
+            <svg class="signal-icon" width="18" height="14" viewBox="0 0 20 16">
+              <rect x="0" y="12" width="4" height="4" rx="1" fill="#22c55e"/>
+              <rect x="5" y="8" width="4" height="8" rx="1" fill="#22c55e"/>
+              <rect x="10" y="4" width="4" height="12" rx="1" fill="#22c55e"/>
+              <rect x="15" y="0" width="4" height="16" rx="1" fill="#22c55e"/>
+            </svg>
+            良好
+          </p>
+        </div>
+        <div class="detail-item">
+          <p class="detail-label">通信残量</p>
+          <p class="detail-value good">
+            <svg class="meter-icon" width="20" height="20" viewBox="0 0 36 36">
+              <circle cx="18" cy="18" r="15" fill="none" stroke="#e5e2dc" stroke-width="4"/>
+              <circle cx="18" cy="18" r="15" fill="none" stroke="#22c55e" stroke-width="4" 
+                stroke-dasharray="94.2" stroke-dashoffset="0.9" 
+                transform="rotate(-90 18 18)" stroke-linecap="round"/>
+            </svg>
+            99%
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <section class="section">
+      <div class="section-header">
+        <h3 class="section-title">📋 検知ログ</h3>
+        <a href="logs.html" class="section-action">全て見る</a>
+      </div>
+      <div class="card"><div class="card-body">
+        <ul class="log-list">
+          <li class="log-item"><span class="log-time">14:35</span><span class="log-distance">35cm</span><span class="log-type human">人間</span><span class="log-battery">2.85V</span></li>
+          <li class="log-item"><span class="log-time">14:30</span><span class="log-distance">142cm</span><span class="log-type pet">ペット</span><span class="log-battery">2.85V</span></li>
+          <li class="log-item"><span class="log-time">10:25</span><span class="log-distance">28cm</span><span class="log-type human">人間</span><span class="log-battery">2.86V</span></li>
+          <li class="log-item"><span class="log-time">08:12</span><span class="log-distance">32cm</span><span class="log-type human">人間</span><span class="log-battery">2.86V</span></li>
+          <li class="log-item"><span class="log-time">07:45</span><span class="log-distance">138cm</span><span class="log-type pet">ペット</span><span class="log-battery">2.86V</span></li>
+        </ul>
+      </div></div>
+    </section>
+
+    <!-- TODO: Phase2で実装予定 - ウォッチリスト機能
+    <section class="section">
+      <div class="section-header">
+        <h3 class="section-title">👁️ ウォッチリスト</h3>
+        <a href="watchers.html" class="section-action">管理</a>
+      </div>
+      <div class="card"><div class="card-body">
+        <ul class="watch-list">
+          <li class="watch-item"><span class="watch-status ok"></span><div class="watch-info"><p class="watch-id">B7X2K9</p><p class="watch-name">田中さん</p></div><span class="watch-detail">正常</span></li>
+          <li class="watch-item"><span class="watch-status pending"></span><div class="watch-info"><p class="watch-id">C4M8P2</p><p class="watch-name">-</p></div><span class="watch-detail">承認待ち</span></li>
+        </ul>
+      </div></div>
+    </section>
+    -->
+
+    <!-- TODO: Phase2で実装予定 - 見守り申請の承認待ち機能
+    <section class="section">
+      <div class="section-header">
+        <h3 class="section-title">📬 承認待ち（1件）</h3>
+      </div>
+      <div class="card"><div class="card-body">
+        <ul class="pending-list">
+          <li class="pending-item">
+            <div class="pending-info"><span class="pending-icon">👤</span><span class="pending-text"><strong>D9L3Q7</strong> さんから申請</span></div>
+            <div class="pending-actions"><button class="pending-btn accept">許可</button><button class="pending-btn reject">拒否</button></div>
+          </li>
+        </ul>
+      </div></div>
+    </section>
+    -->
+
+    <footer class="footer">
+      <div class="footer-links">
+        <a href="settings.html">設定</a><span class="footer-sep">|</span>
+        <a href="plan.html">プラン変更</a><span class="footer-sep">|</span>
+        <a href="trouble.html">故障・交換</a>
+      </div>
+      <div class="footer-links" style="margin-top: 8px;">
+        <a href="#">使い方</a><span class="footer-sep">|</span>
+        <a href="#">利用規約</a><span class="footer-sep">|</span>
+        <a href="#">お問い合わせ</a>
+      </div>
+    </footer>
+  </div>
+
+  <!-- 下部固定 見守り設定バー -->
+  <div class="watch-status-bar">
+    <div class="watch-status-bar-inner">
+      <div class="watch-status-left">
+        <span class="watch-status-label">見守り</span>
+        <span class="watch-status-text" id="watchText">ON</span>
+      </div>
+      <div style="display: flex; align-items: center;">
+        <button class="watch-toggle active" id="watchToggle" onclick="toggleWatch()"></button>
+        <button class="watch-status-btn" onclick="showScheduleModal()">タイマー</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- タイマー設定モーダル -->
+  <div id="scheduleModal" class="modal-overlay">
+    <div class="modal wide">
+      <div class="modal-header">
+        <h3>⏰ タイマー設定</h3>
+        <button class="modal-close" onclick="hideScheduleModal()">×</button>
+      </div>
+      <div class="modal-body">
+        <!-- タブ切り替え -->
+        <div class="timer-tabs">
+          <button class="timer-tab active" onclick="switchTimerTab('oneshot')">📅 単発の予定</button>
+          <button class="timer-tab" onclick="switchTimerTab('recurring')">🔁 定期スケジュール</button>
+        </div>
+        
+        <!-- 単発の予定タブ -->
+        <div id="oneshotTab" class="timer-content active">
+          <!-- 設定済み一覧 -->
+          <div class="schedule-list">
+            <p class="schedule-list-title">📋 設定済みの予定</p>
+            <div class="schedule-items" id="oneshotList">
+              <div class="schedule-item">
+                <div class="schedule-item-info">
+                  <p class="schedule-item-main">1/20 09:00 〜 1/22 18:00</p>
+                  <p class="schedule-item-sub">旅行のため</p>
+                </div>
+                <button class="schedule-item-delete" onclick="deleteOneshot(0)" title="削除">×</button>
+              </div>
+              <div class="schedule-item">
+                <div class="schedule-item-info">
+                  <p class="schedule-item-main">2/10 〜 未定（手動復帰）</p>
+                  <p class="schedule-item-sub">入院予定</p>
+                </div>
+                <button class="schedule-item-delete" onclick="deleteOneshot(1)" title="削除">×</button>
+              </div>
+            </div>
+          </div>
+          
+          <!-- 追加フォーム -->
+          <button class="add-form-toggle" onclick="toggleOneshotForm()">➕ 新しい予定を追加</button>
+          <div id="oneshotForm" class="add-form">
+            <p class="add-form-title">新しい停止予定</p>
+            <div class="form-group">
+              <label class="form-label">停止開始</label>
+              <input type="datetime-local" class="form-input" id="scheduleStart">
+            </div>
+            <div class="form-group">
+              <label class="form-label">自動再開</label>
+              <input type="datetime-local" class="form-input" id="scheduleEnd">
+              <p class="form-hint">空欄の場合は手動でONに戻す必要があります</p>
+            </div>
+            <div class="form-group">
+              <label class="form-label">メモ（任意）</label>
+              <input type="text" class="form-input" id="scheduleMemo" placeholder="旅行、入院など">
+            </div>
+            <div class="add-form-actions">
+              <button class="btn btn-secondary btn-sm" onclick="toggleOneshotForm()">キャンセル</button>
+              <button class="btn btn-primary btn-sm" onclick="saveOneshot()">追加する</button>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 定期スケジュールタブ -->
+        <div id="recurringTab" class="timer-content">
+          <!-- 設定済み一覧 -->
+          <div class="schedule-list">
+            <p class="schedule-list-title">📋 設定済みの定期スケジュール</p>
+            <div class="schedule-items" id="recurringList">
+              <div class="schedule-item">
+                <div class="schedule-item-info">
+                  <p class="schedule-item-main">毎週 月・木 10:00〜16:00</p>
+                  <p class="schedule-item-sub">デイサービス</p>
+                </div>
+                <button class="schedule-item-delete" onclick="deleteRecurring(0)" title="削除">×</button>
+              </div>
+              <div class="schedule-item">
+                <div class="schedule-item-info">
+                  <p class="schedule-item-main">毎週 土 09:00〜翌18:00</p>
+                  <p class="schedule-item-sub">息子宅訪問</p>
+                </div>
+                <button class="schedule-item-delete" onclick="deleteRecurring(1)" title="削除">×</button>
+              </div>
+            </div>
+          </div>
+          
+          <!-- 追加フォーム -->
+          <button class="add-form-toggle" onclick="toggleRecurringForm()">➕ 定期スケジュールを追加</button>
+          <div id="recurringForm" class="add-form">
+            <p class="add-form-title">新しい定期スケジュール</p>
+            
+            <div class="form-group">
+              <label class="form-label">曜日を選択</label>
+              <div class="weekday-selector">
+                <button type="button" class="weekday-btn sun" data-day="0">日</button>
+                <button type="button" class="weekday-btn" data-day="1">月</button>
+                <button type="button" class="weekday-btn" data-day="2">火</button>
+                <button type="button" class="weekday-btn" data-day="3">水</button>
+                <button type="button" class="weekday-btn" data-day="4">木</button>
+                <button type="button" class="weekday-btn" data-day="5">金</button>
+                <button type="button" class="weekday-btn sat" data-day="6">土</button>
+              </div>
+            </div>
+            
+            <div class="form-group">
+              <label class="form-label">時間帯</label>
+              <div class="time-row">
+                <input type="time" id="recurringStart" value="10:00">
+                <span>〜</span>
+                <input type="time" id="recurringEnd" value="16:00">
+              </div>
+              <div class="checkbox-row">
+                <input type="checkbox" id="recurringNextDay">
+                <label for="recurringNextDay">翌日までまたぐ</label>
+              </div>
+            </div>
+            
+            <div class="form-group">
+              <label class="form-label">メモ（任意）</label>
+              <input type="text" class="form-input" id="recurringMemo" placeholder="デイサービス、通院など">
+            </div>
+            
+            <div class="add-form-actions">
+              <button class="btn btn-secondary btn-sm" onclick="toggleRecurringForm()">キャンセル</button>
+              <button class="btn btn-primary btn-sm" onclick="saveRecurring()">追加する</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="hideScheduleModal()">閉じる</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+// Cookie管理
+function setCookie(n,v,d){const e=new Date();e.setTime(e.getTime()+d*24*60*60*1000);document.cookie=n+'='+v+';expires='+e.toUTCString()+';path=/';}
+function getCookie(n){const c=document.cookie.split(';');for(let i=0;i<c.length;i++){let x=c[i].trim();if(x.indexOf(n+'=')===0)return x.substring(n.length+1);}return null;}
+
+// 通知先バナー（実際はサーバーから登録状態を取得）
+// 登録済みなら非表示にする
+(function(){
+  // モック: notify_registered=1 なら非表示
+  if(getCookie('notify_registered')==='1'){
+    document.getElementById('notifyBanner').classList.add('hidden');
+  }
+})();
+
+// PWAバナー
+function closePwaBanner(){document.getElementById('pwaBanner').classList.add('hidden');setCookie('pwa_banner_closed','1',30);}
+(function(){if(getCookie('pwa_banner_closed')==='1'){document.getElementById('pwaBanner').classList.add('hidden');}})();
+
+// トースト表示
+function showToast(message) {
+  const toast = document.getElementById('toast');
+  document.getElementById('toastText').textContent = message || '保存しました';
+  toast.classList.add('show');
+  setTimeout(() => {
+    toast.classList.remove('show');
+  }, 2000);
+}
+
+// 見守りON/OFF
+let watchEnabled = true;
+
+function toggleWatch() {
+  const toggle = document.getElementById('watchToggle');
+  const text = document.getElementById('watchText');
+  const statusCard = document.querySelector('.status-card');
+  const statusIndicator = document.getElementById('statusIndicator');
+  const statusTitle = document.getElementById('statusTitle');
+  const statusSubtitle = document.getElementById('statusSubtitle');
+  
+  watchEnabled = !watchEnabled;
+  
+  if (watchEnabled) {
+    toggle.classList.add('active');
+    text.textContent = 'ON';
+    text.classList.remove('paused');
+    // ステータスカード復帰
+    statusCard.classList.remove('paused');
+    statusIndicator.classList.remove('paused');
+    statusIndicator.classList.add('ok');
+    statusTitle.textContent = '正常稼働中';
+    statusSubtitle.textContent = '最終検知: 3分前';
+    showToast('見守りをONにしました');
+  } else {
+    toggle.classList.remove('active');
+    text.textContent = 'OFF';
+    text.classList.add('paused');
+    // ステータスカードを休眠表示に
+    statusCard.classList.add('paused');
+    statusIndicator.classList.remove('ok');
+    statusIndicator.classList.add('paused');
+    statusTitle.textContent = '見守り停止中';
+    statusSubtitle.textContent = 'タイマーまたは手動でONに戻せます';
+    showToast('見守りをOFFにしました');
+  }
+}
+
+// 停止予定モーダル
+function showScheduleModal() {
+  document.getElementById('scheduleModal').classList.add('show');
+}
+
+function hideScheduleModal() {
+  document.getElementById('scheduleModal').classList.remove('show');
+  // フォームを閉じる
+  document.getElementById('oneshotForm').classList.remove('show');
+  document.getElementById('recurringForm').classList.remove('show');
+}
+
+// タブ切り替え
+function switchTimerTab(tab) {
+  document.querySelectorAll('.timer-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.timer-content').forEach(c => c.classList.remove('active'));
+  
+  if (tab === 'oneshot') {
+    document.querySelector('.timer-tab:nth-child(1)').classList.add('active');
+    document.getElementById('oneshotTab').classList.add('active');
+  } else {
+    document.querySelector('.timer-tab:nth-child(2)').classList.add('active');
+    document.getElementById('recurringTab').classList.add('active');
+  }
+}
+
+// 単発予定フォーム
+function toggleOneshotForm() {
+  const form = document.getElementById('oneshotForm');
+  form.classList.toggle('show');
+  if (form.classList.contains('show')) {
+    // デフォルト値を設定
+    const now = new Date();
+    const tomorrow = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+    document.getElementById('scheduleStart').value = formatDatetimeLocal(now);
+    document.getElementById('scheduleEnd').value = formatDatetimeLocal(tomorrow);
+  }
+}
+
+function formatDatetimeLocal(date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  return `${year}-${month}-${day}T${hours}:${minutes}`;
+}
+
+// 単発予定データ（実際はサーバーから取得）
+let oneshotSchedules = [
+  { start: '2025-01-20T09:00', end: '2025-01-22T18:00', memo: '旅行のため' },
+  { start: '2025-02-10T09:00', end: null, memo: '入院予定' }
+];
+
+function renderOneshotList() {
+  const container = document.getElementById('oneshotList');
+  if (oneshotSchedules.length === 0) {
+    container.innerHTML = '<div class="schedule-empty">設定済みの予定はありません</div>';
+    return;
+  }
+  
+  container.innerHTML = oneshotSchedules.map((s, i) => {
+    const startDate = new Date(s.start);
+    const startStr = `${startDate.getMonth()+1}/${startDate.getDate()} ${String(startDate.getHours()).padStart(2,'0')}:${String(startDate.getMinutes()).padStart(2,'0')}`;
+    let endStr = '未定（手動復帰）';
+    if (s.end) {
+      const endDate = new Date(s.end);
+      endStr = `${endDate.getMonth()+1}/${endDate.getDate()} ${String(endDate.getHours()).padStart(2,'0')}:${String(endDate.getMinutes()).padStart(2,'0')}`;
+    }
+    return `
+      <div class="schedule-item">
+        <div class="schedule-item-info">
+          <p class="schedule-item-main">${startStr} 〜 ${endStr}</p>
+          <p class="schedule-item-sub">${s.memo || '（メモなし）'}</p>
+        </div>
+        <button class="schedule-item-delete" onclick="deleteOneshot(${i})" title="削除">×</button>
+      </div>
+    `;
+  }).join('');
+}
+
+function saveOneshot() {
+  const start = document.getElementById('scheduleStart').value;
+  const end = document.getElementById('scheduleEnd').value;
+  const memo = document.getElementById('scheduleMemo').value;
+  
+  if (!start) {
+    alert('開始日時を入力してください');
+    return;
+  }
+  
+  oneshotSchedules.push({ start, end: end || null, memo });
+  renderOneshotList();
+  toggleOneshotForm();
+  document.getElementById('scheduleMemo').value = '';
+  showToast('予定を追加しました');
+}
+
+function deleteOneshot(index) {
+  if (confirm('この予定を削除しますか？')) {
+    oneshotSchedules.splice(index, 1);
+    renderOneshotList();
+    showToast('予定を削除しました');
+  }
+}
+
+// 定期スケジュールフォーム
+function toggleRecurringForm() {
+  const form = document.getElementById('recurringForm');
+  form.classList.toggle('show');
+  if (!form.classList.contains('show')) {
+    // フォームリセット
+    document.querySelectorAll('.weekday-btn').forEach(btn => btn.classList.remove('selected'));
+    document.getElementById('recurringStart').value = '10:00';
+    document.getElementById('recurringEnd').value = '16:00';
+    document.getElementById('recurringNextDay').checked = false;
+    document.getElementById('recurringMemo').value = '';
+  }
+}
+
+// 曜日ボタン
+document.querySelectorAll('.weekday-btn').forEach(btn => {
+  btn.addEventListener('click', function() {
+    this.classList.toggle('selected');
+  });
+});
+
+// 定期スケジュールデータ
+let recurringSchedules = [
+  { days: [1, 4], start: '10:00', end: '16:00', nextDay: false, memo: 'デイサービス' },
+  { days: [6], start: '09:00', end: '18:00', nextDay: true, memo: '息子宅訪問' }
+];
+
+const dayNames = ['日', '月', '火', '水', '木', '金', '土'];
+
+function renderRecurringList() {
+  const container = document.getElementById('recurringList');
+  if (recurringSchedules.length === 0) {
+    container.innerHTML = '<div class="schedule-empty">設定済みの定期スケジュールはありません</div>';
+    return;
+  }
+  
+  container.innerHTML = recurringSchedules.map((s, i) => {
+    const daysStr = s.days.map(d => dayNames[d]).join('・');
+    const timeStr = s.nextDay ? `${s.start}〜翌${s.end}` : `${s.start}〜${s.end}`;
+    return `
+      <div class="schedule-item">
+        <div class="schedule-item-info">
+          <p class="schedule-item-main">毎週 ${daysStr} ${timeStr}</p>
+          <p class="schedule-item-sub">${s.memo || '（メモなし）'}</p>
+        </div>
+        <button class="schedule-item-delete" onclick="deleteRecurring(${i})" title="削除">×</button>
+      </div>
+    `;
+  }).join('');
+}
+
+function saveRecurring() {
+  const selectedDays = [];
+  document.querySelectorAll('.weekday-btn.selected').forEach(btn => {
+    selectedDays.push(parseInt(btn.dataset.day));
+  });
+  
+  if (selectedDays.length === 0) {
+    alert('曜日を選択してください');
+    return;
+  }
+  
+  const start = document.getElementById('recurringStart').value;
+  const end = document.getElementById('recurringEnd').value;
+  const nextDay = document.getElementById('recurringNextDay').checked;
+  const memo = document.getElementById('recurringMemo').value;
+  
+  if (!start || !end) {
+    alert('時間帯を入力してください');
+    return;
+  }
+  
+  recurringSchedules.push({ days: selectedDays.sort(), start, end, nextDay, memo });
+  renderRecurringList();
+  toggleRecurringForm();
+  showToast('定期スケジュールを追加しました');
+}
+
+function deleteRecurring(index) {
+  if (confirm('この定期スケジュールを削除しますか？')) {
+    recurringSchedules.splice(index, 1);
+    renderRecurringList();
+    showToast('定期スケジュールを削除しました');
+  }
+}
+
+// モーダル外クリックで閉じる
+document.getElementById('scheduleModal').addEventListener('click', function(e) {
+  if (e.target === this) hideScheduleModal();
+});
+  </script>
+</body>
+</html>

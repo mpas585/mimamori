@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>お支払い - みまもりデバイス（仮）</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+:root {
+  --white: #ffffff;
+  --cream: #faf9f7;
+  --beige: #f5f3ef;
+  --gray-100: #f0eeea;
+  --gray-200: #e5e2dc;
+  --gray-300: #d1ccc3;
+  --gray-400: #a8a29e;
+  --gray-500: #78716c;
+  --gray-600: #57534e;
+  --gray-700: #44403c;
+  --gray-800: #292524;
+  --green-light: #dcfce7;
+  --green: #22c55e;
+  --blue-light: #eff6ff;
+  --blue: #3b82f6;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+  --shadow: 0 4px 20px rgba(0,0,0,0.06);
+  --radius: 8px;
+  --radius-lg: 12px;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Noto Sans JP', sans-serif; background: var(--cream); color: var(--gray-800); min-height: 100vh; line-height: 1.7; }
+
+.header { background: var(--white); border-bottom: 1px solid var(--gray-200); padding: 16px 20px; position: sticky; top: 0; z-index: 100; }
+.header-inner { max-width: 640px; margin: 0 auto; display: flex; align-items: center; gap: 16px; }
+.back-btn { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; background: var(--beige); border: none; border-radius: var(--radius); cursor: pointer; font-size: 18px; transition: all 0.2s; text-decoration: none; color: var(--gray-700); }
+.back-btn:hover { background: var(--gray-200); }
+.header-title { font-size: 16px; font-weight: 600; }
+
+.container { max-width: 640px; margin: 0 auto; padding: 24px 20px; }
+
+.order-summary { background: var(--white); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); border: 1px solid var(--gray-200); padding: 24px; margin-bottom: 20px; }
+.order-summary-title { font-size: 15px; font-weight: 600; color: var(--gray-700); margin-bottom: 16px; padding-bottom: 12px; border-bottom: 2px solid var(--gray-200); display: flex; align-items: center; gap: 8px; }
+.order-summary-title span { font-size: 18px; }
+
+.order-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--gray-100); }
+.order-item:last-child { border-bottom: none; }
+.order-item-name { font-size: 14px; color: var(--gray-700); }
+.order-item-price { font-size: 14px; font-weight: 600; color: var(--gray-800); }
+
+.order-total { display: flex; justify-content: space-between; align-items: center; padding-top: 16px; margin-top: 8px; border-top: 2px solid var(--gray-200); }
+.order-total-label { font-size: 15px; font-weight: 600; color: var(--gray-800); }
+.order-total-price { font-size: 24px; font-weight: 700; color: var(--gray-800); }
+.order-total-price small { font-size: 13px; font-weight: 500; color: var(--gray-500); }
+
+.payment-section { background: var(--white); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); border: 1px solid var(--gray-200); padding: 24px; margin-bottom: 20px; }
+.payment-section-title { font-size: 15px; font-weight: 600; color: var(--gray-700); margin-bottom: 16px; padding-bottom: 12px; border-bottom: 2px solid var(--gray-200); display: flex; align-items: center; gap: 8px; }
+.payment-section-title span { font-size: 18px; }
+
+/* Stripe埋め込みエリア（モック） */
+.stripe-placeholder { background: var(--beige); border: 2px dashed var(--gray-300); border-radius: var(--radius); padding: 40px 20px; text-align: center; }
+.stripe-placeholder-icon { font-size: 48px; margin-bottom: 12px; opacity: 0.5; }
+.stripe-placeholder-text { font-size: 14px; color: var(--gray-500); }
+.stripe-placeholder-note { font-size: 12px; color: var(--gray-400); margin-top: 8px; }
+
+/* カード入力フォーム（モック） */
+.card-form { display: none; }
+.card-form.show { display: block; }
+
+.form-group { margin-bottom: 16px; }
+.form-label { display: block; font-size: 13px; font-weight: 600; color: var(--gray-700); margin-bottom: 8px; }
+.form-input { width: 100%; padding: 14px 16px; font-size: 15px; font-family: inherit; border: 1px solid var(--gray-300); border-radius: var(--radius); background: var(--cream); color: var(--gray-800); transition: all 0.2s; }
+.form-input:focus { outline: none; border-color: var(--gray-500); background: var(--white); }
+.form-row { display: flex; gap: 12px; }
+.form-row .form-group { flex: 1; }
+
+.card-brands { display: flex; gap: 8px; margin-top: 16px; justify-content: center; }
+.card-brand { padding: 6px 12px; background: var(--beige); border-radius: 4px; font-size: 12px; font-weight: 600; color: var(--gray-600); }
+
+.secure-badge { display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 20px; padding: 12px; background: var(--green-light); border-radius: var(--radius); font-size: 13px; color: var(--green); }
+
+.btn { display: block; width: 100%; padding: 18px 24px; font-size: 16px; font-weight: 600; font-family: inherit; border: none; border-radius: var(--radius); cursor: pointer; transition: all 0.2s; }
+.btn-primary { background: var(--gray-800); color: var(--white); }
+.btn-primary:hover { background: var(--gray-700); }
+.btn-primary:disabled { background: var(--gray-300); cursor: not-allowed; }
+
+.terms-note { font-size: 12px; color: var(--gray-500); text-align: center; margin-top: 16px; line-height: 1.7; }
+.terms-note a { color: var(--gray-600); }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="header-inner">
+      <a href="plan.html" class="back-btn">←</a>
+      <h1 class="header-title">お支払い</h1>
+    </div>
+  </header>
+
+  <div class="container">
+    <!-- 注文内容 -->
+    <div class="order-summary">
+      <h2 class="order-summary-title"><span>📋</span>ご注文内容</h2>
+      <div class="order-item">
+        <span class="order-item-name">プレミアムプラン（月払い）</span>
+        <span class="order-item-price">¥500</span>
+      </div>
+      <div class="order-item">
+        <span class="order-item-name">消費税（10%）</span>
+        <span class="order-item-price">（税込）</span>
+      </div>
+      <div class="order-total">
+        <span class="order-total-label">お支払い金額</span>
+        <span class="order-total-price">¥500 <small>/月</small></span>
+      </div>
+    </div>
+
+    <!-- 支払い方法 -->
+    <div class="payment-section">
+      <h2 class="payment-section-title"><span>💳</span>お支払い方法</h2>
+      
+      <!-- Stripe埋め込みエリア（実装時はここにStripe Elementsが入る） -->
+      <div class="stripe-placeholder" id="stripePlaceholder">
+        <div class="stripe-placeholder-icon">💳</div>
+        <p class="stripe-placeholder-text">ここにStripe決済フォームが表示されます</p>
+        <p class="stripe-placeholder-note">（実装時はStripe Elementsを埋め込み）</p>
+      </div>
+
+      <!-- モック用カードフォーム -->
+      <div class="card-form show" id="cardForm">
+        <div class="form-group">
+          <label class="form-label">カード番号</label>
+          <input type="text" class="form-input" placeholder="1234 5678 9012 3456" maxlength="19">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">有効期限</label>
+            <input type="text" class="form-input" placeholder="MM/YY" maxlength="5">
+          </div>
+          <div class="form-group">
+            <label class="form-label">セキュリティコード</label>
+            <input type="text" class="form-input" placeholder="123" maxlength="4">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">カード名義人</label>
+          <input type="text" class="form-input" placeholder="TARO YAMADA" style="text-transform: uppercase;">
+        </div>
+      </div>
+
+      <div class="card-brands">
+        <span class="card-brand">VISA</span>
+        <span class="card-brand">Mastercard</span>
+        <span class="card-brand">JCB</span>
+        <span class="card-brand">AMEX</span>
+      </div>
+
+      <div class="secure-badge">
+        🔒 SSL暗号化通信で安全にお支払いいただけます
+      </div>
+    </div>
+
+    <button class="btn btn-primary" onclick="processPayment()">お支払いを確定する</button>
+
+    <p class="terms-note">
+      「お支払いを確定する」をクリックすると、<br>
+      <a href="terms.html">利用規約</a>および<a href="tokushoho.html">特定商取引法に基づく表記</a>に同意したものとみなされます。
+    </p>
+  </div>
+
+  <script>
+function processPayment() {
+  if (confirm('お支払いを確定しますか？')) {
+    // TODO: Stripe API call
+    window.location.href = 'payment-complete.html';
+  }
+}
+  </script>
+</body>
+</html>

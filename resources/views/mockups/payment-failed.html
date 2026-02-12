@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>お支払いエラー - みまもりデバイス（仮）</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+:root {
+  --white: #ffffff;
+  --cream: #faf9f7;
+  --beige: #f5f3ef;
+  --gray-100: #f0eeea;
+  --gray-200: #e5e2dc;
+  --gray-300: #d1ccc3;
+  --gray-400: #a8a29e;
+  --gray-500: #78716c;
+  --gray-600: #57534e;
+  --gray-700: #44403c;
+  --gray-800: #292524;
+  --red-light: #fef2f2;
+  --red: #ef4444;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+  --shadow: 0 4px 20px rgba(0,0,0,0.06);
+  --radius: 8px;
+  --radius-lg: 12px;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Noto Sans JP', sans-serif; background: var(--cream); color: var(--gray-800); min-height: 100vh; line-height: 1.7; }
+
+.container { max-width: 640px; margin: 0 auto; padding: 60px 20px; }
+
+.error-card { background: var(--white); border-radius: var(--radius-lg); box-shadow: var(--shadow); border: 1px solid var(--gray-200); padding: 40px 32px; text-align: center; }
+
+.error-icon { width: 100px; height: 100px; background: var(--red-light); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px; font-size: 50px; }
+
+.error-title { font-size: 22px; font-weight: 700; color: var(--gray-800); margin-bottom: 12px; }
+.error-text { font-size: 14px; color: var(--gray-500); line-height: 1.8; margin-bottom: 32px; }
+
+.error-detail { background: var(--red-light); border: 1px solid #fecaca; border-radius: var(--radius); padding: 16px 20px; margin-bottom: 32px; text-align: left; }
+.error-detail-title { font-size: 13px; font-weight: 600; color: var(--red); margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+.error-detail-text { font-size: 14px; color: var(--gray-700); }
+.error-code { font-size: 12px; color: var(--gray-500); margin-top: 8px; font-family: monospace; }
+
+.help-box { background: var(--beige); border-radius: var(--radius); padding: 20px; margin-bottom: 32px; text-align: left; }
+.help-title { font-size: 14px; font-weight: 600; color: var(--gray-700); margin-bottom: 12px; }
+.help-list { font-size: 13px; color: var(--gray-600); margin: 0; padding-left: 20px; line-height: 1.9; }
+.help-list li { margin-bottom: 4px; }
+
+.btn { display: block; width: 100%; padding: 16px 24px; font-size: 16px; font-weight: 600; font-family: inherit; border: none; border-radius: var(--radius); cursor: pointer; transition: all 0.2s; text-decoration: none; text-align: center; margin-bottom: 12px; }
+.btn-primary { background: var(--gray-800); color: var(--white); }
+.btn-primary:hover { background: var(--gray-700); }
+.btn-secondary { background: var(--beige); color: var(--gray-700); border: 1px solid var(--gray-300); }
+.btn-secondary:hover { background: var(--gray-200); }
+
+.support-link { font-size: 13px; color: var(--gray-500); margin-top: 16px; }
+.support-link a { color: var(--gray-700); }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="error-card">
+      <div class="error-icon">✕</div>
+      <h1 class="error-title">お支払いに失敗しました</h1>
+      <p class="error-text">
+        申し訳ございません。<br>
+        お支払い処理中にエラーが発生しました。
+      </p>
+
+      <div class="error-detail">
+        <p class="error-detail-title">⚠️ エラー内容</p>
+        <p class="error-detail-text">カードが拒否されました。カード情報をご確認の上、再度お試しください。</p>
+        <p class="error-code">エラーコード: card_declined</p>
+      </div>
+
+      <div class="help-box">
+        <p class="help-title">考えられる原因</p>
+        <ul class="help-list">
+          <li>カード番号・有効期限・セキュリティコードの入力ミス</li>
+          <li>カードの利用限度額を超えている</li>
+          <li>カードの有効期限が切れている</li>
+          <li>カード会社によるセキュリティ制限</li>
+          <li>一時的なシステムエラー</li>
+        </ul>
+      </div>
+
+      <a href="payment.html" class="btn btn-primary">もう一度試す</a>
+      <a href="plan.html" class="btn btn-secondary">プラン選択に戻る</a>
+
+      <p class="support-link">
+        問題が解決しない場合は<a href="contact.html">お問い合わせ</a>ください
+      </p>
+    </div>
+  </div>
+</body>
+</html>

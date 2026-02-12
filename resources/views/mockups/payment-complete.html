@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>お支払い完了 - みまもりデバイス（仮）</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+:root {
+  --white: #ffffff;
+  --cream: #faf9f7;
+  --beige: #f5f3ef;
+  --gray-100: #f0eeea;
+  --gray-200: #e5e2dc;
+  --gray-300: #d1ccc3;
+  --gray-400: #a8a29e;
+  --gray-500: #78716c;
+  --gray-600: #57534e;
+  --gray-700: #44403c;
+  --gray-800: #292524;
+  --green-light: #dcfce7;
+  --green: #22c55e;
+  --green-dark: #16a34a;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+  --shadow: 0 4px 20px rgba(0,0,0,0.06);
+  --radius: 8px;
+  --radius-lg: 12px;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Noto Sans JP', sans-serif; background: var(--cream); color: var(--gray-800); min-height: 100vh; line-height: 1.7; }
+
+.container { max-width: 640px; margin: 0 auto; padding: 60px 20px; }
+
+.success-card { background: var(--white); border-radius: var(--radius-lg); box-shadow: var(--shadow); border: 1px solid var(--gray-200); padding: 40px 32px; text-align: center; }
+
+.success-icon { width: 100px; height: 100px; background: var(--green-light); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px; font-size: 50px; animation: scaleIn 0.5s ease; }
+@keyframes scaleIn { 0% { transform: scale(0); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
+
+.success-title { font-size: 22px; font-weight: 700; color: var(--gray-800); margin-bottom: 12px; }
+.success-text { font-size: 14px; color: var(--gray-500); line-height: 1.8; margin-bottom: 32px; }
+
+.receipt-box { background: var(--beige); border-radius: var(--radius); padding: 20px; margin-bottom: 32px; text-align: left; }
+.receipt-title { font-size: 13px; font-weight: 600; color: var(--gray-600); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.05em; }
+.receipt-row { display: flex; justify-content: space-between; padding: 8px 0; font-size: 14px; border-bottom: 1px solid var(--gray-200); }
+.receipt-row:last-child { border-bottom: none; }
+.receipt-label { color: var(--gray-600); }
+.receipt-value { font-weight: 600; color: var(--gray-800); }
+.receipt-value.highlight { color: var(--green-dark); }
+
+.plan-badge { display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px; background: linear-gradient(135deg, #667eea, #764ba2); border-radius: 24px; color: var(--white); font-size: 15px; font-weight: 600; margin-bottom: 24px; }
+.plan-badge span { font-size: 20px; }
+
+.info-text { font-size: 13px; color: var(--gray-500); margin-bottom: 32px; line-height: 1.8; }
+.info-text strong { color: var(--gray-700); }
+
+.btn { display: block; width: 100%; padding: 16px 24px; font-size: 16px; font-weight: 600; font-family: inherit; border: none; border-radius: var(--radius); cursor: pointer; transition: all 0.2s; text-decoration: none; text-align: center; margin-bottom: 12px; }
+.btn-primary { background: var(--gray-800); color: var(--white); }
+.btn-primary:hover { background: var(--gray-700); }
+.btn-secondary { background: var(--beige); color: var(--gray-700); border: 1px solid var(--gray-300); }
+.btn-secondary:hover { background: var(--gray-200); }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="success-card">
+      <div class="success-icon">✓</div>
+      <h1 class="success-title">お支払いが完了しました</h1>
+      <p class="success-text">
+        ありがとうございます。<br>
+        プランのアップグレードが完了しました。
+      </p>
+
+      <div class="plan-badge">
+        <span>👑</span>プレミアムプラン
+      </div>
+
+      <div class="receipt-box">
+        <p class="receipt-title">お支払い明細</p>
+        <div class="receipt-row">
+          <span class="receipt-label">プラン</span>
+          <span class="receipt-value">プレミアムプラン（月払い）</span>
+        </div>
+        <div class="receipt-row">
+          <span class="receipt-label">お支払い金額</span>
+          <span class="receipt-value">¥500（税込）</span>
+        </div>
+        <div class="receipt-row">
+          <span class="receipt-label">次回請求日</span>
+          <span class="receipt-value">2025年2月20日</span>
+        </div>
+        <div class="receipt-row">
+          <span class="receipt-label">注文番号</span>
+          <span class="receipt-value" style="font-family: monospace;">ORD-20250120-A3K9X2</span>
+        </div>
+      </div>
+
+      <p class="info-text">
+        領収書は登録メールアドレス宛に送信されます。<br>
+        お支払い履歴は<strong>マイページ > 設定 > お支払い履歴</strong>からご確認いただけます。
+      </p>
+
+      <a href="mypage.html" class="btn btn-primary">マイページへ</a>
+      <a href="payment-history.html" class="btn btn-secondary">お支払い履歴を見る</a>
+    </div>
+  </div>
+</body>
+</html>

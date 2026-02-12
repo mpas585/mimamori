@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>故障・交換申請 - みまもりデバイス（仮）</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+:root {
+  --white: #ffffff; --cream: #faf9f7; --beige: #f5f3ef;
+  --gray-100: #f0eeea; --gray-200: #e5e2dc; --gray-300: #d1ccc3;
+  --gray-400: #a8a29e; --gray-500: #78716c; --gray-600: #57534e;
+  --gray-700: #44403c; --gray-800: #292524;
+  --green-light: #dcfce7; --green: #22c55e; --green-dark: #16a34a;
+  --yellow-light: #fef9c3;
+  --red-light: #fef2f2; --red: #ef4444; --red-dark: #dc2626;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.04); --shadow: 0 4px 20px rgba(0,0,0,0.06);
+  --radius: 8px; --radius-lg: 12px;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Noto Sans JP', sans-serif; background: var(--cream); color: var(--gray-800); min-height: 100vh; line-height: 1.7; }
+
+.header { background: var(--white); border-bottom: 1px solid var(--gray-100); position: sticky; top: 0; z-index: 100; }
+.header-inner { max-width: 640px; margin: 0 auto; padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; }
+.back-btn { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; background: var(--beige); border: none; border-radius: 8px; cursor: pointer; font-size: 18px; transition: all 0.2s; margin-right: 8px; text-decoration: none; color: inherit; }
+.back-btn:hover { background: var(--gray-200); }
+.header-title { font-size: 16px; font-weight: 500; }
+.header-btn { padding: 8px 12px; font-size: 13px; color: var(--gray-600); background: transparent; border: none; border-radius: var(--radius); text-decoration: none; }
+.header-btn:hover { background: var(--beige); color: var(--gray-800); }
+
+.container { max-width: 640px; margin: 0 auto; padding: 24px 20px 100px; }
+
+.steps { display: flex; align-items: center; justify-content: center; margin-bottom: 32px; }
+.step { display: flex; align-items: center; gap: 8px; }
+.step-number { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; border: 2px solid transparent; }
+.step.active .step-number { background: var(--gray-800); color: var(--white); }
+.step.done .step-number { background: var(--green); color: var(--white); }
+.step.pending .step-number { background: var(--gray-200); color: var(--gray-500); border-color: var(--gray-300); }
+.step-label { font-size: 13px; font-weight: 500; color: var(--gray-500); }
+.step.active .step-label { color: var(--gray-800); font-weight: 600; }
+.step.done .step-label { color: var(--green-dark); font-weight: 600; }
+.step-line { width: 40px; height: 3px; background: var(--gray-200); margin: 0 12px; border-radius: 2px; }
+.step-line.done { background: var(--green); }
+
+.card { background: var(--white); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); overflow: hidden; border: 1px solid var(--gray-200); padding: 24px; margin-bottom: 20px; }
+.card-title { font-size: 17px; font-weight: 700; margin-bottom: 24px; display: flex; align-items: center; gap: 10px; color: var(--gray-800); padding-bottom: 16px; border-bottom: 2px solid var(--gray-200); }
+
+.form-group { margin-bottom: 20px; }
+.form-label { display: block; font-size: 13px; font-weight: 600; color: var(--gray-700); margin-bottom: 8px; }
+.form-input { width: 100%; padding: 14px 16px; font-size: 15px; font-family: inherit; border: 1px solid var(--gray-300); border-radius: var(--radius); background: var(--cream); color: var(--gray-800); }
+.form-input:disabled { background: var(--gray-100); color: var(--gray-600); cursor: not-allowed; font-weight: 500; }
+.form-hint { font-size: 12px; color: var(--gray-500); margin-top: 6px; font-weight: 500; }
+.form-hint a { color: var(--gray-600); }
+.form-textarea { width: 100%; padding: 14px 16px; font-size: 15px; font-family: inherit; border: 1px solid var(--gray-300); border-radius: var(--radius); background: var(--cream); color: var(--gray-800); resize: vertical; min-height: 100px; }
+.form-textarea:focus { outline: none; border-color: var(--gray-500); background: var(--white); }
+
+.readonly-field { display: flex; align-items: center; padding: 14px 16px; background: var(--beige); border-radius: var(--radius); font-size: 15px; font-weight: 600; border: 1px solid var(--gray-200); }
+.readonly-field .lock-icon { margin-left: auto; font-size: 14px; color: var(--gray-400); }
+
+.diagnosis-box { background: var(--yellow-light); border-radius: var(--radius); padding: 18px; margin-bottom: 24px; border: 1px solid #fde68a; }
+.diagnosis-title { font-size: 14px; font-weight: 700; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; color: var(--gray-800); }
+.diagnosis-content { font-size: 14px; color: var(--gray-700); line-height: 1.8; font-weight: 500; }
+.diagnosis-content strong { color: var(--gray-800); font-weight: 700; }
+
+.checkbox-group { display: flex; flex-direction: column; gap: 12px; }
+.checkbox-item { display: flex; align-items: center; gap: 14px; padding: 16px 18px; background: var(--cream); border-radius: var(--radius); cursor: pointer; transition: all 0.2s; border: 1px solid var(--gray-200); }
+.checkbox-item:hover { background: var(--gray-100); border-color: var(--gray-300); }
+.checkbox-item.checked { background: var(--green-light); border: 2px solid var(--green); }
+.checkbox-box { width: 24px; height: 24px; border: 2px solid var(--gray-300); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; color: transparent; transition: all 0.2s; flex-shrink: 0; }
+.checkbox-item.checked .checkbox-box { background: var(--green); border-color: var(--green); color: var(--white); }
+.checkbox-label { font-size: 14px; font-weight: 500; color: var(--gray-800); }
+
+/* 不正利用通報用スタイル */
+.checkbox-item.abuse { border-color: var(--red); background: var(--red-light); }
+.checkbox-item.abuse:hover { background: #fee2e2; }
+.checkbox-item.abuse.checked { background: var(--red-light); border: 2px solid var(--red); }
+.checkbox-item.abuse.checked .checkbox-box { background: var(--red); border-color: var(--red); }
+.checkbox-item.abuse .checkbox-label { color: var(--red-dark); }
+
+.notice { background: var(--beige); border-radius: var(--radius); padding: 18px; font-size: 14px; color: var(--gray-700); line-height: 1.8; border: 1px solid var(--gray-200); }
+.notice-title { font-weight: 700; color: var(--gray-800); margin-bottom: 10px; }
+.notice ul { margin-left: 20px; }
+.notice li { margin-bottom: 4px; font-weight: 500; }
+
+/* 不正利用通報用の警告ボックス */
+.abuse-notice { background: var(--red-light); border-radius: var(--radius); padding: 18px; font-size: 14px; color: var(--gray-700); line-height: 1.8; border: 1px solid #fecaca; margin-bottom: 20px; }
+.abuse-notice-title { font-weight: 700; color: var(--red-dark); margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+.abuse-notice ul { margin-left: 20px; margin-bottom: 12px; }
+.abuse-notice li { margin-bottom: 4px; font-weight: 500; }
+.abuse-notice p { font-weight: 500; }
+.abuse-notice strong { color: var(--red-dark); }
+
+.btn { display: block; width: 100%; padding: 16px 24px; font-size: 16px; font-weight: 600; font-family: inherit; border: none; border-radius: var(--radius); cursor: pointer; transition: all 0.2s ease; text-decoration: none; text-align: center; }
+.btn-primary { background: var(--gray-800); color: var(--white); }
+.btn-primary:hover { background: var(--gray-700); transform: translateY(-1px); box-shadow: var(--shadow); }
+.btn-secondary { background: var(--beige); color: var(--gray-700); border: 1px solid var(--gray-200); }
+.btn-secondary:hover { background: var(--gray-100); }
+.btn-danger { background: var(--red); color: var(--white); }
+.btn-danger:hover { background: var(--red-dark); }
+
+.complete-card { text-align: center; padding: 48px 24px; }
+.complete-icon { font-size: 64px; margin-bottom: 20px; }
+.complete-title { font-size: 22px; font-weight: 700; margin-bottom: 12px; color: var(--gray-800); }
+.complete-text { font-size: 14px; color: var(--gray-600); margin-bottom: 28px; line-height: 1.8; font-weight: 500; }
+.complete-info { background: var(--beige); border-radius: var(--radius); padding: 18px; text-align: left; margin-bottom: 28px; border: 1px solid var(--gray-200); }
+.complete-info-item { display: flex; justify-content: space-between; padding: 10px 0; font-size: 14px; border-bottom: 1px solid var(--gray-200); }
+.complete-info-item:last-child { border-bottom: none; }
+.complete-info-label { color: var(--gray-600); font-weight: 500; }
+.complete-info-value { font-weight: 700; color: var(--gray-800); }
+.home-btn { display: inline-block; padding: 16px 36px; font-size: 15px; font-weight: 700; color: var(--gray-700); background: var(--beige); border: 1px solid var(--gray-300); border-radius: var(--radius); text-decoration: none; transition: all 0.2s; }
+.home-btn:hover { background: var(--gray-200); }
+
+.hidden { display: none !important; }
+
+.divider { border: none; border-top: 1px dashed var(--gray-300); margin: 20px 0; }
+.section-subtitle { font-size: 12px; font-weight: 600; color: var(--gray-500); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="header-inner">
+      <div style="display:flex;align-items:center;">
+        <a href="mypage.html" class="back-btn">←</a>
+        <span class="header-title">故障・交換申請</span>
+      </div>
+      <a href="mypage.html" class="header-btn">マイページ</a>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="steps" id="stepsIndicator">
+      <div class="step active" id="stepInd1"><span class="step-number">1</span><span class="step-label">症状</span></div>
+      <div class="step-line" id="stepLine1"></div>
+      <div class="step pending" id="stepInd2"><span class="step-number">2</span><span class="step-label">送付先</span></div>
+      <div class="step-line" id="stepLine2"></div>
+      <div class="step pending" id="stepInd3"><span class="step-number">3</span><span class="step-label">完了</span></div>
+    </div>
+
+    <div id="step1" class="step-content">
+      <div class="card">
+        <h2 class="card-title">🔍 症状を選択</h2>
+        <div class="diagnosis-box">
+          <p class="diagnosis-title">📊 自動診断結果</p>
+          <div class="diagnosis-content">最終通信: <strong>3日前</strong><br>最終電圧: <strong>2.1V（低下傾向）</strong><br>→ 電池切れの可能性があります</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">品番</label>
+          <div class="readonly-field"><span>A3K9X2</span><span class="lock-icon">🔒</span></div>
+          <p class="form-hint">ログイン情報から自動取得</p>
+        </div>
+        <div class="form-group">
+          <p class="section-subtitle">故障・不具合</p>
+          <div class="checkbox-group">
+            <div class="checkbox-item" onclick="toggleCheckbox(this, 'normal')"><span class="checkbox-box"></span><span class="checkbox-label">LEDが点灯しない</span></div>
+            <div class="checkbox-item" onclick="toggleCheckbox(this, 'normal')"><span class="checkbox-box"></span><span class="checkbox-label">赤点滅が止まらない</span></div>
+            <div class="checkbox-item" onclick="toggleCheckbox(this, 'normal')"><span class="checkbox-box"></span><span class="checkbox-label">検知されない（コンソールに反映されない）</span></div>
+            <div class="checkbox-item" onclick="toggleCheckbox(this, 'normal')"><span class="checkbox-box"></span><span class="checkbox-label">電池交換しても改善しない</span></div>
+            <div class="checkbox-item" onclick="toggleCheckbox(this, 'normal')"><span class="checkbox-box"></span><span class="checkbox-label">その他の不具合</span></div>
+          </div>
+        </div>
+        
+        <hr class="divider">
+        
+        <div class="form-group">
+          <p class="section-subtitle">⚠️ その他のご相談</p>
+          <div class="checkbox-group">
+            <div class="checkbox-item abuse" onclick="toggleCheckbox(this, 'abuse')"><span class="checkbox-box"></span><span class="checkbox-label">不正利用・悪用に関する相談</span></div>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">詳細（任意）</label>
+          <textarea class="form-textarea" id="detailText" placeholder="症状の詳細があれば入力してください..."></textarea>
+        </div>
+        <button class="btn btn-primary" onclick="handleNext()">次へ</button>
+      </div>
+    </div>
+
+    <div id="step2" class="step-content hidden">
+      <div class="card">
+        <h2 class="card-title">📦 送付先確認</h2>
+        <div class="form-group"><label class="form-label">郵便番号</label><input type="text" class="form-input" value="370-0001" disabled></div>
+        <div class="form-group"><label class="form-label">住所</label><input type="text" class="form-input" value="群馬県高崎市〇〇町1-2-3" disabled></div>
+        <div class="form-group"><label class="form-label">建物名・部屋番号</label><input type="text" class="form-input" value="〇〇マンション 301号室" disabled></div>
+        <div class="form-group"><label class="form-label">氏名</label><input type="text" class="form-input" value="山田 太郎" disabled></div>
+        <p class="form-hint" style="margin-bottom:20px">※住所を変更する場合は<a href="#">こちら</a>から</p>
+        <div class="notice">
+          <p class="notice-title">📋 注意事項</p>
+          <ul><li>代替品は1〜3営業日以内に発送します</li><li>故障品の返送は不要です（廃棄OK）</li><li>送料は無料です</li></ul>
+        </div>
+        <div style="display:flex;gap:12px;margin-top:24px;">
+          <button class="btn btn-secondary" onclick="goToStep(1)" style="margin-top:0;">戻る</button>
+          <button class="btn btn-primary" onclick="goToStep(3)" style="margin-top:0;">申請する</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="step3" class="step-content hidden">
+      <div class="card complete-card">
+        <div class="complete-icon">✅</div>
+        <h2 class="complete-title">申請を受け付けました</h2>
+        <p class="complete-text">代替品を1〜3営業日以内に発送します。<br>発送完了時にメールでお知らせします。</p>
+        <div class="complete-info">
+          <div class="complete-info-item"><span class="complete-info-label">受付番号</span><span class="complete-info-value">RMA-2025-00142</span></div>
+          <div class="complete-info-item"><span class="complete-info-label">旧品番</span><span class="complete-info-value">A3K9X2</span></div>
+          <div class="complete-info-item"><span class="complete-info-label">発送予定</span><span class="complete-info-value">1〜3営業日</span></div>
+        </div>
+        <a href="mypage.html" class="home-btn">マイページに戻る</a>
+      </div>
+    </div>
+
+    <!-- 不正利用通報用の画面 -->
+    <div id="stepAbuse" class="step-content hidden">
+      <div class="card">
+        <h2 class="card-title">⚠️ 不正利用・悪用のご相談</h2>
+        
+        <div class="abuse-notice">
+          <p class="abuse-notice-title">⚠️ 対応範囲について</p>
+          <ul>
+            <li>当方で対応できるのは、<strong>ご本人のデバイス停止・アカウント削除</strong>のみです</li>
+            <li>第三者のデバイスについては、品番が不明なため対応が困難です</li>
+            <li>深刻な被害（ストーカー、DV等）の場合は、<strong>警察への相談を強くお勧めします</strong></li>
+          </ul>
+          <p>📞 警察相談ダイヤル: <strong>#9110</strong></p>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">ご相談内容</label>
+          <div class="checkbox-group">
+            <div class="checkbox-item" onclick="toggleCheckbox(this, 'abuse-detail')"><span class="checkbox-box"></span><span class="checkbox-label">自分のデバイスを停止・削除したい</span></div>
+            <div class="checkbox-item" onclick="toggleCheckbox(this, 'abuse-detail')"><span class="checkbox-box"></span><span class="checkbox-label">同意なく設置された可能性がある</span></div>
+            <div class="checkbox-item" onclick="toggleCheckbox(this, 'abuse-detail')"><span class="checkbox-box"></span><span class="checkbox-label">第三者による悪用を発見した</span></div>
+            <div class="checkbox-item" onclick="toggleCheckbox(this, 'abuse-detail')"><span class="checkbox-box"></span><span class="checkbox-label">その他</span></div>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">詳細をご記入ください</label>
+          <textarea class="form-textarea" id="abuseDetailText" placeholder="状況を詳しくお知らせください..."></textarea>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">ご連絡先メールアドレス</label>
+          <input type="email" class="form-input" id="abuseEmail" placeholder="example@example.com">
+          <p class="form-hint">ご回答をお送りするメールアドレスを入力してください</p>
+        </div>
+        
+        <div style="display:flex;gap:12px;margin-top:24px;">
+          <button class="btn btn-secondary" onclick="goToStep(1)" style="margin-top:0;">戻る</button>
+          <button class="btn btn-danger" onclick="submitAbuseReport()" style="margin-top:0;">送信する</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 不正利用通報完了画面 -->
+    <div id="stepAbuseComplete" class="step-content hidden">
+      <div class="card complete-card">
+        <div class="complete-icon">📨</div>
+        <h2 class="complete-title">ご相談を受け付けました</h2>
+        <p class="complete-text">内容を確認の上、3営業日以内にメールでご連絡いたします。<br><br>緊急の場合は、警察相談ダイヤル <strong>#9110</strong> へご連絡ください。</p>
+        <a href="mypage.html" class="home-btn">マイページに戻る</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+let isAbuseMode = false;
+
+function toggleCheckbox(el, type) {
+  // abuse選択時は他のチェックを外す、逆も同様
+  if (type === 'abuse') {
+    // 通常のチェックボックスを全部外す
+    document.querySelectorAll('.checkbox-item:not(.abuse)').forEach(item => {
+      item.classList.remove('checked');
+      item.querySelector('.checkbox-box').textContent = '';
+    });
+    el.classList.toggle('checked');
+    el.querySelector('.checkbox-box').textContent = el.classList.contains('checked') ? '✓' : '';
+    isAbuseMode = el.classList.contains('checked');
+  } else if (type === 'normal') {
+    // 不正利用のチェックを外す
+    document.querySelectorAll('.checkbox-item.abuse').forEach(item => {
+      item.classList.remove('checked');
+      item.querySelector('.checkbox-box').textContent = '';
+    });
+    isAbuseMode = false;
+    el.classList.toggle('checked');
+    el.querySelector('.checkbox-box').textContent = el.classList.contains('checked') ? '✓' : '';
+  } else {
+    // abuse-detail: 単純にトグル
+    el.classList.toggle('checked');
+    el.querySelector('.checkbox-box').textContent = el.classList.contains('checked') ? '✓' : '';
+  }
+}
+
+function handleNext() {
+  if (isAbuseMode) {
+    // 不正利用モード
+    document.getElementById('stepsIndicator').classList.add('hidden');
+    document.querySelectorAll('.step-content').forEach(c => c.classList.add('hidden'));
+    document.getElementById('stepAbuse').classList.remove('hidden');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  } else {
+    // 通常の交換フロー
+    goToStep(2);
+  }
+}
+
+function goToStep(step) {
+  document.getElementById('stepsIndicator').classList.remove('hidden');
+  document.querySelectorAll('.step-content').forEach(c => c.classList.add('hidden'));
+  document.getElementById('step' + step).classList.remove('hidden');
+  for (let i = 1; i <= 3; i++) {
+    const ind = document.getElementById('stepInd' + i);
+    ind.classList.remove('active', 'done', 'pending');
+    if (i < step) ind.classList.add('done');
+    else if (i === step) ind.classList.add('active');
+    else ind.classList.add('pending');
+  }
+  for (let i = 1; i <= 2; i++) {
+    const line = document.getElementById('stepLine' + i);
+    if (i < step) line.classList.add('done');
+    else line.classList.remove('done');
+  }
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function submitAbuseReport() {
+  const email = document.getElementById('abuseEmail').value;
+  const detail = document.getElementById('abuseDetailText').value;
+  
+  if (!email) {
+    alert('メールアドレスを入力してください');
+    return;
+  }
+  if (!detail) {
+    alert('詳細を入力してください');
+    return;
+  }
+  
+  // 送信処理（実際はAPIコール）
+  document.querySelectorAll('.step-content').forEach(c => c.classList.add('hidden'));
+  document.getElementById('stepAbuseComplete').classList.remove('hidden');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+  </script>
+</body>
+</html>

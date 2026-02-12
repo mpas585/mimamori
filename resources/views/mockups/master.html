@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>マスター管理 - みまもりデバイス（仮）</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+:root {
+  --white: #ffffff; --cream: #faf9f7; --beige: #f5f3ef;
+  --gray-100: #f0eeea; --gray-200: #e5e2dc; --gray-300: #d1ccc3;
+  --gray-400: #a8a29e; --gray-500: #78716c; --gray-600: #57534e;
+  --gray-700: #44403c; --gray-800: #292524;
+  --green-light: #dcfce7; --green: #22c55e; --green-dark: #16a34a;
+  --yellow-light: #fef9c3; --yellow: #eab308;
+  --red-light: #fee2e2; --red: #ef4444;
+  --blue-light: #dbeafe; --blue: #3b82f6;
+  --purple-light: #f3e8ff; --purple: #a855f7;
+  --orange-light: #ffedd5; --orange: #f97316;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.04); --shadow: 0 4px 20px rgba(0,0,0,0.06);
+  --radius: 8px; --radius-lg: 12px;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Noto Sans JP', sans-serif; background: var(--cream); color: var(--gray-800); min-height: 100vh; line-height: 1.7; }
+
+.header { background: linear-gradient(135deg, #1e293b 0%, #334155 100%); border-bottom: 1px solid var(--gray-700); position: sticky; top: 0; z-index: 100; }
+.header-inner { max-width: 1400px; margin: 0 auto; padding: 12px 24px; display: flex; align-items: center; justify-content: space-between; }
+.header-left { display: flex; align-items: center; gap: 20px; }
+.header-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--white); }
+.header-logo-icon { width: 36px; height: 36px; background: rgba(255,255,255,0.1); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+.header-logo-text { font-size: 16px; font-weight: 500; }
+.header-badge { font-size: 10px; font-weight: 600; padding: 4px 8px; background: var(--purple); color: var(--white); border-radius: 4px; margin-left: 8px; }
+.header-nav { display: flex; gap: 4px; }
+.header-nav-item { padding: 8px 16px; font-size: 13px; color: rgba(255,255,255,0.7); text-decoration: none; border-radius: var(--radius); transition: all 0.2s; }
+.header-nav-item:hover { background: rgba(255,255,255,0.1); color: var(--white); }
+.header-nav-item.active { background: rgba(255,255,255,0.15); color: var(--white); font-weight: 600; }
+.header-right { display: flex; align-items: center; gap: 16px; }
+.header-user { display: flex; align-items: center; gap: 8px; color: var(--white); font-size: 13px; }
+.header-user-icon { width: 32px; height: 32px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+.header-btn { padding: 8px 12px; font-size: 13px; color: rgba(255,255,255,0.7); background: transparent; border: none; border-radius: var(--radius); cursor: pointer; transition: all 0.2s; text-decoration: none; }
+.header-btn:hover { background: rgba(255,255,255,0.1); color: var(--white); }
+
+.container { max-width: 1400px; margin: 0 auto; padding: 24px; }
+
+.page-title { font-size: 20px; font-weight: 700; color: var(--gray-800); margin-bottom: 24px; display: flex; align-items: center; gap: 12px; }
+.page-title span { font-size: 24px; }
+
+.notify-banner { background: var(--orange-light); border: 1px solid #fed7aa; border-left: 4px solid var(--orange); padding: 14px 20px; margin-bottom: 24px; border-radius: var(--radius); display: flex; align-items: center; justify-content: space-between; }
+.notify-banner.hidden { display: none; }
+.notify-content { display: flex; align-items: center; gap: 12px; }
+.notify-icon { font-size: 20px; }
+.notify-text { font-size: 14px; font-weight: 500; }
+.notify-text strong { color: var(--orange); font-weight: 700; }
+.notify-action { padding: 8px 16px; font-size: 13px; font-weight: 600; font-family: inherit; border: none; border-radius: var(--radius); background: var(--orange); color: var(--white); cursor: pointer; transition: all 0.2s; }
+.notify-action:hover { opacity: 0.9; }
+
+.summary-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; margin-bottom: 28px; }
+.summary-card { background: var(--white); border-radius: var(--radius-lg); padding: 20px; box-shadow: var(--shadow-sm); border: 1px solid var(--gray-200); }
+.summary-card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.summary-card-icon { width: 40px; height: 40px; border-radius: var(--radius); display: flex; align-items: center; justify-content: center; font-size: 20px; }
+.summary-card-icon.blue { background: var(--blue-light); }
+.summary-card-icon.green { background: var(--green-light); }
+.summary-card-icon.yellow { background: var(--yellow-light); }
+.summary-card-icon.purple { background: var(--purple-light); }
+.summary-card-icon.orange { background: var(--orange-light); }
+.summary-card-trend { font-size: 12px; font-weight: 600; padding: 4px 8px; border-radius: 4px; }
+.summary-card-trend.up { background: var(--green-light); color: var(--green-dark); }
+.summary-card-trend.down { background: var(--red-light); color: var(--red); }
+.summary-card-trend.warning { background: var(--orange-light); color: var(--orange); }
+.summary-card-value { font-size: 32px; font-weight: 700; color: var(--gray-800); margin-bottom: 4px; }
+.summary-card-label { font-size: 13px; color: var(--gray-500); font-weight: 500; }
+
+.tab-bar { display: flex; gap: 4px; background: var(--white); padding: 4px; border-radius: var(--radius-lg); margin-bottom: 24px; box-shadow: var(--shadow-sm); border: 1px solid var(--gray-200); }
+.tab { flex: 1; padding: 12px 20px; font-size: 14px; font-weight: 600; text-align: center; color: var(--gray-500); background: transparent; border: none; border-radius: var(--radius); cursor: pointer; transition: all 0.2s; position: relative; }
+.tab.active { background: var(--gray-800); color: var(--white); }
+.tab:not(.active):hover { background: var(--beige); color: var(--gray-700); }
+.tab-badge { position: absolute; top: 6px; right: 12px; min-width: 20px; height: 20px; background: var(--orange); color: var(--white); font-size: 11px; font-weight: 700; border-radius: 10px; display: flex; align-items: center; justify-content: center; }
+
+.toolbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; gap: 16px; flex-wrap: wrap; }
+.toolbar-left { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.search-box { display: flex; align-items: center; background: var(--white); border: 1px solid var(--gray-300); border-radius: var(--radius); padding: 0 12px; width: 300px; }
+.search-box:focus-within { border-color: var(--gray-500); box-shadow: 0 0 0 3px rgba(168, 162, 158, 0.15); }
+.search-box input { flex: 1; padding: 10px 8px; border: none; background: transparent; font-size: 14px; font-family: inherit; }
+.search-box input:focus { outline: none; }
+.search-box span { color: var(--gray-400); }
+.filter-select { padding: 10px 14px; font-size: 14px; font-family: inherit; border: 1px solid var(--gray-300); border-radius: var(--radius); background: var(--white); color: var(--gray-700); cursor: pointer; font-weight: 500; }
+.toolbar-right { display: flex; align-items: center; gap: 8px; }
+.toolbar-btn { padding: 10px 16px; font-size: 13px; font-weight: 600; font-family: inherit; border: 1px solid var(--gray-300); border-radius: var(--radius); background: var(--white); color: var(--gray-700); cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 6px; }
+.toolbar-btn:hover { background: var(--beige); border-color: var(--gray-400); }
+
+.table-card { background: var(--white); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); overflow: hidden; border: 1px solid var(--gray-200); }
+.table-wrapper { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+thead { background: var(--beige); }
+th { padding: 14px 16px; text-align: left; font-weight: 600; color: var(--gray-700); white-space: nowrap; border-bottom: 2px solid var(--gray-300); border-right: 1px solid var(--gray-200); }
+th:last-child { border-right: none; }
+td { padding: 14px 16px; border-bottom: 1px solid var(--gray-200); border-right: 1px solid var(--gray-100); vertical-align: middle; }
+td:last-child { border-right: none; }
+tbody tr:nth-child(odd) { background: var(--white); }
+tbody tr:nth-child(even) { background: var(--cream); }
+tbody tr:hover { background: var(--gray-100); }
+tbody tr:last-child td { border-bottom: none; }
+
+th.sortable { cursor: pointer; user-select: none; }
+th.sortable:hover { background: var(--gray-100); }
+.sort-icon { font-size: 12px; color: var(--gray-400); margin-left: 4px; }
+.mono { font-family: monospace; letter-spacing: 0.03em; }
+
+.plan-badge { display: inline-block; padding: 4px 10px; font-size: 11px; font-weight: 600; border-radius: 4px; }
+.plan-badge.free { background: var(--gray-100); color: var(--gray-600); }
+.plan-badge.premium { background: linear-gradient(135deg, #667eea, #764ba2); color: var(--white); }
+
+.status-badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; font-size: 12px; font-weight: 600; border-radius: 4px; }
+.status-badge.active { background: var(--green-light); color: var(--green-dark); }
+.status-badge.expired { background: var(--red-light); color: var(--red); }
+
+.expiry-cell { display: flex; flex-direction: column; }
+.expiry-date { font-weight: 600; color: var(--gray-800); }
+.expiry-date.warning { color: var(--orange); }
+.expiry-date.expired { color: var(--red); }
+.expiry-remain { font-size: 11px; font-weight: 500; }
+.expiry-remain.ok { color: var(--green-dark); }
+.expiry-remain.warning { color: var(--orange); }
+.expiry-remain.expired { color: var(--red); }
+
+.payment-type { display: inline-block; padding: 3px 8px; font-size: 11px; font-weight: 600; border-radius: 4px; }
+.payment-type.card { background: var(--blue-light); color: var(--blue); }
+.payment-type.transfer { background: var(--green-light); color: var(--green-dark); }
+
+.action-btn { padding: 6px 12px; font-size: 12px; font-weight: 600; font-family: inherit; border: 1px solid var(--gray-300); border-radius: 4px; background: var(--white); color: var(--gray-700); cursor: pointer; transition: all 0.2s; margin-right: 4px; }
+.action-btn:hover { background: var(--beige); }
+.action-btn.success { background: var(--green); color: var(--white); border-color: var(--green); }
+.action-btn.success:hover { background: var(--green-dark); }
+
+.pagination { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-top: 2px solid var(--gray-200); background: var(--cream); }
+.pagination-info { font-size: 13px; font-weight: 500; color: var(--gray-600); }
+.pagination-buttons { display: flex; gap: 4px; }
+.page-btn { min-width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; font-family: inherit; border: 1px solid var(--gray-300); border-radius: var(--radius); background: var(--white); color: var(--gray-700); cursor: pointer; }
+.page-btn:hover { background: var(--beige); }
+.page-btn.active { background: var(--gray-800); color: var(--white); border-color: var(--gray-800); }
+.page-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; padding: 20px; }
+.modal-overlay.show { display: flex; align-items: center; justify-content: center; }
+.modal { background: var(--white); width: 100%; max-width: 500px; border-radius: var(--radius-lg); overflow: hidden; box-shadow: 0 10px 40px rgba(0,0,0,0.2); }
+.modal-header { padding: 20px 24px; border-bottom: 1px solid var(--gray-200); display: flex; justify-content: space-between; align-items: center; }
+.modal-header h3 { font-size: 18px; font-weight: 600; }
+.modal-close { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; background: var(--beige); border: none; border-radius: 6px; cursor: pointer; font-size: 18px; }
+.modal-close:hover { background: var(--gray-200); }
+.modal-body { padding: 24px; max-height: 60vh; overflow-y: auto; }
+.modal-footer { padding: 16px 24px; border-top: 1px solid var(--gray-200); display: flex; gap: 12px; justify-content: flex-end; }
+
+.form-group { margin-bottom: 20px; }
+.form-group:last-child { margin-bottom: 0; }
+.form-label { display: block; font-size: 13px; font-weight: 600; color: var(--gray-700); margin-bottom: 6px; }
+.form-input { width: 100%; padding: 12px 14px; font-size: 14px; font-family: inherit; border: 1px solid var(--gray-300); border-radius: var(--radius); background: var(--cream); }
+.form-input:focus { outline: none; border-color: var(--gray-500); background: var(--white); }
+.form-hint { font-size: 12px; color: var(--gray-500); margin-top: 4px; }
+
+.btn { padding: 12px 24px; font-size: 14px; font-weight: 600; font-family: inherit; border: none; border-radius: var(--radius); cursor: pointer; }
+.btn-primary { background: var(--gray-800); color: var(--white); }
+.btn-primary:hover { background: var(--gray-700); }
+.btn-secondary { background: var(--beige); color: var(--gray-700); border: 1px solid var(--gray-300); }
+.btn-secondary:hover { background: var(--gray-200); }
+.btn-success { background: var(--green); color: var(--white); }
+.btn-success:hover { background: var(--green-dark); }
+
+.detail-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+.detail-item { padding: 12px; background: var(--beige); border-radius: var(--radius); }
+.detail-item-label { font-size: 11px; color: var(--gray-500); margin-bottom: 2px; }
+.detail-item-value { font-size: 14px; font-weight: 600; color: var(--gray-800); }
+
+.transfer-card { background: var(--white); border: 1px solid var(--gray-200); border-radius: var(--radius); padding: 16px; margin-bottom: 12px; }
+.transfer-card:last-child { margin-bottom: 0; }
+.transfer-card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.transfer-card-id { font-family: monospace; font-size: 16px; font-weight: 700; color: var(--gray-800); }
+.transfer-card-date { font-size: 12px; color: var(--gray-500); }
+.transfer-card-body { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 16px; }
+.transfer-card-item { }
+.transfer-card-label { font-size: 11px; color: var(--gray-500); margin-bottom: 2px; }
+.transfer-card-value { font-size: 14px; font-weight: 600; color: var(--gray-800); }
+.transfer-card-actions { display: flex; gap: 8px; }
+
+@media (max-width: 1200px) { .summary-grid { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 1024px) { .summary-grid { grid-template-columns: repeat(2, 1fr); } .header-nav { display: none; } }
+@media (max-width: 768px) { .summary-grid { grid-template-columns: 1fr; } .toolbar { flex-direction: column; align-items: stretch; } .search-box { width: 100%; } .transfer-card-body { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="header-inner">
+      <div class="header-left">
+        <a href="#" class="header-logo">
+          <div class="header-logo-icon"></div>
+          <span class="header-logo-text">みまもりデバイス（仮）</span>
+          <span class="header-badge">MASTER</span>
+        </a>
+        <nav class="header-nav">
+          <a href="#" class="header-nav-item active">アカウント管理</a>
+          <a href="#" class="header-nav-item">デバイス発番</a>
+          <a href="#" class="header-nav-item">システム設定</a>
+        </nav>
+      </div>
+      <div class="header-right">
+        <div class="header-user">
+          <span class="header-user-icon">👤</span>
+          <span>Masaki</span>
+        </div>
+        <a href="admin-password-change.html" class="header-btn">🔐 パスワード変更</a>
+        <a href="admin-login.html" class="header-btn">ログアウト</a>
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="notify-banner" id="transferBanner">
+      <div class="notify-content">
+        <span class="notify-icon">💰</span>
+        <span class="notify-text">振込申請が <strong>3件</strong> あります。入金確認をお願いします。</span>
+      </div>
+      <button class="notify-action" onclick="document.querySelectorAll('.tab')[3].click();">確認する</button>
+    </div>
+
+    <h1 class="page-title"><span>👥</span>アカウント・課金管理</h1>
+
+    <div class="summary-grid">
+      <div class="summary-card">
+        <div class="summary-card-header">
+          <div class="summary-card-icon blue">📱</div>
+          <span class="summary-card-trend up">+12 今月</span>
+        </div>
+        <p class="summary-card-value">856</p>
+        <p class="summary-card-label">総アカウント数</p>
+      </div>
+      <div class="summary-card">
+        <div class="summary-card-header">
+          <div class="summary-card-icon purple">👑</div>
+        </div>
+        <p class="summary-card-value">124</p>
+        <p class="summary-card-label">Premium会員</p>
+      </div>
+      <div class="summary-card">
+        <div class="summary-card-header">
+          <div class="summary-card-icon yellow">💰</div>
+        </div>
+        <p class="summary-card-value">¥62,000</p>
+        <p class="summary-card-label">今月売上</p>
+      </div>
+      <div class="summary-card">
+        <div class="summary-card-header">
+          <div class="summary-card-icon orange">⏳</div>
+          <span class="summary-card-trend warning">要対応</span>
+        </div>
+        <p class="summary-card-value">3</p>
+        <p class="summary-card-label">振込待ち</p>
+      </div>
+      <div class="summary-card">
+        <div class="summary-card-header">
+          <div class="summary-card-icon green">✓</div>
+        </div>
+        <p class="summary-card-value">8</p>
+        <p class="summary-card-label">期限切れ間近</p>
+      </div>
+    </div>
+
+    <div class="tab-bar">
+      <button class="tab active" onclick="switchTab('individual')">個人アカウント</button>
+      <button class="tab" onclick="switchTab('org')">法人アカウント</button>
+      <button class="tab" onclick="switchTab('expiring')">期限切れ間近</button>
+      <button class="tab" onclick="switchTab('transfer')">振込管理<span class="tab-badge">3</span></button>
+    </div>
+
+    <!-- 個人アカウントタブ -->
+    <div id="individualTab">
+      <div class="toolbar">
+        <div class="toolbar-left">
+          <div class="search-box"><span>🔍</span><input type="text" placeholder="デバイスID・メールで検索..."></div>
+          <select class="filter-select">
+            <option value="">すべてのプラン</option>
+            <option value="free">無料</option>
+            <option value="premium">Premium</option>
+          </select>
+          <select class="filter-select">
+            <option value="">すべての支払方法</option>
+            <option value="card">クレカ</option>
+            <option value="transfer">振込</option>
+          </select>
+        </div>
+        <div class="toolbar-right">
+          <button class="toolbar-btn">📥 CSV出力</button>
+        </div>
+      </div>
+
+      <div class="table-card">
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th class="sortable">デバイスID <span class="sort-icon">↕</span></th>
+                <th>メールアドレス</th>
+                <th>プラン</th>
+                <th>支払方法</th>
+                <th class="sortable">有効期限 <span class="sort-icon">↕</span></th>
+                <th>状態</th>
+                <th>登録日</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="mono">A3K9X2</td>
+                <td><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="621b030f03060322071a030f120e074c010d0f">[email&#160;protected]</a></td>
+                <td><span class="plan-badge premium">Premium</span></td>
+                <td><span class="payment-type card">クレカ</span></td>
+                <td>
+                  <div class="expiry-cell">
+                    <span class="expiry-date">2025/02/20</span>
+                    <span class="expiry-remain ok">あと31日</span>
+                  </div>
+                </td>
+                <td><span class="status-badge active">● 有効</span></td>
+                <td>2024/06/15</td>
+                <td><button class="action-btn" onclick="showPlanEditModal('A3K9X2', 'Premium', '2025-02-20', 'card')">編集</button></td>
+              </tr>
+              <tr>
+                <td class="mono">B7X2K9</td>
+                <td>-</td>
+                <td><span class="plan-badge premium">Premium</span></td>
+                <td><span class="payment-type transfer">振込</span></td>
+                <td>
+                  <div class="expiry-cell">
+                    <span class="expiry-date warning">2025/01/25</span>
+                    <span class="expiry-remain warning">あと5日</span>
+                  </div>
+                </td>
+                <td><span class="status-badge active">● 有効</span></td>
+                <td>2024/07/01</td>
+                <td><button class="action-btn" onclick="showPlanEditModal('B7X2K9', 'Premium', '2025-01-25', 'transfer')">編集</button></td>
+              </tr>
+              <tr>
+                <td class="mono">C4M8P2</td>
+                <td><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="ec988d828d878dac89948d819c8089c28f8381">[email&#160;protected]</a></td>
+                <td><span class="plan-badge free">無料</span></td>
+                <td>-</td>
+                <td>
+                  <div class="expiry-cell">
+                    <span class="expiry-date">-</span>
+                    <span class="expiry-remain">無期限</span>
+                  </div>
+                </td>
+                <td><span class="status-badge active">● 有効</span></td>
+                <td>2024/05/20</td>
+                <td><button class="action-btn" onclick="showPlanEditModal('C4M8P2', '無料', '', '')">編集</button></td>
+              </tr>
+              <tr>
+                <td class="mono">D9L3Q7</td>
+                <td><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="0675737c736d6f46637e676b766a632865696b">[email&#160;protected]</a></td>
+                <td><span class="plan-badge premium">Premium</span></td>
+                <td><span class="payment-type card">クレカ</span></td>
+                <td>
+                  <div class="expiry-cell">
+                    <span class="expiry-date expired">2025/01/15</span>
+                    <span class="expiry-remain expired">期限切れ</span>
+                  </div>
+                </td>
+                <td><span class="status-badge expired">● 期限切れ</span></td>
+                <td>2024/08/10</td>
+                <td><button class="action-btn" onclick="showPlanEditModal('D9L3Q7', 'Premium', '2025-01-15', 'card')">編集</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="pagination">
+          <span class="pagination-info">全856件中 1-4件を表示</span>
+          <div class="pagination-buttons">
+            <button class="page-btn" disabled>‹</button>
+            <button class="page-btn active">1</button>
+            <button class="page-btn">2</button>
+            <button class="page-btn">3</button>
+            <button class="page-btn">...</button>
+            <button class="page-btn">214</button>
+            <button class="page-btn">›</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 法人アカウントタブ -->
+    <div id="orgTab" style="display: none;">
+      <div class="toolbar">
+        <div class="toolbar-left">
+          <div class="search-box"><span>🔍</span><input type="text" placeholder="組織名・IDで検索..."></div>
+        </div>
+        <div class="toolbar-right">
+          <button class="toolbar-btn" onclick="showAddOrgModal()">➕ 法人追加</button>
+        </div>
+      </div>
+      <div class="table-card">
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>組織ID</th>
+                <th>組織名</th>
+                <th>デバイス数</th>
+                <th>有効期限</th>
+                <th>状態</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="mono">ORG-001</td>
+                <td>〇〇マンション管理組合</td>
+                <td>45台</td>
+                <td>
+                  <div class="expiry-cell">
+                    <span class="expiry-date">2025/03/31</span>
+                    <span class="expiry-remain ok">あと70日</span>
+                  </div>
+                </td>
+                <td><span class="status-badge active">● 有効</span></td>
+                <td><button class="action-btn">編集</button><button class="action-btn">詳細</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- 期限切れ間近タブ -->
+    <div id="expiringTab" style="display: none;">
+      <div class="toolbar">
+        <div class="toolbar-left">
+          <select class="filter-select">
+            <option value="7">7日以内</option>
+            <option value="14">14日以内</option>
+            <option value="30" selected>30日以内</option>
+          </select>
+        </div>
+      </div>
+      <div class="table-card">
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>デバイスID</th>
+                <th>メールアドレス</th>
+                <th>プラン</th>
+                <th>支払方法</th>
+                <th class="sortable">有効期限 <span class="sort-icon">↕</span></th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="mono">D9L3Q7</td>
+                <td><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="1e6d6b646b75775e7b667f736e727b307d7173">[email&#160;protected]</a></td>
+                <td><span class="plan-badge premium">Premium</span></td>
+                <td><span class="payment-type card">クレカ</span></td>
+                <td>
+                  <div class="expiry-cell">
+                    <span class="expiry-date expired">2025/01/15</span>
+                    <span class="expiry-remain expired">期限切れ</span>
+                  </div>
+                </td>
+                <td><button class="action-btn" onclick="showPlanEditModal('D9L3Q7', 'Premium', '2025-01-15', 'card')">編集</button></td>
+              </tr>
+              <tr>
+                <td class="mono">B7X2K9</td>
+                <td>-</td>
+                <td><span class="plan-badge premium">Premium</span></td>
+                <td><span class="payment-type transfer">振込</span></td>
+                <td>
+                  <div class="expiry-cell">
+                    <span class="expiry-date warning">2025/01/25</span>
+                    <span class="expiry-remain warning">あと5日</span>
+                  </div>
+                </td>
+                <td><button class="action-btn" onclick="showPlanEditModal('B7X2K9', 'Premium', '2025-01-25', 'transfer')">編集</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- 振込管理タブ -->
+    <div id="transferTab" style="display: none;">
+      <div class="toolbar">
+        <div class="toolbar-left">
+          <select class="filter-select">
+            <option value="pending">入金待ち</option>
+            <option value="confirmed">入金済み</option>
+            <option value="all">すべて</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="transfer-card">
+        <div class="transfer-card-header">
+          <span class="transfer-card-id">E5N7R2</span>
+          <span class="transfer-card-date">申請日: 2025/01/18 14:32</span>
+        </div>
+        <div class="transfer-card-body">
+          <div class="transfer-card-item">
+            <p class="transfer-card-label">メールアドレス</p>
+            <p class="transfer-card-value"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="fd96929f9c849c8e9594bd98859c908d9198d39e9290">[email&#160;protected]</a></p>
+          </div>
+          <div class="transfer-card-item">
+            <p class="transfer-card-label">申請プラン</p>
+            <p class="transfer-card-value">Premium（年払い）</p>
+          </div>
+          <div class="transfer-card-item">
+            <p class="transfer-card-label">金額</p>
+            <p class="transfer-card-value">¥6,000</p>
+          </div>
+        </div>
+        <div class="transfer-card-actions">
+          <button class="action-btn success" onclick="confirmTransfer('E5N7R2')">✓ 入金確認</button>
+          <button class="action-btn" onclick="cancelTransfer('E5N7R2')">キャンセル</button>
+        </div>
+      </div>
+
+      <div class="transfer-card">
+        <div class="transfer-card-header">
+          <span class="transfer-card-id">F8K2M6</span>
+          <span class="transfer-card-date">申請日: 2025/01/17 09:15</span>
+        </div>
+        <div class="transfer-card-body">
+          <div class="transfer-card-item">
+            <p class="transfer-card-label">メールアドレス</p>
+            <p class="transfer-card-value">-</p>
+          </div>
+          <div class="transfer-card-item">
+            <p class="transfer-card-label">申請プラン</p>
+            <p class="transfer-card-value">Premium（年払い）</p>
+          </div>
+          <div class="transfer-card-item">
+            <p class="transfer-card-label">金額</p>
+            <p class="transfer-card-value">¥6,000</p>
+          </div>
+        </div>
+        <div class="transfer-card-actions">
+          <button class="action-btn success" onclick="confirmTransfer('F8K2M6')">✓ 入金確認</button>
+          <button class="action-btn" onclick="cancelTransfer('F8K2M6')">キャンセル</button>
+        </div>
+      </div>
+
+      <div class="transfer-card">
+        <div class="transfer-card-header">
+          <span class="transfer-card-id">G3P9T4</span>
+          <span class="transfer-card-date">申請日: 2025/01/16 16:48</span>
+        </div>
+        <div class="transfer-card-body">
+          <div class="transfer-card-item">
+            <p class="transfer-card-label">メールアドレス</p>
+            <p class="transfer-card-value"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="80e9f4efc0e5f8e1edf0ece5aee3efed">[email&#160;protected]</a></p>
+          </div>
+          <div class="transfer-card-item">
+            <p class="transfer-card-label">申請プラン</p>
+            <p class="transfer-card-value">Premium（年払い）</p>
+          </div>
+          <div class="transfer-card-item">
+            <p class="transfer-card-label">金額</p>
+            <p class="transfer-card-value">¥6,000</p>
+          </div>
+        </div>
+        <div class="transfer-card-actions">
+          <button class="action-btn success" onclick="confirmTransfer('G3P9T4')">✓ 入金確認</button>
+          <button class="action-btn" onclick="cancelTransfer('G3P9T4')">キャンセル</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- プラン編集モーダル -->
+  <div id="planEditModal" class="modal-overlay" onclick="if(event.target===this)hidePlanEditModal()">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>プラン・有効期限の編集</h3>
+        <button class="modal-close" onclick="hidePlanEditModal()">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="detail-grid" style="margin-bottom: 20px;">
+          <div class="detail-item">
+            <p class="detail-item-label">デバイスID</p>
+            <p class="detail-item-value" id="editDeviceId">A3K9X2</p>
+          </div>
+          <div class="detail-item">
+            <p class="detail-item-label">現在のプラン</p>
+            <p class="detail-item-value" id="editCurrentPlan">Premium</p>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">プラン</label>
+          <select class="form-input" id="editPlan">
+            <option value="free">無料プラン</option>
+            <option value="premium">Premiumプラン</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">支払い方法</label>
+          <select class="form-input" id="editPaymentType">
+            <option value="">-（無料プランの場合）</option>
+            <option value="card">クレジットカード</option>
+            <option value="transfer">銀行振込</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">有効期限</label>
+          <input type="date" class="form-input" id="editExpiry">
+          <p class="form-hint">無料プランの場合は空欄でOK。有料プランは必ず設定。</p>
+        </div>
+        <div class="form-group">
+          <label class="form-label">メモ（任意）</label>
+          <input type="text" class="form-input" id="editMemo" placeholder="例：振込確認済み、特別対応など">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="hidePlanEditModal()">キャンセル</button>
+        <button class="btn btn-primary" onclick="savePlanEdit()">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 振込入金確認モーダル -->
+  <div id="transferConfirmModal" class="modal-overlay" onclick="if(event.target===this)hideTransferConfirmModal()">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>入金確認</h3>
+        <button class="modal-close" onclick="hideTransferConfirmModal()">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="detail-grid" style="margin-bottom: 20px;">
+          <div class="detail-item">
+            <p class="detail-item-label">デバイスID</p>
+            <p class="detail-item-value" id="confirmDeviceId">E5N7R2</p>
+          </div>
+          <div class="detail-item">
+            <p class="detail-item-label">金額</p>
+            <p class="detail-item-value">¥6,000</p>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">有効期限を設定</label>
+          <input type="date" class="form-input" id="confirmExpiry">
+          <p class="form-hint">年払いなら1年後を設定</p>
+        </div>
+        <div class="form-group">
+          <label class="form-label">入金日</label>
+          <input type="date" class="form-input" id="confirmPaymentDate">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="hideTransferConfirmModal()">キャンセル</button>
+        <button class="btn btn-success" onclick="executeTransferConfirm()">入金確認を完了</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 法人追加モーダル -->
+  <div id="addOrgModal" class="modal-overlay" onclick="if(event.target===this)hideAddOrgModal()">
+    <div class="modal" style="max-width: 600px;">
+      <div class="modal-header">
+        <h3>法人アカウント追加</h3>
+        <button class="modal-close" onclick="hideAddOrgModal()">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">組織名 *</label>
+          <input type="text" class="form-input" id="orgName" placeholder="例：〇〇マンション管理組合">
+        </div>
+        <div class="form-group">
+          <label class="form-label">組織タイプ</label>
+          <select class="form-input" id="orgType">
+            <option value="mansion">マンション管理組合</option>
+            <option value="realtor">不動産会社</option>
+            <option value="senior">高齢者住宅</option>
+            <option value="care">介護事業者</option>
+            <option value="other">その他</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">デバイス上限数</label>
+          <input type="number" class="form-input" id="orgDeviceLimit" value="50" min="1">
+        </div>
+        <div class="form-group">
+          <label class="form-label">有効期限 *</label>
+          <input type="date" class="form-input" id="orgExpiry">
+        </div>
+
+        <div style="border-top: 2px solid var(--gray-200); margin: 24px 0; padding-top: 20px;">
+          <h4 style="font-size: 15px; font-weight: 600; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+            <span>👤</span>管理者アカウント（admin）
+          </h4>
+          <div class="form-group">
+            <label class="form-label">管理者メールアドレス *</label>
+            <input type="email" class="form-input" id="adminEmail" placeholder="admin@example.com">
+            <p class="form-hint">この宛先にログイン情報を送信します</p>
+          </div>
+          <div class="form-group">
+            <label class="form-label">管理者名</label>
+            <input type="text" class="form-input" id="adminName" placeholder="例：山田太郎">
+          </div>
+          <div class="form-group">
+            <label class="form-label">初期パスワード</label>
+            <div style="display: flex; gap: 8px;">
+              <input type="text" class="form-input" id="adminPassword" value="" placeholder="自動生成されます" style="flex: 1;">
+              <button type="button" class="btn btn-secondary" onclick="generatePassword()" style="white-space: nowrap; padding: 12px 16px;">生成</button>
+            </div>
+            <p class="form-hint">初回ログイン後に変更を促します</p>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="hideAddOrgModal()">キャンセル</button>
+        <button class="btn btn-primary" onclick="addOrg()">作成</button>
+      </div>
+    </div>
+  </div>
+
+  <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById('individualTab').style.display = tab === 'individual' ? 'block' : 'none';
+  document.getElementById('orgTab').style.display = tab === 'org' ? 'block' : 'none';
+  document.getElementById('expiringTab').style.display = tab === 'expiring' ? 'block' : 'none';
+  document.getElementById('transferTab').style.display = tab === 'transfer' ? 'block' : 'none';
+}
+
+let currentEditId = '';
+function showPlanEditModal(deviceId, plan, expiry, paymentType) {
+  currentEditId = deviceId;
+  document.getElementById('editDeviceId').textContent = deviceId;
+  document.getElementById('editCurrentPlan').textContent = plan;
+  document.getElementById('editPlan').value = plan === 'Premium' ? 'premium' : 'free';
+  document.getElementById('editPaymentType').value = paymentType || '';
+  document.getElementById('editExpiry').value = expiry || '';
+  document.getElementById('planEditModal').classList.add('show');
+}
+
+function hidePlanEditModal() {
+  document.getElementById('planEditModal').classList.remove('show');
+}
+
+function savePlanEdit() {
+  const plan = document.getElementById('editPlan').value;
+  const expiry = document.getElementById('editExpiry').value;
+  if (plan === 'premium' && !expiry) {
+    alert('有料プランの場合は有効期限を設定してください');
+    return;
+  }
+  alert(currentEditId + ' のプラン情報を更新しました');
+  hidePlanEditModal();
+}
+
+let currentTransferId = '';
+function confirmTransfer(deviceId) {
+  currentTransferId = deviceId;
+  document.getElementById('confirmDeviceId').textContent = deviceId;
+  const oneYearLater = new Date();
+  oneYearLater.setFullYear(oneYearLater.getFullYear() + 1);
+  document.getElementById('confirmExpiry').value = oneYearLater.toISOString().split('T')[0];
+  document.getElementById('confirmPaymentDate').value = new Date().toISOString().split('T')[0];
+  document.getElementById('transferConfirmModal').classList.add('show');
+}
+
+function hideTransferConfirmModal() {
+  document.getElementById('transferConfirmModal').classList.remove('show');
+}
+
+function executeTransferConfirm() {
+  const expiry = document.getElementById('confirmExpiry').value;
+  const paymentDate = document.getElementById('confirmPaymentDate').value;
+  if (!expiry || !paymentDate) {
+    alert('有効期限と入金日を入力してください');
+    return;
+  }
+  alert(currentTransferId + ' の入金確認を完了しました\n有効期限: ' + expiry);
+  hideTransferConfirmModal();
+}
+
+function cancelTransfer(deviceId) {
+  if (confirm(deviceId + ' の振込申請をキャンセルしますか？')) {
+    alert('キャンセルしました');
+  }
+}
+
+// 法人追加
+function showAddOrgModal() {
+  document.getElementById('orgName').value = '';
+  document.getElementById('orgType').value = 'mansion';
+  document.getElementById('orgDeviceLimit').value = '50';
+  document.getElementById('adminEmail').value = '';
+  document.getElementById('adminName').value = '';
+  document.getElementById('adminPassword').value = '';
+  // 1年後をデフォルト
+  const oneYearLater = new Date();
+  oneYearLater.setFullYear(oneYearLater.getFullYear() + 1);
+  document.getElementById('orgExpiry').value = oneYearLater.toISOString().split('T')[0];
+  generatePassword();
+  document.getElementById('addOrgModal').classList.add('show');
+}
+
+function hideAddOrgModal() {
+  document.getElementById('addOrgModal').classList.remove('show');
+}
+
+function generatePassword() {
+  const chars = 'abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let password = '';
+  for (let i = 0; i < 12; i++) {
+    password += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  document.getElementById('adminPassword').value = password;
+}
+
+function addOrg() {
+  const orgName = docum

@@ -6,6 +6,9 @@ use App\Http\Controllers\Auth\PinResetController;
 use App\Http\Controllers\MypageController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\LogController;
+use App\Http\Controllers\Admin\AdminLoginController;
+use App\Http\Controllers\Admin\MasterController;
+use App\Http\Middleware\AdminAuth;
 
 // ゲスト用（未ログイン）
 Route::middleware('guest')->group(function () {
@@ -40,4 +43,20 @@ Route::middleware('auth')->group(function () {
 
     // 検知ログ
     Route::get('/logs', [LogController::class, 'index'])->name('logs');
+});
+
+// ============================================================
+// 管理者画面
+// ============================================================
+
+// 管理者ログイン（未認証）
+Route::get('/admin/login', [AdminLoginController::class, 'showLoginForm'])->name('admin.login');
+Route::post('/admin/login', [AdminLoginController::class, 'login']);
+
+// 管理者認証済み
+Route::middleware(AdminAuth::class)->prefix('admin')->group(function () {
+    Route::get('/', [MasterController::class, 'index'])->name('admin.dashboard');
+    Route::post('/issue', [MasterController::class, 'issueDevice'])->name('admin.issue');
+    Route::post('/issue-bulk', [MasterController::class, 'issueBulk'])->name('admin.issue-bulk');
+    Route::post('/logout', [AdminLoginController::class, 'logout'])->name('admin.logout');
 });

@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>使い方ガイド - みまもりデバイス（仮）</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+:root {
+  --white: #ffffff;
+  --cream: #faf9f7;
+  --beige: #f5f4f0;
+  --gray-100: #f0efeb;
+  --gray-200: #e5e2dc;
+  --gray-300: #d1ccc3;
+  --gray-400: #a8a29e;
+  --gray-500: #78716c;
+  --gray-600: #57534e;
+  --gray-700: #44403c;
+  --gray-800: #292524;
+  --green: #22c55e;
+  --green-dark: #16a34a;
+  --green-light: #dcfce7;
+  --blue: #3b82f6;
+  --blue-light: #eff6ff;
+  --red: #ef4444;
+  --red-light: #fef2f2;
+  --yellow: #eab308;
+  --yellow-light: #fef9c3;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+  --radius: 8px;
+  --radius-lg: 12px;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Noto Sans JP', sans-serif; background: var(--cream); color: var(--gray-800); line-height: 1.8; min-height: 100vh; }
+
+.header { background: var(--white); border-bottom: 1px solid var(--gray-200); padding: 16px 20px; position: sticky; top: 0; z-index: 100; }
+.header-inner { max-width: 800px; margin: 0 auto; display: flex; align-items: center; gap: 16px; }
+.back-btn { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; background: var(--beige); border: none; border-radius: var(--radius); cursor: pointer; font-size: 18px; transition: all 0.2s; text-decoration: none; color: var(--gray-700); }
+.back-btn:hover { background: var(--gray-200); }
+.header-title { font-size: 16px; font-weight: 600; }
+
+.container { max-width: 800px; margin: 0 auto; padding: 24px 20px 60px; }
+
+.page-title { font-size: 24px; font-weight: 700; text-align: center; margin-bottom: 8px; }
+.page-subtitle { font-size: 14px; color: var(--gray-500); text-align: center; margin-bottom: 32px; }
+
+/* 目次ナビ */
+.nav-tabs { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; margin-bottom: 24px; -webkit-overflow-scrolling: touch; }
+.nav-tab { padding: 10px 16px; font-size: 13px; font-weight: 600; color: var(--gray-600); background: var(--white); border: 1px solid var(--gray-200); border-radius: 20px; white-space: nowrap; text-decoration: none; transition: all 0.2s; flex-shrink: 0; }
+.nav-tab:hover { background: var(--gray-100); }
+.nav-tab.active { background: var(--gray-800); color: var(--white); border-color: var(--gray-800); }
+
+.section { background: var(--white); border-radius: var(--radius-lg); padding: 28px 24px; margin-bottom: 24px; box-shadow: var(--shadow-sm); border: 1px solid var(--gray-200); }
+.section-title { font-size: 18px; font-weight: 700; color: var(--gray-800); margin-bottom: 20px; display: flex; align-items: center; gap: 10px; padding-bottom: 12px; border-bottom: 2px solid var(--gray-200); }
+.section-title span { font-size: 22px; }
+
+/* ステップカード */
+.step-list { counter-reset: step; }
+.step-item { display: flex; gap: 16px; margin-bottom: 24px; padding-bottom: 24px; border-bottom: 1px solid var(--gray-100); }
+.step-item:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+.step-number { counter-increment: step; width: 36px; height: 36px; background: var(--gray-800); color: var(--white); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; flex-shrink: 0; }
+.step-number::before { content: counter(step); }
+.step-content { flex: 1; }
+.step-title { font-size: 15px; font-weight: 700; color: var(--gray-800); margin-bottom: 8px; }
+.step-text { font-size: 14px; color: var(--gray-600); }
+.step-image { margin-top: 12px; background: var(--beige); border-radius: var(--radius); padding: 20px; text-align: center; }
+.step-image-placeholder { display: inline-block; padding: 30px 40px; border: 2px dashed var(--gray-300); border-radius: var(--radius); color: var(--gray-400); font-size: 13px; }
+
+/* 注意ボックス */
+.notice-box { background: var(--yellow-light); border-radius: var(--radius); padding: 16px; margin: 16px 0; font-size: 13px; color: var(--gray-700); display: flex; gap: 10px; }
+.notice-box.success { background: var(--green-light); }
+.notice-box.info { background: var(--blue-light); }
+.notice-box.warning { background: var(--red-light); }
+.notice-icon { font-size: 18px; flex-shrink: 0; }
+
+/* LED表示 */
+.led-table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 13px; }
+.led-table th, .led-table td { padding: 12px; text-align: left; border: 1px solid var(--gray-200); }
+.led-table th { background: var(--beige); font-weight: 600; }
+.led-indicator { display: inline-flex; align-items: center; gap: 6px; }
+.led-dot { width: 12px; height: 12px; border-radius: 50%; }
+.led-dot.green { background: var(--green); box-shadow: 0 0 6px var(--green); }
+.led-dot.red { background: var(--red); box-shadow: 0 0 6px var(--red); }
+.led-dot.off { background: var(--gray-300); }
+
+/* 図解 */
+.diagram { background: var(--beige); border-radius: var(--radius); padding: 24px; margin: 16px 0; text-align: center; }
+.diagram-title { font-size: 12px; font-weight: 600; color: var(--gray-500); margin-bottom: 16px; }
+.diagram-content { display: flex; justify-content: center; align-items: flex-end; gap: 40px; }
+.diagram-item { text-align: center; }
+.diagram-icon { font-size: 48px; margin-bottom: 8px; }
+.diagram-label { font-size: 12px; color: var(--gray-600); }
+.diagram-arrow { font-size: 24px; color: var(--gray-400); margin-bottom: 30px; }
+
+/* リスト */
+.check-list { list-style: none; }
+.check-list li { padding: 8px 0; padding-left: 28px; position: relative; font-size: 14px; }
+.check-list li::before { content: '✓'; position: absolute; left: 0; color: var(--green-dark); font-weight: 700; }
+
+/* FAQ */
+.faq-list { list-style: none; }
+.faq-item { background: var(--beige); border-radius: var(--radius); margin-bottom: 12px; overflow: hidden; }
+.faq-question { padding: 16px; font-size: 14px; font-weight: 600; color: var(--gray-800); cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+.faq-question::after { content: '+'; font-size: 20px; color: var(--gray-400); transition: transform 0.2s; }
+.faq-item.open .faq-question::after { transform: rotate(45deg); }
+.faq-answer { display: none; padding: 0 16px 16px; font-size: 13px; color: var(--gray-600); line-height: 1.8; }
+.faq-item.open .faq-answer { display: block; }
+
+/* 操作説明 */
+.operation-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-top: 16px; }
+.operation-card { background: var(--beige); border-radius: var(--radius); padding: 20px; text-align: center; }
+.operation-icon { font-size: 32px; margin-bottom: 12px; }
+.operation-title { font-size: 14px; font-weight: 600; color: var(--gray-800); margin-bottom: 6px; }
+.operation-desc { font-size: 12px; color: var(--gray-500); }
+
+@media (max-width: 480px) {
+  .section { padding: 20px 16px; }
+  .step-item { flex-direction: column; }
+  .step-number { margin-bottom: 8px; }
+  .diagram-content { flex-direction: column; gap: 16px; }
+  .diagram-arrow { transform: rotate(90deg); margin: 0; }
+}
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="header-inner">
+      <a href="javascript:history.back()" class="back-btn">←</a>
+      <h1 class="header-title">使い方ガイド</h1>
+    </div>
+  </header>
+
+  <div class="container">
+    <h1 class="page-title">使い方ガイド</h1>
+    <p class="page-subtitle">みまもりデバイス（仮）の設置から運用まで</p>
+
+    <nav class="nav-tabs">
+      <a href="#setup" class="nav-tab active">📦 設置方法</a>
+      <a href="#start" class="nav-tab">⚡ 初期設定</a>
+      <a href="#console" class="nav-tab">📱 管理画面</a>
+      <a href="#notify" class="nav-tab">🔔 通知設定</a>
+      <a href="#faq" class="nav-tab">❓ よくある質問</a>
+    </nav>
+
+    <!-- 設置方法 -->
+    <section class="section" id="setup">
+      <h2 class="section-title"><span>📦</span>設置方法</h2>
+      
+      <div class="notice-box info">
+        <span class="notice-icon">💡</span>
+        <div>設置は5分で完了します。工事不要、両面テープで貼り付けるだけ。</div>
+      </div>
+
+      <div class="step-list">
+        <div class="step-item">
+          <div class="step-number"></div>
+          <div class="step-content">
+            <h3 class="step-title">設置場所を決める</h3>
+            <p class="step-text">よく通る場所のドア上部（枠の内側）に設置します。玄関、リビング入口、トイレ前などがおすすめです。</p>
+            <div class="diagram">
+              <p class="diagram-title">おすすめの設置場所</p>
+              <div class="diagram-content">
+                <div class="diagram-item">
+                  <div class="diagram-icon">🚪</div>
+                  <div class="diagram-label">玄関</div>
+                </div>
+                <div class="diagram-item">
+                  <div class="diagram-icon">🛋️</div>
+                  <div class="diagram-label">リビング入口</div>
+                </div>
+                <div class="diagram-item">
+                  <div class="diagram-icon">🚽</div>
+                  <div class="diagram-label">トイレ前</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="step-item">
+          <div class="step-number"></div>
+          <div class="step-content">
+            <h3 class="step-title">電波状況を確認</h3>
+            <p class="step-text">設置場所でスマートフォンの電波が届くか確認します。SoftBankまたはauの電波が必要です。</p>
+            <div class="notice-box warning">
+              <span class="notice-icon">⚠️</span>
+              <div>地下室や鉄筋コンクリートの奥まった場所は電波が届かない場合があります。</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="step-item">
+          <div class="step-number"></div>
+          <div class="step-content">
+            <h3 class="step-title">貼り付け面を清掃</h3>
+            <p class="step-text">ドア枠の貼り付け面を乾いた布で拭き、ホコリや油分を取り除きます。</p>
+          </div>
+        </div>
+
+        <div class="step-item">
+          <div class="step-number"></div>
+          <div class="step-content">
+            <h3 class="step-title">本体を貼り付け</h3>
+            <p class="step-text">本体裏面の両面テープ保護シートを剥がし、ドア枠の内側上部に貼り付けます。センサー部分（下面）が下を向くようにしてください。</p>
+            <div class="notice-box">
+              <span class="notice-icon">📍</span>
+              <div>高さは180〜220cmがおすすめ。高すぎると検知しにくくなります。</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 初期設定 -->
+    <section class="section" id="start">
+      <h2 class="section-title"><span>⚡</span>初期設定</h2>
+      
+      <div class="step-list">
+        <div class="step-item">
+          <div class="step-number"></div>
+          <div class="step-content">
+            <h3 class="step-title">電池を入れる</h3>
+            <p class="step-text">本体上部の電池カバーをスライドして開け、単3電池2本を入れます。＋−の向きに注意してください。</p>
+          </div>
+        </div>
+
+        <div class="step-item">
+          <div class="step-number"></div>
+          <div class="step-content">
+            <h3 class="step-title">LEDを確認</h3>
+            <p class="step-text">電池を入れると自動的に接続テストが始まります。約20秒お待ちください。</p>
+            
+            <table class="led-table">
+              <tr>
+                <th>LED表示</th>
+                <th>意味</th>
+                <th>対処</th>
+              </tr>
+              <tr>
+                <td><span class="led-indicator"><span class="led-dot green"></span>緑色点灯（3秒）</span></td>
+                <td>接続成功</td>
+                <td>設置完了！そのままお使いください</td>
+              </tr>
+              <tr>
+                <td><span class="led-indicator"><span class="led-dot red"></span>赤色点滅（遅い）</span></td>
+                <td>電波なし</td>
+                <td>設置場所を変更してください</td>
+              </tr>
+              <tr>
+                <td><span class="led-indicator"><span class="led-dot red"></span>赤色点滅（速い）</span></td>
+                <td>通信エラー</td>
+                <td>電池を入れ直してください</td>
+              </tr>
+            </table>
+          </div>
+        </div>
+
+        <div class="step-item">
+          <div class="step-number"></div>
+          <div class="step-content">
+            <h3 class="step-title">管理画面にログイン</h3>
+            <p class="step-text">製品ラベルに記載のQRコードを読み取るか、以下の情報でログインします。</p>
+            <ul class="check-list">
+              <li>デバイスID：製品ラベルの6文字（例：A3K9X2）</li>
+              <li>PIN：製品ラベルの4桁（例：1234）</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="step-item">
+          <div class="step-number"></div>
+          <div class="step-content">
+            <h3 class="step-title">通知先を設定</h3>
+            <p class="step-text">設定画面でメールアドレスやLINEを登録し、テスト通知で受信を確認します。</p>
+            <div class="notice-box success">
+              <span class="notice-icon">✓</span>
+              <div>これで設定完了です！見守りが開始されました。</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 管理画面 -->
+    <section class="section" id="console">
+      <h2 class="section-title"><span>📱</span>管理画面の使い方</h2>
+      
+      <p style="font-size: 14px; color: var(--gray-600); margin-bottom: 20px;">
+        管理画面（マイページ）では、デバイスの状態確認や各種設定ができます。
+      </p>
+
+      <div class="operation-grid">
+        <div class="operation-card">
+          <div class="operation-icon">📊</div>
+          <div class="operation-title">ステータス確認</div>
+          <div class="operation-desc">現在の状態、最終検知時刻、電池残量を確認</div>
+        </div>
+        <div class="operation-card">
+          <div class="operation-icon">📋</div>
+          <div class="operation-title">検知ログ</div>
+          <div class="operation-desc">過去の検知履歴を日付・時刻で確認</div>
+        </div>
+        <div class="operation-card">
+          <div class="operation-icon">🔔</div>
+          <div class="operation-title">通知設定</div>
+          <div class="operation-desc">通知方法・アラート時間の変更</div>
+        </div>
+        <div class="operation-card">
+          <div class="operation-icon">👥</div>
+          <div class="operation-title">見守り共有</div>
+          <div class="operation-desc">家族や友人と見守り状況を共有</div>
+        </div>
+        <div class="operation-card">
+          <div class="operation-icon">🐕</div>
+          <div class="operation-title">ペット設定</div>
+          <div class="operation-desc">ペット除外機能のON/OFF、閾値調整</div>
+        </div>
+        <div class="operation-card">
+          <div class="operation-icon">🔧</div>
+          <div class="operation-title">故障・交換</div>
+          <div class="operation-desc">不具合の報告、代替機の申請</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 通知設定 -->
+    <section class="section" id="notify">
+      <h2 class="section-title"><span>🔔</span>通知設定</h2>
+      
+      <h3 style="font-size: 15px; font-weight: 600; margin-bottom: 12px;">通知方法</h3>
+      <table class="led-table">
+        <tr>
+          <th>方法</th>
+          <th>対応プラン</th>
+          <th>特徴</th>
+        </tr>
+        <tr>
+          <td>📧 メール</td>
+          <td>無料</td>
+          <td>スマホ・PCどちらでも受信可能</td>
+        </tr>
+        <tr>
+          <td>🌐 Webプッシュ</td>
+          <td>無料</td>
+          <td>ブラウザを開いていなくても通知</td>
+        </tr>
+        <tr>
+          <td>💬 LINE</td>
+          <td>無料</td>
+          <td>LINEアプリで直接受信</td>
+        </tr>
+        <tr>
+          <td>📱 SMS</td>
+          <td>プレミアム</td>
+          <td>電話番号宛にショートメッセージ</td>
+        </tr>
+        <tr>
+          <td>📞 電話（自動音声）</td>
+          <td>プレミアム</td>
+          <td>固定電話でも受信可能</td>
+        </tr>
+      </table>
+
+      <h3 style="font-size: 15px; font-weight: 600; margin: 24px 0 12px;">アラート時間の設定</h3>
+      <p style="font-size: 14px; color: var(--gray-600); margin-bottom: 12px;">
+        人の動きを検知しない時間が設定値を超えると、アラート通知を送信します。
+      </p>
+      <table class="led-table">
+        <tr>
+          <th>設定値</th>
+          <th>おすすめの方</th>
+        </tr>
+        <tr>
+          <td>12時間</td>
+          <td>早期発見を重視する方</td>
+        </tr>
+        <tr>
+          <td>24時間（初期値）</td>
+          <td>一般的な利用</td>
+        </tr>
+        <tr>
+          <td>36〜48時間</td>
+          <td>外出が多い方</td>
+        </tr>
+        <tr>
+          <td>72時間</td>
+          <td>旅行などで長期不在が多い方</td>
+        </tr>
+      </table>
+
+      <div class="notice-box info">
+        <span class="notice-icon">💡</span>
+        <div>旅行などで長期不在になる場合は、事前にアラート時間を長めに設定するか、「タイマー停止」機能をお使いください。</div>
+      </div>
+    </section>
+
+    <!-- よくある質問 -->
+    <section class="section" id="faq">
+      <h2 class="section-title"><span>❓</span>よくある質問</h2>
+      
+      <ul class="faq-list">
+        <li class="faq-item">
+          <div class="faq-question">電池はどのくらい持ちますか？</div>
+          <div class="faq-answer">
+            単3電池2本で約2年間使用できる設計です。電池残量が20%を下回ると通知でお知らせします。電池は市販のアルカリ電池をご使用ください。
+          </div>
+        </li>
+        <li class="faq-item">
+          <div class="faq-question">ペットがいても使えますか？</div>
+          <div class="faq-answer">
+            はい、ペット除外機能があります。センサーの距離測定により、小型〜中型のペット（体高約50cm以下）は除外できます。設定画面でON/OFFや閾値の調整が可能です。
+          </div>
+        </li>
+        <li class="faq-item">
+          <div class="faq-question">賃貸でも使えますか？</div>
+          <div class="faq-answer">
+            はい、両面テープで固定するだけなので、賃貸住宅でも安心してお使いいただけます。退去時は剥がすだけでOKです。
+          </div>
+        </li>
+        <li class="faq-item">
+          <div class="faq-question">Wi-Fiは必要ですか？</div>
+          <div class="faq-answer">
+            いいえ、不要です。本製品はLTE通信を内蔵しているため、Wi-Fi環境がなくても使用できます。SoftBankまたはau（KDDI）のLTE電波が届く場所であれば利用可能です。
+          </div>
+        </li>
+        <li class="faq-item">
+          <div class="faq-question">月額料金はかかりますか？</div>
+          <div class="faq-answer">
+            基本機能（メール・Webプッシュ・LINE通知）は無料でご利用いただけます。SMS通知や電話通知をご希望の場合は、プレミアムプラン（月額¥500）へのアップグレードが必要です。
+          </div>
+        </li>
+        <li class="faq-item">
+          <div class="faq-question">複数の人で見守りを共有できますか？</div>
+          <div class="faq-answer">
+            はい、「ウォッチャー」機能で見守り情報を共有できます。無料プランは2名まで、プレミアムプランは5名まで共有可能です。招待はメールアドレスで行います。
+          </div>
+        </li>
+        <li class="faq-item">
+          <div class="faq-question">通知が来ない場合は？</div>
+          <div class="faq-answer">
+            以下をご確認ください：<br>
+            ・迷惑メールフォルダに振り分けられていないか<br>
+            ・メールアドレス/電話番号が正しく登録されているか<br>
+            ・設定画面の「テスト通知」で受信できるか<br>
+            改善しない場合は、お問い合わせフォームよりご連絡ください。
+          </div>
+        </li>
+        <li class="faq-item">
+          <div class="faq-question">故障した場合は？</div>
+          <div class="faq-answer">
+            購入後1年以内の故障は無償で交換いたします。故障・交換申請フォームから症状をお知らせください。代替機をお送りします（故障品の返送は不要です）。
+          </div>
+        </li>
+        <li class="faq-item">
+          <div class="faq-question">引っ越しの場合は？</div>
+          <div class="faq-answer">
+            そのまま新しい住所でお使いいただけます。本体を取り外し、新居のドア枠に再度貼り付けてください。両面テープは市販品で代用可能です。
+          </div>
+        </li>
+        <li class="faq-item">
+          <div class="faq-question">プライバシーは大丈夫ですか？</div>
+          <div class="faq-answer">
+            本製品はカメラやマイクを搭載していないため、映像や音声は一切記録しません。取得するのは「人の動きの有無」と「電池残量」のみです。詳しくはプライバシーポリシーをご確認ください。
+          </div>
+        </li>
+      </ul>
+    </section>
+
+    <!-- お問い合わせへの導線 -->
+    <div style="text-align: center; padding: 32px 0;">
+      <p style="font-size: 14px; color: var(--gray-500); margin-bottom: 16px;">解決しない場合はお気軽にお問い合わせください</p>
+      <a href="contact.html" style="display: inline-block; padding: 14px 32px; background: var(--gray-800); color: var(--white); text-decoration: none; border-radius: var(--radius); font-size: 14px; font-weight: 600; transition: all 0.2s;">お問い合わせ</a>
+    </div>
+  </div>
+
+  <script>
+// FAQ開閉
+document.querySelectorAll('.faq-question').forEach(q => {
+  q.addEventListener('click', () => {
+    q.parentElement.classList.toggle('open');
+  });
+});
+
+// ナビタブのスムーズスクロール
+document.querySelectorAll('.nav-tab').forEach(tab => {
+  tab.addEventListener('click', function(e) {
+    e.preventDefault();
+    const targetId = this.getAttribute('href').substring(1);
+    const targetElement = document.getElementById(targetId);
+    if (targetElement) {
+      const headerHeight = 70;
+      const targetPosition = targetElement.offsetTop - headerHeight;
+      window.scrollTo({ top: targetPosition, behavior: 'smooth' });
+      
+      document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+      this.classList.add('active');
+    }
+  });
+});
+
+// スクロールに応じてアクティブタブを更新
+window.addEventListener('scroll', function() {
+  const sections = document.querySelectorAll('.section[id]');
+  const scrollPos = window.scrollY + 100;
+  
+  sections.forEach(section => {
+    if (section.offsetTop <= scrollPos && section.offsetTop + section.offsetHeight > scrollPos) {
+      const id = section.getAttribute('id');
+      document.querySelectorAll('.nav-tab').forEach(tab => {
+        tab.classList.remove('active');
+        if (tab.getAttribute('href') === '#' + id) {
+          tab.classList.add('active');
+        }
+      });
+    }
+  });
+});
+  </script>
+</body>
+</html>

@@ -4,72 +4,77 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'みまもりデバイス')</title>
+    <title>@yield('title', '管理画面 - みまもりデバイス')</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Noto Sans JP', sans-serif;
-            background: #f5f0e8;
+            background: #f0ede6;
             color: #4a4a4a;
             min-height: 100vh;
         }
         .header {
-            background: #fff;
-            border-bottom: 1px solid #e0d8cc;
+            background: #5a5245;
             padding: 12px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
         .header-logo {
-            font-size: 16px;
-            font-weight: 500;
-            color: #8b7e6a;
+            font-size: 14px;
+            color: #e0d8cc;
             text-decoration: none;
         }
-        .header-logo span {
-            font-size: 18px;
-            margin-right: 4px;
+        .header-logo span { margin-right: 4px; }
+        .header-badge {
+            background: #8b7e6a;
+            color: #fff;
+            font-size: 10px;
+            padding: 2px 8px;
+            border-radius: 10px;
+            margin-left: 8px;
         }
         .header-nav {
             display: flex;
             gap: 16px;
             align-items: center;
         }
-        .header-nav a {
-            color: #8b7e6a;
-            text-decoration: none;
-            font-size: 13px;
-        }
-        .header-nav a:hover { color: #5a5245; }
-        .header-device-id {
+        .header-nav span {
             font-size: 12px;
-            color: #aaa;
-            font-family: monospace;
+            color: #c0b8aa;
         }
+        .header-nav button {
+            background: none;
+            border: none;
+            color: #c0b8aa;
+            font-size: 12px;
+            cursor: pointer;
+            font-family: 'Noto Sans JP', sans-serif;
+        }
+        .header-nav button:hover { color: #fff; }
         .main-content {
-            max-width: 640px;
+            max-width: 960px;
             margin: 0 auto;
             padding: 24px 16px;
         }
         .btn {
             display: inline-block;
-            padding: 10px 24px;
+            padding: 8px 20px;
             border-radius: 6px;
             border: none;
             font-family: 'Noto Sans JP', sans-serif;
-            font-size: 14px;
+            font-size: 13px;
             cursor: pointer;
             text-decoration: none;
             text-align: center;
             transition: opacity 0.2s;
         }
         .btn:hover { opacity: 0.85; }
-        .btn-primary { background: #8b7e6a; color: #fff; }
+        .btn-primary { background: #5a5245; color: #fff; }
         .btn-secondary { background: #e0d8cc; color: #5a5245; }
-        .btn-block { display: block; width: 100%; }
+        .btn-sm { padding: 6px 14px; font-size: 12px; }
         .card {
             background: #fff;
             border-radius: 12px;
@@ -87,18 +92,16 @@
     </style>
 </head>
 <body>
-    @auth
+    @auth('admin')
     <div class="header">
-        <a href="/mypage" class="header-logo">
-            みまもりデバイス
+        <a href="/admin" class="header-logo">
+            みまもりデバイス<span class="header-badge">ADMIN</span>
         </a>
         <div class="header-nav">
-            <span class="header-device-id">{{ Auth::user()->device_id }}</span>
-            <a href="/mypage">マイページ</a>
-            <a href="/settings">設定</a>
-            <form method="POST" action="/logout" style="display:inline;">
+            <span>{{ Auth::guard('admin')->user()->name }}</span>
+            <form method="POST" action="/admin/logout" style="display:inline;">
                 @csrf
-                <button type="submit" style="background:none;border:none;color:#8b7e6a;font-size:13px;cursor:pointer;font-family:'Noto Sans JP',sans-serif;">ログアウト</button>
+                <button type="submit">ログアウト</button>
             </form>
         </div>
     </div>

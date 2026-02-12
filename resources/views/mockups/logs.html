@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>検知ログ - みまもりデバイス（仮）</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+:root {
+  --white: #ffffff;
+  --cream: #faf9f7;
+  --beige: #f5f4f0;
+  --gray-100: #f0efeb;
+  --gray-200: #e5e2dc;
+  --gray-300: #d1ccc3;
+  --gray-400: #a8a29e;
+  --gray-500: #78716c;
+  --gray-600: #57534e;
+  --gray-700: #44403c;
+  --gray-800: #292524;
+  --green: #22c55e;
+  --green-dark: #16a34a;
+  --green-light: #dcfce7;
+  --blue: #3b82f6;
+  --blue-light: #eff6ff;
+  --red: #ef4444;
+  --red-light: #fef2f2;
+  --yellow: #eab308;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+  --radius: 8px;
+  --radius-lg: 12px;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Noto Sans JP', sans-serif; background: var(--cream); color: var(--gray-800); line-height: 1.6; min-height: 100vh; }
+
+.header { background: var(--white); border-bottom: 1px solid var(--gray-200); padding: 16px 20px; position: sticky; top: 0; z-index: 100; }
+.header-inner { max-width: 640px; margin: 0 auto; display: flex; align-items: center; gap: 16px; }
+.back-btn { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; background: var(--beige); border: none; border-radius: var(--radius); cursor: pointer; font-size: 18px; transition: all 0.2s; text-decoration: none; color: var(--gray-700); }
+.back-btn:hover { background: var(--gray-200); }
+.header-title { font-size: 16px; font-weight: 600; flex: 1; }
+.header-id { font-size: 13px; font-weight: 600; color: var(--gray-500); font-family: monospace; letter-spacing: 0.05em; }
+
+.container { max-width: 640px; margin: 0 auto; padding: 24px 20px; }
+
+.filter-bar { display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
+.filter-input { flex: 1; min-width: 140px; padding: 12px 14px; font-size: 14px; font-family: inherit; border: 1px solid var(--gray-300); border-radius: var(--radius); background: var(--white); }
+.filter-input:focus { outline: none; border-color: var(--gray-500); }
+.filter-select { padding: 12px 14px; font-size: 14px; font-family: inherit; border: 1px solid var(--gray-300); border-radius: var(--radius); background: var(--white); min-width: 120px; }
+
+.summary-bar { display: flex; gap: 16px; padding: 16px 20px; background: var(--white); border-radius: var(--radius-lg); margin-bottom: 20px; box-shadow: var(--shadow-sm); border: 1px solid var(--gray-200); }
+.summary-item { text-align: center; flex: 1; }
+.summary-value { font-size: 24px; font-weight: 700; color: var(--gray-800); }
+.summary-value.human { color: var(--green-dark); }
+.summary-value.pet { color: var(--yellow); }
+.summary-label { font-size: 11px; color: var(--gray-500); margin-top: 2px; }
+
+.log-section { background: var(--white); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-sm); border: 1px solid var(--gray-200); }
+.log-date-header { padding: 12px 20px; background: var(--beige); font-size: 13px; font-weight: 600; color: var(--gray-700); border-bottom: 1px solid var(--gray-200); position: sticky; top: 61px; z-index: 10; }
+.log-item { display: flex; align-items: center; padding: 14px 20px; border-bottom: 1px solid var(--gray-100); transition: background 0.2s; }
+.log-item:last-child { border-bottom: none; }
+.log-item:hover { background: var(--gray-100); }
+.log-time { font-size: 14px; font-weight: 600; color: var(--gray-800); min-width: 60px; font-family: monospace; }
+.log-type { display: flex; align-items: center; gap: 6px; min-width: 80px; }
+.log-type-icon { font-size: 16px; }
+.log-type-text { font-size: 13px; font-weight: 500; }
+.log-type-text.human { color: var(--green-dark); }
+.log-type-text.pet { color: var(--yellow); }
+.log-details { flex: 1; display: flex; gap: 16px; justify-content: flex-end; }
+.log-detail { font-size: 12px; color: var(--gray-500); display: flex; align-items: center; gap: 4px; }
+.log-detail svg { width: 14px; height: 14px; }
+
+.load-more { display: block; width: 100%; padding: 16px; font-size: 14px; font-weight: 500; font-family: inherit; color: var(--gray-600); background: var(--beige); border: none; border-radius: var(--radius-lg); cursor: pointer; margin-top: 20px; transition: all 0.2s; }
+.load-more:hover { background: var(--gray-200); }
+
+.empty-state { text-align: center; padding: 60px 20px; color: var(--gray-500); }
+.empty-state-icon { font-size: 48px; margin-bottom: 16px; }
+.empty-state-text { font-size: 14px; }
+
+@media (max-width: 480px) {
+  .filter-bar { flex-direction: column; }
+  .filter-input, .filter-select { width: 100%; }
+  .log-details { gap: 12px; }
+  .summary-bar { gap: 8px; padding: 12px 16px; }
+  .summary-value { font-size: 20px; }
+}
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="header-inner">
+      <a href="mypage.html" class="back-btn">←</a>
+      <h1 class="header-title">検知ログ</h1>
+      <span class="header-id">A3K9X2</span>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="filter-bar">
+      <input type="date" class="filter-input" id="dateFrom" value="2025-01-08">
+      <input type="date" class="filter-input" id="dateTo" value="2025-01-15">
+      <select class="filter-select" id="typeFilter">
+        <option value="">すべて</option>
+        <option value="human">人間のみ</option>
+        <option value="pet">ペットのみ</option>
+      </select>
+    </div>
+
+    <div class="summary-bar">
+      <div class="summary-item">
+        <p class="summary-value">156</p>
+        <p class="summary-label">総検知数</p>
+      </div>
+      <div class="summary-item">
+        <p class="summary-value human">142</p>
+        <p class="summary-label">人間</p>
+      </div>
+      <div class="summary-item">
+        <p class="summary-value pet">14</p>
+        <p class="summary-label">ペット</p>
+      </div>
+    </div>
+
+    <div class="log-section">
+      <div class="log-date-header">2025年1月15日（水）</div>
+      <div class="log-item">
+        <span class="log-time">14:35</span>
+        <div class="log-type">
+          <span class="log-type-icon">👤</span>
+          <span class="log-type-text human">人間</span>
+        </div>
+        <div class="log-details">
+          <span class="log-detail">35cm</span>
+          <span class="log-detail">
+            <svg viewBox="0 0 24 12"><rect x="0" y="0" width="20" height="12" rx="2" fill="none" stroke="#16a34a" stroke-width="1.5"/><rect x="2" y="2" width="14" height="8" rx="1" fill="#22c55e"/><rect x="20" y="3" width="3" height="6" rx="1" fill="#16a34a"/></svg>
+            2.85V
+          </span>
+        </div>
+      </div>
+      <div class="log-item">
+        <span class="log-time">14:30</span>
+        <div class="log-type">
+          <span class="log-type-icon">🐕</span>
+          <span class="log-type-text pet">ペット</span>
+        </div>
+        <div class="log-details">
+          <span class="log-detail">142cm</span>
+          <span class="log-detail">
+            <svg viewBox="0 0 24 12"><rect x="0" y="0" width="20" height="12" rx="2" fill="none" stroke="#16a34a" stroke-width="1.5"/><rect x="2" y="2" width="14" height="8" rx="1" fill="#22c55e"/><rect x="20" y="3" width="3" height="6" rx="1" fill="#16a34a"/></svg>
+            2.85V
+          </span>
+        </div>
+      </div>
+      <div class="log-item">
+        <span class="log-time">10:25</span>
+        <div class="log-type">
+          <span class="log-type-icon">👤</span>
+          <span class="log-type-text human">人間</span>
+        </div>
+        <div class="log-details">
+          <span class="log-detail">28cm</span>
+          <span class="log-detail">
+            <svg viewBox="0 0 24 12"><rect x="0" y="0" width="20" height="12" rx="2" fill="none" stroke="#16a34a" stroke-width="1.5"/><rect x="2" y="2" width="14" height="8" rx="1" fill="#22c55e"/><rect x="20" y="3" width="3" height="6" rx="1" fill="#16a34a"/></svg>
+            2.86V
+          </span>
+        </div>
+      </div>
+      <div class="log-item">
+        <span class="log-time">08:12</span>
+        <div class="log-type">
+          <span class="log-type-icon">👤</span>
+          <span class="log-type-text human">人間</span>
+        </div>
+        <div class="log-details">
+          <span class="log-detail">32cm</span>
+          <span class="log-detail">
+            <svg viewBox="0 0 24 12"><rect x="0" y="0" width="20" height="12" rx="2" fill="none" stroke="#16a34a" stroke-width="1.5"/><rect x="2" y="2" width="14" height="8" rx="1" fill="#22c55e"/><rect x="20" y="3" width="3" height="6" rx="1" fill="#16a34a"/></svg>
+            2.86V
+          </span>
+        </div>
+      </div>
+
+      <div class="log-date-header">2025年1月14日（火）</div>
+      <div class="log-item">
+        <span class="log-time">22:45</span>
+        <div class="log-type">
+          <span class="log-type-icon">👤</span>
+          <span class="log-type-text human">人間</span>
+        </div>
+        <div class="log-details">
+          <span class="log-detail">30cm</span>
+          <span class="log-detail">
+            <svg viewBox="0 0 24 12"><rect x="0" y="0" width="20" height="12" rx="2" fill="none" stroke="#16a34a" stroke-width="1.5"/><rect x="2" y="2" width="14" height="8" rx="1" fill="#22c55e"/><rect x="20" y="3" width="3" height="6" rx="1" fill="#16a34a"/></svg>
+            2.86V
+          </span>
+        </div>
+      </div>
+      <div class="log-item">
+        <span class="log-time">18:30</span>
+        <div class="log-type">
+          <span class="log-type-icon">🐕</span>
+          <span class="log-type-text pet">ペット</span>
+        </div>
+        <div class="log-details">
+          <span class="log-detail">155cm</span>
+          <span class="log-detail">
+            <svg viewBox="0 0 24 12"><rect x="0" y="0" width="20" height="12" rx="2" fill="none" stroke="#16a34a" stroke-width="1.5"/><rect x="2" y="2" width="14" height="8" rx="1" fill="#22c55e"/><rect x="20" y="3" width="3" height="6" rx="1" fill="#16a34a"/></svg>
+            2.86V
+          </span>
+        </div>
+      </div>
+      <div class="log-item">
+        <span class="log-time">15:22</span>
+        <div class="log-type">
+          <span class="log-type-icon">👤</span>
+          <span class="log-type-text human">人間</span>
+        </div>
+        <div class="log-details">
+          <span class="log-detail">33cm</span>
+          <span class="log-detail">
+            <svg viewBox="0 0 24 12"><rect x="0" y="0" width="20" height="12" rx="2" fill="none" stroke="#16a34a" stroke-width="1.5"/><rect x="2" y="2" width="14" height="8" rx="1" fill="#22c55e"/><rect x="20" y="3" width="3" height="6" rx="1" fill="#16a34a"/></svg>
+            2.87V
+          </span>
+        </div>
+      </div>
+      <div class="log-item">
+        <span class="log-time">12:08</span>
+        <div class="log-type">
+          <span class="log-type-icon">👤</span>
+          <span class="log-type-text human">人間</span>
+        </div>
+        <div class="log-details">
+          <span class="log-detail">29cm</span>
+          <span class="log-detail">
+            <svg viewBox="0 0 24 12"><rect x="0" y="0" width="20" height="12" rx="2" fill="none" stroke="#16a34a" stroke-width="1.5"/><rect x="2" y="2" width="14" height="8" rx="1" fill="#22c55e"/><rect x="20" y="3" width="3" height="6" rx="1" fill="#16a34a"/></svg>
+            2.87V
+          </span>
+        </div>
+      </div>
+      <div class="log-item">
+        <span class="log-time">07:55</span>
+        <div class="log-type">
+          <span class="log-type-icon">👤</span>
+          <span class="log-type-text human">人間</span>
+        </div>
+        <div class="log-details">
+          <span class="log-detail">31cm</span>
+          <span class="log-detail">
+            <svg viewBox="0 0 24 12"><rect x="0" y="0" width="20" height="12" rx="2" fill="none" stroke="#16a34a" stroke-width="1.5"/><rect x="2" y="2" width="14" height="8" rx="1" fill="#22c55e"/><rect x="20" y="3" width="3" height="6" rx="1" fill="#16a34a"/></svg>
+            2.87V
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <button class="load-more">さらに読み込む</button>
+  </div>
+</body>
+</html>
