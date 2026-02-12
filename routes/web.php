@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\DeviceLoginController;
+use App\Http\Controllers\Auth\PinResetController;
 use App\Http\Controllers\MypageController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\LogController;
@@ -10,6 +11,17 @@ use App\Http\Controllers\LogController;
 Route::middleware('guest')->group(function () {
     Route::get('/login', [DeviceLoginController::class, 'showLoginForm'])->name('login');
     Route::post('/login', [DeviceLoginController::class, 'login']);
+});
+
+// PIN再設定（ゲスト・認証済み両方アクセス可）
+Route::middleware('throttle:5,1')->group(function () {
+    Route::get('/pin-reset', [PinResetController::class, 'showForm'])->name('pin-reset');
+    Route::post('/pin-reset', [PinResetController::class, 'verifyDevice']);
+    Route::post('/pin-reset/send-email', [PinResetController::class, 'sendResetEmail']);
+    Route::get('/pin-reset/initial', [PinResetController::class, 'showInitialPinForm']);
+    Route::post('/pin-reset/initial', [PinResetController::class, 'resetWithInitialPin']);
+    Route::get('/pin-reset/token/{token}', [PinResetController::class, 'showNewPinForm']);
+    Route::post('/pin-reset/token/{token}', [PinResetController::class, 'resetWithToken']);
 });
 
 // 認証済みユーザー
