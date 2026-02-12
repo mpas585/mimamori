@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\DeviceLoginController;
 use App\Http\Controllers\MypageController;
+use App\Http\Controllers\SettingsController;
 
 // ゲスト用（未ログイン）
 Route::middleware('guest')->group(function () {
@@ -17,4 +18,10 @@ Route::middleware('auth')->group(function () {
     });
     Route::get('/mypage', [MypageController::class, 'index'])->name('mypage');
     Route::post('/logout', [DeviceLoginController::class, 'logout'])->name('logout');
+
+    // 設定
+    Route::get('/settings', [SettingsController::class, 'index'])->name('settings');
+    Route::post('/settings/device', [SettingsController::class, 'updateDevice']);
+    Route::post('/settings/notification', [SettingsController::class, 'updateNotification']);
+    Route::post('/settings/test-notification', [SettingsController::class, 'sendTestNotification']);
 });
