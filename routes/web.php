@@ -18,7 +18,7 @@ Route::middleware('guest')->group(function () {
 });
 
 // PIN再設定（ゲスト・認証済み両方アクセス可）
-Route::middleware('throttle:5,1')->group(function () {
+Route::middleware('throttle:15,1')->group(function () {
     Route::get('/pin-reset', [PinResetController::class, 'showForm'])->name('pin-reset');
     Route::post('/pin-reset', [PinResetController::class, 'verifyDevice']);
     Route::post('/pin-reset/send-email', [PinResetController::class, 'sendResetEmail']);
@@ -33,6 +33,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/', function () {
         return redirect('/mypage');
     });
+
     Route::get('/mypage', [MypageController::class, 'index'])->name('mypage');
     Route::post('/mypage/toggle-watch', [MypageController::class, 'toggleWatch']);
     Route::post('/logout', [DeviceLoginController::class, 'logout'])->name('logout');
