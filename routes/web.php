@@ -33,6 +33,7 @@ Route::middleware('auth')->group(function () {
         return redirect('/mypage');
     });
     Route::get('/mypage', [MypageController::class, 'index'])->name('mypage');
+    Route::post('/mypage/toggle-watch', [MypageController::class, 'toggleWatch']);
     Route::post('/logout', [DeviceLoginController::class, 'logout'])->name('logout');
 
     // 設定
