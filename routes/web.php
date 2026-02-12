@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\DeviceLoginController;
 use App\Http\Controllers\MypageController;
 use App\Http\Controllers\SettingsController;
+use App\Http\Controllers\LogController;
 
 // ゲスト用（未ログイン）
 Route::middleware('guest')->group(function () {
@@ -24,4 +25,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/settings/device', [SettingsController::class, 'updateDevice']);
     Route::post('/settings/notification', [SettingsController::class, 'updateNotification']);
     Route::post('/settings/test-notification', [SettingsController::class, 'sendTestNotification']);
+
+    // 検知ログ
+    Route::get('/logs', [LogController::class, 'index'])->name('logs');
 });

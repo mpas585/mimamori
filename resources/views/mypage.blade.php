@@ -77,5 +77,8 @@
             </tbody>
         </table>
     @endif
+    <div style="text-align:center;margin-top:12px;">
+        <a href="/logs" style="color:#8b7e6a;font-size:13px;text-decoration:none;">すべてのログを見る →</a>
+    </div>
 </div>
 @endsection
