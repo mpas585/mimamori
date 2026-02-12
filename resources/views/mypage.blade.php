@@ -78,6 +78,7 @@
     .status-indicator.error { background: var(--red-light); }
     .status-indicator.offline { background: var(--gray-200); }
     .status-indicator.paused { background: var(--gray-100); }
+
     .status-dot-inner {
         width: 20px;
         height: 20px;
@@ -95,7 +96,8 @@
     .status-indicator.ok::after {
         content: '';
         position: absolute;
-        top: 50%; left: 50%;
+        top: 50%;
+        left: 50%;
         transform: translate(-50%, -50%);
         border-radius: 50%;
         border: 2px solid var(--green);
@@ -103,10 +105,12 @@
         animation: radar-pulse 3.5s ease-out infinite;
     }
     .status-indicator.ok::after { animation-delay: 1.75s; }
+
     @keyframes radar-pulse {
         0% { width: 20px; height: 20px; opacity: 0.6; }
         100% { width: 80px; height: 80px; opacity: 0; }
     }
+
     .status-indicator.paused::before,
     .status-indicator.paused::after { display: none; }
 
@@ -116,6 +120,7 @@
 
     .status-text h2 { font-size: 18px; font-weight: 600; margin-bottom: 4px; color: var(--gray-800); }
     .status-text p { font-size: 14px; color: var(--gray-500); font-weight: 500; }
+
     .status-id {
         font-size: 13px;
         font-weight: 600;
@@ -125,6 +130,7 @@
         padding: 6px 12px;
         border-radius: 20px;
     }
+
     .status-details {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
@@ -193,7 +199,6 @@
         transition: all 0.2s;
     }
     .section-action:hover { background: var(--gray-200); color: var(--gray-800); }
-
     .card-body { padding: 16px 20px; }
 
     /* 検知ログ */
@@ -212,12 +217,7 @@
     .log-type.human { color: var(--green-dark); }
     .log-type.pet { color: var(--gray-400); }
     .log-battery { color: var(--gray-400); font-size: 12px; }
-    .log-empty {
-        padding: 32px 20px;
-        text-align: center;
-        color: var(--gray-400);
-        font-size: 13px;
-    }
+    .log-empty { padding: 32px 20px; text-align: center; color: var(--gray-400); font-size: 13px; }
 
     /* フッター */
     .footer {
@@ -260,6 +260,7 @@
     .watch-status-label { font-size: 16px; color: var(--gray-600); font-weight: 500; }
     .watch-status-text { font-size: 18px; font-weight: 700; color: var(--gray-800); }
     .watch-status-text.paused { color: var(--gray-400); }
+
     .watch-toggle {
         position: relative;
         width: 52px;
@@ -275,14 +276,17 @@
     .watch-toggle::after {
         content: '';
         position: absolute;
-        top: 3px; left: 3px;
-        width: 24px; height: 24px;
+        top: 3px;
+        left: 3px;
+        width: 24px;
+        height: 24px;
         background: var(--white);
         border-radius: 50%;
         transition: all 0.2s;
         box-shadow: 0 1px 3px rgba(0,0,0,0.2);
     }
     .watch-toggle.active::after { left: 25px; }
+
     .watch-status-btn {
         padding: 10px 20px;
         font-size: 14px;
@@ -329,7 +333,8 @@
     }
     .modal-header h3 { font-size: 16px; font-weight: 600; }
     .modal-close {
-        width: 32px; height: 32px;
+        width: 32px;
+        height: 32px;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -341,11 +346,7 @@
         color: var(--gray-600);
     }
     .modal-close:hover { background: var(--gray-200); }
-    .modal-body {
-        padding: 20px;
-        overflow-y: auto;
-        flex: 1;
-    }
+    .modal-body { padding: 20px; overflow-y: auto; flex: 1; }
     .modal-footer {
         padding: 16px 20px;
         border-top: 1px solid var(--gray-100);
@@ -378,11 +379,7 @@
         transition: all 0.2s;
         font-family: 'Noto Sans JP', sans-serif;
     }
-    .timer-tab.active {
-        background: var(--white);
-        color: var(--gray-800);
-        box-shadow: var(--shadow-sm);
-    }
+    .timer-tab.active { background: var(--white); color: var(--gray-800); box-shadow: var(--shadow-sm); }
     .timer-tab:not(.active):hover { color: var(--gray-700); }
     .timer-content { display: none; }
     .timer-content.active { display: block; }
@@ -416,7 +413,8 @@
     .schedule-item-main { font-size: 14px; font-weight: 600; color: var(--gray-800); margin-bottom: 2px; }
     .schedule-item-sub { font-size: 12px; color: var(--gray-500); }
     .schedule-item-delete {
-        width: 28px; height: 28px;
+        width: 28px;
+        height: 28px;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -486,7 +484,8 @@
     /* 曜日選択 */
     .weekday-selector { display: flex; gap: 6px; margin-bottom: 16px; }
     .weekday-btn {
-        width: 40px; height: 40px;
+        width: 40px;
+        height: 40px;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -532,84 +531,85 @@
 @endsection
 
 @section('content')
-    {{-- 通知先未登録バナー --}}
-    @if($showNotifyBanner)
-    <div class="notify-banner">
-        <div class="notify-banner-inner">
-            <div class="notify-banner-text">
-                <span>⚠️</span>
-                <p>通知先を登録してください</p>
-            </div>
-            <a href="/settings" class="notify-banner-btn">登録する</a>
+
+{{-- 通知先未登録バナー --}}
+@if($showNotifyBanner)
+<div class="notify-banner">
+    <div class="notify-banner-inner">
+        <div class="notify-banner-text">
+            <span>⚠️</span>
+            <p>通知先を登録してください</p>
         </div>
+        <a href="/settings" class="notify-banner-btn">登録する</a>
     </div>
-    @endif
+</div>
+@endif
 
-    {{-- ステータスカード --}}
-    <div class="status-card{{ $device->away_mode ? ' paused' : '' }}" id="statusCard">
-        <div class="status-header">
-            <div class="status-main">
-                @php
-                    $indicatorClass = match($device->status) {
-                        'normal' => 'ok',
-                        'warning' => 'warning',
-                        'alert' => 'error',
-                        'offline' => 'offline',
-                        default => 'offline',
-                    };
-                    if ($device->away_mode) $indicatorClass = 'paused';
-                @endphp
-                <div class="status-indicator {{ $indicatorClass }}" id="statusIndicator">
-                    <div class="status-dot-inner"></div>
-                </div>
-                <div class="status-text">
-                    <h2 id="statusTitle">
-                        @if($device->away_mode)
-                            見守り停止中
-                        @else
-                            @switch($device->status)
-                                @case('normal') 正常稼働中 @break
-                                @case('warning') 注意 @break
-                                @case('alert') 未検知アラート @break
-                                @case('offline') 通信途絶 @break
-                                @default 未稼働
-                            @endswitch
-                        @endif
-                    </h2>
-                    <p id="statusSubtitle">
-                        @if($device->away_mode)
-                            タイマーまたは手動でONに戻せます
-                        @elseif($device->last_human_detected_at)
-                            最終検知: {{ $device->last_human_detected_at->diffForHumans() }}
-                        @else
-                            検知データなし
-                        @endif
-                    </p>
-                </div>
+{{-- ステータスカード --}}
+<div class="status-card{{ $device->away_mode ? ' paused' : '' }}" id="statusCard">
+    <div class="status-header">
+        <div class="status-main">
+            @php
+                $indicatorClass = match($device->status) {
+                    'normal' => 'ok',
+                    'warning' => 'warning',
+                    'alert' => 'error',
+                    'offline' => 'offline',
+                    default => 'offline',
+                };
+                if ($device->away_mode) $indicatorClass = 'paused';
+            @endphp
+            <div class="status-indicator {{ $indicatorClass }}" id="statusIndicator">
+                <div class="status-dot-inner"></div>
             </div>
-            <span class="status-id">{{ $device->device_id }}</span>
+            <div class="status-text">
+                <h2 id="statusTitle">
+                    @if($device->away_mode)
+                        見守り停止中
+                    @else
+                        @switch($device->status)
+                            @case('normal') 正常稼働中 @break
+                            @case('warning') 注意 @break
+                            @case('alert') 未検知アラート @break
+                            @case('offline') 通信途絶 @break
+                            @default 未稼働
+                        @endswitch
+                    @endif
+                </h2>
+                <p id="statusSubtitle">
+                    @if($device->away_mode)
+                        タイマーまたは手動でONに戻せます
+                    @elseif($device->last_human_detected_at)
+                        最終検知: {{ $device->last_human_detected_at->diffForHumans() }}
+                    @else
+                        検知データなし
+                    @endif
+                </p>
+            </div>
         </div>
+        <span class="status-id">{{ $device->device_id }}</span>
+    </div>
 
-        <div class="status-details">
-            <div class="detail-item">
-                <p class="detail-label">電池残量</p>
-                <p class="detail-value {{ $device->battery_pct !== null ? ($device->battery_pct > 50 ? 'good' : ($device->battery_pct > 20 ? 'warn' : 'bad')) : '' }}">
-                    @if($device->battery_pct !== null)
+    <div class="status-details">
+        <div class="detail-item">
+            <p class="detail-label">電池残量</p>
+            <p class="detail-value {{ $device->battery_pct !== null ? ($device->battery_pct > 50 ? 'good' : ($device->battery_pct > 20 ? 'warn' : 'bad')) : '' }}">
+                @if($device->battery_pct !== null)
                     <svg width="22" height="11" viewBox="0 0 24 12">
                         <rect x="0" y="0" width="20" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="1.5"/>
                         <rect x="2" y="2" width="{{ max(1, $device->battery_pct / 100 * 16) }}" height="8" rx="1" fill="currentColor"/>
                         <rect x="20" y="3" width="3" height="6" rx="1" fill="currentColor"/>
                     </svg>
                     {{ $device->battery_pct }}%
-                    @else
+                @else
                     ---
-                    @endif
-                </p>
-            </div>
-            <div class="detail-item">
-                <p class="detail-label">電波状況</p>
-                <p class="detail-value {{ $device->rssi !== null ? ($device->rssi > -80 ? 'good' : ($device->rssi > -100 ? 'warn' : 'bad')) : '' }}">
-                    @if($device->rssi !== null)
+                @endif
+            </p>
+        </div>
+        <div class="detail-item">
+            <p class="detail-label">電波状況</p>
+            <p class="detail-value {{ $device->rssi !== null ? ($device->rssi > -80 ? 'good' : ($device->rssi > -100 ? 'warn' : 'bad')) : '' }}">
+                @if($device->rssi !== null)
                     <svg width="18" height="14" viewBox="0 0 20 16">
                         <rect x="0" y="12" width="4" height="4" rx="1" fill="currentColor"/>
                         <rect x="5" y="8" width="4" height="8" rx="1" fill="{{ $device->rssi > -100 ? 'currentColor' : 'var(--gray-200)' }}"/>
@@ -617,33 +617,33 @@
                         <rect x="15" y="0" width="4" height="16" rx="1" fill="{{ $device->rssi > -60 ? 'currentColor' : 'var(--gray-200)' }}"/>
                     </svg>
                     {{ $device->rssi > -60 ? '良好' : ($device->rssi > -80 ? '普通' : '弱い') }}
-                    @else
+                @else
                     ---
-                    @endif
-                </p>
-            </div>
-            <div class="detail-item">
-                <p class="detail-label">最終受信</p>
-                <p class="detail-value">
-                    {{ $device->last_received_at ? $device->last_received_at->format('m/d H:i') : '---' }}
-                </p>
-            </div>
+                @endif
+            </p>
+        </div>
+        <div class="detail-item">
+            <p class="detail-label">最終受信</p>
+            <p class="detail-value">
+                {{ $device->last_received_at ? $device->last_received_at->format('m/d H:i') : '---' }}
+            </p>
         </div>
     </div>
+</div>
 
-    {{-- 検知ログ --}}
-    <section class="section">
-        <div class="section-header">
-            <h3 class="section-title-new">📋 検知ログ</h3>
-            <a href="/logs" class="section-action">全て見る</a>
-        </div>
-        <div class="card" style="padding:0;">
-            <div class="card-body">
-                @if($logs->isEmpty())
-                    <div class="log-empty">まだ検知データがありません</div>
-                @else
-                    <ul class="log-list">
-                        @foreach($logs as $log)
+{{-- 検知ログ --}}
+<section class="section">
+    <div class="section-header">
+        <h3 class="section-title-new">📋 検知ログ</h3>
+        <a href="/logs" class="section-action">全て見る</a>
+    </div>
+    <div class="card" style="padding:0;">
+        <div class="card-body">
+            @if($logs->isEmpty())
+                <div class="log-empty">まだ検知データがありません</div>
+            @else
+                <ul class="log-list">
+                    @foreach($logs as $log)
                         <li class="log-item">
                             <span class="log-time">{{ $log->period_start->format('m/d H:i') }}</span>
                             @if($log->last_distance_cm !== null)
@@ -660,26 +660,26 @@
                             @endif
                             <span class="log-battery">{{ $log->battery_voltage ? $log->battery_voltage . 'V' : '' }}</span>
                         </li>
-                        @endforeach
-                    </ul>
-                @endif
-            </div>
+                    @endforeach
+                </ul>
+            @endif
         </div>
-    </section>
+    </div>
+</section>
 
-    {{-- フッター --}}
-    <footer class="footer">
-        <div class="footer-links">
-            <a href="/settings">設定</a><span class="footer-sep">|</span>
-            <a href="/logs">検知ログ</a><span class="footer-sep">|</span>
-            <a href="/pin-reset">PIN変更</a>
-        </div>
-        <div class="footer-links" style="margin-top: 8px;">
-            <a href="#">使い方</a><span class="footer-sep">|</span>
-            <a href="#">利用規約</a><span class="footer-sep">|</span>
-            <a href="#">お問い合わせ</a>
-        </div>
-    </footer>
+{{-- フッター --}}
+<footer class="footer">
+    <div class="footer-links">
+        <a href="/settings">設定</a><span class="footer-sep">|</span>
+        <a href="/logs">検知ログ</a><span class="footer-sep">|</span>
+        <a href="/pin-reset">PIN変更</a>
+    </div>
+    <div class="footer-links" style="margin-top: 8px;">
+        <a href="#">使い方</a><span class="footer-sep">|</span>
+        <a href="#">利用規約</a><span class="footer-sep">|</span>
+        <a href="#">お問い合わせ</a>
+    </div>
+</footer>
 
 {{-- 下部固定 見守り設定バー --}}
 <div class="watch-status-bar">
@@ -699,24 +699,24 @@
 <div id="scheduleModal" class="modal-overlay">
     <div class="modal">
         <div class="modal-header">
-            <h3>⏰ タイマー設定</h3>
+            <h3>タイマー設定</h3>
             <button class="modal-close" onclick="hideScheduleModal()">×</button>
         </div>
         <div class="modal-body">
             <div class="timer-tabs">
-                <button class="timer-tab active" onclick="switchTimerTab('oneshot')">📅 単発の予定</button>
-                <button class="timer-tab" onclick="switchTimerTab('recurring')">🔁 定期スケジュール</button>
+                <button class="timer-tab active" onclick="switchTimerTab('oneshot')">単発の予定</button>
+                <button class="timer-tab" onclick="switchTimerTab('recurring')">定期スケジュール</button>
             </div>
 
             {{-- 単発の予定タブ --}}
             <div id="oneshotTab" class="timer-content active">
                 <div class="schedule-list">
-                    <p class="schedule-list-title">📋 設定済みの予定</p>
+                    <p class="schedule-list-title">設定済みの予定</p>
                     <div class="schedule-items" id="oneshotList">
                         <div class="schedule-empty">設定済みの予定はありません</div>
                     </div>
                 </div>
-                <button class="add-form-toggle" onclick="toggleOneshotForm()">➕ 新しい予定を追加</button>
+                <button class="add-form-toggle" onclick="toggleOneshotForm()">＋ 新しい予定を追加</button>
                 <div id="oneshotForm" class="add-form">
                     <p class="add-form-title">新しい停止予定</p>
                     <div class="form-group">
@@ -742,12 +742,12 @@
             {{-- 定期スケジュールタブ --}}
             <div id="recurringTab" class="timer-content">
                 <div class="schedule-list">
-                    <p class="schedule-list-title">📋 設定済みの定期スケジュール</p>
+                    <p class="schedule-list-title">設定済みの定期スケジュール</p>
                     <div class="schedule-items" id="recurringList">
                         <div class="schedule-empty">設定済みの定期スケジュールはありません</div>
                     </div>
                 </div>
-                <button class="add-form-toggle" onclick="toggleRecurringForm()">➕ 定期スケジュールを追加</button>
+                <button class="add-form-toggle" onclick="toggleRecurringForm()">＋ 定期スケジュールを追加</button>
                 <div id="recurringForm" class="add-form">
                     <p class="add-form-title">新しい定期スケジュール</p>
                     <div class="form-group">
@@ -790,44 +790,67 @@
         </div>
     </div>
 </div>
+
 @endsection
 
 @section('scripts')
 <script>
-    const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
-    const headers = {
-        'Content-Type': 'application/json',
-        'X-CSRF-TOKEN': csrfToken,
-        'Accept': 'application/json',
-    };
+const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+const headers = {
+    'Content-Type': 'application/json',
+    'X-CSRF-TOKEN': csrfToken,
+    'Accept': 'application/json',
+};
 
-    // ==== 見守りON/OFF ====
-    let watchEnabled = {{ $device->away_mode ? 'false' : 'true' }};
+// ==== 見守りON/OFF ====
+let watchEnabled = {{ $device->away_mode ? 'false' : 'true' }};
 
-    function toggleWatch() {
-        const toggle = document.getElementById('watchToggle');
-        const text = document.getElementById('watchText');
-        const statusCard = document.getElementById('statusCard');
-        const statusIndicator = document.getElementById('statusIndicator');
-        const statusTitle = document.getElementById('statusTitle');
-        const statusSubtitle = document.getElementById('statusSubtitle');
+function toggleWatch() {
+    const toggle = document.getElementById('watchToggle');
+    const text = document.getElementById('watchText');
+    const statusCard = document.getElementById('statusCard');
+    const statusIndicator = document.getElementById('statusIndicator');
+    const statusTitle = document.getElementById('statusTitle');
+    const statusSubtitle = document.getElementById('statusSubtitle');
 
-        watchEnabled = !watchEnabled;
+    watchEnabled = !watchEnabled;
 
-        fetch('/mypage/toggle-watch', {
-            method: 'POST',
-            headers: headers,
-            body: JSON.stringify({ away_mode: !watchEnabled })
-        });
-
+    fetch('/mypage/toggle-watch', {
+        method: 'POST',
+        headers: headers,
+        body: JSON.stringify({ away_mode: !watchEnabled })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (watchEnabled) {
+            // ON: サーバーから返された実際のステータスを反映
+            toggle.classList.add('active');
+            text.textContent = 'ON';
+            text.classList.remove('paused');
+            statusCard.classList.remove('paused');
+            statusIndicator.className = 'status-indicator ' + data.indicator_class;
+            statusTitle.textContent = data.status_label;
+            statusSubtitle.textContent = data.status_subtitle;
+            showToast('見守りをONにしました');
+        } else {
+            // OFF: 停止中表示
+            toggle.classList.remove('active');
+            text.textContent = 'OFF';
+            text.classList.add('paused');
+            statusCard.classList.add('paused');
+            statusIndicator.className = 'status-indicator paused';
+            statusTitle.textContent = '見守り停止中';
+            statusSubtitle.textContent = 'タイマーまたは手動でONに戻せます';
+            showToast('見守りをOFFにしました');
+        }
+    })
+    .catch(() => {
+        // 通信エラー時はUI即時反映（フォールバック）
         if (watchEnabled) {
             toggle.classList.add('active');
             text.textContent = 'ON';
             text.classList.remove('paused');
             statusCard.classList.remove('paused');
-            statusIndicator.className = 'status-indicator ok';
-            statusTitle.textContent = '正常稼働中';
-            statusSubtitle.textContent = '見守り再開';
             showToast('見守りをONにしました');
         } else {
             toggle.classList.remove('active');
@@ -839,228 +862,231 @@
             statusSubtitle.textContent = 'タイマーまたは手動でONに戻せます';
             showToast('見守りをOFFにしました');
         }
-    }
-
-    // ==== タイマーモーダル ====
-    function showScheduleModal() {
-        document.getElementById('scheduleModal').classList.add('show');
-        loadSchedules();
-    }
-    function hideScheduleModal() {
-        document.getElementById('scheduleModal').classList.remove('show');
-        document.getElementById('oneshotForm').classList.remove('show');
-        document.getElementById('recurringForm').classList.remove('show');
-    }
-    function switchTimerTab(tab) {
-        document.querySelectorAll('.timer-tab').forEach(t => t.classList.remove('active'));
-        document.querySelectorAll('.timer-content').forEach(c => c.classList.remove('active'));
-        if (tab === 'oneshot') {
-            document.querySelector('.timer-tab:nth-child(1)').classList.add('active');
-            document.getElementById('oneshotTab').classList.add('active');
-        } else {
-            document.querySelector('.timer-tab:nth-child(2)').classList.add('active');
-            document.getElementById('recurringTab').classList.add('active');
-        }
-    }
-
-    // ==== サーバーからスケジュール読み込み ====
-    let oneshotSchedules = [];
-    let recurringSchedules = [];
-    const dayNames = ['日', '月', '火', '水', '木', '金', '土'];
-
-    async function loadSchedules() {
-        try {
-            const res = await fetch('/schedules', { headers: { 'Accept': 'application/json' } });
-            const data = await res.json();
-
-            oneshotSchedules = data.filter(s => s.type === 'oneshot');
-            recurringSchedules = data.filter(s => s.type === 'recurring');
-
-            renderOneshotList();
-            renderRecurringList();
-        } catch (e) {
-            console.error('スケジュール読み込みエラー:', e);
-        }
-    }
-
-    // ==== 単発予定 ====
-    function toggleOneshotForm() {
-        const form = document.getElementById('oneshotForm');
-        form.classList.toggle('show');
-        if (form.classList.contains('show')) {
-            const now = new Date();
-            const tomorrow = new Date(now.getTime() + 24 * 60 * 60 * 1000);
-            document.getElementById('scheduleStart').value = formatDatetimeLocal(now);
-            document.getElementById('scheduleEnd').value = formatDatetimeLocal(tomorrow);
-            setTimeout(() => form.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
-        }
-    }
-
-    function formatDatetimeLocal(date) {
-        const y = date.getFullYear();
-        const m = String(date.getMonth() + 1).padStart(2, '0');
-        const d = String(date.getDate()).padStart(2, '0');
-        const h = String(date.getHours()).padStart(2, '0');
-        const mi = String(date.getMinutes()).padStart(2, '0');
-        return `${y}-${m}-${d}T${h}:${mi}`;
-    }
-
-    function formatDateTime(dtStr) {
-        if (!dtStr) return '未定（手動復帰）';
-        const d = new Date(dtStr);
-        return `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
-    }
-
-    function renderOneshotList() {
-        const container = document.getElementById('oneshotList');
-        if (oneshotSchedules.length === 0) {
-            container.innerHTML = '<div class="schedule-empty">設定済みの予定はありません</div>';
-            return;
-        }
-        container.innerHTML = oneshotSchedules.map(s => `
-            <div class="schedule-item">
-                <div class="schedule-item-info">
-                    <p class="schedule-item-main">${formatDateTime(s.start_at)} 〜 ${formatDateTime(s.end_at)}</p>
-                    <p class="schedule-item-sub">${s.memo || '（メモなし）'}</p>
-                </div>
-                <button class="schedule-item-delete" onclick="deleteSchedule(${s.id}, 'oneshot')" title="削除">×</button>
-            </div>`).join('');
-    }
-
-    async function saveOneshot() {
-        const start = document.getElementById('scheduleStart').value;
-        const end = document.getElementById('scheduleEnd').value;
-        const memo = document.getElementById('scheduleMemo').value;
-        if (!start) { alert('開始日時を入力してください'); return; }
-
-        try {
-            const res = await fetch('/schedules', {
-                method: 'POST',
-                headers: headers,
-                body: JSON.stringify({
-                    type: 'oneshot',
-                    start_at: start,
-                    end_at: end || null,
-                    memo: memo || null,
-                })
-            });
-            if (!res.ok) { alert('保存に失敗しました'); return; }
-
-            const saved = await res.json();
-            oneshotSchedules.push(saved);
-            renderOneshotList();
-            toggleOneshotForm();
-            document.getElementById('scheduleMemo').value = '';
-            showToast('予定を追加しました');
-        } catch (e) {
-            alert('通信エラーが発生しました');
-        }
-    }
-
-    // ==== 定期スケジュール ====
-    function toggleRecurringForm() {
-        const form = document.getElementById('recurringForm');
-        form.classList.toggle('show');
-        if (form.classList.contains('show')) {
-            setTimeout(() => form.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
-        } else {
-            document.querySelectorAll('.weekday-btn').forEach(btn => btn.classList.remove('selected'));
-            document.getElementById('recurringStart').value = '10:00';
-            document.getElementById('recurringEnd').value = '16:00';
-            document.getElementById('recurringNextDay').checked = false;
-            document.getElementById('recurringMemo').value = '';
-        }
-    }
-
-    document.querySelectorAll('.weekday-btn').forEach(btn => {
-        btn.addEventListener('click', function() { this.classList.toggle('selected'); });
     });
+}
 
-    function renderRecurringList() {
-        const container = document.getElementById('recurringList');
-        if (recurringSchedules.length === 0) {
-            container.innerHTML = '<div class="schedule-empty">設定済みの定期スケジュールはありません</div>';
-            return;
-        }
-        container.innerHTML = recurringSchedules.map(s => {
-            const days = s.days_of_week || [];
-            const daysStr = days.map(d => dayNames[d]).join('・');
-            const timeStr = s.next_day ? `${s.start_time}〜翌${s.end_time}` : `${s.start_time}〜${s.end_time}`;
-            return `
-                <div class="schedule-item">
-                    <div class="schedule-item-info">
-                        <p class="schedule-item-main">毎週 ${daysStr} ${timeStr}</p>
-                        <p class="schedule-item-sub">${s.memo || '（メモなし）'}</p>
-                    </div>
-                    <button class="schedule-item-delete" onclick="deleteSchedule(${s.id}, 'recurring')" title="削除">×</button>
-                </div>`;
-        }).join('');
+// ==== タイマーモーダル ====
+function showScheduleModal() {
+    document.getElementById('scheduleModal').classList.add('show');
+    loadSchedules();
+}
+function hideScheduleModal() {
+    document.getElementById('scheduleModal').classList.remove('show');
+    document.getElementById('oneshotForm').classList.remove('show');
+    document.getElementById('recurringForm').classList.remove('show');
+}
+function switchTimerTab(tab) {
+    document.querySelectorAll('.timer-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.timer-content').forEach(c => c.classList.remove('active'));
+    if (tab === 'oneshot') {
+        document.querySelector('.timer-tab:nth-child(1)').classList.add('active');
+        document.getElementById('oneshotTab').classList.add('active');
+    } else {
+        document.querySelector('.timer-tab:nth-child(2)').classList.add('active');
+        document.getElementById('recurringTab').classList.add('active');
     }
+}
 
-    async function saveRecurring() {
-        const selectedDays = [];
-        document.querySelectorAll('.weekday-btn.selected').forEach(btn => {
-            selectedDays.push(parseInt(btn.dataset.day));
+// ==== サーバーからスケジュール読み込み ====
+let oneshotSchedules = [];
+let recurringSchedules = [];
+const dayNames = ['日', '月', '火', '水', '木', '金', '土'];
+
+async function loadSchedules() {
+    try {
+        const res = await fetch('/schedules', { headers: { 'Accept': 'application/json' } });
+        const data = await res.json();
+        oneshotSchedules = data.filter(s => s.type === 'oneshot');
+        recurringSchedules = data.filter(s => s.type === 'recurring');
+        renderOneshotList();
+        renderRecurringList();
+    } catch (e) {
+        console.error('スケジュール読み込みエラー:', e);
+    }
+}
+
+// ==== 単発予定 ====
+function toggleOneshotForm() {
+    const form = document.getElementById('oneshotForm');
+    form.classList.toggle('show');
+    if (form.classList.contains('show')) {
+        const now = new Date();
+        const tomorrow = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+        document.getElementById('scheduleStart').value = formatDatetimeLocal(now);
+        document.getElementById('scheduleEnd').value = formatDatetimeLocal(tomorrow);
+        setTimeout(() => form.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
+    }
+}
+
+function formatDatetimeLocal(date) {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const d = String(date.getDate()).padStart(2, '0');
+    const h = String(date.getHours()).padStart(2, '0');
+    const mi = String(date.getMinutes()).padStart(2, '0');
+    return `${y}-${m}-${d}T${h}:${mi}`;
+}
+
+function formatDateTime(dtStr) {
+    if (!dtStr) return '未定（手動復帰）';
+    const d = new Date(dtStr);
+    return `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+}
+
+function renderOneshotList() {
+    const container = document.getElementById('oneshotList');
+    if (oneshotSchedules.length === 0) {
+        container.innerHTML = '<div class="schedule-empty">設定済みの予定はありません</div>';
+        return;
+    }
+    container.innerHTML = oneshotSchedules.map(s => `
+        <div class="schedule-item">
+            <div class="schedule-item-info">
+                <p class="schedule-item-main">${formatDateTime(s.start_at)} 〜 ${formatDateTime(s.end_at)}</p>
+                <p class="schedule-item-sub">${s.memo || '（メモなし）'}</p>
+            </div>
+            <button class="schedule-item-delete" onclick="deleteSchedule(${s.id}, 'oneshot')" title="削除">×</button>
+        </div>`).join('');
+}
+
+async function saveOneshot() {
+    const start = document.getElementById('scheduleStart').value;
+    const end = document.getElementById('scheduleEnd').value;
+    const memo = document.getElementById('scheduleMemo').value;
+
+    if (!start) { alert('開始日時を入力してください'); return; }
+
+    try {
+        const res = await fetch('/schedules', {
+            method: 'POST',
+            headers: headers,
+            body: JSON.stringify({
+                type: 'oneshot',
+                start_at: start,
+                end_at: end || null,
+                memo: memo || null,
+            })
         });
-        if (selectedDays.length === 0) { alert('曜日を選択してください'); return; }
-        const start = document.getElementById('recurringStart').value;
-        const end = document.getElementById('recurringEnd').value;
-        const nextDay = document.getElementById('recurringNextDay').checked;
-        const memo = document.getElementById('recurringMemo').value;
-        if (!start || !end) { alert('時間帯を入力してください'); return; }
-
-        try {
-            const res = await fetch('/schedules', {
-                method: 'POST',
-                headers: headers,
-                body: JSON.stringify({
-                    type: 'recurring',
-                    days_of_week: selectedDays.sort(),
-                    start_time: start,
-                    end_time: end,
-                    next_day: nextDay,
-                    memo: memo || null,
-                })
-            });
-            if (!res.ok) { alert('保存に失敗しました'); return; }
-
-            const saved = await res.json();
-            recurringSchedules.push(saved);
-            renderRecurringList();
-            toggleRecurringForm();
-            showToast('定期スケジュールを追加しました');
-        } catch (e) {
-            alert('通信エラーが発生しました');
-        }
+        if (!res.ok) { alert('保存に失敗しました'); return; }
+        const saved = await res.json();
+        oneshotSchedules.push(saved);
+        renderOneshotList();
+        toggleOneshotForm();
+        document.getElementById('scheduleMemo').value = '';
+        showToast('予定を追加しました');
+    } catch (e) {
+        alert('通信エラーが発生しました');
     }
+}
 
-    // ==== 共通削除 ====
-    async function deleteSchedule(id, type) {
-        if (!confirm('このスケジュールを削除しますか？')) return;
-
-        try {
-            const res = await fetch(`/schedules/${id}`, {
-                method: 'DELETE',
-                headers: headers,
-            });
-            if (!res.ok) { alert('削除に失敗しました'); return; }
-
-            if (type === 'oneshot') {
-                oneshotSchedules = oneshotSchedules.filter(s => s.id !== id);
-                renderOneshotList();
-            } else {
-                recurringSchedules = recurringSchedules.filter(s => s.id !== id);
-                renderRecurringList();
-            }
-            showToast('スケジュールを削除しました');
-        } catch (e) {
-            alert('通信エラーが発生しました');
-        }
+// ==== 定期スケジュール ====
+function toggleRecurringForm() {
+    const form = document.getElementById('recurringForm');
+    form.classList.toggle('show');
+    if (form.classList.contains('show')) {
+        setTimeout(() => form.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
+    } else {
+        document.querySelectorAll('.weekday-btn').forEach(btn => btn.classList.remove('selected'));
+        document.getElementById('recurringStart').value = '10:00';
+        document.getElementById('recurringEnd').value = '16:00';
+        document.getElementById('recurringNextDay').checked = false;
+        document.getElementById('recurringMemo').value = '';
     }
+}
 
-    // モーダル外クリックで閉じる
-    document.getElementById('scheduleModal').addEventListener('click', function(e) {
-        if (e.target === this) hideScheduleModal();
+document.querySelectorAll('.weekday-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        this.classList.toggle('selected');
     });
+});
+
+function renderRecurringList() {
+    const container = document.getElementById('recurringList');
+    if (recurringSchedules.length === 0) {
+        container.innerHTML = '<div class="schedule-empty">設定済みの定期スケジュールはありません</div>';
+        return;
+    }
+    container.innerHTML = recurringSchedules.map(s => {
+        const days = s.days_of_week || [];
+        const daysStr = days.map(d => dayNames[d]).join('・');
+        const timeStr = s.next_day
+            ? `${s.start_time}〜翌${s.end_time}`
+            : `${s.start_time}〜${s.end_time}`;
+        return `
+        <div class="schedule-item">
+            <div class="schedule-item-info">
+                <p class="schedule-item-main">毎週 ${daysStr} ${timeStr}</p>
+                <p class="schedule-item-sub">${s.memo || '（メモなし）'}</p>
+            </div>
+            <button class="schedule-item-delete" onclick="deleteSchedule(${s.id}, 'recurring')" title="削除">×</button>
+        </div>`;
+    }).join('');
+}
+
+async function saveRecurring() {
+    const selectedDays = [];
+    document.querySelectorAll('.weekday-btn.selected').forEach(btn => {
+        selectedDays.push(parseInt(btn.dataset.day));
+    });
+
+    if (selectedDays.length === 0) { alert('曜日を選択してください'); return; }
+
+    const start = document.getElementById('recurringStart').value;
+    const end = document.getElementById('recurringEnd').value;
+    const nextDay = document.getElementById('recurringNextDay').checked;
+    const memo = document.getElementById('recurringMemo').value;
+
+    if (!start || !end) { alert('時間帯を入力してください'); return; }
+
+    try {
+        const res = await fetch('/schedules', {
+            method: 'POST',
+            headers: headers,
+            body: JSON.stringify({
+                type: 'recurring',
+                days_of_week: selectedDays.sort(),
+                start_time: start,
+                end_time: end,
+                next_day: nextDay,
+                memo: memo || null,
+            })
+        });
+        if (!res.ok) { alert('保存に失敗しました'); return; }
+        const saved = await res.json();
+        recurringSchedules.push(saved);
+        renderRecurringList();
+        toggleRecurringForm();
+        showToast('定期スケジュールを追加しました');
+    } catch (e) {
+        alert('通信エラーが発生しました');
+    }
+}
+
+// ==== 共通削除 ====
+async function deleteSchedule(id, type) {
+    if (!confirm('このスケジュールを削除しますか？')) return;
+    try {
+        const res = await fetch(`/schedules/${id}`, {
+            method: 'DELETE',
+            headers: headers,
+        });
+        if (!res.ok) { alert('削除に失敗しました'); return; }
+        if (type === 'oneshot') {
+            oneshotSchedules = oneshotSchedules.filter(s => s.id !== id);
+            renderOneshotList();
+        } else {
+            recurringSchedules = recurringSchedules.filter(s => s.id !== id);
+            renderRecurringList();
+        }
+        showToast('スケジュールを削除しました');
+    } catch (e) {
+        alert('通信エラーが発生しました');
+    }
+}
+
+// モーダル外クリックで閉じる
+document.getElementById('scheduleModal').addEventListener('click', function(e) {
+    if (e.target === this) hideScheduleModal();
+});
 </script>
 @endsection

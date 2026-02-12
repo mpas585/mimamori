@@ -4,176 +4,294 @@
 
 @section('styles')
 <style>
+    .main-content {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        min-height: calc(100vh - 40px);
+        padding-bottom: 40px;
+    }
     .login-container {
-        max-width: 400px;
-        margin: 60px auto 0;
+        max-width: 480px;
+        margin: 0 auto;
+        width: 100%;
     }
-    .login-logo {
+
+    /* ロゴ */
+    .logo-area {
         text-align: center;
-        margin-bottom: 32px;
+        margin-bottom: 48px;
+        animation: fadeIn 0.6s ease;
     }
-    .login-logo .emoji {
-        font-size: 48px;
-        display: block;
-        margin-bottom: 8px;
+    .logo {
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 16px;
     }
-    .login-logo .name {
-        font-size: 20px;
+    .logo-text {
+        font-size: 24px;
         font-weight: 500;
-        color: #8b7e6a;
+        letter-spacing: 0.02em;
+        color: var(--gray-800);
     }
+
+    /* カード */
     .login-card {
-        background: #fff;
-        border-radius: 12px;
-        padding: 32px 28px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        background: var(--white);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-sm);
+        overflow: hidden;
+        border: 1px solid var(--gray-200);
+        padding: 32px;
     }
+    .login-card-title {
+        font-size: 17px;
+        font-weight: 700;
+        margin-bottom: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        color: var(--gray-800);
+        padding-bottom: 16px;
+        border-bottom: 2px solid var(--gray-200);
+    }
+
+    /* フォーム */
     .form-group {
         margin-bottom: 20px;
     }
     .form-label {
         display: block;
         font-size: 13px;
-        font-weight: 500;
-        color: #6b6358;
-        margin-bottom: 6px;
+        font-weight: 600;
+        color: var(--gray-700);
+        margin-bottom: 8px;
     }
     .form-input {
         width: 100%;
-        padding: 12px 14px;
-        border: 1px solid #d8d0c4;
-        border-radius: 8px;
-        font-size: 16px;
-        font-family: 'Noto Sans JP', sans-serif;
-        background: #faf8f4;
-        color: #4a4a4a;
-        transition: border-color 0.2s;
+        padding: 14px 16px;
+        font-size: 15px;
+        font-family: inherit;
+        border: 1px solid var(--gray-300);
+        border-radius: var(--radius);
+        background: var(--cream);
+        color: var(--gray-800);
+        transition: all 0.2s;
     }
     .form-input:focus {
         outline: none;
-        border-color: #8b7e6a;
-        background: #fff;
+        border-color: var(--gray-500);
+        background: var(--white);
+        box-shadow: 0 0 0 3px rgba(168, 162, 158, 0.15);
     }
     .form-input::placeholder {
-        color: #c0b8aa;
+        color: var(--gray-400);
     }
-    .form-input.device-id {
+    .form-input.id-input {
         text-transform: uppercase;
-        letter-spacing: 4px;
+        letter-spacing: 0.15em;
         text-align: center;
-        font-family: monospace;
-        font-size: 20px;
-    }
-    .form-input.pin {
-        letter-spacing: 8px;
-        text-align: center;
-        font-size: 20px;
+        font-size: 18px;
     }
     .form-hint {
-        font-size: 11px;
-        color: #aaa;
-        margin-top: 4px;
+        font-size: 12px;
+        color: var(--gray-500);
+        margin-top: 6px;
+        font-weight: 500;
     }
     .form-error {
-        color: #c62828;
+        color: var(--red);
         font-size: 12px;
-        margin-top: 4px;
+        margin-top: 6px;
     }
-    .remember-row {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        margin-bottom: 24px;
-    }
-    .remember-row label {
-        font-size: 13px;
-        color: #888;
-    }
+
+    /* ボタン */
     .login-btn {
+        display: block;
         width: 100%;
-        padding: 14px;
-        background: #8b7e6a;
-        color: #fff;
+        padding: 16px 24px;
+        font-size: 16px;
+        font-weight: 600;
+        font-family: inherit;
         border: none;
-        border-radius: 8px;
-        font-size: 15px;
-        font-weight: 500;
-        font-family: 'Noto Sans JP', sans-serif;
+        border-radius: var(--radius);
         cursor: pointer;
-        transition: background 0.2s;
+        transition: all 0.2s ease;
+        background: var(--gray-800);
+        color: var(--white);
     }
     .login-btn:hover {
-        background: #7a6e5b;
+        background: var(--gray-700);
+        transform: translateY(-1px);
+        box-shadow: var(--shadow);
     }
-    .login-footer {
+    .forgot-link {
         text-align: center;
-        margin-top: 20px;
-        font-size: 12px;
-        color: #aaa;
+        margin-top: 16px;
     }
-    .login-footer a {
-        color: #8b7e6a;
+    .forgot-link a {
+        font-size: 13px;
+        color: var(--gray-500);
         text-decoration: none;
+        font-weight: 500;
+        transition: color 0.2s;
+    }
+    .forgot-link a:hover {
+        color: var(--gray-700);
+        text-decoration: underline;
+    }
+
+    /* 区切り線 */
+    .divider {
+        display: flex;
+        align-items: center;
+        margin: 32px 0;
+        color: var(--gray-500);
+        font-size: 13px;
+        font-weight: 500;
+    }
+    .divider::before,
+    .divider::after {
+        content: '';
+        flex: 1;
+        height: 2px;
+        background: var(--gray-200);
+    }
+    .divider span {
+        padding: 0 16px;
+    }
+
+    /* QRエリア */
+    .qr-area {
+        text-align: center;
+    }
+    .qr-box {
+        display: inline-block;
+        padding: 20px;
+        background: var(--cream);
+        border-radius: var(--radius-lg);
+        margin-bottom: 12px;
+        border: 1px solid var(--gray-200);
+    }
+    .qr-placeholder {
+        width: 140px;
+        height: 140px;
+        background: var(--gray-100);
+        border: 2px dashed var(--gray-300);
+        border-radius: var(--radius);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--gray-500);
+        font-size: 14px;
+        font-weight: 500;
+    }
+    .qr-hint {
+        font-size: 13px;
+        color: var(--gray-500);
+        font-weight: 500;
+    }
+
+    .security-note {
+        font-size: 11px;
+        color: var(--gray-400);
+        text-align: center;
+        margin-top: 24px;
+    }
+
+    @media (max-width: 480px) {
+        .logo-text { font-size: 20px; }
     }
 </style>
 @endsection
 
 @section('content')
 <div class="login-container">
-    <div class="login-logo">
-        <span class="name">みまもりデバイス</span>
+
+    {{-- ロゴエリア --}}
+    <div class="logo-area">
+        <div class="logo">
+            <span class="logo-text">みまもりデバイス</span>
+        </div>
+
     </div>
 
+    {{-- ログインカード --}}
     <div class="login-card">
+        <h1 class="login-card-title">ログイン</h1>
+
         <form method="POST" action="/login">
             @csrf
 
             <div class="form-group">
-                <label class="form-label">品番（デバイスID）</label>
+                <label class="form-label" for="deviceId">デバイスID</label>
                 <input
                     type="text"
+                    id="deviceId"
                     name="device_id"
-                    class="form-input device-id"
+                    class="form-input id-input"
                     placeholder="A3K9X2"
                     value="{{ old('device_id') }}"
                     maxlength="6"
                     autocomplete="off"
                     autofocus
+                    required
                 >
-                <div class="form-hint">端末に記載の英数字6文字</div>
+                <p class="form-hint">製品ラベルに記載の6文字</p>
                 @error('device_id')
                     <div class="form-error">{{ $message }}</div>
                 @enderror
             </div>
 
             <div class="form-group">
-                <label class="form-label">PIN</label>
+                <label class="form-label" for="pin">PIN</label>
                 <input
                     type="password"
+                    id="pin"
                     name="pin"
-                    class="form-input pin"
+                    class="form-input id-input"
                     placeholder="••••"
                     maxlength="4"
                     inputmode="numeric"
                     autocomplete="current-password"
+                    required
                 >
-                <div class="form-hint">数字4桁</div>
+                <p class="form-hint">製品ラベルに記載の4桁</p>
                 @error('pin')
                     <div class="form-error">{{ $message }}</div>
                 @enderror
             </div>
 
-            <div class="remember-row">
-                <input type="checkbox" name="remember" id="remember">
-                <label for="remember">ログイン状態を保持する</label>
-            </div>
-
             <button type="submit" class="login-btn">ログイン</button>
+            <p class="forgot-link"><a href="/pin-reset">PINを忘れた場合</a></p>
         </form>
 
-        <div class="login-footer">
-            <p>PINを忘れた場合は<a href="/pin-reset">こちら</a></p>
+        <div class="divider"><span>または</span></div>
+
+        <div class="qr-area">
+            <div class="qr-box">
+                <div class="qr-placeholder">QRスキャン</div>
+            </div>
+            <p class="qr-hint">製品ラベルのQRコードを読み取り</p>
         </div>
+
+        <p class="security-note">※連続してログインに失敗すると一定時間操作できなくなります</p>
     </div>
+
 </div>
+@endsection
+
+@section('scripts')
+<script>
+document.getElementById('deviceId').addEventListener('input', function() {
+    this.value = this.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+    if (this.value.length > 6) this.value = this.value.slice(0, 6);
+});
+document.getElementById('pin').addEventListener('input', function() {
+    this.value = this.value.replace(/[^0-9]/g, '');
+    if (this.value.length > 4) this.value = this.value.slice(0, 4);
+});
+</script>
 @endsection
