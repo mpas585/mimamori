@@ -90,6 +90,14 @@ class Device extends Authenticatable
     }
 
     /**
+     * B2B組織へのデバイス割当情報
+     */
+    public function orgAssignment(): HasOne
+    {
+        return $this->hasOne(OrgDeviceAssignment::class);
+    }
+
+    /**
      * このデバイスが見守っている相手
      */
     public function watchingTargets(): HasMany

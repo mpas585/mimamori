@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', '管理画面') - みまもりトーフ</title>
+    <title>@yield('title', 'マスター管理') - みまもりトーフ</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -49,96 +49,120 @@
 
         /* ===== ヘッダー ===== */
         .header {
-            background: var(--white);
-            border-bottom: 1px solid var(--gray-200);
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            border-bottom: 1px solid var(--gray-700);
             position: sticky;
             top: 0;
             z-index: 100;
-            box-shadow: var(--shadow-sm);
         }
         .header-inner {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
-            padding: 12px 20px;
+            padding: 12px 24px;
             display: flex;
             align-items: center;
             justify-content: space-between;
+        }
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
         }
         .header-logo {
             display: flex;
             align-items: center;
             gap: 10px;
             text-decoration: none;
-            color: var(--gray-800);
+            color: var(--white);
         }
         .header-logo-icon {
-            font-size: 20px;
-        }
-        .header-logo-text {
-            font-size: 15px;
-            font-weight: 600;
-        }
-        .header-org-name {
-            font-size: 13px;
-            color: var(--gray-500);
-            margin-left: 12px;
-            padding-left: 12px;
-            border-left: 1px solid var(--gray-300);
-        }
-        .header-actions {
+            width: 36px;
+            height: 36px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 8px;
             display: flex;
             align-items: center;
-            gap: 12px;
+            justify-content: center;
+            font-size: 18px;
         }
-        .header-link {
+        .header-logo-text {
+            font-size: 16px;
+            font-weight: 500;
+        }
+        .header-badge {
+            font-size: 10px;
+            font-weight: 600;
+            padding: 4px 8px;
+            background: var(--purple);
+            color: var(--white);
+            border-radius: 4px;
+            margin-left: 8px;
+        }
+        .header-nav {
+            display: flex;
+            gap: 4px;
+        }
+        .header-nav-item {
+            padding: 8px 16px;
             font-size: 13px;
-            color: var(--gray-500);
+            color: rgba(255,255,255,0.7);
             text-decoration: none;
-            padding: 6px 10px;
             border-radius: var(--radius);
             transition: all 0.2s;
         }
-        .header-link:hover {
-            background: var(--beige);
-            color: var(--gray-700);
+        .header-nav-item:hover {
+            background: rgba(255,255,255,0.1);
+            color: var(--white);
+        }
+        .header-nav-item.active {
+            background: rgba(255,255,255,0.15);
+            color: var(--white);
+            font-weight: 600;
+        }
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .header-user {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--white);
+            font-size: 13px;
+        }
+        .header-user-icon {
+            width: 32px;
+            height: 32px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+        .header-btn {
+            padding: 8px 12px;
+            font-size: 13px;
+            color: rgba(255,255,255,0.7);
+            background: transparent;
+            border: none;
+            border-radius: var(--radius);
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+        .header-btn:hover {
+            background: rgba(255,255,255,0.1);
+            color: var(--white);
         }
 
         /* ===== コンテナ ===== */
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
-            padding: 20px;
+            padding: 24px;
         }
-
-        /* ===== PWAバナー ===== */
-        .pwa-banner {
-            background: var(--blue-light);
-            border: 1px solid #bfdbfe;
-            border-radius: var(--radius);
-            padding: 12px 16px;
-            margin-bottom: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            font-size: 13px;
-            color: var(--blue);
-        }
-        .pwa-banner-left {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .pwa-banner button {
-            padding: 6px 12px;
-            font-size: 12px;
-            font-family: inherit;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: 600;
-        }
-        .pwa-add { background: var(--blue); color: var(--white); }
-        .pwa-close { background: transparent; color: var(--gray-400); font-size: 16px; }
 
         /* ===== フラッシュメッセージ ===== */
         .flash-success {
@@ -164,46 +188,9 @@
             font-weight: 500;
         }
 
-        /* ===== アラートバナー ===== */
-        .alert-banner {
-            padding: 14px 20px;
-            margin-bottom: 12px;
-            border-radius: var(--radius);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            font-size: 14px;
-            font-weight: 500;
-        }
-        .alert-banner.warning {
-            background: var(--red-light);
-            border: 1px solid #fecaca;
-            border-left: 4px solid var(--red);
-            color: var(--red);
-        }
-        .alert-banner.offline {
-            background: var(--gray-100);
-            border: 1px solid var(--gray-300);
-            border-left: 4px solid var(--gray-600);
-            color: var(--gray-600);
-        }
-        .alert-banner strong { font-weight: 700; }
-        .alert-banner-btn {
-            padding: 6px 14px;
-            font-size: 13px;
-            font-weight: 600;
-            font-family: inherit;
-            border: none;
-            border-radius: var(--radius);
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .alert-banner.warning .alert-banner-btn { background: var(--red); color: var(--white); }
-        .alert-banner.offline .alert-banner-btn { background: var(--gray-600); color: var(--white); }
-
         /* ===== 共通ボタン ===== */
         .btn {
-            padding: 10px 20px;
+            padding: 12px 24px;
             font-size: 14px;
             font-weight: 600;
             font-family: inherit;
@@ -220,18 +207,27 @@
         .btn-primary:hover { background: var(--gray-700); }
         .btn-secondary { background: var(--beige); color: var(--gray-700); border: 1px solid var(--gray-300); }
         .btn-secondary:hover { background: var(--gray-200); }
-        .btn-danger { background: var(--red); color: var(--white); }
-        .btn-danger:hover { background: #dc2626; }
+        .btn-success { background: var(--green); color: var(--white); }
+        .btn-success:hover { background: var(--green-dark); }
         .btn-sm { padding: 8px 14px; font-size: 13px; }
 
-        /* ===== カード ===== */
+        /* ===== 共通カード ===== */
         .card {
             background: var(--white);
             border-radius: var(--radius-lg);
-            padding: 20px;
+            padding: 24px;
             box-shadow: var(--shadow-sm);
             border: 1px solid var(--gray-200);
+            margin-bottom: 20px;
+        }
+        .card-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--gray-700);
             margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         /* ===== モーダル ===== */
@@ -287,7 +283,7 @@
         }
 
         /* ===== フォーム ===== */
-        .form-group { margin-bottom: 16px; }
+        .form-group { margin-bottom: 20px; }
         .form-group:last-child { margin-bottom: 0; }
         .form-label {
             display: block;
@@ -298,7 +294,7 @@
         }
         .form-input {
             width: 100%;
-            padding: 10px 14px;
+            padding: 12px 14px;
             font-size: 14px;
             font-family: inherit;
             border: 1px solid var(--gray-300);
@@ -316,9 +312,12 @@
             margin-top: 4px;
         }
 
+        @media (max-width: 1024px) {
+            .header-nav { display: none; }
+        }
         @media (max-width: 768px) {
-            .container { padding: 12px; }
-            .header-org-name { display: none; }
+            .container { padding: 16px; }
+            .header-inner { padding: 12px 16px; }
         }
 
         @yield('styles')
@@ -327,21 +326,28 @@
 <body>
     <header class="header">
         <div class="header-inner">
-            <div style="display:flex;align-items:center;">
-                <a href="#" class="header-logo">
-                    <span class="header-logo-icon">🧈</span>
+            <div class="header-left">
+                <a href="{{ route('admin.dashboard') }}" class="header-logo">
+                    <div class="header-logo-icon">🧈</div>
                     <span class="header-logo-text">みまもりトーフ</span>
+                    <span class="header-badge">MASTER</span>
                 </a>
-                @if(isset($organization))
-                    <span class="header-org-name">{{ $organization->name }} 管理画面</span>
-                @endif
+                <nav class="header-nav">
+                    @yield('nav')
+                </nav>
             </div>
-            <div class="header-actions">
-                <a href="#" class="header-link">🔐 パスワード変更</a>
-                <form method="POST" action="{{ route('admin.logout') }}" style="display:inline;">
-                    @csrf
-                    <button type="submit" class="header-link" style="border:none;background:none;cursor:pointer;font-family:inherit;">ログアウト</button>
-                </form>
+            <div class="header-right">
+                @auth('admin')
+                    <div class="header-user">
+                        <span class="header-user-icon">👤</span>
+                        <span>{{ Auth::guard('admin')->user()->name }}</span>
+                    </div>
+                    <a href="#" class="header-btn">🔐 パスワード変更</a>
+                    <form method="POST" action="{{ route('admin.logout') }}" style="display:inline;">
+                        @csrf
+                        <button type="submit" class="header-btn">ログアウト</button>
+                    </form>
+                @endauth
             </div>
         </div>
     </header>

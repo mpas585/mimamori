@@ -38,7 +38,12 @@ class AdminLoginController extends Controller
         $admin->update(['last_login_at' => now()]);
         $request->session()->regenerate();
 
-        return redirect('/admin');
+        // roleで振り分け
+        if ($admin->isMaster()) {
+            return redirect('/admin');
+        }
+
+        return redirect('/admin/org');
     }
 
     public function logout(Request $request)

@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Device;
+use App\Models\Organization;
+use App\Models\Subscription;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -12,28 +14,47 @@ use Illuminate\Support\Str;
 class MasterController extends Controller
 {
     /**
-     * ダッシュボード（デバイス一覧 + 統計）
+     * ダッシュボード（アカウント・課金管理）
      */
     public function index(Request $request)
     {
         // 統計
         $stats = [
-            'total' => Device::count(),
-            'active' => Device::where('status', '!=', 'inactive')->count(),
-            'normal' => Device::where('status', 'normal')->count(),
-            'alert' => Device::where('status', 'alert')->count(),
-            'offline' => Device::where('status', 'offline')->count(),
-            'inactive' => Device::where('status', 'inactive')->count(),
+            'total'             => Device::count(),
+            'active'            => Device::where('status', '!=', 'inactive')->count(),
+            'normal'            => Device::where('status', 'normal')->count(),
+            'alert'             => Device::where('status', 'alert')->count(),
+            'offline'           => Device::where('status', 'offline')->count(),
+            'inactive'          => Device::where('status', 'inactive')->count(),
+            'premium'           => Subscription::where('plan', 'premium')
+                                      ->where('status', 'active')->count(),
+            'monthly_revenue'   => $this->calcMonthlyRevenue(),
+            'pending_transfers' => Subscription::where('plan', 'premium')
+                                      ->where('status', 'active')
+                                      ->whereNull('stripe_subscription_id')
+                                      ->whereNull('current_period_end')
+                                      ->count(),
+            'expiring_soon'     => Subscription::where('plan', 'premium')
+                                      ->where('status', 'active')
+                                      ->whereNotNull('current_period_end')
+                                      ->where('current_period_end', '<=', now()->addDays(30))
+                                      ->count(),
+            'new_this_month'    => Device::whereMonth('created_at', now()->month)
+                                      ->whereYear('created_at', now()->year)
+                                      ->count(),
         ];
 
         // デバイス一覧（検索・フィルタ対応）
-        $query = Device::query();
+        $query = Device::with(['subscription', 'notificationSetting']);
 
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('device_id', 'like', "%{$search}%")
-                  ->orWhere('nickname', 'like', "%{$search}%");
+                  ->orWhere('nickname', 'like', "%{$search}%")
+                  ->orWhereHas('notificationSetting', function ($q2) use ($search) {
+                      $q2->where('email_1', 'like', "%{$search}%");
+                  });
             });
         }
 
@@ -41,9 +62,73 @@ class MasterController extends Controller
             $query->where('status', $request->status);
         }
 
+        if ($request->filled('plan')) {
+            if ($request->plan === 'premium') {
+                $query->whereHas('subscription', function ($q) {
+                    $q->where('plan', 'premium')->where('status', 'active');
+                });
+            } elseif ($request->plan === 'free') {
+                $query->where(function ($q) {
+                    $q->whereDoesntHave('subscription')
+                      ->orWhereHas('subscription', function ($q2) {
+                          $q2->where('plan', 'free');
+                      });
+                });
+            }
+        }
+
         $devices = $query->orderBy('created_at', 'desc')->paginate(20);
 
-        return view('admin.master', compact('stats', 'devices'));
+        // 法人一覧
+        $organizations = Organization::withCount([
+            'devices' => function ($q) {
+                $q->where('status', '!=', 'inactive');
+            },
+        ])->get();
+
+        // 期限切れ間近
+        $expiringDevices = Device::with(['subscription', 'notificationSetting'])
+            ->whereHas('subscription', function ($q) {
+                $q->where('plan', 'premium')
+                  ->where('status', 'active')
+                  ->whereNotNull('current_period_end')
+                  ->where('current_period_end', '<=', now()->addDays(30));
+            })
+            ->get();
+
+        // 振込待ち
+        $pendingTransfers = Subscription::with(['device.notificationSetting'])
+            ->where('plan', 'premium')
+            ->where('status', 'active')
+            ->whereNull('stripe_subscription_id')
+            ->whereNull('current_period_end')
+            ->get();
+
+        return view('admin.master', compact(
+            'stats',
+            'devices',
+            'organizations',
+            'expiringDevices',
+            'pendingTransfers'
+        ));
+    }
+
+    /**
+     * 今月売上の概算
+     */
+    private function calcMonthlyRevenue(): int
+    {
+        $monthly = Subscription::where('plan', 'premium')
+            ->where('status', 'active')
+            ->where('billing_cycle', 'monthly')
+            ->count();
+
+        $yearly = Subscription::where('plan', 'premium')
+            ->where('status', 'active')
+            ->where('billing_cycle', 'yearly')
+            ->count();
+
+        return ($monthly * 500) + (int) round($yearly * 3000 / 12);
     }
 
     /**
@@ -120,7 +205,7 @@ class MasterController extends Controller
      */
     private function generateDeviceId(): string
     {
-        $chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // 紛らわしい文字を除外（0,O,1,I）
+        $chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 
         do {
             $id = '';
