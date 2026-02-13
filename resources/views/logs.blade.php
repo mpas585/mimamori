@@ -36,6 +36,7 @@
         font-size: 16px;
         font-weight: 600;
         flex: 1;
+        text-align: center;
     }
     .log-header-id {
         font-size: 13px;
@@ -130,12 +131,8 @@
         border-bottom: 1px solid var(--gray-100);
         transition: background 0.2s;
     }
-    .log-item:last-child {
-        border-bottom: none;
-    }
-    .log-item:hover {
-        background: var(--gray-100);
-    }
+    .log-item:last-child { border-bottom: none; }
+    .log-item:hover { background: var(--gray-100); }
     .log-time {
         font-size: 14px;
         font-weight: 600;
@@ -150,7 +147,10 @@
         min-width: 80px;
     }
     .log-type-icon { font-size: 16px; }
-    .log-type-text { font-size: 13px; font-weight: 500; }
+    .log-type-text {
+        font-size: 13px;
+        font-weight: 500;
+    }
     .log-type-text.human { color: var(--green-dark); }
     .log-type-text.pet { color: var(--yellow); }
     .log-details {
@@ -206,9 +206,7 @@
         border: 1px solid var(--gray-200);
         transition: all 0.2s;
     }
-    .pagination-wrap a:hover {
-        background: var(--beige);
-    }
+    .pagination-wrap a:hover { background: var(--beige); }
     .pagination-wrap span.current {
         background: var(--gray-800);
         color: var(--white);
@@ -229,7 +227,10 @@
         padding: 60px 20px;
         color: var(--gray-500);
     }
-    .empty-state-icon { font-size: 48px; margin-bottom: 16px; }
+    .empty-state-icon {
+        font-size: 48px;
+        margin-bottom: 16px;
+    }
     .empty-state-text { font-size: 14px; }
 
     @media (max-width: 480px) {
@@ -282,6 +283,7 @@
 @else
     <div class="log-section">
         @php $currentDate = null; @endphp
+
         @foreach($logs as $log)
             @php
                 $logDate = $log->period_start->format('Y年n月j日') . '（' . ['日','月','火','水','木','金','土'][$log->period_start->dayOfWeek] . '）';
@@ -296,6 +298,7 @@
                 $isHuman = $log->human_count > 0;
                 $isPet = $log->pet_count > 0 && !$isHuman;
             @endphp
+
             <div class="log-item">
                 <span class="log-time">{{ $log->period_start->format('H:i') }}</span>
                 <div class="log-type">

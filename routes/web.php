@@ -3,22 +3,27 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\DeviceLoginController;
 use App\Http\Controllers\Auth\PinResetController;
+use App\Http\Controllers\Auth\AdminLoginController;
 use App\Http\Controllers\MypageController;
 use App\Http\Controllers\SettingsController;
+use App\Http\Controllers\EmailSettingsController;
 use App\Http\Controllers\LogController;
 use App\Http\Controllers\ScheduleController;
-use App\Http\Controllers\Admin\AdminLoginController;
-use App\Http\Controllers\Admin\MasterController;
+use App\Http\Controllers\MasterController;
 use App\Http\Middleware\AdminAuth;
 
-// ゲスト用（未ログイン）
+// ============================================================
+// ユーザー画面
+// ============================================================
+
+// ゲスト（未ログイン）
 Route::middleware('guest')->group(function () {
     Route::get('/login', [DeviceLoginController::class, 'showLoginForm'])->name('login');
     Route::post('/login', [DeviceLoginController::class, 'login']);
 });
 
 // PIN再設定（ゲスト・認証済み両方アクセス可）
-Route::middleware('throttle:15,1')->group(function () {
+Route::middleware('throttle:5,1')->group(function () {
     Route::get('/pin-reset', [PinResetController::class, 'showForm'])->name('pin-reset');
     Route::post('/pin-reset', [PinResetController::class, 'verifyDevice']);
     Route::post('/pin-reset/send-email', [PinResetController::class, 'sendResetEmail']);
@@ -28,12 +33,14 @@ Route::middleware('throttle:15,1')->group(function () {
     Route::post('/pin-reset/token/{token}', [PinResetController::class, 'resetWithToken']);
 });
 
+// メール認証リンク（ログイン不要でアクセス可能にする）
+Route::get('/email-settings/verify/{token}', [EmailSettingsController::class, 'verify'])->name('email-settings.verify');
+
 // 認証済みユーザー
 Route::middleware('auth')->group(function () {
     Route::get('/', function () {
         return redirect('/mypage');
     });
-
     Route::get('/mypage', [MypageController::class, 'index'])->name('mypage');
     Route::post('/mypage/toggle-watch', [MypageController::class, 'toggleWatch']);
     Route::post('/logout', [DeviceLoginController::class, 'logout'])->name('logout');
@@ -44,13 +51,17 @@ Route::middleware('auth')->group(function () {
     Route::post('/settings/notification', [SettingsController::class, 'updateNotification']);
     Route::post('/settings/test-notification', [SettingsController::class, 'sendTestNotification']);
 
+    // メールアドレス設定
+    Route::get('/email-settings', [EmailSettingsController::class, 'index'])->name('email-settings');
+    Route::post('/email-settings/send', [EmailSettingsController::class, 'sendVerification'])->name('email-settings.send');
+    Route::get('/email-settings/sent', [EmailSettingsController::class, 'sent'])->name('email-settings.sent');
+    Route::post('/email-settings/delete', [EmailSettingsController::class, 'delete'])->name('email-settings.delete');
+
     // 検知ログ
     Route::get('/logs', [LogController::class, 'index'])->name('logs');
 
-    // スケジュール（AJAX）
-    Route::get('/schedules', [ScheduleController::class, 'index']);
-    Route::post('/schedules', [ScheduleController::class, 'store']);
-    Route::delete('/schedules/{id}', [ScheduleController::class, 'destroy']);
+    // スケジュール（外出モード）
+    Route::apiResource('schedules', ScheduleController::class)->except(['show']);
 });
 
 // ============================================================

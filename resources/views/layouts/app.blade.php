@@ -139,9 +139,8 @@
         @media (max-width: 480px) {
             .main-content { padding: 16px 16px 100px; }
         }
-
-        @yield('styles')
-    </style>
+</style>
+    @yield('styles')
 </head>
 <body>
     <!-- トースト通知 -->
