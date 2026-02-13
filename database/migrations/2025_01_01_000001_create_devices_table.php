@@ -27,7 +27,7 @@ return new class extends Migration
 
             // 設定
             $table->unsignedTinyInteger('alert_threshold_hours')->default(24)->comment('未検知アラート閾値(時間)');
-            $table->boolean('pet_exclusion_enabled')->default(true)->comment('ペット除外ON/OFF');
+            $table->boolean('pet_exclusion_enabled')->default(false)->comment('ペット除外ON/OFF');
             $table->unsignedSmallInteger('pet_exclusion_threshold_cm')->default(100)->comment('ペット除外閾値(cm)');
             $table->unsignedSmallInteger('install_height_cm')->default(200)->comment('設置高さ(cm)');
             $table->boolean('away_mode')->default(false)->comment('外出モード');

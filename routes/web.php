@@ -3,13 +3,13 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\DeviceLoginController;
 use App\Http\Controllers\Auth\PinResetController;
-use App\Http\Controllers\Auth\AdminLoginController;
+use App\Http\Controllers\Admin\AdminLoginController;
 use App\Http\Controllers\MypageController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\EmailSettingsController;
 use App\Http\Controllers\LogController;
 use App\Http\Controllers\ScheduleController;
-use App\Http\Controllers\MasterController;
+use App\Http\Controllers\Admin\MasterController;
 use App\Http\Middleware\AdminAuth;
 
 // ============================================================
@@ -41,6 +41,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/', function () {
         return redirect('/mypage');
     });
+
     Route::get('/mypage', [MypageController::class, 'index'])->name('mypage');
     Route::post('/mypage/toggle-watch', [MypageController::class, 'toggleWatch']);
     Route::post('/logout', [DeviceLoginController::class, 'logout'])->name('logout');
