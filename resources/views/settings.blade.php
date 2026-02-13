@@ -542,10 +542,7 @@
             </div>
             @endforeach
         </div>
-        <p class="alert-hint">
-            人の動きが検知されない時間がこの設定を超えると、通知が届きます。<br>
-            外泊や旅行時は「タイマー設定」機能をご利用ください。
-        </p>
+
         <div class="info-box">
             <strong>💡 ポイント</strong><br>
             人の動きが検知されない時間がこの設定を超えると、通知が届きます。<br>
