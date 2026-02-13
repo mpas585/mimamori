@@ -10,7 +10,6 @@ use App\Http\Controllers\EmailSettingsController;
 use App\Http\Controllers\LogController;
 use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\Admin\MasterController;
-use App\Http\Controllers\Admin\OrgAdminController;
 use App\Http\Controllers\ContactController;
 use App\Http\Middleware\AdminAuth;
 
@@ -83,19 +82,15 @@ Route::middleware('auth')->group(function () {
 Route::get('/admin/login', [AdminLoginController::class, 'showLoginForm'])->name('admin.login');
 Route::post('/admin/login', [AdminLoginController::class, 'login']);
 
-// マスター管理者のみ
-Route::middleware(AdminAuth::class . ':master')->prefix('admin')->group(function () {
+// 管理者認証済み
+Route::middleware(AdminAuth::class)->prefix('admin')->group(function () {
     Route::get('/', [MasterController::class, 'index'])->name('admin.dashboard');
     Route::post('/issue', [MasterController::class, 'issueDevice'])->name('admin.issue');
     Route::post('/issue-bulk', [MasterController::class, 'issueBulk'])->name('admin.issue-bulk');
-});
-
-// 組織管理者のみ
-Route::middleware(AdminAuth::class . ':operator')->prefix('admin')->group(function () {
-    Route::get('/org', [OrgAdminController::class, 'index'])->name('admin.org.dashboard');
-});
-
-// 共通（どちらのroleでもOK）
-Route::middleware(AdminAuth::class)->prefix('admin')->group(function () {
     Route::post('/logout', [AdminLoginController::class, 'logout'])->name('admin.logout');
+
+    // 管理者アカウント管理
+    Route::post('/admin-users', [MasterController::class, 'storeAdminUser'])->name('admin.admin-users.store');
+    Route::put('/admin-users/{id}', [MasterController::class, 'updateAdminUser'])->name('admin.admin-users.update');
+    Route::delete('/admin-users/{id}', [MasterController::class, 'destroyAdminUser'])->name('admin.admin-users.destroy');
 });
