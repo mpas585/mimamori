@@ -78,7 +78,6 @@
     .status-indicator.error { background: var(--red-light); }
     .status-indicator.offline { background: var(--gray-200); }
     .status-indicator.paused { background: var(--gray-100); }
-
     .status-dot-inner {
         width: 20px;
         height: 20px;
@@ -91,7 +90,6 @@
     .status-indicator.error .status-dot-inner { background: var(--red); }
     .status-indicator.offline .status-dot-inner { background: var(--gray-400); }
     .status-indicator.paused .status-dot-inner { background: var(--gray-300); }
-
     .status-indicator.ok::before,
     .status-indicator.ok::after {
         content: '';
@@ -105,22 +103,17 @@
         animation: radar-pulse 3.5s ease-out infinite;
     }
     .status-indicator.ok::after { animation-delay: 1.75s; }
-
     @keyframes radar-pulse {
         0% { width: 20px; height: 20px; opacity: 0.6; }
         100% { width: 80px; height: 80px; opacity: 0; }
     }
-
     .status-indicator.paused::before,
     .status-indicator.paused::after { display: none; }
-
     .status-card.paused { opacity: 0.7; }
     .status-card.paused .status-text h2 { color: var(--gray-500); }
     .status-card.paused .status-text p { color: var(--gray-400); }
-
     .status-text h2 { font-size: 18px; font-weight: 600; margin-bottom: 4px; color: var(--gray-800); }
     .status-text p { font-size: 14px; color: var(--gray-500); font-weight: 500; }
-
     .status-id {
         font-size: 13px;
         font-weight: 600;
@@ -130,7 +123,6 @@
         padding: 6px 12px;
         border-radius: 20px;
     }
-
     .status-details {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
@@ -260,7 +252,6 @@
     .watch-status-label { font-size: 16px; color: var(--gray-600); font-weight: 500; }
     .watch-status-text { font-size: 18px; font-weight: 700; color: var(--gray-800); }
     .watch-status-text.paused { color: var(--gray-400); }
-
     .watch-toggle {
         position: relative;
         width: 52px;
@@ -286,7 +277,6 @@
         box-shadow: 0 1px 3px rgba(0,0,0,0.2);
     }
     .watch-toggle.active::after { left: 25px; }
-
     .watch-status-btn {
         padding: 10px 20px;
         font-size: 14px;
@@ -346,7 +336,11 @@
         color: var(--gray-600);
     }
     .modal-close:hover { background: var(--gray-200); }
-    .modal-body { padding: 20px; overflow-y: auto; flex: 1; }
+    .modal-body {
+        padding: 20px;
+        overflow-y: auto;
+        flex: 1;
+    }
     .modal-footer {
         padding: 16px 20px;
         border-top: 1px solid var(--gray-100);
@@ -379,7 +373,11 @@
         transition: all 0.2s;
         font-family: 'Noto Sans JP', sans-serif;
     }
-    .timer-tab.active { background: var(--white); color: var(--gray-800); box-shadow: var(--shadow-sm); }
+    .timer-tab.active {
+        background: var(--white);
+        color: var(--gray-800);
+        box-shadow: var(--shadow-sm);
+    }
     .timer-tab:not(.active):hover { color: var(--gray-700); }
     .timer-content { display: none; }
     .timer-content.active { display: block; }
@@ -462,7 +460,12 @@
     }
     .add-form.show { display: block; }
     .add-form-title { font-size: 13px; font-weight: 600; color: var(--gray-700); margin-bottom: 12px; }
-    .add-form-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px; }
+    .add-form-actions {
+        display: flex;
+        gap: 8px;
+        justify-content: flex-end;
+        margin-top: 16px;
+    }
     .btn-sm { padding: 8px 16px; font-size: 13px; }
 
     /* フォーム */
@@ -531,7 +534,6 @@
 @endsection
 
 @section('content')
-
 {{-- 通知先未登録バナー --}}
 @if($showNotifyBanner)
 <div class="notify-banner">
@@ -644,22 +646,22 @@
             @else
                 <ul class="log-list">
                     @foreach($logs as $log)
-                        <li class="log-item">
-                            <span class="log-time">{{ $log->period_start->format('m/d H:i') }}</span>
-                            @if($log->last_distance_cm !== null)
-                                <span class="log-distance">{{ $log->last_distance_cm }}cm</span>
-                            @else
-                                <span class="log-distance">---</span>
-                            @endif
-                            @if($log->human_count > 0)
-                                <span class="log-type human">人間 ×{{ $log->human_count }}</span>
-                            @elseif($log->pet_count > 0)
-                                <span class="log-type pet">ペット ×{{ $log->pet_count }}</span>
-                            @else
-                                <span class="log-type">検知なし</span>
-                            @endif
-                            <span class="log-battery">{{ $log->battery_voltage ? $log->battery_voltage . 'V' : '' }}</span>
-                        </li>
+                    <li class="log-item">
+                        <span class="log-time">{{ $log->period_start->format('m/d H:i') }}</span>
+                        @if($log->last_distance_cm !== null)
+                            <span class="log-distance">{{ $log->last_distance_cm }}cm</span>
+                        @else
+                            <span class="log-distance">---</span>
+                        @endif
+                        @if($log->human_count > 0)
+                            <span class="log-type human">人間 ×{{ $log->human_count }}</span>
+                        @elseif($log->pet_count > 0)
+                            <span class="log-type pet">ペット ×{{ $log->pet_count }}</span>
+                        @else
+                            <span class="log-type">検知なし</span>
+                        @endif
+                        <span class="log-battery">{{ $log->battery_voltage ? $log->battery_voltage . 'V' : '' }}</span>
+                    </li>
                     @endforeach
                 </ul>
             @endif
@@ -675,9 +677,9 @@
         <a href="/pin-reset">PIN変更</a>
     </div>
     <div class="footer-links" style="margin-top: 8px;">
-        <a href="#">使い方</a><span class="footer-sep">|</span>
-        <a href="#">利用規約</a><span class="footer-sep">|</span>
-        <a href="#">お問い合わせ</a>
+        <a href="/guide">使い方</a><span class="footer-sep">|</span>
+        <a href="/terms">利用規約</a><span class="footer-sep">|</span>
+        <a href="/contact">お問い合わせ</a>
     </div>
 </footer>
 
@@ -790,303 +792,283 @@
         </div>
     </div>
 </div>
-
 @endsection
 
 @section('scripts')
 <script>
-const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
-const headers = {
-    'Content-Type': 'application/json',
-    'X-CSRF-TOKEN': csrfToken,
-    'Accept': 'application/json',
-};
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+    const headers = {
+        'Content-Type': 'application/json',
+        'X-CSRF-TOKEN': csrfToken,
+        'Accept': 'application/json',
+    };
 
-// ==== 見守りON/OFF ====
-let watchEnabled = {{ $device->away_mode ? 'false' : 'true' }};
+    // ==== 見守りON/OFF ====
+    let watchEnabled = {{ $device->away_mode ? 'false' : 'true' }};
 
-function toggleWatch() {
-    const toggle = document.getElementById('watchToggle');
-    const text = document.getElementById('watchText');
-    const statusCard = document.getElementById('statusCard');
-    const statusIndicator = document.getElementById('statusIndicator');
-    const statusTitle = document.getElementById('statusTitle');
-    const statusSubtitle = document.getElementById('statusSubtitle');
+    function toggleWatch() {
+        const toggle = document.getElementById('watchToggle');
+        const text = document.getElementById('watchText');
+        const statusCard = document.getElementById('statusCard');
+        const statusIndicator = document.getElementById('statusIndicator');
+        const statusTitle = document.getElementById('statusTitle');
+        const statusSubtitle = document.getElementById('statusSubtitle');
 
-    watchEnabled = !watchEnabled;
+        watchEnabled = !watchEnabled;
 
-    fetch('/mypage/toggle-watch', {
-        method: 'POST',
-        headers: headers,
-        body: JSON.stringify({ away_mode: !watchEnabled })
-    })
-    .then(res => res.json())
-    .then(data => {
-        if (watchEnabled) {
-            // ON: サーバーから返された実際のステータスを反映
-            toggle.classList.add('active');
-            text.textContent = 'ON';
-            text.classList.remove('paused');
-            statusCard.classList.remove('paused');
-            statusIndicator.className = 'status-indicator ' + data.indicator_class;
-            statusTitle.textContent = data.status_label;
-            statusSubtitle.textContent = data.status_subtitle;
-            showToast('見守りをONにしました');
-        } else {
-            // OFF: 停止中表示
-            toggle.classList.remove('active');
-            text.textContent = 'OFF';
-            text.classList.add('paused');
-            statusCard.classList.add('paused');
-            statusIndicator.className = 'status-indicator paused';
-            statusTitle.textContent = '見守り停止中';
-            statusSubtitle.textContent = 'タイマーまたは手動でONに戻せます';
-            showToast('見守りをOFFにしました');
-        }
-    })
-    .catch(() => {
-        // 通信エラー時はUI即時反映（フォールバック）
-        if (watchEnabled) {
-            toggle.classList.add('active');
-            text.textContent = 'ON';
-            text.classList.remove('paused');
-            statusCard.classList.remove('paused');
-            showToast('見守りをONにしました');
-        } else {
-            toggle.classList.remove('active');
-            text.textContent = 'OFF';
-            text.classList.add('paused');
-            statusCard.classList.add('paused');
-            statusIndicator.className = 'status-indicator paused';
-            statusTitle.textContent = '見守り停止中';
-            statusSubtitle.textContent = 'タイマーまたは手動でONに戻せます';
-            showToast('見守りをOFFにしました');
-        }
-    });
-}
-
-// ==== タイマーモーダル ====
-function showScheduleModal() {
-    document.getElementById('scheduleModal').classList.add('show');
-    loadSchedules();
-}
-function hideScheduleModal() {
-    document.getElementById('scheduleModal').classList.remove('show');
-    document.getElementById('oneshotForm').classList.remove('show');
-    document.getElementById('recurringForm').classList.remove('show');
-}
-function switchTimerTab(tab) {
-    document.querySelectorAll('.timer-tab').forEach(t => t.classList.remove('active'));
-    document.querySelectorAll('.timer-content').forEach(c => c.classList.remove('active'));
-    if (tab === 'oneshot') {
-        document.querySelector('.timer-tab:nth-child(1)').classList.add('active');
-        document.getElementById('oneshotTab').classList.add('active');
-    } else {
-        document.querySelector('.timer-tab:nth-child(2)').classList.add('active');
-        document.getElementById('recurringTab').classList.add('active');
-    }
-}
-
-// ==== サーバーからスケジュール読み込み ====
-let oneshotSchedules = [];
-let recurringSchedules = [];
-const dayNames = ['日', '月', '火', '水', '木', '金', '土'];
-
-async function loadSchedules() {
-    try {
-        const res = await fetch('/schedules', { headers: { 'Accept': 'application/json' } });
-        const data = await res.json();
-        oneshotSchedules = data.filter(s => s.type === 'oneshot');
-        recurringSchedules = data.filter(s => s.type === 'recurring');
-        renderOneshotList();
-        renderRecurringList();
-    } catch (e) {
-        console.error('スケジュール読み込みエラー:', e);
-    }
-}
-
-// ==== 単発予定 ====
-function toggleOneshotForm() {
-    const form = document.getElementById('oneshotForm');
-    form.classList.toggle('show');
-    if (form.classList.contains('show')) {
-        const now = new Date();
-        const tomorrow = new Date(now.getTime() + 24 * 60 * 60 * 1000);
-        document.getElementById('scheduleStart').value = formatDatetimeLocal(now);
-        document.getElementById('scheduleEnd').value = formatDatetimeLocal(tomorrow);
-        setTimeout(() => form.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
-    }
-}
-
-function formatDatetimeLocal(date) {
-    const y = date.getFullYear();
-    const m = String(date.getMonth() + 1).padStart(2, '0');
-    const d = String(date.getDate()).padStart(2, '0');
-    const h = String(date.getHours()).padStart(2, '0');
-    const mi = String(date.getMinutes()).padStart(2, '0');
-    return `${y}-${m}-${d}T${h}:${mi}`;
-}
-
-function formatDateTime(dtStr) {
-    if (!dtStr) return '未定（手動復帰）';
-    const d = new Date(dtStr);
-    return `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
-}
-
-function renderOneshotList() {
-    const container = document.getElementById('oneshotList');
-    if (oneshotSchedules.length === 0) {
-        container.innerHTML = '<div class="schedule-empty">設定済みの予定はありません</div>';
-        return;
-    }
-    container.innerHTML = oneshotSchedules.map(s => `
-        <div class="schedule-item">
-            <div class="schedule-item-info">
-                <p class="schedule-item-main">${formatDateTime(s.start_at)} 〜 ${formatDateTime(s.end_at)}</p>
-                <p class="schedule-item-sub">${s.memo || '（メモなし）'}</p>
-            </div>
-            <button class="schedule-item-delete" onclick="deleteSchedule(${s.id}, 'oneshot')" title="削除">×</button>
-        </div>`).join('');
-}
-
-async function saveOneshot() {
-    const start = document.getElementById('scheduleStart').value;
-    const end = document.getElementById('scheduleEnd').value;
-    const memo = document.getElementById('scheduleMemo').value;
-
-    if (!start) { alert('開始日時を入力してください'); return; }
-
-    try {
-        const res = await fetch('/schedules', {
+        fetch('/mypage/toggle-watch', {
             method: 'POST',
             headers: headers,
-            body: JSON.stringify({
-                type: 'oneshot',
-                start_at: start,
-                end_at: end || null,
-                memo: memo || null,
-            })
+            body: JSON.stringify({ away_mode: !watchEnabled })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (watchEnabled) {
+                toggle.classList.add('active');
+                text.textContent = 'ON';
+                text.classList.remove('paused');
+                statusCard.classList.remove('paused');
+                statusIndicator.className = 'status-indicator ' + data.indicator_class;
+                statusTitle.textContent = data.status_label;
+                statusSubtitle.textContent = data.status_subtitle;
+                showToast('見守りをONにしました');
+            } else {
+                toggle.classList.remove('active');
+                text.textContent = 'OFF';
+                text.classList.add('paused');
+                statusCard.classList.add('paused');
+                statusIndicator.className = 'status-indicator paused';
+                statusTitle.textContent = '見守り停止中';
+                statusSubtitle.textContent = 'タイマーまたは手動でONに戻せます';
+                showToast('見守りをOFFにしました');
+            }
+        })
+        .catch(() => {
+            if (watchEnabled) {
+                toggle.classList.add('active');
+                text.textContent = 'ON';
+                text.classList.remove('paused');
+                statusCard.classList.remove('paused');
+                showToast('見守りをONにしました');
+            } else {
+                toggle.classList.remove('active');
+                text.textContent = 'OFF';
+                text.classList.add('paused');
+                statusCard.classList.add('paused');
+                statusIndicator.className = 'status-indicator paused';
+                statusTitle.textContent = '見守り停止中';
+                statusSubtitle.textContent = 'タイマーまたは手動でONに戻せます';
+                showToast('見守りをOFFにしました');
+            }
         });
-        if (!res.ok) { alert('保存に失敗しました'); return; }
-        const saved = await res.json();
-        oneshotSchedules.push(saved);
-        renderOneshotList();
-        toggleOneshotForm();
-        document.getElementById('scheduleMemo').value = '';
-        showToast('予定を追加しました');
-    } catch (e) {
-        alert('通信エラーが発生しました');
     }
-}
 
-// ==== 定期スケジュール ====
-function toggleRecurringForm() {
-    const form = document.getElementById('recurringForm');
-    form.classList.toggle('show');
-    if (form.classList.contains('show')) {
-        setTimeout(() => form.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
-    } else {
-        document.querySelectorAll('.weekday-btn').forEach(btn => btn.classList.remove('selected'));
-        document.getElementById('recurringStart').value = '10:00';
-        document.getElementById('recurringEnd').value = '16:00';
-        document.getElementById('recurringNextDay').checked = false;
-        document.getElementById('recurringMemo').value = '';
+    // ==== タイマーモーダル ====
+    function showScheduleModal() {
+        document.getElementById('scheduleModal').classList.add('show');
+        loadSchedules();
     }
-}
-
-document.querySelectorAll('.weekday-btn').forEach(btn => {
-    btn.addEventListener('click', function() {
-        this.classList.toggle('selected');
-    });
-});
-
-function renderRecurringList() {
-    const container = document.getElementById('recurringList');
-    if (recurringSchedules.length === 0) {
-        container.innerHTML = '<div class="schedule-empty">設定済みの定期スケジュールはありません</div>';
-        return;
+    function hideScheduleModal() {
+        document.getElementById('scheduleModal').classList.remove('show');
+        document.getElementById('oneshotForm').classList.remove('show');
+        document.getElementById('recurringForm').classList.remove('show');
     }
-    container.innerHTML = recurringSchedules.map(s => {
-        const days = s.days_of_week || [];
-        const daysStr = days.map(d => dayNames[d]).join('・');
-        const timeStr = s.next_day
-            ? `${s.start_time}〜翌${s.end_time}`
-            : `${s.start_time}〜${s.end_time}`;
-        return `
-        <div class="schedule-item">
-            <div class="schedule-item-info">
-                <p class="schedule-item-main">毎週 ${daysStr} ${timeStr}</p>
-                <p class="schedule-item-sub">${s.memo || '（メモなし）'}</p>
-            </div>
-            <button class="schedule-item-delete" onclick="deleteSchedule(${s.id}, 'recurring')" title="削除">×</button>
-        </div>`;
-    }).join('');
-}
-
-async function saveRecurring() {
-    const selectedDays = [];
-    document.querySelectorAll('.weekday-btn.selected').forEach(btn => {
-        selectedDays.push(parseInt(btn.dataset.day));
-    });
-
-    if (selectedDays.length === 0) { alert('曜日を選択してください'); return; }
-
-    const start = document.getElementById('recurringStart').value;
-    const end = document.getElementById('recurringEnd').value;
-    const nextDay = document.getElementById('recurringNextDay').checked;
-    const memo = document.getElementById('recurringMemo').value;
-
-    if (!start || !end) { alert('時間帯を入力してください'); return; }
-
-    try {
-        const res = await fetch('/schedules', {
-            method: 'POST',
-            headers: headers,
-            body: JSON.stringify({
-                type: 'recurring',
-                days_of_week: selectedDays.sort(),
-                start_time: start,
-                end_time: end,
-                next_day: nextDay,
-                memo: memo || null,
-            })
-        });
-        if (!res.ok) { alert('保存に失敗しました'); return; }
-        const saved = await res.json();
-        recurringSchedules.push(saved);
-        renderRecurringList();
-        toggleRecurringForm();
-        showToast('定期スケジュールを追加しました');
-    } catch (e) {
-        alert('通信エラーが発生しました');
+    function switchTimerTab(tab) {
+        document.querySelectorAll('.timer-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.timer-content').forEach(c => c.classList.remove('active'));
+        if (tab === 'oneshot') {
+            document.querySelector('.timer-tab:nth-child(1)').classList.add('active');
+            document.getElementById('oneshotTab').classList.add('active');
+        } else {
+            document.querySelector('.timer-tab:nth-child(2)').classList.add('active');
+            document.getElementById('recurringTab').classList.add('active');
+        }
     }
-}
 
-// ==== 共通削除 ====
-async function deleteSchedule(id, type) {
-    if (!confirm('このスケジュールを削除しますか？')) return;
-    try {
-        const res = await fetch(`/schedules/${id}`, {
-            method: 'DELETE',
-            headers: headers,
-        });
-        if (!res.ok) { alert('削除に失敗しました'); return; }
-        if (type === 'oneshot') {
-            oneshotSchedules = oneshotSchedules.filter(s => s.id !== id);
+    // ==== サーバーからスケジュール読み込み ====
+    let oneshotSchedules = [];
+    let recurringSchedules = [];
+    const dayNames = ['日', '月', '火', '水', '木', '金', '土'];
+
+    async function loadSchedules() {
+        try {
+            const res = await fetch('/schedules', { headers: { 'Accept': 'application/json' } });
+            const data = await res.json();
+            oneshotSchedules = data.filter(s => s.type === 'oneshot');
+            recurringSchedules = data.filter(s => s.type === 'recurring');
             renderOneshotList();
-        } else {
-            recurringSchedules = recurringSchedules.filter(s => s.id !== id);
             renderRecurringList();
+        } catch (e) {
+            console.error('スケジュール読み込みエラー:', e);
         }
-        showToast('スケジュールを削除しました');
-    } catch (e) {
-        alert('通信エラーが発生しました');
     }
-}
 
-// モーダル外クリックで閉じる
-document.getElementById('scheduleModal').addEventListener('click', function(e) {
-    if (e.target === this) hideScheduleModal();
-});
+    // ==== 単発予定 ====
+    function toggleOneshotForm() {
+        const form = document.getElementById('oneshotForm');
+        form.classList.toggle('show');
+        if (form.classList.contains('show')) {
+            const now = new Date();
+            const tomorrow = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+            document.getElementById('scheduleStart').value = formatDatetimeLocal(now);
+            document.getElementById('scheduleEnd').value = formatDatetimeLocal(tomorrow);
+            setTimeout(() => form.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
+        }
+    }
+
+    function formatDatetimeLocal(date) {
+        const y = date.getFullYear();
+        const m = String(date.getMonth() + 1).padStart(2, '0');
+        const d = String(date.getDate()).padStart(2, '0');
+        const h = String(date.getHours()).padStart(2, '0');
+        const mi = String(date.getMinutes()).padStart(2, '0');
+        return `${y}-${m}-${d}T${h}:${mi}`;
+    }
+
+    function formatDateTime(dtStr) {
+        if (!dtStr) return '未定（手動復帰）';
+        const d = new Date(dtStr);
+        return `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+    }
+
+    function renderOneshotList() {
+        const container = document.getElementById('oneshotList');
+        if (oneshotSchedules.length === 0) {
+            container.innerHTML = '<div class="schedule-empty">設定済みの予定はありません</div>';
+            return;
+        }
+        container.innerHTML = oneshotSchedules.map(s => `
+            <div class="schedule-item">
+                <div class="schedule-item-info">
+                    <p class="schedule-item-main">${formatDateTime(s.start_at)} 〜 ${formatDateTime(s.end_at)}</p>
+                    <p class="schedule-item-sub">${s.memo || '（メモなし）'}</p>
+                </div>
+                <button class="schedule-item-delete" onclick="deleteSchedule(${s.id}, 'oneshot')" title="削除">×</button>
+            </div>`).join('');
+    }
+
+    async function saveOneshot() {
+        const start = document.getElementById('scheduleStart').value;
+        const end = document.getElementById('scheduleEnd').value;
+        const memo = document.getElementById('scheduleMemo').value;
+        if (!start) { alert('開始日時を入力してください'); return; }
+        try {
+            const res = await fetch('/schedules', {
+                method: 'POST',
+                headers: headers,
+                body: JSON.stringify({
+                    type: 'oneshot',
+                    start_at: start,
+                    end_at: end || null,
+                    memo: memo || null,
+                })
+            });
+            if (!res.ok) { alert('保存に失敗しました'); return; }
+            const saved = await res.json();
+            oneshotSchedules.push(saved);
+            renderOneshotList();
+            toggleOneshotForm();
+            document.getElementById('scheduleMemo').value = '';
+            showToast('予定を追加しました');
+        } catch (e) { alert('通信エラーが発生しました'); }
+    }
+
+    // ==== 定期スケジュール ====
+    function toggleRecurringForm() {
+        const form = document.getElementById('recurringForm');
+        form.classList.toggle('show');
+        if (form.classList.contains('show')) {
+            setTimeout(() => form.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
+        } else {
+            document.querySelectorAll('.weekday-btn').forEach(btn => btn.classList.remove('selected'));
+            document.getElementById('recurringStart').value = '10:00';
+            document.getElementById('recurringEnd').value = '16:00';
+            document.getElementById('recurringNextDay').checked = false;
+            document.getElementById('recurringMemo').value = '';
+        }
+    }
+
+    document.querySelectorAll('.weekday-btn').forEach(btn => {
+        btn.addEventListener('click', function() { this.classList.toggle('selected'); });
+    });
+
+    function renderRecurringList() {
+        const container = document.getElementById('recurringList');
+        if (recurringSchedules.length === 0) {
+            container.innerHTML = '<div class="schedule-empty">設定済みの定期スケジュールはありません</div>';
+            return;
+        }
+        container.innerHTML = recurringSchedules.map(s => {
+            const days = s.days_of_week || [];
+            const daysStr = days.map(d => dayNames[d]).join('・');
+            const timeStr = s.next_day ? `${s.start_time}〜翌${s.end_time}` : `${s.start_time}〜${s.end_time}`;
+            return `
+            <div class="schedule-item">
+                <div class="schedule-item-info">
+                    <p class="schedule-item-main">毎週 ${daysStr} ${timeStr}</p>
+                    <p class="schedule-item-sub">${s.memo || '（メモなし）'}</p>
+                </div>
+                <button class="schedule-item-delete" onclick="deleteSchedule(${s.id}, 'recurring')" title="削除">×</button>
+            </div>`;
+        }).join('');
+    }
+
+    async function saveRecurring() {
+        const selectedDays = [];
+        document.querySelectorAll('.weekday-btn.selected').forEach(btn => {
+            selectedDays.push(parseInt(btn.dataset.day));
+        });
+        if (selectedDays.length === 0) { alert('曜日を選択してください'); return; }
+        const start = document.getElementById('recurringStart').value;
+        const end = document.getElementById('recurringEnd').value;
+        const nextDay = document.getElementById('recurringNextDay').checked;
+        const memo = document.getElementById('recurringMemo').value;
+        if (!start || !end) { alert('時間帯を入力してください'); return; }
+        try {
+            const res = await fetch('/schedules', {
+                method: 'POST',
+                headers: headers,
+                body: JSON.stringify({
+                    type: 'recurring',
+                    days_of_week: selectedDays.sort(),
+                    start_time: start,
+                    end_time: end,
+                    next_day: nextDay,
+                    memo: memo || null,
+                })
+            });
+            if (!res.ok) { alert('保存に失敗しました'); return; }
+            const saved = await res.json();
+            recurringSchedules.push(saved);
+            renderRecurringList();
+            toggleRecurringForm();
+            showToast('定期スケジュールを追加しました');
+        } catch (e) { alert('通信エラーが発生しました'); }
+    }
+
+    // ==== 共通削除 ====
+    async function deleteSchedule(id, type) {
+        if (!confirm('このスケジュールを削除しますか？')) return;
+        try {
+            const res = await fetch(`/schedules/${id}`, {
+                method: 'DELETE',
+                headers: headers,
+            });
+            if (!res.ok) { alert('削除に失敗しました'); return; }
+            if (type === 'oneshot') {
+                oneshotSchedules = oneshotSchedules.filter(s => s.id !== id);
+                renderOneshotList();
+            } else {
+                recurringSchedules = recurringSchedules.filter(s => s.id !== id);
+                renderRecurringList();
+            }
+            showToast('スケジュールを削除しました');
+        } catch (e) { alert('通信エラーが発生しました'); }
+    }
+
+    // モーダル外クリックで閉じる
+    document.getElementById('scheduleModal').addEventListener('click', function(e) {
+        if (e.target === this) hideScheduleModal();
+    });
 </script>
 @endsection

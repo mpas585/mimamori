@@ -10,6 +10,7 @@ use App\Http\Controllers\EmailSettingsController;
 use App\Http\Controllers\LogController;
 use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\Admin\MasterController;
+use App\Http\Controllers\ContactController;
 use App\Http\Middleware\AdminAuth;
 
 // ============================================================
@@ -35,6 +36,14 @@ Route::middleware('throttle:5,1')->group(function () {
 
 // メール認証リンク（ログイン不要でアクセス可能にする）
 Route::get('/email-settings/verify/{token}', [EmailSettingsController::class, 'verify'])->name('email-settings.verify');
+
+// 公開ページ（ゲスト・認証済み両方アクセス可）
+Route::get('/terms', function () {
+    return view('terms');
+})->name('terms');
+
+Route::get('/contact', [ContactController::class, 'index'])->name('contact');
+Route::post('/contact', [ContactController::class, 'send'])->middleware('throttle:5,1');
 
 // 認証済みユーザー
 Route::middleware('auth')->group(function () {
