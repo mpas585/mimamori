@@ -5,6 +5,7 @@ use App\Http\Controllers\Auth\DeviceLoginController;
 use App\Http\Controllers\Auth\PinResetController;
 use App\Http\Controllers\Admin\AdminLoginController;
 use App\Http\Controllers\Admin\AdminPasswordController;
+use App\Http\Controllers\Admin\OrgAdminController;
 use App\Http\Controllers\MypageController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\EmailSettingsController;
@@ -83,7 +84,7 @@ Route::middleware('auth')->group(function () {
 Route::get('/admin/login', [AdminLoginController::class, 'showLoginForm'])->name('admin.login');
 Route::post('/admin/login', [AdminLoginController::class, 'login']);
 
-// 管理者認証済み
+// 管理者認証済み（共通）
 Route::middleware(AdminAuth::class)->prefix('admin')->group(function () {
     Route::get('/', [MasterController::class, 'index'])->name('admin.dashboard');
     Route::post('/issue', [MasterController::class, 'issueDevice'])->name('admin.issue');
@@ -98,4 +99,9 @@ Route::middleware(AdminAuth::class)->prefix('admin')->group(function () {
     Route::post('/admin-users', [MasterController::class, 'storeAdminUser'])->name('admin.admin-users.store');
     Route::put('/admin-users/{id}', [MasterController::class, 'updateAdminUser'])->name('admin.admin-users.update');
     Route::delete('/admin-users/{id}', [MasterController::class, 'destroyAdminUser'])->name('admin.admin-users.destroy');
+});
+
+// 組織管理者（operator）専用
+Route::middleware(AdminAuth::class.':operator')->prefix('admin/org')->group(function () {
+    Route::get('/', [OrgAdminController::class, 'index'])->name('admin.org.dashboard');
 });
