@@ -4,8 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\DeviceLoginController;
 use App\Http\Controllers\Auth\PinResetController;
 use App\Http\Controllers\Admin\AdminLoginController;
-use App\Http\Controllers\Admin\AdminPasswordResetController;
-use App\Http\Controllers\Admin\OrgAdminController;
+use App\Http\Controllers\Admin\AdminPasswordController;
 use App\Http\Controllers\MypageController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\EmailSettingsController;
@@ -82,15 +81,7 @@ Route::middleware('auth')->group(function () {
 
 // 管理者ログイン（未認証）
 Route::get('/admin/login', [AdminLoginController::class, 'showLoginForm'])->name('admin.login');
-Route::post('/admin/login', [AdminLoginController::class, 'login'])->middleware('throttle:5,1');
-
-// 管理者パスワードリセット（未認証）
-Route::middleware('throttle:5,1')->group(function () {
-    Route::get('/admin/password-reset', [AdminPasswordResetController::class, 'showRequestForm'])->name('admin.password-reset');
-    Route::post('/admin/password-reset', [AdminPasswordResetController::class, 'sendResetLink']);
-    Route::get('/admin/password-reset/{token}', [AdminPasswordResetController::class, 'showResetForm'])->name('admin.password-reset.form');
-    Route::post('/admin/password-reset/{token}', [AdminPasswordResetController::class, 'reset']);
-});
+Route::post('/admin/login', [AdminLoginController::class, 'login']);
 
 // 管理者認証済み
 Route::middleware(AdminAuth::class)->prefix('admin')->group(function () {
@@ -99,11 +90,12 @@ Route::middleware(AdminAuth::class)->prefix('admin')->group(function () {
     Route::post('/issue-bulk', [MasterController::class, 'issueBulk'])->name('admin.issue-bulk');
     Route::post('/logout', [AdminLoginController::class, 'logout'])->name('admin.logout');
 
+    // パスワード変更
+    Route::get('/password-change', [AdminPasswordController::class, 'showForm'])->name('admin.password-change');
+    Route::post('/password-change', [AdminPasswordController::class, 'update'])->name('admin.password-change.update');
+
     // 管理者アカウント管理
     Route::post('/admin-users', [MasterController::class, 'storeAdminUser'])->name('admin.admin-users.store');
     Route::put('/admin-users/{id}', [MasterController::class, 'updateAdminUser'])->name('admin.admin-users.update');
     Route::delete('/admin-users/{id}', [MasterController::class, 'destroyAdminUser'])->name('admin.admin-users.destroy');
-
-    // B2B組織管理者ダッシュボード
-    Route::get('/org', [OrgAdminController::class, 'index'])->name('admin.org');
 });

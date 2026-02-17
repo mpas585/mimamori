@@ -337,7 +337,7 @@
                 @endif
             </div>
             <div class="header-actions">
-                <a href="#" class="header-link">🔐 パスワード変更</a>
+                <a href="{{ route('admin.password-change') }}" class="header-link">🔐 パスワード変更</a>
                 <form method="POST" action="{{ route('admin.logout') }}" style="display:inline;">
                     @csrf
                     <button type="submit" class="header-link" style="border:none;background:none;cursor:pointer;font-family:inherit;">ログアウト</button>
