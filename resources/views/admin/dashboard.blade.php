@@ -377,8 +377,28 @@
         margin-bottom: 16px;
     }
     .detail-status-badge.normal { background: var(--green-light); color: var(--green-dark); }
+    .detail-status-badge.warning { background: var(--yellow-light); color: #a16207; }
     .detail-status-badge.alert { background: var(--red-light); color: var(--red); }
     .detail-status-badge.offline { background: var(--gray-100); color: var(--gray-600); }
+
+    /* ===== トースト通知 ===== */
+    .toast {
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        padding: 14px 20px;
+        border-radius: var(--radius);
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--white);
+        z-index: 9999;
+        transform: translateY(100px);
+        opacity: 0;
+        transition: all 0.3s;
+    }
+    .toast.show { transform: translateY(0); opacity: 1; }
+    .toast.success { background: var(--green-dark); }
+    .toast.error { background: var(--red); }
 
     @media (max-width: 768px) {
         .status-grid { grid-template-columns: repeat(3, 1fr); }
@@ -425,23 +445,23 @@
 
     {{-- ステータスカード --}}
     <div class="status-grid">
-        <div class="status-card" onclick="filterByStatus('normal')">
+        <div class="status-card {{ request('status') === 'normal' ? 'active' : '' }}" onclick="filterByStatus('normal')">
             <div class="status-value green">{{ $stats['normal'] ?? 0 }}</div>
             <div class="status-label"><span class="status-dot green"></span> 正常</div>
         </div>
-        <div class="status-card" onclick="filterByStatus('warning')">
+        <div class="status-card {{ request('status') === 'warning' ? 'active' : '' }}" onclick="filterByStatus('warning')">
             <div class="status-value yellow">{{ $stats['warning'] ?? 0 }}</div>
             <div class="status-label"><span class="status-dot yellow"></span> 注意</div>
         </div>
-        <div class="status-card" onclick="filterByStatus('alert')">
+        <div class="status-card {{ request('status') === 'alert' ? 'active' : '' }}" onclick="filterByStatus('alert')">
             <div class="status-value red">{{ $stats['alert'] ?? 0 }}</div>
             <div class="status-label"><span class="status-dot red"></span> 警告</div>
         </div>
-        <div class="status-card" onclick="filterByStatus('offline')">
+        <div class="status-card {{ request('status') === 'offline' ? 'active' : '' }}" onclick="filterByStatus('offline')">
             <div class="status-value gray">{{ $stats['offline'] ?? 0 }}</div>
             <div class="status-label"><span class="status-dot gray"></span> 離線</div>
         </div>
-        <div class="status-card" onclick="filterByStatus('vacant')">
+        <div class="status-card {{ request('status') === 'vacant' ? 'active' : '' }}" onclick="filterByStatus('vacant')">
             <div class="status-value light">{{ $stats['vacant'] ?? 0 }}</div>
             <div class="status-label"><span class="status-dot light"></span> 空室</div>
         </div>
@@ -458,7 +478,7 @@
     {{-- ツールバー --}}
     <div class="toolbar">
         <div class="toolbar-left">
-            <form method="GET" action="" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+            <form method="GET" action="{{ route('admin.org.dashboard') }}" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
                 <div class="search-box">
                     <span>🔍</span>
                     <input type="text" name="search" placeholder="部屋番号・名前で検索..." value="{{ request('search') }}">
@@ -482,9 +502,8 @@
             <span class="toolbar-count">登録: <strong>{{ $devices->total() ?? 0 }}</strong> / {{ $organization->device_limit ?? 100 }}台</span>
         </div>
         <div class="toolbar-right">
-            <button class="toolbar-btn" onclick="showTimerListModal()">⏰ タイマー一覧</button>
             <button class="toolbar-btn" onclick="showAddDeviceModal()">➕ デバイス追加</button>
-            <a href="#" class="toolbar-btn">📥 CSV出力</a>
+            <a href="{{ route('admin.org.csv') }}" class="toolbar-btn">📥 CSV出力</a>
         </div>
     </div>
 
@@ -494,13 +513,13 @@
             <table>
                 <thead>
                     <tr>
-                        <th class="sortable">状態 <span class="sort-icon">↕</span></th>
-                        <th class="sortable">部屋 / 名前 <span class="sort-icon">↑</span></th>
-                        <th class="sortable">デバイスID <span class="sort-icon">↕</span></th>
+                        <th>状態</th>
+                        <th>部屋 / 名前</th>
+                        <th>デバイスID</th>
                         <th>見守り</th>
-                        <th class="sortable">最終検知 <span class="sort-icon">↕</span></th>
-                        <th class="sortable">電池 <span class="sort-icon">↕</span></th>
-                        <th class="sortable">電波 <span class="sort-icon">↕</span></th>
+                        <th>最終検知</th>
+                        <th>電池</th>
+                        <th>電波</th>
                         <th>操作</th>
                     </tr>
                 </thead>
@@ -513,11 +532,9 @@
                             $isVacant = !$assignment || !$tenantName;
                             $displayStatus = $isVacant ? 'vacant' : $device->status;
 
-                            // 最終検知からの経過時間
                             $lastDetected = $device->last_human_detected_at;
                             $timeSince = $lastDetected ? $lastDetected->diffForHumans() : null;
 
-                            // 電波強度ラベル
                             $rssi = $device->rssi;
                             $signalLabel = '-';
                             if ($rssi !== null) {
@@ -552,7 +569,7 @@
                                 @if($roomNumber)
                                     <strong>{{ $roomNumber }}</strong><br>
                                     <span style="font-size:12px;color:var(--gray-500);">{{ $tenantName ?: '-' }}</span>
-                                @elseif($isVacant)
+                                @else
                                     <span style="color:var(--gray-400);">-</span>
                                 @endif
                             </td>
@@ -561,7 +578,7 @@
                                 @if(!$isVacant)
                                     <label class="watch-toggle">
                                         <input type="checkbox" {{ !$device->away_mode ? 'checked' : '' }}
-                                            onchange="toggleWatch('{{ $device->device_id }}', this.checked)">
+                                            onchange="toggleWatch('{{ $device->device_id }}', this.checked, this)">
                                         <span class="watch-slider"></span>
                                     </label>
                                     @if($device->away_until)
@@ -579,12 +596,8 @@
                                 {{ $signalLabel }}
                             </td>
                             <td>
-                                @if($isVacant && !$device->device_id)
-                                    <button class="action-btn setup" onclick="showAddDeviceModal('{{ $roomNumber }}')">設置</button>
-                                @else
-                                    <button class="action-btn" onclick="showDeviceDetail('{{ $device->device_id }}')">詳細</button>
-                                    <button class="action-btn danger" onclick="confirmDelete('{{ $device->device_id }}')">削除</button>
-                                @endif
+                                <button class="action-btn" onclick="showDeviceDetail('{{ $device->device_id }}')">詳細</button>
+                                <button class="action-btn danger" onclick="confirmDelete('{{ $device->device_id }}')">削除</button>
                             </td>
                         </tr>
                     @empty
@@ -628,71 +641,77 @@
     </div>
 
     {{-- ===== モーダル: デバイス追加 ===== --}}
-    <div id="addDeviceModal" class="modal-overlay" onclick="if(event.target===this)hideAddDeviceModal()">
+    <div id="addDeviceModal" class="modal-overlay" onclick="if(event.target===this)hideModal('addDeviceModal')">
         <div class="modal">
             <div class="modal-header">
                 <h3>➕ デバイス追加</h3>
-                <button class="modal-close" onclick="hideAddDeviceModal()">×</button>
+                <button class="modal-close" onclick="hideModal('addDeviceModal')">×</button>
             </div>
-            <div class="modal-body">
-                <div class="form-group">
-                    <label class="form-label">デバイスID</label>
-                    <input type="text" class="form-input" id="addDeviceId" placeholder="A3K9X2" maxlength="6" style="text-transform:uppercase;">
-                    <p class="form-hint">製品ラベルに記載の6文字</p>
+            <form method="POST" action="{{ route('admin.org.devices.add') }}">
+                @csrf
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label class="form-label">デバイスID</label>
+                        <input type="text" class="form-input" name="device_id" placeholder="A3K9X2" maxlength="6" style="text-transform:uppercase;" required>
+                        <p class="form-hint">製品ラベルに記載の6文字</p>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">部屋番号</label>
+                        <input type="text" class="form-input" name="room_number" placeholder="101">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">入居者名（任意）</label>
+                        <input type="text" class="form-input" name="tenant_name">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">メモ（任意）</label>
+                        <input type="text" class="form-input" name="memo">
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label class="form-label">部屋番号</label>
-                    <input type="text" class="form-input" id="addRoomNumber" placeholder="101">
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="hideModal('addDeviceModal')">キャンセル</button>
+                    <button type="submit" class="btn btn-primary">追加</button>
                 </div>
-                <div class="form-group">
-                    <label class="form-label">入居者名（任意）</label>
-                    <input type="text" class="form-input" id="addTenantName">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">メモ（任意）</label>
-                    <input type="text" class="form-input" id="addMemo">
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-secondary" onclick="hideAddDeviceModal()">キャンセル</button>
-                <button class="btn btn-primary" onclick="addDevice()">追加</button>
-            </div>
+            </form>
         </div>
     </div>
 
     {{-- ===== モーダル: デバイス削除確認 ===== --}}
-    <div id="deleteModal" class="modal-overlay" onclick="if(event.target===this)hideDeleteModal()">
+    <div id="deleteModal" class="modal-overlay" onclick="if(event.target===this)hideModal('deleteModal')">
         <div class="modal">
             <div class="modal-header">
                 <h3>⚠️ デバイス削除</h3>
-                <button class="modal-close" onclick="hideDeleteModal()">×</button>
+                <button class="modal-close" onclick="hideModal('deleteModal')">×</button>
             </div>
-            <div class="modal-body">
-                <p>デバイス <strong id="deleteDeviceId">-</strong> を削除しますか？</p>
-                <p style="color:var(--gray-500);font-size:13px;margin-top:8px;">この操作は取り消せません。</p>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-secondary" onclick="hideDeleteModal()">キャンセル</button>
-                <button class="btn btn-danger" onclick="executeDelete()">削除する</button>
-            </div>
+            <form id="deleteForm" method="POST" action="">
+                @csrf
+                <div class="modal-body">
+                    <p>デバイス <strong id="deleteDeviceId" class="mono">-</strong> を組織から削除しますか？</p>
+                    <p style="color:var(--gray-500);font-size:13px;margin-top:8px;">デバイスの登録データは残りますが、組織との紐付けが解除されます。</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="hideModal('deleteModal')">キャンセル</button>
+                    <button type="submit" class="btn btn-danger">削除する</button>
+                </div>
+            </form>
         </div>
     </div>
 
     {{-- ===== モーダル: デバイス詳細 ===== --}}
-    <div id="detailModal" class="modal-overlay" onclick="if(event.target===this)hideDetailModal()">
+    <div id="detailModal" class="modal-overlay" onclick="if(event.target===this)hideModal('detailModal')">
         <div class="modal" style="max-width:560px;">
             <div class="modal-header">
                 <h3>📋 デバイス詳細</h3>
-                <button class="modal-close" onclick="hideDetailModal()">×</button>
+                <button class="modal-close" onclick="hideModal('detailModal')">×</button>
             </div>
             <div class="modal-body">
-                <div class="detail-status-badge normal" id="detailStatusBadge">正常稼働中</div>
+                <div class="detail-status-badge normal" id="detailStatusBadge">-</div>
 
                 <div class="detail-section">
                     <div class="detail-grid">
                         <div class="detail-item">
                             <p class="detail-item-label">デバイスID</p>
-                            <p class="detail-item-value" id="detailDeviceId">-</p>
+                            <p class="detail-item-value mono" id="detailDeviceId">-</p>
                         </div>
                         <div class="detail-item">
                             <p class="detail-item-label">部屋番号</p>
@@ -728,15 +747,19 @@
                     <div class="detail-grid">
                         <div class="detail-item">
                             <p class="detail-item-label">アラート時間</p>
-                            <p class="detail-item-value" id="detailAlertHours">24時間</p>
+                            <p class="detail-item-value" id="detailAlertHours">-</p>
                         </div>
                         <div class="detail-item">
                             <p class="detail-item-label">設置高さ</p>
-                            <p class="detail-item-value" id="detailHeight">200cm</p>
+                            <p class="detail-item-value" id="detailHeight">-</p>
                         </div>
                         <div class="detail-item">
                             <p class="detail-item-label">ペット除外</p>
-                            <p class="detail-item-value" id="detailPetExclusion">OFF</p>
+                            <p class="detail-item-value" id="detailPetExclusion">-</p>
+                        </div>
+                        <div class="detail-item">
+                            <p class="detail-item-label">見守り</p>
+                            <p class="detail-item-value" id="detailAwayMode">-</p>
                         </div>
                     </div>
                 </div>
@@ -756,111 +779,241 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-secondary" onclick="hideDetailModal()">閉じる</button>
-                <button class="btn btn-primary" onclick="editDevice()">編集</button>
+                <button class="btn btn-secondary" onclick="hideModal('detailModal')">閉じる</button>
+                <button class="btn btn-primary" id="detailEditBtn" onclick="openEditFromDetail()">編集</button>
             </div>
         </div>
     </div>
 
+    {{-- ===== モーダル: デバイス編集 ===== --}}
+    <div id="editModal" class="modal-overlay" onclick="if(event.target===this)hideModal('editModal')">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>✏️ デバイス編集</h3>
+                <button class="modal-close" onclick="hideModal('editModal')">×</button>
+            </div>
+            <form id="editForm" method="POST" action="">
+                @csrf
+                @method('PUT')
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label class="form-label">デバイスID</label>
+                        <input type="text" class="form-input" id="editDeviceId" disabled style="background:var(--gray-100);">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">部屋番号</label>
+                        <input type="text" class="form-input" name="room_number" id="editRoomNumber" placeholder="101">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">入居者名</label>
+                        <input type="text" class="form-input" name="tenant_name" id="editTenantName">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">メモ</label>
+                        <input type="text" class="form-input" name="memo" id="editMemo">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="hideModal('editModal')">キャンセル</button>
+                    <button type="submit" class="btn btn-primary">保存</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     {{-- ===== モーダル: 見守りOFF確認 ===== --}}
-    <div id="watchOffModal" class="modal-overlay" onclick="if(event.target===this)hideWatchOffModal()">
+    <div id="watchOffModal" class="modal-overlay" onclick="if(event.target===this)hideModal('watchOffModal')">
         <div class="modal">
             <div class="modal-header">
                 <h3>⚠️ 見守りをOFFにしますか？</h3>
-                <button class="modal-close" onclick="hideWatchOffModal()">×</button>
+                <button class="modal-close" onclick="hideModal('watchOffModal')">×</button>
             </div>
             <div class="modal-body">
                 <p><strong>⚠️ 注意:</strong> OFFにすると、このデバイスの未検知アラートが送信されなくなります。</p>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-secondary" onclick="hideWatchOffModal()">キャンセル</button>
+                <button class="btn btn-secondary" onclick="cancelWatchOff()">キャンセル</button>
                 <button class="btn btn-danger" onclick="executeWatchOff()">OFFにする</button>
             </div>
         </div>
     </div>
+
+    {{-- トースト --}}
+    <div id="toast" class="toast"></div>
 @endsection
 
 @section('scripts')
 <script>
-// ステータスフィルタ
+const csrfToken = '{{ csrf_token() }}';
+
+// ===== ユーティリティ =====
+function showModal(id) { document.getElementById(id).classList.add('show'); }
+function hideModal(id) { document.getElementById(id).classList.remove('show'); }
+
+function showToast(message, type) {
+    const toast = document.getElementById('toast');
+    toast.textContent = message;
+    toast.className = 'toast ' + type + ' show';
+    setTimeout(function() { toast.classList.remove('show'); }, 3000);
+}
+
+// ===== ステータスフィルタ =====
 function filterByStatus(status) {
     const url = new URL(window.location);
-    url.searchParams.set('status', status);
+    if (url.searchParams.get('status') === status) {
+        url.searchParams.delete('status');
+    } else {
+        url.searchParams.set('status', status);
+    }
     window.location = url;
 }
 
-// 見守りトグル
+// ===== デバイス追加 =====
+function showAddDeviceModal() {
+    showModal('addDeviceModal');
+}
+
+// ===== デバイス削除 =====
+function confirmDelete(deviceId) {
+    document.getElementById('deleteDeviceId').textContent = deviceId;
+    document.getElementById('deleteForm').action = '/admin/org/devices/' + deviceId + '/remove';
+    showModal('deleteModal');
+}
+
+// ===== 見守りトグル =====
 let pendingToggleDevice = null;
 let pendingToggleCheckbox = null;
-function toggleWatch(deviceId, checked) {
-    if (!checked) {
-        pendingToggleDevice = deviceId;
-        pendingToggleCheckbox = event.target;
-        event.target.checked = true;
-        document.getElementById('watchOffModal').classList.add('show');
-    }
-}
-function hideWatchOffModal() {
-    document.getElementById('watchOffModal').classList.remove('show');
-}
-function executeWatchOff() {
-    if (pendingToggleCheckbox) {
-        pendingToggleCheckbox.checked = false;
-    }
-    hideWatchOffModal();
-}
 
-// デバイス追加モーダル
-function showAddDeviceModal(roomNumber) {
-    document.getElementById('addDeviceId').value = '';
-    document.getElementById('addRoomNumber').value = roomNumber || '';
-    document.getElementById('addTenantName').value = '';
-    document.getElementById('addMemo').value = '';
-    document.getElementById('addDeviceModal').classList.add('show');
-}
-function hideAddDeviceModal() {
-    document.getElementById('addDeviceModal').classList.remove('show');
-}
-function addDevice() {
-    const deviceId = document.getElementById('addDeviceId').value.trim();
-    if (!deviceId) {
-        alert('デバイスIDを入力してください');
+function toggleWatch(deviceId, checked, checkbox) {
+    if (!checked) {
+        // OFFにする → 確認モーダル
+        pendingToggleDevice = deviceId;
+        pendingToggleCheckbox = checkbox;
+        checkbox.checked = true; // 一旦戻す
+        showModal('watchOffModal');
         return;
     }
-    alert('デバイス ' + deviceId + ' を追加しました');
-    hideAddDeviceModal();
+    // ONにする → そのまま実行
+    sendToggleWatch(deviceId, false);
 }
 
-// 削除モーダル
-let deleteTargetId = '';
-function confirmDelete(deviceId) {
-    deleteTargetId = deviceId;
-    document.getElementById('deleteDeviceId').textContent = deviceId;
-    document.getElementById('deleteModal').classList.add('show');
-}
-function hideDeleteModal() {
-    document.getElementById('deleteModal').classList.remove('show');
-}
-function executeDelete() {
-    alert('デバイス ' + deleteTargetId + ' を削除しました');
-    hideDeleteModal();
+function cancelWatchOff() {
+    hideModal('watchOffModal');
+    pendingToggleDevice = null;
+    pendingToggleCheckbox = null;
 }
 
-// 詳細モーダル
+function executeWatchOff() {
+    if (pendingToggleDevice) {
+        sendToggleWatch(pendingToggleDevice, true);
+        if (pendingToggleCheckbox) {
+            pendingToggleCheckbox.checked = false;
+        }
+    }
+    hideModal('watchOffModal');
+}
+
+function sendToggleWatch(deviceId, awayMode) {
+    fetch('/admin/org/devices/' + deviceId + '/toggle-watch', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': csrfToken,
+            'Accept': 'application/json',
+        },
+        body: JSON.stringify({ away_mode: awayMode }),
+    })
+    .then(function(res) { return res.json(); })
+    .then(function(data) {
+        if (data.success) {
+            showToast(data.message, 'success');
+        } else {
+            showToast('エラーが発生しました', 'error');
+        }
+    })
+    .catch(function() {
+        showToast('通信エラーが発生しました', 'error');
+    });
+}
+
+// ===== デバイス詳細 =====
+let currentDetailDeviceId = null;
+
 function showDeviceDetail(deviceId) {
-    document.getElementById('detailDeviceId').textContent = deviceId;
-    document.getElementById('detailModal').classList.add('show');
-}
-function hideDetailModal() {
-    document.getElementById('detailModal').classList.remove('show');
-}
-function editDevice() {
-    alert('編集機能は今後実装予定です');
+    currentDetailDeviceId = deviceId;
+
+    fetch('/admin/org/devices/' + deviceId + '/detail', {
+        headers: { 'Accept': 'application/json' },
+    })
+    .then(function(res) { return res.json(); })
+    .then(function(data) {
+        // ステータスバッジ
+        const badge = document.getElementById('detailStatusBadge');
+        const statusLabels = { normal: '正常稼働中', warning: '注意', alert: '未検知警告', offline: '通信途絶' };
+        badge.textContent = statusLabels[data.status] || data.status;
+        badge.className = 'detail-status-badge ' + (data.status || 'offline');
+
+        // 基本情報
+        document.getElementById('detailDeviceId').textContent = data.device_id;
+        document.getElementById('detailRoom').textContent = data.room_number || '-';
+        document.getElementById('detailTenant').textContent = data.tenant_name || '-';
+        document.getElementById('detailLastDetected').textContent = data.last_human_detected || '-';
+
+        // デバイス状態
+        document.getElementById('detailBattery').textContent = data.battery_pct !== null ? data.battery_pct + '%' : '-';
+        var rssiLabel = '-';
+        if (data.rssi !== null) {
+            if (data.rssi > -70) rssiLabel = '良好 (' + data.rssi + 'dBm)';
+            else if (data.rssi > -85) rssiLabel = '普通 (' + data.rssi + 'dBm)';
+            else rssiLabel = '弱い (' + data.rssi + 'dBm)';
+        }
+        document.getElementById('detailSignal').textContent = rssiLabel;
+
+        // 見守り設定
+        document.getElementById('detailAlertHours').textContent = data.alert_threshold_hours + '時間';
+        document.getElementById('detailHeight').textContent = data.install_height_cm + 'cm';
+        document.getElementById('detailPetExclusion').textContent = data.pet_exclusion_enabled ? 'ON（' + data.pet_exclusion_threshold_cm + 'cm）' : 'OFF';
+        var awayText = data.away_mode ? 'OFF（見守り停止中）' : 'ON';
+        if (data.away_until) awayText += '（〜' + data.away_until + '）';
+        document.getElementById('detailAwayMode').textContent = awayText;
+
+        // 登録情報
+        document.getElementById('detailRegistered').textContent = data.registered_at || '-';
+        document.getElementById('detailMemo').textContent = data.memo || '-';
+
+        showModal('detailModal');
+    })
+    .catch(function() {
+        showToast('詳細の取得に失敗しました', 'error');
+    });
 }
 
-// タイマー一覧
-function showTimerListModal() {
-    alert('タイマー一覧は今後実装予定です');
+// ===== 詳細 → 編集 =====
+function openEditFromDetail() {
+    if (!currentDetailDeviceId) return;
+    hideModal('detailModal');
+
+    // 詳細モーダルの値を編集モーダルに転記
+    document.getElementById('editDeviceId').value = document.getElementById('detailDeviceId').textContent;
+    var room = document.getElementById('detailRoom').textContent;
+    var tenant = document.getElementById('detailTenant').textContent;
+    var memo = document.getElementById('detailMemo').textContent;
+    document.getElementById('editRoomNumber').value = (room !== '-') ? room : '';
+    document.getElementById('editTenantName').value = (tenant !== '-') ? tenant : '';
+    document.getElementById('editMemo').value = (memo !== '-') ? memo : '';
+    document.getElementById('editForm').action = '/admin/org/devices/' + currentDetailDeviceId + '/assignment';
+
+    showModal('editModal');
 }
+
+// ===== フラッシュメッセージ自動表示 =====
+document.addEventListener('DOMContentLoaded', function() {
+    @if(session('success'))
+        showToast('{{ session("success") }}', 'success');
+    @endif
+    @if(session('error'))
+        showToast('{{ session("error") }}', 'error');
+    @endif
+});
 </script>
 @endsection

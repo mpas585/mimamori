@@ -104,4 +104,10 @@ Route::middleware(AdminAuth::class)->prefix('admin')->group(function () {
 // 組織管理者（operator）専用
 Route::middleware(AdminAuth::class.':operator')->prefix('admin/org')->group(function () {
     Route::get('/', [OrgAdminController::class, 'index'])->name('admin.org.dashboard');
+    Route::post('/devices/add', [OrgAdminController::class, 'addDevice'])->name('admin.org.devices.add');
+    Route::post('/devices/{deviceId}/remove', [OrgAdminController::class, 'removeDevice'])->name('admin.org.devices.remove');
+    Route::post('/devices/{deviceId}/toggle-watch', [OrgAdminController::class, 'toggleWatch'])->name('admin.org.devices.toggle-watch');
+    Route::get('/devices/{deviceId}/detail', [OrgAdminController::class, 'deviceDetail'])->name('admin.org.devices.detail');
+    Route::put('/devices/{deviceId}/assignment', [OrgAdminController::class, 'updateAssignment'])->name('admin.org.devices.update-assignment');
+    Route::get('/csv', [OrgAdminController::class, 'exportCsv'])->name('admin.org.csv');
 });
