@@ -110,4 +110,5 @@ Route::middleware(AdminAuth::class.':operator')->prefix('admin/org')->group(func
     Route::get('/devices/{deviceId}/detail', [OrgAdminController::class, 'deviceDetail'])->name('admin.org.devices.detail');
     Route::put('/devices/{deviceId}/assignment', [OrgAdminController::class, 'updateAssignment'])->name('admin.org.devices.update-assignment');
     Route::get('/csv', [OrgAdminController::class, 'exportCsv'])->name('admin.org.csv');
+    Route::get('/timers', [OrgAdminController::class, 'timerList'])->name('admin.org.timers');
 });

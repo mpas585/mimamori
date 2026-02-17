@@ -345,4 +345,69 @@ class OrgAdminController extends Controller
             'Content-Disposition' => "attachment; filename=\"{$filename}\"",
         ]);
     }
+
+    /**
+     * タイマー一覧（JSON）
+     */
+    public function timerList(Request $request)
+    {
+        $organization = $this->getOrganization();
+
+        // 組織のデバイスを取得（スケジュール・割当情報込み）
+        $devices = Device::where('organization_id', $organization->id)
+            ->with(['orgAssignment', 'schedules' => function ($q) {
+                $q->where('is_active', true)->orderBy('created_at', 'desc');
+            }])
+            ->get();
+
+        $result = [];
+        $dayNames = ['日', '月', '火', '水', '木', '金', '土'];
+
+        foreach ($devices as $device) {
+            $assignment = $device->orgAssignment;
+            $roomNumber = $assignment ? $assignment->room_number : null;
+            $tenantName = $assignment ? $assignment->tenant_name : null;
+
+            // away_modeがON または スケジュールがあるデバイスのみ
+            $hasSchedules = $device->schedules->isNotEmpty();
+            $isAwayMode = $device->away_mode;
+
+            if (!$hasSchedules && !$isAwayMode) {
+                continue;
+            }
+
+            $schedules = $device->schedules->map(function ($schedule) use ($dayNames) {
+                $data = [
+                    'id' => $schedule->id,
+                    'type' => $schedule->type,
+                    'memo' => $schedule->memo,
+                ];
+
+                if ($schedule->type === 'oneshot') {
+                    $data['start_at'] = $schedule->start_at ? $schedule->start_at->format('Y-m-d H:i') : null;
+                    $data['end_at'] = $schedule->end_at ? $schedule->end_at->format('Y-m-d H:i') : null;
+                } else {
+                    $days = $schedule->days_of_week ?? [];
+                    $data['days_label'] = implode('・', array_map(fn($d) => $dayNames[$d] ?? '', $days));
+                    $data['start_time'] = $schedule->start_time;
+                    $data['end_time'] = $schedule->end_time;
+                    $data['next_day'] = $schedule->next_day;
+                }
+
+                return $data;
+            });
+
+            $result[] = [
+                'device_id' => $device->device_id,
+                'room_number' => $roomNumber,
+                'tenant_name' => $tenantName,
+                'is_vacant' => !$assignment || !$tenantName,
+                'away_mode' => (bool) $device->away_mode,
+                'away_until' => $device->away_until ? $device->away_until->format('Y-m-d H:i') : null,
+                'schedules' => $schedules,
+            ];
+        }
+
+        return response()->json($result);
+    }
 }

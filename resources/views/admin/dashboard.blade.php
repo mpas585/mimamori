@@ -400,6 +400,137 @@
     .toast.success { background: var(--green-dark); }
     .toast.error { background: var(--red); }
 
+    /* ===== タイマー一覧モーダル ===== */
+    .timer-list-loading {
+        padding: 40px 20px;
+        text-align: center;
+        color: var(--gray-400);
+        font-size: 13px;
+    }
+    .timer-list-empty {
+        padding: 40px 20px;
+        text-align: center;
+        color: var(--gray-400);
+        font-size: 13px;
+    }
+    .timer-device-group {
+        margin-bottom: 16px;
+        border: 1px solid var(--gray-200);
+        border-radius: var(--radius);
+        overflow: hidden;
+    }
+    .timer-device-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 14px;
+        background: var(--beige);
+        border-bottom: 1px solid var(--gray-200);
+    }
+    .timer-device-info {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .timer-device-room {
+        font-size: 14px;
+        font-weight: 700;
+        color: var(--gray-800);
+    }
+    .timer-device-name {
+        font-size: 12px;
+        color: var(--gray-500);
+    }
+    .timer-device-id {
+        font-family: monospace;
+        font-size: 11px;
+        font-weight: 600;
+        color: var(--gray-500);
+        background: var(--white);
+        padding: 2px 8px;
+        border-radius: 4px;
+        border: 1px solid var(--gray-200);
+    }
+    .timer-away-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 3px 10px;
+        font-size: 11px;
+        font-weight: 600;
+        border-radius: 4px;
+        background: var(--yellow-light);
+        color: #a16207;
+    }
+    .timer-schedule-item {
+        display: flex;
+        align-items: center;
+        padding: 10px 14px;
+        border-bottom: 1px solid var(--gray-100);
+        font-size: 13px;
+    }
+    .timer-schedule-item:last-child { border-bottom: none; }
+    .timer-schedule-item:nth-child(even) { background: var(--cream); }
+    .timer-schedule-icon {
+        width: 28px;
+        height: 28px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 6px;
+        font-size: 14px;
+        margin-right: 10px;
+        flex-shrink: 0;
+    }
+    .timer-schedule-icon.oneshot { background: #eff6ff; }
+    .timer-schedule-icon.recurring { background: #f0fdf4; }
+    .timer-schedule-info { flex: 1; }
+    .timer-schedule-main {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--gray-800);
+        margin-bottom: 2px;
+    }
+    .timer-schedule-sub {
+        font-size: 11px;
+        color: var(--gray-500);
+    }
+    .timer-schedule-type {
+        font-size: 10px;
+        font-weight: 600;
+        padding: 2px 6px;
+        border-radius: 3px;
+        margin-left: 8px;
+        flex-shrink: 0;
+    }
+    .timer-schedule-type.oneshot { background: #eff6ff; color: #1d4ed8; }
+    .timer-schedule-type.recurring { background: #f0fdf4; color: #15803d; }
+    .timer-summary {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 16px;
+        flex-wrap: wrap;
+    }
+    .timer-summary-item {
+        background: var(--white);
+        border: 1px solid var(--gray-200);
+        border-radius: var(--radius);
+        padding: 10px 14px;
+        flex: 1;
+        min-width: 120px;
+        text-align: center;
+    }
+    .timer-summary-value {
+        font-size: 20px;
+        font-weight: 700;
+        color: var(--gray-800);
+    }
+    .timer-summary-label {
+        font-size: 11px;
+        color: var(--gray-500);
+        margin-top: 2px;
+    }
+
     @media (max-width: 768px) {
         .status-grid { grid-template-columns: repeat(3, 1fr); }
         .toolbar { flex-direction: column; align-items: stretch; }
@@ -502,6 +633,7 @@
             <span class="toolbar-count">登録: <strong>{{ $devices->total() ?? 0 }}</strong> / {{ $organization->device_limit ?? 100 }}台</span>
         </div>
         <div class="toolbar-right">
+            <button class="toolbar-btn" onclick="showTimerListModal()">⏰ タイマー一覧</button>
             <button class="toolbar-btn" onclick="showAddDeviceModal()">➕ デバイス追加</button>
             <a href="{{ route('admin.org.csv') }}" class="toolbar-btn">📥 CSV出力</a>
         </div>
@@ -838,6 +970,22 @@
         </div>
     </div>
 
+    {{-- ===== モーダル: タイマー一覧 ===== --}}
+    <div id="timerListModal" class="modal-overlay" onclick="if(event.target===this)hideModal('timerListModal')">
+        <div class="modal" style="max-width:620px;">
+            <div class="modal-header">
+                <h3>⏰ タイマー一覧</h3>
+                <button class="modal-close" onclick="hideModal('timerListModal')">×</button>
+            </div>
+            <div class="modal-body" id="timerListBody">
+                <div class="timer-list-loading">読み込み中...</div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="hideModal('timerListModal')">閉じる</button>
+            </div>
+        </div>
+    </div>
+
     {{-- トースト --}}
     <div id="toast" class="toast"></div>
 @endsection
@@ -855,6 +1003,13 @@ function showToast(message, type) {
     toast.textContent = message;
     toast.className = 'toast ' + type + ' show';
     setTimeout(function() { toast.classList.remove('show'); }, 3000);
+}
+
+function escapeHtml(str) {
+    if (!str) return '';
+    var div = document.createElement('div');
+    div.appendChild(document.createTextNode(str));
+    return div.innerHTML;
 }
 
 // ===== ステータスフィルタ =====
@@ -1004,6 +1159,124 @@ function openEditFromDetail() {
     document.getElementById('editForm').action = '/admin/org/devices/' + currentDetailDeviceId + '/assignment';
 
     showModal('editModal');
+}
+
+// ===== タイマー一覧 =====
+function showTimerListModal() {
+    showModal('timerListModal');
+    loadTimerList();
+}
+
+async function loadTimerList() {
+    const body = document.getElementById('timerListBody');
+    body.innerHTML = '<div class="timer-list-loading">読み込み中...</div>';
+
+    try {
+        const res = await fetch('{{ route("admin.org.timers") }}', {
+            headers: { 'Accept': 'application/json' }
+        });
+
+        if (!res.ok) {
+            body.innerHTML = '<div class="timer-list-empty">データの取得に失敗しました</div>';
+            return;
+        }
+
+        const data = await res.json();
+
+        if (data.length === 0) {
+            body.innerHTML = '<div class="timer-list-empty">タイマーが設定されているデバイスはありません</div>';
+            return;
+        }
+
+        // サマリー集計
+        let awayCount = 0;
+        let oneshotCount = 0;
+        let recurringCount = 0;
+        data.forEach(function(d) {
+            if (d.away_mode) awayCount++;
+            d.schedules.forEach(function(s) {
+                if (s.type === 'oneshot') oneshotCount++;
+                else recurringCount++;
+            });
+        });
+
+        let html = '';
+
+        // サマリー
+        html += '<div class="timer-summary">';
+        html += '<div class="timer-summary-item"><div class="timer-summary-value">' + data.length + '</div><div class="timer-summary-label">対象デバイス</div></div>';
+        html += '<div class="timer-summary-item"><div class="timer-summary-value">' + awayCount + '</div><div class="timer-summary-label">見守りOFF中</div></div>';
+        html += '<div class="timer-summary-item"><div class="timer-summary-value">' + oneshotCount + '</div><div class="timer-summary-label">単発予定</div></div>';
+        html += '<div class="timer-summary-item"><div class="timer-summary-value">' + recurringCount + '</div><div class="timer-summary-label">定期スケジュール</div></div>';
+        html += '</div>';
+
+        // デバイスごとのグループ
+        data.forEach(function(d) {
+            html += '<div class="timer-device-group">';
+            html += '<div class="timer-device-header">';
+            html += '<div class="timer-device-info">';
+            if (d.room_number) html += '<span class="timer-device-room">' + escapeHtml(d.room_number) + '</span>';
+            if (d.tenant_name) html += '<span class="timer-device-name">' + escapeHtml(d.tenant_name) + '</span>';
+            html += '<span class="timer-device-id">' + escapeHtml(d.device_id) + '</span>';
+            html += '</div>';
+            if (d.away_mode) {
+                html += '<span class="timer-away-badge">⏸ 見守りOFF';
+                if (d.away_until) html += '（〜' + formatTimerDateTime(d.away_until) + '）';
+                html += '</span>';
+            }
+            html += '</div>';
+
+            if (d.schedules.length > 0) {
+                d.schedules.forEach(function(s) {
+                    html += '<div class="timer-schedule-item">';
+                    if (s.type === 'oneshot') {
+                        html += '<div class="timer-schedule-icon oneshot">📅</div>';
+                        html += '<div class="timer-schedule-info">';
+                        html += '<p class="timer-schedule-main">' + formatTimerDateTime(s.start_at) + ' 〜 ' + (s.end_at ? formatTimerDateTime(s.end_at) : '手動復帰') + '</p>';
+                        html += '<p class="timer-schedule-sub">' + (s.memo ? escapeHtml(s.memo) : '（メモなし）') + '</p>';
+                        html += '</div>';
+                        html += '<span class="timer-schedule-type oneshot">単発</span>';
+                    } else {
+                        html += '<div class="timer-schedule-icon recurring">🔁</div>';
+                        html += '<div class="timer-schedule-info">';
+                        var timeStr = s.start_time + '〜' + (s.next_day ? '翌' : '') + s.end_time;
+                        html += '<p class="timer-schedule-main">毎週 ' + escapeHtml(s.days_label) + ' ' + timeStr + '</p>';
+                        html += '<p class="timer-schedule-sub">' + (s.memo ? escapeHtml(s.memo) : '（メモなし）') + '</p>';
+                        html += '</div>';
+                        html += '<span class="timer-schedule-type recurring">定期</span>';
+                    }
+                    html += '</div>';
+                });
+            } else if (d.away_mode) {
+                html += '<div class="timer-schedule-item">';
+                html += '<div class="timer-schedule-icon oneshot">⏸</div>';
+                html += '<div class="timer-schedule-info">';
+                html += '<p class="timer-schedule-main">手動で見守りOFF中</p>';
+                html += '<p class="timer-schedule-sub">スケジュール設定なし</p>';
+                html += '</div>';
+                html += '</div>';
+            }
+
+            html += '</div>';
+        });
+
+        body.innerHTML = html;
+    } catch (e) {
+        console.error('タイマー一覧読み込みエラー:', e);
+        body.innerHTML = '<div class="timer-list-empty">通信エラーが発生しました</div>';
+    }
+}
+
+function formatTimerDateTime(dtStr) {
+    if (!dtStr) return '-';
+    var parts = dtStr.split(' ');
+    if (parts.length === 2) {
+        var dateParts = parts[0].split('-');
+        if (dateParts.length === 3) {
+            return parseInt(dateParts[1]) + '/' + parseInt(dateParts[2]) + ' ' + parts[1];
+        }
+    }
+    return dtStr;
 }
 
 // ===== フラッシュメッセージ自動表示 =====
