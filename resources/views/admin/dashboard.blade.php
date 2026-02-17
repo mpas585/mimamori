@@ -530,6 +530,221 @@
         color: var(--gray-500);
         margin-top: 2px;
     }
+    .timer-add-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        width: 100%;
+        padding: 8px;
+        font-size: 12px;
+        font-weight: 600;
+        font-family: inherit;
+        color: var(--gray-500);
+        background: var(--cream);
+        border: 1px dashed var(--gray-300);
+        border-radius: 0;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .timer-add-btn:hover { background: var(--beige); color: var(--gray-700); }
+    .timer-delete-btn {
+        width: 28px;
+        height: 28px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        color: var(--gray-400);
+        background: transparent;
+        border: 1px solid transparent;
+        border-radius: 4px;
+        cursor: pointer;
+        margin-left: 8px;
+        flex-shrink: 0;
+        transition: all 0.2s;
+    }
+    .timer-delete-btn:hover { color: var(--red); background: var(--red-light); border-color: var(--red-light); }
+    .schedule-form-group { margin-bottom: 14px; }
+    .schedule-form-group label {
+        display: block;
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--gray-700);
+        margin-bottom: 4px;
+    }
+    .schedule-form-group input,
+    .schedule-form-group select {
+        width: 100%;
+        padding: 8px 10px;
+        font-size: 13px;
+        font-family: inherit;
+        border: 1px solid var(--gray-300);
+        border-radius: var(--radius);
+        background: var(--white);
+    }
+    .schedule-form-group input:focus,
+    .schedule-form-group select:focus {
+        outline: none;
+        border-color: var(--gray-500);
+        box-shadow: 0 0 0 3px rgba(168,162,158,0.15);
+    }
+    .schedule-type-tabs {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 16px;
+    }
+    .schedule-type-tab {
+        flex: 1;
+        padding: 10px;
+        text-align: center;
+        font-size: 13px;
+        font-weight: 600;
+        font-family: inherit;
+        border: 2px solid var(--gray-200);
+        border-radius: var(--radius);
+        background: var(--white);
+        cursor: pointer;
+        transition: all 0.2s;
+        color: var(--gray-600);
+    }
+    .schedule-type-tab.active {
+        border-color: var(--gray-800);
+        background: var(--beige);
+        color: var(--gray-800);
+    }
+    .schedule-type-tab:hover:not(.active) { background: var(--cream); }
+    .schedule-days {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+    }
+    .schedule-day-btn {
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 13px;
+        font-weight: 600;
+        font-family: inherit;
+        border: 2px solid var(--gray-200);
+        border-radius: 50%;
+        background: var(--white);
+        cursor: pointer;
+        transition: all 0.2s;
+        color: var(--gray-600);
+    }
+    .schedule-day-btn.active {
+        border-color: var(--gray-800);
+        background: var(--gray-800);
+        color: var(--white);
+    }
+    .schedule-day-btn:hover:not(.active) { background: var(--cream); }
+    .schedule-time-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .schedule-time-row input { width: auto; flex: 1; }
+    .schedule-time-row span { font-size: 13px; color: var(--gray-500); white-space: nowrap; }
+    .schedule-nextday-check {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        margin-top: 8px;
+        font-size: 12px;
+        color: var(--gray-600);
+    }
+    .schedule-device-label {
+        font-size: 12px;
+        color: var(--gray-500);
+        margin-bottom: 12px;
+        padding: 8px 12px;
+        background: var(--beige);
+        border-radius: var(--radius);
+    }
+    .schedule-device-label strong {
+        color: var(--gray-800);
+    }
+    .detail-schedule-list {
+        border: 1px solid var(--gray-200);
+        border-radius: var(--radius);
+        overflow: hidden;
+        margin-bottom: 10px;
+    }
+    .detail-schedule-item {
+        display: flex;
+        align-items: center;
+        padding: 8px 12px;
+        border-bottom: 1px solid var(--gray-100);
+        font-size: 13px;
+    }
+    .detail-schedule-item:last-child { border-bottom: none; }
+    .detail-schedule-item:nth-child(even) { background: var(--cream); }
+    .detail-schedule-icon {
+        width: 26px;
+        height: 26px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 6px;
+        font-size: 13px;
+        margin-right: 8px;
+        flex-shrink: 0;
+    }
+    .detail-schedule-icon.oneshot { background: #eff6ff; }
+    .detail-schedule-icon.recurring { background: #f0fdf4; }
+    .detail-schedule-info { flex: 1; min-width: 0; }
+    .detail-schedule-main {
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--gray-800);
+    }
+    .detail-schedule-sub {
+        font-size: 11px;
+        color: var(--gray-500);
+    }
+    .detail-schedule-del {
+        width: 24px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 13px;
+        color: var(--gray-400);
+        background: transparent;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        flex-shrink: 0;
+        transition: all 0.2s;
+    }
+    .detail-schedule-del:hover { color: var(--red); background: var(--red-light); }
+    .detail-schedule-empty {
+        padding: 16px;
+        text-align: center;
+        font-size: 12px;
+        color: var(--gray-400);
+    }
+    .detail-schedule-add {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        width: 100%;
+        padding: 8px;
+        font-size: 12px;
+        font-weight: 600;
+        font-family: inherit;
+        color: var(--gray-500);
+        background: var(--cream);
+        border: 1px dashed var(--gray-300);
+        border-radius: var(--radius);
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .detail-schedule-add:hover { background: var(--beige); color: var(--gray-700); }
 
     @media (max-width: 768px) {
         .status-grid { grid-template-columns: repeat(3, 1fr); }
@@ -909,6 +1124,12 @@
                         </div>
                     </div>
                 </div>
+
+                <div class="detail-section">
+                    <div class="detail-section-title">📅 スケジュール</div>
+                    <div id="detailScheduleList"></div>
+                    <button class="detail-schedule-add" id="detailScheduleAddBtn" onclick="openScheduleAddFromDetail()">＋ スケジュール追加</button>
+                </div>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-secondary" onclick="hideModal('detailModal')">閉じる</button>
@@ -982,6 +1203,93 @@
             </div>
             <div class="modal-footer">
                 <button class="btn btn-secondary" onclick="hideModal('timerListModal')">閉じる</button>
+            </div>
+        </div>
+    </div>
+
+    {{-- ===== モーダル: スケジュール追加 ===== --}}
+    <div id="scheduleAddModal" class="modal-overlay" onclick="if(event.target===this)hideScheduleAddModal()">
+        <div class="modal" style="max-width:480px;">
+            <div class="modal-header">
+                <h3>📅 スケジュール追加</h3>
+                <button class="modal-close" onclick="hideScheduleAddModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="schedule-device-label" id="scheduleDeviceLabel">
+                    対象: <strong>-</strong>
+                </div>
+
+                <div class="schedule-type-tabs">
+                    <button class="schedule-type-tab active" id="tabOneshot" onclick="switchScheduleType('oneshot')">📅 単発</button>
+                    <button class="schedule-type-tab" id="tabRecurring" onclick="switchScheduleType('recurring')">🔁 定期</button>
+                </div>
+
+                {{-- 単発フォーム --}}
+                <div id="oneshotForm">
+                    <div class="schedule-form-group">
+                        <label>開始日時</label>
+                        <input type="datetime-local" id="schedStartAt">
+                    </div>
+                    <div class="schedule-form-group">
+                        <label>終了日時（空欄＝手動復帰）</label>
+                        <input type="datetime-local" id="schedEndAt">
+                    </div>
+                </div>
+
+                {{-- 定期フォーム --}}
+                <div id="recurringForm" style="display:none;">
+                    <div class="schedule-form-group">
+                        <label>曜日</label>
+                        <div class="schedule-days" id="scheduleDays">
+                            <button type="button" class="schedule-day-btn" data-day="0" onclick="toggleDay(this)">日</button>
+                            <button type="button" class="schedule-day-btn" data-day="1" onclick="toggleDay(this)">月</button>
+                            <button type="button" class="schedule-day-btn" data-day="2" onclick="toggleDay(this)">火</button>
+                            <button type="button" class="schedule-day-btn" data-day="3" onclick="toggleDay(this)">水</button>
+                            <button type="button" class="schedule-day-btn" data-day="4" onclick="toggleDay(this)">木</button>
+                            <button type="button" class="schedule-day-btn" data-day="5" onclick="toggleDay(this)">金</button>
+                            <button type="button" class="schedule-day-btn" data-day="6" onclick="toggleDay(this)">土</button>
+                        </div>
+                    </div>
+                    <div class="schedule-form-group">
+                        <label>時間帯</label>
+                        <div class="schedule-time-row">
+                            <input type="time" id="schedStartTime">
+                            <span>〜</span>
+                            <input type="time" id="schedEndTime">
+                        </div>
+                        <label class="schedule-nextday-check">
+                            <input type="checkbox" id="schedNextDay"> 翌日にまたがる
+                        </label>
+                    </div>
+                </div>
+
+                {{-- 共通 --}}
+                <div class="schedule-form-group">
+                    <label>メモ（任意）</label>
+                    <input type="text" id="schedMemo" placeholder="例: デイサービス" maxlength="200">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="hideScheduleAddModal()">キャンセル</button>
+                <button class="btn btn-primary" onclick="submitSchedule()">追加</button>
+            </div>
+        </div>
+    </div>
+
+    {{-- ===== モーダル: スケジュール削除確認 ===== --}}
+    <div id="scheduleDeleteModal" class="modal-overlay" onclick="if(event.target===this)hideModal('scheduleDeleteModal')">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>⚠️ スケジュール削除</h3>
+                <button class="modal-close" onclick="hideModal('scheduleDeleteModal')">×</button>
+            </div>
+            <div class="modal-body">
+                <p>このスケジュールを削除しますか？</p>
+                <p id="scheduleDeleteDetail" style="color:var(--gray-500);font-size:13px;margin-top:8px;"></p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="hideModal('scheduleDeleteModal')">キャンセル</button>
+                <button class="btn btn-danger" onclick="executeDeleteSchedule()">削除する</button>
             </div>
         </div>
     </div>
@@ -1113,6 +1421,8 @@ function showDeviceDetail(deviceId) {
         document.getElementById('detailRoom').textContent = data.room_number || '-';
         document.getElementById('detailTenant').textContent = data.tenant_name || '-';
         document.getElementById('detailLastDetected').textContent = data.last_human_detected || '-';
+        currentDetailRoomNumber = data.room_number || '';
+        currentDetailTenantName = data.tenant_name || '';
 
         // デバイス状態
         document.getElementById('detailBattery').textContent = data.battery_pct !== null ? data.battery_pct + '%' : '-';
@@ -1136,6 +1446,9 @@ function showDeviceDetail(deviceId) {
         document.getElementById('detailRegistered').textContent = data.registered_at || '-';
         document.getElementById('detailMemo').textContent = data.memo || '-';
 
+        // スケジュール一覧
+        renderDetailSchedules(data.schedules || [], data.device_id);
+
         showModal('detailModal');
     })
     .catch(function() {
@@ -1144,6 +1457,9 @@ function showDeviceDetail(deviceId) {
 }
 
 // ===== 詳細 → 編集 =====
+let currentDetailRoomNumber = '';
+let currentDetailTenantName = '';
+
 function openEditFromDetail() {
     if (!currentDetailDeviceId) return;
     hideModal('detailModal');
@@ -1159,6 +1475,46 @@ function openEditFromDetail() {
     document.getElementById('editForm').action = '/admin/org/devices/' + currentDetailDeviceId + '/assignment';
 
     showModal('editModal');
+}
+
+// ===== 詳細モーダル内スケジュール描画 =====
+function renderDetailSchedules(schedules, deviceId) {
+    var container = document.getElementById('detailScheduleList');
+    if (!schedules || schedules.length === 0) {
+        container.innerHTML = '<div class="detail-schedule-empty">スケジュールなし</div>';
+        return;
+    }
+
+    var html = '<div class="detail-schedule-list">';
+    schedules.forEach(function(s) {
+        html += '<div class="detail-schedule-item">';
+        if (s.type === 'oneshot') {
+            html += '<div class="detail-schedule-icon oneshot">📅</div>';
+            html += '<div class="detail-schedule-info">';
+            html += '<p class="detail-schedule-main">' + formatTimerDateTime(s.start_at) + ' 〜 ' + (s.end_at ? formatTimerDateTime(s.end_at) : '手動復帰') + '</p>';
+            html += '<p class="detail-schedule-sub">' + (s.memo ? escapeHtml(s.memo) : '単発') + '</p>';
+            html += '</div>';
+        } else {
+            html += '<div class="detail-schedule-icon recurring">🔁</div>';
+            html += '<div class="detail-schedule-info">';
+            var timeStr = s.start_time + '〜' + (s.next_day ? '翌' : '') + s.end_time;
+            html += '<p class="detail-schedule-main">毎週 ' + escapeHtml(s.days_label) + ' ' + timeStr + '</p>';
+            html += '<p class="detail-schedule-sub">' + (s.memo ? escapeHtml(s.memo) : '定期') + '</p>';
+            html += '</div>';
+        }
+        html += '<button class="detail-schedule-del" onclick="confirmDeleteSchedule(\'' + escapeHtml(deviceId) + '\',' + s.id + ',\'' + escapeHtml(s.type === 'oneshot' ? formatTimerDateTime(s.start_at) : s.days_label) + '\')" title="削除">×</button>';
+        html += '</div>';
+    });
+    html += '</div>';
+    container.innerHTML = html;
+}
+
+// ===== 詳細モーダルからスケジュール追加 =====
+let scheduleAddOrigin = null; // 'detail' or 'timerlist'
+
+function openScheduleAddFromDetail() {
+    scheduleAddOrigin = 'detail';
+    openScheduleAddModal(currentDetailDeviceId, currentDetailRoomNumber, currentDetailTenantName);
 }
 
 // ===== タイマー一覧 =====
@@ -1245,6 +1601,7 @@ async function loadTimerList() {
                         html += '</div>';
                         html += '<span class="timer-schedule-type recurring">定期</span>';
                     }
+                    html += '<button class="timer-delete-btn" onclick="confirmDeleteSchedule(\'' + escapeHtml(d.device_id) + '\',' + s.id + ',\'' + escapeHtml(s.type === 'oneshot' ? formatTimerDateTime(s.start_at) : s.days_label) + '\')" title="削除">×</button>';
                     html += '</div>';
                 });
             } else if (d.away_mode) {
@@ -1256,6 +1613,9 @@ async function loadTimerList() {
                 html += '</div>';
                 html += '</div>';
             }
+
+            // スケジュール追加ボタン
+            html += '<button class="timer-add-btn" onclick="scheduleAddOrigin=\'timerlist\';openScheduleAddModal(\'' + escapeHtml(d.device_id) + '\',\'' + escapeHtml(d.room_number || '') + '\',\'' + escapeHtml(d.tenant_name || '') + '\')">＋ スケジュール追加</button>';
 
             html += '</div>';
         });
@@ -1277,6 +1637,160 @@ function formatTimerDateTime(dtStr) {
         }
     }
     return dtStr;
+}
+
+// ===== スケジュール追加モーダル =====
+let scheduleTargetDeviceId = null;
+let scheduleType = 'oneshot';
+
+function openScheduleAddModal(deviceId, roomNumber, tenantName) {
+    scheduleTargetDeviceId = deviceId;
+    scheduleType = 'oneshot';
+
+    // ラベル更新
+    var label = roomNumber ? roomNumber : '';
+    if (tenantName) label += (label ? ' ' : '') + tenantName;
+    label += (label ? '（' : '') + deviceId + (label ? '）' : '');
+    document.getElementById('scheduleDeviceLabel').innerHTML = '対象: <strong>' + escapeHtml(label) + '</strong>';
+
+    // フォームリセット
+    document.getElementById('schedStartAt').value = '';
+    document.getElementById('schedEndAt').value = '';
+    document.getElementById('schedStartTime').value = '';
+    document.getElementById('schedEndTime').value = '';
+    document.getElementById('schedNextDay').checked = false;
+    document.getElementById('schedMemo').value = '';
+    document.querySelectorAll('.schedule-day-btn').forEach(function(b) { b.classList.remove('active'); });
+
+    // タブリセット
+    switchScheduleType('oneshot');
+
+    showModal('scheduleAddModal');
+}
+
+function hideScheduleAddModal() {
+    hideModal('scheduleAddModal');
+}
+
+function switchScheduleType(type) {
+    scheduleType = type;
+    document.getElementById('tabOneshot').classList.toggle('active', type === 'oneshot');
+    document.getElementById('tabRecurring').classList.toggle('active', type === 'recurring');
+    document.getElementById('oneshotForm').style.display = type === 'oneshot' ? 'block' : 'none';
+    document.getElementById('recurringForm').style.display = type === 'recurring' ? 'block' : 'none';
+}
+
+function toggleDay(btn) {
+    btn.classList.toggle('active');
+}
+
+async function submitSchedule() {
+    if (!scheduleTargetDeviceId) return;
+
+    var payload = {
+        type: scheduleType,
+        memo: document.getElementById('schedMemo').value || null,
+    };
+
+    if (scheduleType === 'oneshot') {
+        var startAt = document.getElementById('schedStartAt').value;
+        if (!startAt) {
+            showToast('開始日時を入力してください', 'error');
+            return;
+        }
+        payload.start_at = startAt;
+        var endAt = document.getElementById('schedEndAt').value;
+        if (endAt) payload.end_at = endAt;
+    } else {
+        var days = [];
+        document.querySelectorAll('.schedule-day-btn.active').forEach(function(b) {
+            days.push(parseInt(b.getAttribute('data-day')));
+        });
+        if (days.length === 0) {
+            showToast('曜日を1つ以上選択してください', 'error');
+            return;
+        }
+        var startTime = document.getElementById('schedStartTime').value;
+        var endTime = document.getElementById('schedEndTime').value;
+        if (!startTime || !endTime) {
+            showToast('開始時間と終了時間を入力してください', 'error');
+            return;
+        }
+        payload.days_of_week = days;
+        payload.start_time = startTime;
+        payload.end_time = endTime;
+        payload.next_day = document.getElementById('schedNextDay').checked;
+    }
+
+    try {
+        var res = await fetch('/admin/org/devices/' + scheduleTargetDeviceId + '/schedules', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': csrfToken,
+                'Accept': 'application/json',
+            },
+            body: JSON.stringify(payload),
+        });
+
+        var data = await res.json();
+
+        if (res.ok && data.success) {
+            showToast('スケジュールを追加しました', 'success');
+            hideScheduleAddModal();
+            if (scheduleAddOrigin === 'detail' && currentDetailDeviceId) {
+                showDeviceDetail(currentDetailDeviceId); // 詳細モーダル再読み込み
+            }
+            loadTimerList(); // タイマー一覧も再読み込み
+        } else {
+            var msg = data.message || (data.errors ? Object.values(data.errors).flat().join(', ') : '追加に失敗しました');
+            showToast(msg, 'error');
+        }
+    } catch (e) {
+        console.error('スケジュール追加エラー:', e);
+        showToast('通信エラーが発生しました', 'error');
+    }
+}
+
+// ===== スケジュール削除 =====
+let deleteScheduleDeviceId = null;
+let deleteScheduleId = null;
+
+function confirmDeleteSchedule(deviceId, scheduleId, detail) {
+    deleteScheduleDeviceId = deviceId;
+    deleteScheduleId = scheduleId;
+    document.getElementById('scheduleDeleteDetail').textContent = deviceId + ' のスケジュール: ' + detail;
+    showModal('scheduleDeleteModal');
+}
+
+async function executeDeleteSchedule() {
+    if (!deleteScheduleDeviceId || !deleteScheduleId) return;
+
+    try {
+        var res = await fetch('/admin/org/devices/' + deleteScheduleDeviceId + '/schedules/' + deleteScheduleId, {
+            method: 'DELETE',
+            headers: {
+                'X-CSRF-TOKEN': csrfToken,
+                'Accept': 'application/json',
+            },
+        });
+
+        var data = await res.json();
+
+        if (res.ok && data.success) {
+            showToast('スケジュールを削除しました', 'success');
+            hideModal('scheduleDeleteModal');
+            if (currentDetailDeviceId && document.getElementById('detailModal').classList.contains('show')) {
+                showDeviceDetail(currentDetailDeviceId); // 詳細モーダル再読み込み
+            }
+            loadTimerList(); // タイマー一覧も再読み込み
+        } else {
+            showToast(data.message || '削除に失敗しました', 'error');
+        }
+    } catch (e) {
+        console.error('スケジュール削除エラー:', e);
+        showToast('通信エラーが発生しました', 'error');
+    }
 }
 
 // ===== フラッシュメッセージ自動表示 =====

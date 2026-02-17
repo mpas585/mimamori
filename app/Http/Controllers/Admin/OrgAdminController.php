@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Device;
+use App\Models\DeviceSchedule;
 use App\Models\Organization;
 use App\Models\OrgDeviceAssignment;
 use Illuminate\Http\Request;
@@ -227,10 +228,32 @@ class OrgAdminController extends Controller
 
         $device = Device::where('device_id', $deviceId)
             ->where('organization_id', $organization->id)
-            ->with('orgAssignment')
+            ->with(['orgAssignment', 'schedules' => function ($q) {
+                $q->where('is_active', true)->orderBy('created_at', 'desc');
+            }])
             ->firstOrFail();
 
         $assignment = $device->orgAssignment;
+        $dayNames = ['日', '月', '火', '水', '木', '金', '土'];
+
+        $schedules = $device->schedules->map(function ($schedule) use ($dayNames) {
+            $data = [
+                'id' => $schedule->id,
+                'type' => $schedule->type,
+                'memo' => $schedule->memo,
+            ];
+            if ($schedule->type === 'oneshot') {
+                $data['start_at'] = $schedule->start_at ? $schedule->start_at->format('Y-m-d H:i') : null;
+                $data['end_at'] = $schedule->end_at ? $schedule->end_at->format('Y-m-d H:i') : null;
+            } else {
+                $days = $schedule->days_of_week ?? [];
+                $data['days_label'] = implode('・', array_map(fn($d) => $dayNames[$d] ?? '', $days));
+                $data['start_time'] = $schedule->start_time;
+                $data['end_time'] = $schedule->end_time;
+                $data['next_day'] = $schedule->next_day;
+            }
+            return $data;
+        });
 
         return response()->json([
             'device_id' => $device->device_id,
@@ -251,6 +274,7 @@ class OrgAdminController extends Controller
             'away_until' => $device->away_until ? $device->away_until->format('Y/m/d H:i') : null,
             'memo' => $device->location_memo,
             'registered_at' => $device->created_at->format('Y/m/d'),
+            'schedules' => $schedules,
         ]);
     }
 
@@ -409,5 +433,59 @@ class OrgAdminController extends Controller
         }
 
         return response()->json($result);
+    }
+
+    /**
+     * デバイスにスケジュール追加
+     */
+    public function storeSchedule(Request $request, $deviceId)
+    {
+        $organization = $this->getOrganization();
+
+        $device = Device::where('device_id', $deviceId)
+            ->where('organization_id', $organization->id)
+            ->firstOrFail();
+
+        $validated = $request->validate([
+            'type' => 'required|in:oneshot,recurring',
+            'start_at' => 'required_if:type,oneshot|nullable|date',
+            'end_at' => 'nullable|date|after:start_at',
+            'days_of_week' => 'required_if:type,recurring|nullable|array',
+            'days_of_week.*' => 'integer|between:0,6',
+            'start_time' => 'required_if:type,recurring|nullable|date_format:H:i',
+            'end_time' => 'required_if:type,recurring|nullable|date_format:H:i',
+            'next_day' => 'nullable|boolean',
+            'memo' => 'nullable|string|max:200',
+        ]);
+
+        $schedule = $device->schedules()->create([
+            'type' => $validated['type'],
+            'start_at' => $validated['start_at'] ?? null,
+            'end_at' => $validated['end_at'] ?? null,
+            'days_of_week' => $validated['days_of_week'] ?? null,
+            'start_time' => $validated['start_time'] ?? null,
+            'end_time' => $validated['end_time'] ?? null,
+            'next_day' => $validated['next_day'] ?? false,
+            'memo' => $validated['memo'] ?? null,
+        ]);
+
+        return response()->json(['success' => true, 'schedule' => $schedule], 201);
+    }
+
+    /**
+     * デバイスのスケジュール削除
+     */
+    public function destroySchedule(Request $request, $deviceId, $scheduleId)
+    {
+        $organization = $this->getOrganization();
+
+        $device = Device::where('device_id', $deviceId)
+            ->where('organization_id', $organization->id)
+            ->firstOrFail();
+
+        $schedule = $device->schedules()->findOrFail($scheduleId);
+        $schedule->delete();
+
+        return response()->json(['success' => true, 'message' => 'スケジュールを削除しました']);
     }
 }

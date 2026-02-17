@@ -111,4 +111,6 @@ Route::middleware(AdminAuth::class.':operator')->prefix('admin/org')->group(func
     Route::put('/devices/{deviceId}/assignment', [OrgAdminController::class, 'updateAssignment'])->name('admin.org.devices.update-assignment');
     Route::get('/csv', [OrgAdminController::class, 'exportCsv'])->name('admin.org.csv');
     Route::get('/timers', [OrgAdminController::class, 'timerList'])->name('admin.org.timers');
+    Route::post('/devices/{deviceId}/schedules', [OrgAdminController::class, 'storeSchedule'])->name('admin.org.devices.schedules.store');
+    Route::delete('/devices/{deviceId}/schedules/{scheduleId}', [OrgAdminController::class, 'destroySchedule'])->name('admin.org.devices.schedules.destroy');
 });
