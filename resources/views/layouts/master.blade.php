@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'マスター管理') - みまもりトーフ</title>
+    <title>@yield('title', 'マスター管理') - みまもりデバイス</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -329,7 +329,7 @@
             <div class="header-left">
                 <a href="{{ route('admin.dashboard') }}" class="header-logo">
                     <div class="header-logo-icon">🧈</div>
-                    <span class="header-logo-text">みまもりトーフ</span>
+                    <span class="header-logo-text">みまもりデバイス</span>
                     <span class="header-badge">MASTER</span>
                 </a>
                 <nav class="header-nav">

@@ -44,7 +44,7 @@
   <circle cx="270" cy="250" r="10" fill="#C0A080"/>
   <circle cx="270" cy="250" r="6" fill="#D4B896"/>
   
-  <!-- みまもりトーフ本体（ドア枠の上部内側に貼り付け） -->
+  <!-- みまもりデバイス本体（ドア枠の上部内側に貼り付け） -->
   <g filter="url(#deviceShadow)">
     <rect x="160" y="52" width="80" height="20" rx="4" fill="url(#deviceGrad)" stroke="#E0E0E0" stroke-width="1"/>
     <!-- センサー部分（下面） -->
