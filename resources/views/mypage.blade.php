@@ -4,6 +4,55 @@
 
 @section('styles')
 <style>
+    /* アラートバナー */
+    .alert-banner {
+        border-radius: var(--radius-lg);
+        padding: 14px 16px;
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        animation: fadeIn 0.4s ease;
+    }
+    .alert-banner.warning {
+        background: var(--red-light);
+        border: 1px solid #fca5a5;
+    }
+    .alert-banner.offline {
+        background: var(--gray-100);
+        border: 1px solid var(--gray-300);
+    }
+    .alert-banner span {
+        font-size: 14px;
+        font-weight: 500;
+        color: var(--gray-700);
+        flex: 1;
+    }
+    .alert-banner strong {
+        font-weight: 700;
+    }
+    .alert-dismiss-btn {
+        padding: 6px 14px;
+        font-size: 13px;
+        font-weight: 600;
+        font-family: inherit;
+        color: var(--gray-600);
+        background: var(--white);
+        border: 1px solid var(--gray-300);
+        border-radius: var(--radius);
+        cursor: pointer;
+        transition: all 0.2s;
+        white-space: nowrap;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+    .alert-dismiss-btn:hover {
+        background: var(--gray-100);
+        border-color: var(--gray-400);
+    }
+
     /* 通知先未登録バナー */
     .notify-banner {
         background: var(--yellow-light);
@@ -350,6 +399,23 @@
         flex-shrink: 0;
     }
 
+    /* 解除確認モーダル内 */
+    .dismiss-warning {
+        background: var(--red-light);
+        border-radius: var(--radius);
+        padding: 12px 14px;
+        margin-bottom: 16px;
+        font-size: 13px;
+        color: var(--red);
+        font-weight: 600;
+    }
+    .dismiss-details {
+        font-size: 13px;
+        color: var(--gray-600);
+        line-height: 1.8;
+        margin-bottom: 16px;
+    }
+
     /* タイマータブ */
     .timer-tabs {
         display: flex;
@@ -529,6 +595,8 @@
     @media (max-width: 480px) {
         .status-card { padding: 20px; }
         .detail-item { padding: 8px 6px; }
+        .alert-banner { flex-direction: column; align-items: flex-start; gap: 8px; }
+        .alert-dismiss-btn { align-self: flex-end; }
     }
 </style>
 @endsection
@@ -544,6 +612,20 @@
         </div>
         <a href="/settings" class="notify-banner-btn">登録する</a>
     </div>
+</div>
+@endif
+
+{{-- アラートバナー --}}
+@if($device->status === 'alert' && !$device->away_mode)
+<div class="alert-banner warning" id="alertBanner">
+    <span>🔴 <strong>{{ $device->alert_threshold_hours }}時間以上</strong>検知がありません（要確認）</span>
+    <button class="alert-dismiss-btn" onclick="showDismissModal()">✕ 解除</button>
+</div>
+@endif
+@if($device->status === 'offline' && !$device->away_mode)
+<div class="alert-banner offline" id="offlineBanner">
+    <span>⚫ デバイスとの<strong>通信が途絶</strong>えています（電波障害または電池切れの可能性）</span>
+    <button class="alert-dismiss-btn" onclick="showDismissModal()">✕ 解除</button>
 </div>
 @endif
 
@@ -697,6 +779,24 @@
     </div>
 </div>
 
+{{-- ===== モーダル: 警告解除確認 ===== --}}
+<div id="dismissModal" class="modal-overlay">
+    <div class="modal">
+        <div class="modal-header">
+            <h3>⚠️ 警告を解除しますか？</h3>
+            <button class="modal-close" onclick="hideDismissModal()">×</button>
+        </div>
+        <div class="modal-body">
+            <p style="font-size:14px;color:var(--gray-700);margin-bottom:16px;">ステータスを<strong>「未稼働」</strong>に変更します。</p>
+            <p style="font-size:13px;color:var(--gray-500);">デバイスからの次回通信があれば自動的に再開されます。</p>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="hideDismissModal()">キャンセル</button>
+            <button class="btn btn-danger" id="dismissBtn" onclick="executeDismiss()">解除する</button>
+        </div>
+    </div>
+</div>
+
 {{-- タイマー設定モーダル --}}
 <div id="scheduleModal" class="modal-overlay">
     <div class="modal">
@@ -802,6 +902,49 @@
         'X-CSRF-TOKEN': csrfToken,
         'Accept': 'application/json',
     };
+
+    // ==== 警告解除 ====
+    function showDismissModal() {
+        document.getElementById('dismissModal').classList.add('show');
+    }
+    function hideDismissModal() {
+        document.getElementById('dismissModal').classList.remove('show');
+    }
+
+    async function executeDismiss() {
+        var btn = document.getElementById('dismissBtn');
+        btn.disabled = true;
+        btn.textContent = '処理中...';
+
+        try {
+            var res = await fetch('/mypage/dismiss-alert', {
+                method: 'POST',
+                headers: headers,
+            });
+            var data = await res.json();
+
+            if (res.ok && data.success) {
+                showToast(data.message);
+                hideDismissModal();
+                // ページをリロードして状態を反映
+                setTimeout(function() { location.reload(); }, 500);
+            } else {
+                showToast(data.message || 'エラーが発生しました');
+                btn.disabled = false;
+                btn.textContent = '解除する';
+            }
+        } catch (e) {
+            console.error('警告解除エラー:', e);
+            showToast('通信エラーが発生しました');
+            btn.disabled = false;
+            btn.textContent = '解除する';
+        }
+    }
+
+    // モーダル外クリックで閉じる
+    document.getElementById('dismissModal').addEventListener('click', function(e) {
+        if (e.target === this) hideDismissModal();
+    });
 
     // ==== 見守りON/OFF ====
     let watchEnabled = {{ $device->away_mode ? 'false' : 'true' }};

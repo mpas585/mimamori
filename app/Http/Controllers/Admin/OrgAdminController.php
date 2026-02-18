@@ -318,7 +318,7 @@ class OrgAdminController extends Controller
     }
 
     /**
-     * 警告解除（ステータスをinactiveに戻し、検知データをクリア）
+     * 警告解除（ステータスをinactiveに変更）
      */
     public function clearAlert(Request $request, $deviceId)
     {
@@ -328,24 +328,19 @@ class OrgAdminController extends Controller
             ->where('organization_id', $organization->id)
             ->firstOrFail();
 
-        // ステータスをinactiveに戻す（初期状態「-」表示）
+        if (!in_array($device->status, ['alert', 'offline'])) {
+            return response()->json([
+                'success' => false,
+                'message' => '現在のステータスでは解除できません',
+            ], 422);
+        }
+
         $device->update([
             'status' => 'inactive',
-            'last_human_detected_at' => null,
-            'last_received_at' => null,
-            'battery_voltage' => null,
-            'battery_pct' => null,
-            'rssi' => null,
         ]);
 
-        // 検知ログをクリア
-        $device->detectionLogs()->delete();
-
         if ($request->expectsJson()) {
-            return response()->json([
-                'success' => true,
-                'message' => "デバイス {$deviceId} の警告を解除しました",
-            ]);
+            return response()->json(['success' => true, 'message' => "デバイス {$deviceId} の警告を解除しました"]);
         }
 
         return back()->with('success', "デバイス {$deviceId} の警告を解除しました");

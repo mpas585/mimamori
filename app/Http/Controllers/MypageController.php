@@ -61,4 +61,29 @@ class MypageController extends Controller
             'status_subtitle' => $subtitle,
         ]);
     }
+
+    /**
+     * 警告解除（ステータスをinactiveに変更）
+     */
+    public function dismissAlert(Request $request)
+    {
+        $device = Auth::user();
+
+        // alert / offline 以外では実行不可
+        if (!in_array($device->status, ['alert', 'offline'])) {
+            return response()->json([
+                'success' => false,
+                'message' => '現在のステータスでは解除できません',
+            ], 422);
+        }
+
+        $device->update([
+            'status' => 'inactive',
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => '警告を解除しました',
+        ]);
+    }
 }
