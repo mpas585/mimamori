@@ -234,6 +234,50 @@
     .device-status.offline { background: var(--gray-100); color: var(--gray-600); }
     .device-status.vacant { background: #f8fafc; color: var(--gray-400); border: 1px solid var(--gray-200); }
 
+    /* ===== 警告解除ボタン ===== */
+    .clear-alert-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 3px;
+        padding: 2px 8px;
+        font-size: 10px;
+        font-weight: 600;
+        font-family: inherit;
+        color: var(--red);
+        background: var(--white);
+        border: 1px solid var(--red-light);
+        border-radius: 4px;
+        cursor: pointer;
+        transition: all 0.2s;
+        margin-left: 6px;
+        white-space: nowrap;
+    }
+    .clear-alert-btn:hover {
+        background: var(--red-light);
+        border-color: var(--red);
+    }
+    .detail-clear-alert-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 4px 12px;
+        font-size: 12px;
+        font-weight: 600;
+        font-family: inherit;
+        color: var(--red);
+        background: var(--white);
+        border: 1px solid var(--red-light);
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.2s;
+        margin-left: 10px;
+        vertical-align: middle;
+    }
+    .detail-clear-alert-btn:hover {
+        background: var(--red-light);
+        border-color: var(--red);
+    }
+
     /* ===== 見守りトグル ===== */
     .watch-toggle {
         position: relative;
@@ -368,13 +412,18 @@
         font-weight: 600;
         color: var(--gray-800);
     }
+    .detail-status-row {
+        display: flex;
+        align-items: center;
+        margin-bottom: 16px;
+        gap: 0;
+    }
     .detail-status-badge {
         display: inline-block;
         padding: 4px 12px;
         font-size: 12px;
         font-weight: 600;
         border-radius: 6px;
-        margin-bottom: 16px;
     }
     .detail-status-badge.normal { background: var(--green-light); color: var(--green-dark); }
     .detail-status-badge.warning { background: var(--yellow-light); color: #a16207; }
@@ -890,7 +939,7 @@
                                 else $signalLabel = '弱い';
                             }
                         @endphp
-                        <tr>
+                        <tr id="row-{{ $device->device_id }}">
                             <td>
                                 @switch($displayStatus)
                                     @case('normal')
@@ -901,6 +950,7 @@
                                         @break
                                     @case('alert')
                                         <span class="device-status alert">警告</span>
+                                        <button class="clear-alert-btn" onclick="confirmClearAlert('{{ $device->device_id }}', '{{ $roomNumber }}', '{{ $tenantName }}')" title="警告を解除してステータスを初期化">✕ 解除</button>
                                         @break
                                     @case('offline')
                                         <span class="device-status offline">離線</span>
@@ -1044,6 +1094,28 @@
         </div>
     </div>
 
+    {{-- ===== モーダル: 警告解除確認 ===== --}}
+    <div id="clearAlertModal" class="modal-overlay" onclick="if(event.target===this)hideModal('clearAlertModal')">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>⚠️ 警告解除</h3>
+                <button class="modal-close" onclick="hideModal('clearAlertModal')">×</button>
+            </div>
+            <div class="modal-body">
+                <p id="clearAlertTarget" style="margin-bottom:8px;"></p>
+                <p>このデバイスの警告を解除しますか？</p>
+                <p style="color:var(--gray-500);font-size:13px;margin-top:8px;">
+                    ステータスが初期状態（-）に戻り、検知ログもクリアされます。<br>
+                    退去・長期不在等でデバイスを初期化する場合にご利用ください。
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="hideModal('clearAlertModal')">キャンセル</button>
+                <button class="btn btn-danger" onclick="executeClearAlert()">警告を解除する</button>
+            </div>
+        </div>
+    </div>
+
     {{-- ===== モーダル: デバイス詳細 ===== --}}
     <div id="detailModal" class="modal-overlay" onclick="if(event.target===this)hideModal('detailModal')">
         <div class="modal" style="max-width:560px;">
@@ -1052,7 +1124,10 @@
                 <button class="modal-close" onclick="hideModal('detailModal')">×</button>
             </div>
             <div class="modal-body">
-                <div class="detail-status-badge normal" id="detailStatusBadge">-</div>
+                <div class="detail-status-row">
+                    <div class="detail-status-badge normal" id="detailStatusBadge">-</div>
+                    <button class="detail-clear-alert-btn" id="detailClearAlertBtn" style="display:none;" onclick="confirmClearAlertFromDetail()">✕ 警告解除</button>
+                </div>
 
                 <div class="detail-section">
                     <div class="detail-grid">
@@ -1343,6 +1418,52 @@ function confirmDelete(deviceId) {
     showModal('deleteModal');
 }
 
+// ===== 警告解除 =====
+let clearAlertDeviceId = null;
+
+function confirmClearAlert(deviceId, roomNumber, tenantName) {
+    clearAlertDeviceId = deviceId;
+    var label = '';
+    if (roomNumber) label += roomNumber + ' ';
+    if (tenantName) label += tenantName + ' ';
+    label += '（' + deviceId + '）';
+    document.getElementById('clearAlertTarget').innerHTML = '対象: <strong class="mono">' + escapeHtml(label) + '</strong>';
+    showModal('clearAlertModal');
+}
+
+function confirmClearAlertFromDetail() {
+    if (!currentDetailDeviceId) return;
+    hideModal('detailModal');
+    confirmClearAlert(currentDetailDeviceId, currentDetailRoomNumber, currentDetailTenantName);
+}
+
+function executeClearAlert() {
+    if (!clearAlertDeviceId) return;
+
+    fetch('/admin/org/devices/' + clearAlertDeviceId + '/clear-alert', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': csrfToken,
+            'Accept': 'application/json',
+        },
+    })
+    .then(function(res) { return res.json(); })
+    .then(function(data) {
+        if (data.success) {
+            showToast(data.message, 'success');
+            hideModal('clearAlertModal');
+            // ページをリロードして最新状態を反映
+            setTimeout(function() { location.reload(); }, 500);
+        } else {
+            showToast(data.message || 'エラーが発生しました', 'error');
+        }
+    })
+    .catch(function() {
+        showToast('通信エラーが発生しました', 'error');
+    });
+}
+
 // ===== 見守りトグル =====
 let pendingToggleDevice = null;
 let pendingToggleCheckbox = null;
@@ -1415,6 +1536,14 @@ function showDeviceDetail(deviceId) {
         const statusLabels = { normal: '正常稼働中', warning: '注意', alert: '未検知警告', offline: '通信途絶' };
         badge.textContent = statusLabels[data.status] || data.status;
         badge.className = 'detail-status-badge ' + (data.status || 'offline');
+
+        // 警告解除ボタンの表示/非表示
+        var clearBtn = document.getElementById('detailClearAlertBtn');
+        if (data.status === 'alert') {
+            clearBtn.style.display = 'inline-flex';
+        } else {
+            clearBtn.style.display = 'none';
+        }
 
         // 基本情報
         document.getElementById('detailDeviceId').textContent = data.device_id;
