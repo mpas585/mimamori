@@ -1,8 +1,8 @@
 /*
- * みまもりトーフ - Step4: AM312 + VL53L0X + 2色LED テスト
+ * みまもりデバイス - Step4: SR602 + VL53L0X + 2色LED テスト
  * 
  * 配線:
- *   AM312 VCC → 3.3V / GND → GND / OUT → D0 (GPIO2)
+ *   SR602 + → 3.3V / - → GND / OUT → D0 (GPIO2)
  *   VL53L0X VCC → 3.3V / GND → GND / SDA → D4 (GPIO6) / SCL → D5 (GPIO7)
  *   LED 赤(左足) → D1 (GPIO3) / GND(真ん中) → GND / 緑(右足) → D2 (GPIO4)
  * 
