@@ -897,6 +897,7 @@
             <span class="toolbar-count">登録: <strong>{{ $devices->total() ?? 0 }}</strong> / {{ $organization->device_limit ?? 100 }}台</span>
         </div>
         <div class="toolbar-right">
+            <button class="toolbar-btn" onclick="showNotificationModal()">🔔 通知設定</button>
             <button class="toolbar-btn" onclick="showTimerListModal()">⏰ タイマー一覧</button>
             <button class="toolbar-btn" onclick="showAddDeviceModal()">➕ デバイス追加</button>
             <a href="{{ route('admin.org.csv') }}" class="toolbar-btn">📥 CSV出力</a>
@@ -1368,6 +1369,9 @@
             </div>
         </div>
     </div>
+
+    {{-- ===== モーダル: 組織通知設定 ===== --}}
+    @include('admin.partials.notification-modal')
 
     {{-- トースト --}}
     <div id="toast" class="toast"></div>
@@ -1920,6 +1924,61 @@ async function executeDeleteSchedule() {
         console.error('スケジュール削除エラー:', e);
         showToast('通信エラーが発生しました', 'error');
     }
+}
+
+// ===== 組織通知設定 =====
+function showNotificationModal() {
+    // 現在の設定を取得して表示
+    fetch('{{ route("admin.org.notification") }}', {
+        headers: { 'Accept': 'application/json' }
+    })
+    .then(function(res) { return res.json(); })
+    .then(function(data) {
+        document.getElementById('orgNotifEmail1').value = data.notification_email_1 || '';
+        document.getElementById('orgNotifEmail2').value = data.notification_email_2 || '';
+        document.getElementById('orgNotifEmail3').value = data.notification_email_3 || '';
+        document.getElementById('orgNotifEnabled').checked = data.notification_enabled;
+        showModal('notificationModal');
+    })
+    .catch(function() {
+        // 取得失敗でも空フォームで開く
+        showModal('notificationModal');
+    });
+}
+
+function saveOrgNotification() {
+    var payload = {
+        notification_email_1: document.getElementById('orgNotifEmail1').value || null,
+        notification_email_2: document.getElementById('orgNotifEmail2').value || null,
+        notification_email_3: document.getElementById('orgNotifEmail3').value || null,
+        notification_enabled: document.getElementById('orgNotifEnabled').checked ? 1 : 0,
+    };
+
+    fetch('{{ route("admin.org.notification.update") }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': csrfToken,
+            'Accept': 'application/json',
+        },
+        body: JSON.stringify(payload),
+    })
+    .then(function(res) { return res.json(); })
+    .then(function(data) {
+        if (data.success) {
+            showToast(data.message, 'success');
+            hideModal('notificationModal');
+        } else {
+            var msg = data.message || '保存に失敗しました';
+            if (data.errors) {
+                msg = Object.values(data.errors).flat().join(', ');
+            }
+            showToast(msg, 'error');
+        }
+    })
+    .catch(function() {
+        showToast('通信エラーが発生しました', 'error');
+    });
 }
 
 // ===== フラッシュメッセージ自動表示 =====

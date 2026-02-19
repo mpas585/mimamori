@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use App\Models\Device;
+use App\Models\Organization;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
@@ -88,6 +89,18 @@ class CheckUndetectedDevices extends Command
      */
     private function sendNotification(Device $device, string $type, string $subject): void
     {
+        // --- デバイス個別の通知先に送信 ---
+        $this->sendDeviceNotification($device, $type, $subject);
+
+        // --- 組織管理者への通知 ---
+        $this->sendOrgNotification($device, $type, $subject);
+    }
+
+    /**
+     * デバイス個別の通知設定に基づいて送信
+     */
+    private function sendDeviceNotification(Device $device, string $type, string $subject): void
+    {
         $notif = $device->notificationSetting;
 
         // メールアドレスが登録されていて有効な場合
@@ -126,7 +139,75 @@ class CheckUndetectedDevices extends Command
     }
 
     /**
-     * 通知本文を生成
+     * 組織管理者への通知（デバイス個別の通知設定とは独立して動作）
+     */
+    private function sendOrgNotification(Device $device, string $type, string $subject): void
+    {
+        // 組織に所属していない場合はスキップ
+        if (!$device->organization_id) {
+            return;
+        }
+
+        $organization = Organization::find($device->organization_id);
+        if (!$organization) {
+            return;
+        }
+
+        // 組織の通知メールアドレスを取得（notification_enabledがfalseなら空配列）
+        $orgEmails = $organization->getNotificationEmails();
+        if (empty($orgEmails)) {
+            return;
+        }
+
+        // デバイス個別の通知先と重複するメールは除外
+        $deviceEmails = $this->getDeviceNotificationEmails($device);
+
+        $body = $this->buildOrgNotificationBody($device, $type, $organization);
+
+        foreach ($orgEmails as $email) {
+            // デバイス個別通知と同じメアドには二重送信しない
+            if (in_array($email, $deviceEmails)) {
+                continue;
+            }
+
+            DB::table('notification_logs')->insert([
+                'device_id' => $device->id,
+                'type' => $type,
+                'channel' => 'email',
+                'recipient' => $email,
+                'subject' => "[みまもりデバイス] [{$organization->name}] {$subject}",
+                'body' => $body,
+                'status' => 'pending',
+                'created_at' => now(),
+            ]);
+
+            // TODO: 実際のメール送信
+            // Mail::to($email)->send(new OrgDeviceAlertMail($device, $type, $organization));
+        }
+    }
+
+    /**
+     * デバイス個別に設定されている通知メールアドレス一覧を取得
+     */
+    private function getDeviceNotificationEmails(Device $device): array
+    {
+        $notif = $device->notificationSetting;
+        if (!$notif || !$notif->email_enabled) {
+            return [];
+        }
+
+        $emails = [];
+        foreach (['email_1', 'email_2', 'email_3'] as $field) {
+            if (!empty($notif->$field)) {
+                $emails[] = $notif->$field;
+            }
+        }
+
+        return $emails;
+    }
+
+    /**
+     * デバイス個別通知の本文を生成
      */
     private function buildNotificationBody(Device $device, string $type): string
     {
@@ -159,6 +240,64 @@ class CheckUndetectedDevices extends Command
                 . "検知時刻: {$now}\n\n"
                 . "デバイスとの通信が途絶えています。\n"
                 . "電池切れまたは電波状況をご確認ください。";
+        }
+
+        return '';
+    }
+
+    /**
+     * 組織管理者向け通知の本文を生成（部屋番号等の追加情報あり）
+     */
+    private function buildOrgNotificationBody(Device $device, string $type, Organization $organization): string
+    {
+        $name = $device->nickname ?: $device->device_id;
+        $now = Carbon::now()->format('Y/m/d H:i');
+
+        // 部屋番号・入居者名を取得
+        $assignment = $device->orgAssignment;
+        $roomNumber = $assignment ? $assignment->room_number : null;
+        $tenantName = $assignment ? $assignment->tenant_name : null;
+
+        $locationInfo = '';
+        if ($roomNumber) {
+            $locationInfo .= "部屋番号: {$roomNumber}\n";
+        }
+        if ($tenantName) {
+            $locationInfo .= "入居者名: {$tenantName}\n";
+        }
+
+        if ($type === 'alert') {
+            $hours = $device->alert_threshold_hours;
+            $lastDetected = $device->last_human_detected_at
+                ? $device->last_human_detected_at->format('Y/m/d H:i')
+                : '不明';
+
+            return "【未検知アラート】\n\n"
+                . "組織: {$organization->name}\n"
+                . "デバイス: {$name}\n"
+                . $locationInfo
+                . "最終検知: {$lastDetected}\n"
+                . "設定閾値: {$hours}時間\n"
+                . "検知時刻: {$now}\n\n"
+                . "{$hours}時間以上、人の動きが検知されていません。\n"
+                . "ご確認をお願いいたします。\n\n"
+                . "管理画面からデバイスの状態を確認できます。";
+        }
+
+        if ($type === 'offline') {
+            $lastReceived = $device->last_received_at
+                ? $device->last_received_at->format('Y/m/d H:i')
+                : '不明';
+
+            return "【通信途絶】\n\n"
+                . "組織: {$organization->name}\n"
+                . "デバイス: {$name}\n"
+                . $locationInfo
+                . "最終通信: {$lastReceived}\n"
+                . "検知時刻: {$now}\n\n"
+                . "デバイスとの通信が途絶えています。\n"
+                . "電池切れまたは電波状況をご確認ください。\n\n"
+                . "管理画面からデバイスの状態を確認できます。";
         }
 
         return '';

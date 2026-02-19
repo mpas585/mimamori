@@ -112,6 +112,52 @@ class OrgAdminController extends Controller
     }
 
     /**
+     * 組織の通知設定を更新
+     */
+    public function updateNotification(Request $request)
+    {
+        $organization = $this->getOrganization();
+
+        $request->validate([
+            'notification_email_1' => 'nullable|email|max:255',
+            'notification_email_2' => 'nullable|email|max:255',
+            'notification_email_3' => 'nullable|email|max:255',
+            'notification_enabled' => 'nullable|boolean',
+        ]);
+
+        $organization->update([
+            'notification_email_1' => $request->notification_email_1 ?: null,
+            'notification_email_2' => $request->notification_email_2 ?: null,
+            'notification_email_3' => $request->notification_email_3 ?: null,
+            'notification_enabled' => $request->has('notification_enabled') ? (bool) $request->notification_enabled : true,
+        ]);
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => '通知設定を更新しました',
+            ]);
+        }
+
+        return back()->with('success', '通知設定を更新しました');
+    }
+
+    /**
+     * 組織の通知設定を取得（JSON）
+     */
+    public function getNotification()
+    {
+        $organization = $this->getOrganization();
+
+        return response()->json([
+            'notification_email_1' => $organization->notification_email_1,
+            'notification_email_2' => $organization->notification_email_2,
+            'notification_email_3' => $organization->notification_email_3,
+            'notification_enabled' => (bool) $organization->notification_enabled,
+        ]);
+    }
+
+    /**
      * デバイス追加（品番で組織に紐付け）
      */
     public function addDevice(Request $request)
@@ -318,7 +364,7 @@ class OrgAdminController extends Controller
     }
 
     /**
-     * 警告解除（ステータスをinactiveに変更）
+     * 警告解除（ステータスをinactiveに戻し、検知データをクリア）
      */
     public function clearAlert(Request $request, $deviceId)
     {
@@ -328,19 +374,24 @@ class OrgAdminController extends Controller
             ->where('organization_id', $organization->id)
             ->firstOrFail();
 
-        if (!in_array($device->status, ['alert', 'offline'])) {
-            return response()->json([
-                'success' => false,
-                'message' => '現在のステータスでは解除できません',
-            ], 422);
-        }
-
+        // ステータスをinactiveに戻す（初期状態「-」表示）
         $device->update([
             'status' => 'inactive',
+            'last_human_detected_at' => null,
+            'last_received_at' => null,
+            'battery_voltage' => null,
+            'battery_pct' => null,
+            'rssi' => null,
         ]);
 
+        // 検知ログをクリア
+        $device->detectionLogs()->delete();
+
         if ($request->expectsJson()) {
-            return response()->json(['success' => true, 'message' => "デバイス {$deviceId} の警告を解除しました"]);
+            return response()->json([
+                'success' => true,
+                'message' => "デバイス {$deviceId} の警告を解除しました",
+            ]);
         }
 
         return back()->with('success', "デバイス {$deviceId} の警告を解除しました");
