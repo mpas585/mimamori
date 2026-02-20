@@ -91,9 +91,10 @@ Route::middleware(AdminAuth::class)->prefix('admin')->group(function () {
     Route::post('/issue-bulk', [MasterController::class, 'issueBulk'])->name('admin.issue-bulk');
     Route::post('/logout', [AdminLoginController::class, 'logout'])->name('admin.logout');
 
-    // パスワード変更
+    // アカウント設定（パスワード変更 + メール変更）
     Route::get('/password-change', [AdminPasswordController::class, 'showForm'])->name('admin.password-change');
     Route::post('/password-change', [AdminPasswordController::class, 'update'])->name('admin.password-change.update');
+    Route::post('/email-change', [AdminPasswordController::class, 'updateEmail'])->name('admin.email-change');
 
     // 管理者アカウント管理
     Route::post('/admin-users', [MasterController::class, 'storeAdminUser'])->name('admin.admin-users.store');
