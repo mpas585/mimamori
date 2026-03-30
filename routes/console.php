@@ -10,3 +10,6 @@ Artisan::command('inspire', function () {
 
 // スケジュールに基づくaway_mode自動ON/OFF（毎分実行）
 Schedule::command('schedules:process')->everyMinute();
+
+// 未検知チェック（30分ごと実行）
+Schedule::command('devices:check-undetected')->everyThirtyMinutes();

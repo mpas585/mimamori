@@ -12,9 +12,9 @@ return [
             'driver' => 'session',
             'provider' => 'devices',
         ],
-        'admin' => [
+        'partner' => [
             'driver' => 'session',
-            'provider' => 'admins',
+            'provider' => 'partners',
         ],
     ],
 
@@ -23,9 +23,9 @@ return [
             'driver' => 'eloquent',
             'model' => App\Models\Device::class,
         ],
-        'admins' => [
+        'partners' => [
             'driver' => 'eloquent',
-            'model' => App\Models\AdminUser::class,
+            'model' => App\Models\PartnerUser::class,
         ],
     ],
 

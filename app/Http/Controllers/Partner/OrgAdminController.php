@@ -1,0 +1,571 @@
+<?php
+
+namespace App\Http\Controllers\Partner;
+
+use App\Http\Controllers\Controller;
+use App\Models\Device;
+use App\Models\DeviceSchedule;
+use App\Models\Organization;
+use App\Models\OrgDeviceAssignment;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Symfony\Component\HttpFoundation\StreamedResponse;
+
+class OrgAdminController extends Controller
+{
+    /**
+     * ログイン中管理者の所属組織を取得
+     */
+    private function getOrganization(): Organization
+    {
+        $admin = Auth::guard('partner')->user();
+        $organization = $admin->organization;
+
+        if (!$organization) {
+            abort(403, '組織が割り当てられていません');
+        }
+
+        return $organization;
+    }
+
+    /**
+     * B2B管理画面ダッシュボード
+     */
+    public function index(Request $request)
+    {
+        $organization = $this->getOrganization();
+
+        // この組織に所属するデバイスを取得
+        $query = Device::where('organization_id', $organization->id)
+            ->with(['orgAssignment', 'notificationSetting']);
+
+        // ステータスフィルタ
+        if ($request->filled('status')) {
+            $status = $request->status;
+            if ($status === 'vacant') {
+                $query->where(function ($q) {
+                    $q->whereDoesntHave('orgAssignment')
+                      ->orWhereHas('orgAssignment', function ($q2) {
+                          $q2->where(function ($q3) {
+                              $q3->whereNull('tenant_name')->orWhere('tenant_name', '');
+                          });
+                      });
+                });
+            } else {
+                $query->where('status', $status);
+            }
+        }
+
+        // 見守りフィルタ
+        if ($request->filled('watch')) {
+            $watch = $request->watch;
+            if ($watch === 'on') {
+                $query->where('away_mode', false);
+            } elseif ($watch === 'off') {
+                $query->where('away_mode', true)->whereNull('away_until');
+            } elseif ($watch === 'timer') {
+                $query->where('away_mode', true)->whereNotNull('away_until');
+            }
+        }
+
+        // 検索
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('device_id', 'like', "%{$search}%")
+                  ->orWhere('nickname', 'like', "%{$search}%")
+                  ->orWhereHas('orgAssignment', function ($q2) use ($search) {
+                      $q2->where('room_number', 'like', "%{$search}%")
+                         ->orWhere('tenant_name', 'like', "%{$search}%");
+                  });
+            });
+        }
+
+        // ソート
+        $sortBy = $request->get('sort', 'created_at');
+        $sortDir = $request->get('dir', 'desc');
+        $allowedSorts = ['status', 'device_id', 'last_human_detected_at', 'battery_pct', 'rssi', 'created_at'];
+        if (in_array($sortBy, $allowedSorts)) {
+            $query->orderBy($sortBy, $sortDir === 'asc' ? 'asc' : 'desc');
+        }
+
+        $devices = $query->paginate(20)->appends($request->query());
+
+        // 統計
+        $allDevices = Device::where('organization_id', $organization->id);
+        $stats = [
+            'normal'  => (clone $allDevices)->where('status', 'normal')->count(),
+            'warning' => (clone $allDevices)->where('status', 'warning')->count(),
+            'alert'   => (clone $allDevices)->where('status', 'alert')->count(),
+            'offline' => (clone $allDevices)->where('status', 'offline')->count(),
+            'vacant'  => (clone $allDevices)->where(function ($q) {
+                            $q->whereDoesntHave('orgAssignment')
+                              ->orWhereHas('orgAssignment', function ($q2) {
+                                  $q2->where(function ($q3) {
+                                      $q3->whereNull('tenant_name')->orWhere('tenant_name', '');
+                                  });
+                              });
+                         })->count(),
+        ];
+
+        return view('partner.dashboard', compact('organization', 'stats', 'devices'));
+    }
+
+    /**
+     * 組織の通知設定を更新
+     */
+    public function updateNotification(Request $request)
+    {
+        $organization = $this->getOrganization();
+
+        $request->validate([
+            'notification_email_1' => 'nullable|email|max:255',
+            'notification_email_2' => 'nullable|email|max:255',
+            'notification_email_3' => 'nullable|email|max:255',
+            'notification_enabled' => 'nullable|boolean',
+        ]);
+
+        $organization->update([
+            'notification_email_1' => $request->notification_email_1 ?: null,
+            'notification_email_2' => $request->notification_email_2 ?: null,
+            'notification_email_3' => $request->notification_email_3 ?: null,
+            'notification_enabled' => $request->has('notification_enabled') ? (bool) $request->notification_enabled : true,
+        ]);
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => '通知設定を更新しました',
+            ]);
+        }
+
+        return back()->with('success', '通知設定を更新しました');
+    }
+
+    /**
+     * 組織の通知設定を取得（JSON）
+     */
+    public function getNotification()
+    {
+        $organization = $this->getOrganization();
+
+        return response()->json([
+            'notification_email_1' => $organization->notification_email_1,
+            'notification_email_2' => $organization->notification_email_2,
+            'notification_email_3' => $organization->notification_email_3,
+            'notification_enabled' => (bool) $organization->notification_enabled,
+        ]);
+    }
+
+    /**
+     * デバイス追加（品番で組織に紐付け）
+     */
+    public function addDevice(Request $request)
+    {
+        $organization = $this->getOrganization();
+
+        $request->validate([
+            'device_id' => 'required|string|size:6',
+            'room_number' => 'nullable|string|max:50',
+            'tenant_name' => 'nullable|string|max:100',
+            'memo' => 'nullable|string|max:255',
+        ]);
+
+        $deviceCode = strtoupper($request->device_id);
+
+        // デバイス存在チェック
+        $device = Device::where('device_id', $deviceCode)->first();
+        if (!$device) {
+            return back()->with('error', "デバイス {$deviceCode} が見つかりません");
+        }
+
+        // 既に別の組織に所属していないかチェック
+        if ($device->organization_id && $device->organization_id !== $organization->id) {
+            return back()->with('error', "デバイス {$deviceCode} は別の組織に登録されています");
+        }
+
+        // 組織に紐付け
+        $device->update([
+            'organization_id' => $organization->id,
+            'location_memo' => $request->memo,
+        ]);
+
+        // 割当情報作成・更新
+        OrgDeviceAssignment::updateOrCreate(
+            [
+                'organization_id' => $organization->id,
+                'device_id' => $device->id,
+            ],
+            [
+                'room_number' => $request->room_number,
+                'tenant_name' => $request->tenant_name,
+                'assigned_at' => now(),
+                'unassigned_at' => null,
+            ]
+        );
+
+        return back()->with('success', "デバイス {$deviceCode} を追加しました");
+    }
+
+    /**
+     * デバイス削除（組織から解除）
+     */
+    public function removeDevice(Request $request, $deviceId)
+    {
+        $organization = $this->getOrganization();
+
+        $device = Device::where('device_id', $deviceId)
+            ->where('organization_id', $organization->id)
+            ->firstOrFail();
+
+        // 割当を解除
+        OrgDeviceAssignment::where('organization_id', $organization->id)
+            ->where('device_id', $device->id)
+            ->update(['unassigned_at' => now()]);
+
+        // 組織紐付けを解除
+        $device->update(['organization_id' => null]);
+
+        // 割当レコードを削除
+        OrgDeviceAssignment::where('organization_id', $organization->id)
+            ->where('device_id', $device->id)
+            ->delete();
+
+        if ($request->expectsJson()) {
+            return response()->json(['success' => true, 'message' => "デバイス {$deviceId} を削除しました"]);
+        }
+
+        return back()->with('success', "デバイス {$deviceId} を組織から削除しました");
+    }
+
+    /**
+     * 見守りON/OFF トグル（AJAX）
+     */
+    public function toggleWatch(Request $request, $deviceId)
+    {
+        $organization = $this->getOrganization();
+
+        $device = Device::where('device_id', $deviceId)
+            ->where('organization_id', $organization->id)
+            ->firstOrFail();
+
+        $request->validate([
+            'away_mode' => 'required|boolean',
+        ]);
+
+        $device->update([
+            'away_mode' => $request->away_mode,
+            'away_until' => $request->away_mode ? null : null,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'away_mode' => (bool) $device->away_mode,
+            'message' => $device->away_mode ? '見守りをOFFにしました' : '見守りをONにしました',
+        ]);
+    }
+
+    /**
+     * デバイス詳細（JSON）
+     */
+    public function deviceDetail($deviceId)
+    {
+        $organization = $this->getOrganization();
+
+        $device = Device::where('device_id', $deviceId)
+            ->where('organization_id', $organization->id)
+            ->with(['orgAssignment', 'schedules' => function ($q) {
+                $q->where('is_active', true)->orderBy('created_at', 'desc');
+            }])
+            ->firstOrFail();
+
+        $assignment = $device->orgAssignment;
+        $dayNames = ['日', '月', '火', '水', '木', '金', '土'];
+
+        $schedules = $device->schedules->map(function ($schedule) use ($dayNames) {
+            $data = [
+                'id' => $schedule->id,
+                'type' => $schedule->type,
+                'memo' => $schedule->memo,
+            ];
+            if ($schedule->type === 'oneshot') {
+                $data['start_at'] = $schedule->start_at ? $schedule->start_at->format('Y-m-d H:i') : null;
+                $data['end_at'] = $schedule->end_at ? $schedule->end_at->format('Y-m-d H:i') : null;
+            } else {
+                $days = $schedule->days_of_week ?? [];
+                $data['days_label'] = implode('・', array_map(fn($d) => $dayNames[$d] ?? '', $days));
+                $data['start_time'] = $schedule->start_time;
+                $data['end_time'] = $schedule->end_time;
+                $data['next_day'] = $schedule->next_day;
+            }
+            return $data;
+        });
+
+        return response()->json([
+            'device_id' => $device->device_id,
+            'status' => $device->status,
+            'room_number' => $assignment->room_number ?? null,
+            'tenant_name' => $assignment->tenant_name ?? null,
+            'last_human_detected' => $device->last_human_detected_at
+                ? $device->last_human_detected_at->format('Y/m/d H:i')
+                : null,
+            'battery_pct' => $device->battery_pct,
+            'battery_voltage' => $device->battery_voltage,
+            'rssi' => $device->rssi,
+            'alert_threshold_hours' => $device->alert_threshold_hours,
+            'pet_exclusion_enabled' => $device->pet_exclusion_enabled,
+            'pet_exclusion_threshold_cm' => $device->pet_exclusion_threshold_cm,
+            'install_height_cm' => $device->install_height_cm,
+            'away_mode' => $device->away_mode,
+            'away_until' => $device->away_until ? $device->away_until->format('Y/m/d H:i') : null,
+            'memo' => $device->location_memo,
+            'registered_at' => $device->created_at->format('Y/m/d'),
+            'schedules' => $schedules,
+        ]);
+    }
+
+    /**
+     * 割当情報更新（部屋番号・入居者名）
+     */
+    public function updateAssignment(Request $request, $deviceId)
+    {
+        $organization = $this->getOrganization();
+
+        $device = Device::where('device_id', $deviceId)
+            ->where('organization_id', $organization->id)
+            ->firstOrFail();
+
+        $request->validate([
+            'room_number' => 'nullable|string|max:50',
+            'tenant_name' => 'nullable|string|max:100',
+            'memo' => 'nullable|string|max:255',
+        ]);
+
+        // 割当情報更新
+        OrgDeviceAssignment::updateOrCreate(
+            [
+                'organization_id' => $organization->id,
+                'device_id' => $device->id,
+            ],
+            [
+                'room_number' => $request->room_number,
+                'tenant_name' => $request->tenant_name,
+            ]
+        );
+
+        // メモはdevicesテーブル
+        $device->update(['location_memo' => $request->memo]);
+
+        if ($request->expectsJson()) {
+            return response()->json(['success' => true, 'message' => '更新しました']);
+        }
+
+        return back()->with('success', "デバイス {$deviceId} の情報を更新しました");
+    }
+
+    /**
+     * 警告解除（ステータスをinactiveに戻し、検知データをクリア）
+     */
+    public function clearAlert(Request $request, $deviceId)
+    {
+        $organization = $this->getOrganization();
+
+        $device = Device::where('device_id', $deviceId)
+            ->where('organization_id', $organization->id)
+            ->firstOrFail();
+
+        // ステータスをinactiveに戻す（初期状態「-」表示）
+        $device->update([
+            'status' => 'inactive',
+            'last_human_detected_at' => null,
+            'last_received_at' => null,
+            'battery_voltage' => null,
+            'battery_pct' => null,
+            'rssi' => null,
+        ]);
+
+        // 検知ログをクリア
+        $device->detectionLogs()->delete();
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => "デバイス {$deviceId} の警告を解除しました",
+            ]);
+        }
+
+        return back()->with('success', "デバイス {$deviceId} の警告を解除しました");
+    }
+
+    /**
+     * CSV出力
+     */
+    public function exportCsv()
+    {
+        $organization = $this->getOrganization();
+
+        $devices = Device::where('organization_id', $organization->id)
+            ->with('orgAssignment')
+            ->orderBy('created_at')
+            ->get();
+
+        $filename = $organization->name . '_デバイス一覧_' . date('Ymd') . '.csv';
+
+        return new StreamedResponse(function () use ($devices) {
+            $handle = fopen('php://output', 'w');
+
+            // BOM for Excel UTF-8
+            fwrite($handle, "\xEF\xBB\xBF");
+
+            // ヘッダー
+            fputcsv($handle, [
+                'ステータス', '部屋番号', '入居者名', 'デバイスID',
+                '見守り', '最終検知', '電池残量(%)', '電波(dBm)', 'メモ',
+            ]);
+
+            $statusLabels = [
+                'normal' => '正常', 'warning' => '注意', 'alert' => '警告',
+                'offline' => '離線', 'inactive' => '未稼働',
+            ];
+
+            foreach ($devices as $device) {
+                $assignment = $device->orgAssignment;
+                fputcsv($handle, [
+                    $statusLabels[$device->status] ?? $device->status,
+                    $assignment->room_number ?? '',
+                    $assignment->tenant_name ?? '',
+                    $device->device_id,
+                    $device->away_mode ? 'OFF' : 'ON',
+                    $device->last_human_detected_at ? $device->last_human_detected_at->format('Y/m/d H:i') : '',
+                    $device->battery_pct ?? '',
+                    $device->rssi ?? '',
+                    $device->location_memo ?? '',
+                ]);
+            }
+
+            fclose($handle);
+        }, 200, [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+        ]);
+    }
+
+    /**
+     * タイマー一覧（JSON）
+     */
+    public function timerList(Request $request)
+    {
+        $organization = $this->getOrganization();
+
+        // 組織のデバイスを取得（スケジュール・割当情報込み）
+        $devices = Device::where('organization_id', $organization->id)
+            ->with(['orgAssignment', 'schedules' => function ($q) {
+                $q->where('is_active', true)->orderBy('created_at', 'desc');
+            }])
+            ->get();
+
+        $result = [];
+        $dayNames = ['日', '月', '火', '水', '木', '金', '土'];
+
+        foreach ($devices as $device) {
+            $assignment = $device->orgAssignment;
+            $roomNumber = $assignment ? $assignment->room_number : null;
+            $tenantName = $assignment ? $assignment->tenant_name : null;
+
+            // away_modeがON または スケジュールがあるデバイスのみ
+            $hasSchedules = $device->schedules->isNotEmpty();
+            $isAwayMode = $device->away_mode;
+
+            if (!$hasSchedules && !$isAwayMode) {
+                continue;
+            }
+
+            $schedules = $device->schedules->map(function ($schedule) use ($dayNames) {
+                $data = [
+                    'id' => $schedule->id,
+                    'type' => $schedule->type,
+                    'memo' => $schedule->memo,
+                ];
+
+                if ($schedule->type === 'oneshot') {
+                    $data['start_at'] = $schedule->start_at ? $schedule->start_at->format('Y-m-d H:i') : null;
+                    $data['end_at'] = $schedule->end_at ? $schedule->end_at->format('Y-m-d H:i') : null;
+                } else {
+                    $days = $schedule->days_of_week ?? [];
+                    $data['days_label'] = implode('・', array_map(fn($d) => $dayNames[$d] ?? '', $days));
+                    $data['start_time'] = $schedule->start_time;
+                    $data['end_time'] = $schedule->end_time;
+                    $data['next_day'] = $schedule->next_day;
+                }
+
+                return $data;
+            });
+
+            $result[] = [
+                'device_id' => $device->device_id,
+                'room_number' => $roomNumber,
+                'tenant_name' => $tenantName,
+                'is_vacant' => !$assignment || !$tenantName,
+                'away_mode' => (bool) $device->away_mode,
+                'away_until' => $device->away_until ? $device->away_until->format('Y-m-d H:i') : null,
+                'schedules' => $schedules,
+            ];
+        }
+
+        return response()->json($result);
+    }
+
+    /**
+     * デバイスにスケジュール追加
+     */
+    public function storeSchedule(Request $request, $deviceId)
+    {
+        $organization = $this->getOrganization();
+
+        $device = Device::where('device_id', $deviceId)
+            ->where('organization_id', $organization->id)
+            ->firstOrFail();
+
+        $validated = $request->validate([
+            'type' => 'required|in:oneshot,recurring',
+            'start_at' => 'required_if:type,oneshot|nullable|date',
+            'end_at' => 'nullable|date|after:start_at',
+            'days_of_week' => 'required_if:type,recurring|nullable|array',
+            'days_of_week.*' => 'integer|between:0,6',
+            'start_time' => 'required_if:type,recurring|nullable|date_format:H:i',
+            'end_time' => 'required_if:type,recurring|nullable|date_format:H:i',
+            'next_day' => 'nullable|boolean',
+            'memo' => 'nullable|string|max:200',
+        ]);
+
+        $schedule = $device->schedules()->create([
+            'type' => $validated['type'],
+            'start_at' => $validated['start_at'] ?? null,
+            'end_at' => $validated['end_at'] ?? null,
+            'days_of_week' => $validated['days_of_week'] ?? null,
+            'start_time' => $validated['start_time'] ?? null,
+            'end_time' => $validated['end_time'] ?? null,
+            'next_day' => $validated['next_day'] ?? false,
+            'memo' => $validated['memo'] ?? null,
+        ]);
+
+        return response()->json(['success' => true, 'schedule' => $schedule], 201);
+    }
+
+    /**
+     * デバイスのスケジュール削除
+     */
+    public function destroySchedule(Request $request, $deviceId, $scheduleId)
+    {
+        $organization = $this->getOrganization();
+
+        $device = Device::where('device_id', $deviceId)
+            ->where('organization_id', $organization->id)
+            ->firstOrFail();
+
+        $schedule = $device->schedules()->findOrFail($scheduleId);
+        $schedule->delete();
+
+        return response()->json(['success' => true, 'message' => 'スケジュールを削除しました']);
+    }
+}

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>みまもりデバイス（仮）</title>
+<style>
+:root{--beige:#f5f0e8;--cream:#faf8f4;--white:#fff;--gray-100:#f5f5f5;--gray-200:#e5e5e5;--gray-300:#d4d4d4;--gray-400:#a3a3a3;--gray-500:#737373;--gray-600:#525252;--gray-700:#404040;--gray-800:#262626;--radius:8px;--radius-lg:12px;--shadow:0 4px 12px rgba(0,0,0,.1)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans JP',sans-serif;background:var(--beige);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+.wrap{width:100%;max-width:400px}
+.logo{text-align:center;margin-bottom:32px}
+.logo-title{font-size:22px;font-weight:700;color:var(--gray-800)}
+.logo-badge{display:inline-block;margin-top:6px;font-size:11px;font-weight:700;letter-spacing:1px;color:var(--gray-500);background:var(--gray-200);padding:3px 10px;border-radius:4px}
+.card{background:var(--white);border-radius:var(--radius-lg);box-shadow:var(--shadow);padding:32px}
+.card-title{font-size:18px;font-weight:700;color:var(--gray-800);margin-bottom:24px;text-align:center}
+.alert{background:#fbe9e7;color:#c62828;border-radius:var(--radius);padding:10px 14px;font-size:13px;margin-bottom:16px}
+.form-group{margin-bottom:16px}
+.form-label{display:block;font-size:13px;font-weight:600;color:var(--gray-700);margin-bottom:6px}
+.form-input{width:100%;padding:10px 12px;font-size:14px;font-family:inherit;border:1px solid var(--gray-300);border-radius:var(--radius);background:var(--white);color:var(--gray-800)}
+.form-input:focus{outline:none;border-color:var(--gray-500)}
+.remember{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--gray-600);margin-bottom:20px}
+.btn-submit{width:100%;padding:12px;font-size:15px;font-weight:700;font-family:inherit;background:var(--gray-800);color:var(--white);border:none;border-radius:var(--radius);cursor:pointer}
+.btn-submit:hover{background:var(--gray-700)}
+.form-footer{text-align:center;margin-top:16px;font-size:12px;color:var(--gray-500)}
+.form-footer a{color:var(--gray-600);text-decoration:underline}
+.notice{font-size:11px;color:var(--gray-400);text-align:center;margin-top:12px}
+.copyright{text-align:center;margin-top:24px;font-size:12px;color:var(--gray-400)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="logo">
+    <div class="logo-title">🧈 みまもりデバイス（仮）</div>
+    <span class="logo-badge">ADMIN</span>
+  </div>
+  <div class="card">
+    <h1 class="card-title">🔐 管理者ログイン</h1>
+    <!-- エラー時 -->
+    <div class="alert">メールアドレスまたはパスワードが正しくありません</div>
+    <div class="form-group">
+      <label class="form-label">メールアドレス</label>
+      <input type="email" class="form-input" placeholder="admin@example.com">
+    </div>
+    <div class="form-group">
+      <label class="form-label">パスワード</label>
+      <input type="password" class="form-input" placeholder="">
+    </div>
+    <div class="remember">
+      <input type="checkbox" id="remember">
+      <label for="remember">ログイン状態を保持する</label>
+    </div>
+    <button class="btn-submit" onclick="location.href='partner.html'">ログイン</button>
+    <div class="form-footer">
+      <a href="partner-password-reset.html">パスワードをお忘れの方</a>
+    </div>
+    <p class="notice">※連続してログインに失敗すると一定時間操作できなくなります</p>
+  </div>
+  <p class="copyright">&copy; 2025 みまもりデバイス（仮）</p>
+</div>
+</body>
+</html>

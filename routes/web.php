@@ -3,17 +3,18 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\DeviceLoginController;
 use App\Http\Controllers\Auth\PinResetController;
-use App\Http\Controllers\Admin\AdminLoginController;
-use App\Http\Controllers\Admin\AdminPasswordController;
-use App\Http\Controllers\Admin\OrgAdminController;
+use App\Http\Controllers\Partner\PartnerLoginController;
+use App\Http\Controllers\Partner\PartnerPasswordController;
+use App\Http\Controllers\Partner\PartnerPasswordResetController;
 use App\Http\Controllers\MypageController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\EmailSettingsController;
 use App\Http\Controllers\LogController;
 use App\Http\Controllers\ScheduleController;
-use App\Http\Controllers\Admin\MasterController;
+use App\Http\Controllers\Partner\MasterController;
 use App\Http\Controllers\ContactController;
-use App\Http\Middleware\AdminAuth;
+use App\Http\Controllers\Partner\OrgAdminController;
+use App\Http\Middleware\PartnerAuth;
 
 // ============================================================
 // ユーザー画面
@@ -77,46 +78,52 @@ Route::middleware('auth')->group(function () {
 });
 
 // ============================================================
-// 管理者画面
+// パートナー（管理会社）画面
 // ============================================================
 
-// 管理者ログイン（未認証）
-Route::get('/admin/login', [AdminLoginController::class, 'showLoginForm'])->name('admin.login');
-Route::post('/admin/login', [AdminLoginController::class, 'login']);
+// パートナーログイン（未認証）
+Route::get('/partner/login', [PartnerLoginController::class, 'showLoginForm'])->name('partner.login');
+Route::post('/partner/login', [PartnerLoginController::class, 'login']);
 
-// 管理者認証済み（共通）
-Route::middleware(AdminAuth::class)->prefix('admin')->group(function () {
-    Route::get('/', [MasterController::class, 'index'])->name('admin.dashboard');
-    Route::post('/issue', [MasterController::class, 'issueDevice'])->name('admin.issue');
-    Route::post('/issue-bulk', [MasterController::class, 'issueBulk'])->name('admin.issue-bulk');
-    Route::post('/logout', [AdminLoginController::class, 'logout'])->name('admin.logout');
+// パスワードリセット（未認証）
+Route::get('/partner/password-reset', [PartnerPasswordResetController::class, 'showRequestForm'])->name('partner.password-reset');
+Route::post('/partner/password-reset', [PartnerPasswordResetController::class, 'sendResetLink']);
+Route::get('/partner/password-reset/{token}', [PartnerPasswordResetController::class, 'showResetForm'])->name('partner.password-reset.show');
+Route::post('/partner/password-reset/{token}', [PartnerPasswordResetController::class, 'reset']);
+
+// パートナー認証済み（共通）
+Route::middleware(PartnerAuth::class)->prefix('partner')->group(function () {
+    Route::get('/', [MasterController::class, 'index'])->name('partner.dashboard');
+    Route::post('/issue', [MasterController::class, 'issueDevice'])->name('partner.issue');
+    Route::post('/issue-bulk', [MasterController::class, 'issueBulk'])->name('partner.issue-bulk');
+    Route::post('/logout', [PartnerLoginController::class, 'logout'])->name('partner.logout');
 
     // アカウント設定（パスワード変更 + メール変更）
-    Route::get('/password-change', [AdminPasswordController::class, 'showForm'])->name('admin.password-change');
-    Route::post('/password-change', [AdminPasswordController::class, 'update'])->name('admin.password-change.update');
-    Route::post('/email-change', [AdminPasswordController::class, 'updateEmail'])->name('admin.email-change');
+    Route::get('/password-change', [PartnerPasswordController::class, 'showForm'])->name('partner.password-change');
+    Route::post('/password-change', [PartnerPasswordController::class, 'update'])->name('partner.password-change.update');
+    Route::post('/email-change', [PartnerPasswordController::class, 'updateEmail'])->name('partner.email-change');
 
     // 管理者アカウント管理
-    Route::post('/admin-users', [MasterController::class, 'storeAdminUser'])->name('admin.admin-users.store');
-    Route::put('/admin-users/{id}', [MasterController::class, 'updateAdminUser'])->name('admin.admin-users.update');
-    Route::delete('/admin-users/{id}', [MasterController::class, 'destroyAdminUser'])->name('admin.admin-users.destroy');
+    Route::post('/admin-users', [MasterController::class, 'storeAdminUser'])->name('partner.admin-users.store');
+    Route::put('/admin-users/{id}', [MasterController::class, 'updateAdminUser'])->name('partner.admin-users.update');
+    Route::delete('/admin-users/{id}', [MasterController::class, 'destroyAdminUser'])->name('partner.admin-users.destroy');
 });
 
 // 組織管理者（operator）専用
-Route::middleware(AdminAuth::class.':operator')->prefix('admin/org')->group(function () {
-    Route::get('/', [OrgAdminController::class, 'index'])->name('admin.org.dashboard');
-    Route::post('/devices/add', [OrgAdminController::class, 'addDevice'])->name('admin.org.devices.add');
-    Route::post('/devices/{deviceId}/remove', [OrgAdminController::class, 'removeDevice'])->name('admin.org.devices.remove');
-    Route::post('/devices/{deviceId}/toggle-watch', [OrgAdminController::class, 'toggleWatch'])->name('admin.org.devices.toggle-watch');
-    Route::post('/devices/{deviceId}/clear-alert', [OrgAdminController::class, 'clearAlert'])->name('admin.org.devices.clear-alert');
-    Route::get('/devices/{deviceId}/detail', [OrgAdminController::class, 'deviceDetail'])->name('admin.org.devices.detail');
-    Route::put('/devices/{deviceId}/assignment', [OrgAdminController::class, 'updateAssignment'])->name('admin.org.devices.update-assignment');
-    Route::get('/csv', [OrgAdminController::class, 'exportCsv'])->name('admin.org.csv');
-    Route::get('/timers', [OrgAdminController::class, 'timerList'])->name('admin.org.timers');
-    Route::post('/devices/{deviceId}/schedules', [OrgAdminController::class, 'storeSchedule'])->name('admin.org.devices.schedules.store');
-    Route::delete('/devices/{deviceId}/schedules/{scheduleId}', [OrgAdminController::class, 'destroySchedule'])->name('admin.org.devices.schedules.destroy');
+Route::middleware(PartnerAuth::class.':operator')->prefix('partner/org')->group(function () {
+    Route::get('/', [OrgAdminController::class, 'index'])->name('partner.org.dashboard');
+    Route::post('/devices/add', [OrgAdminController::class, 'addDevice'])->name('partner.org.devices.add');
+    Route::post('/devices/{deviceId}/remove', [OrgAdminController::class, 'removeDevice'])->name('partner.org.devices.remove');
+    Route::post('/devices/{deviceId}/toggle-watch', [OrgAdminController::class, 'toggleWatch'])->name('partner.org.devices.toggle-watch');
+    Route::post('/devices/{deviceId}/clear-alert', [OrgAdminController::class, 'clearAlert'])->name('partner.org.devices.clear-alert');
+    Route::get('/devices/{deviceId}/detail', [OrgAdminController::class, 'deviceDetail'])->name('partner.org.devices.detail');
+    Route::put('/devices/{deviceId}/assignment', [OrgAdminController::class, 'updateAssignment'])->name('partner.org.devices.update-assignment');
+    Route::get('/csv', [OrgAdminController::class, 'exportCsv'])->name('partner.org.csv');
+    Route::get('/timers', [OrgAdminController::class, 'timerList'])->name('partner.org.timers');
+    Route::post('/devices/{deviceId}/schedules', [OrgAdminController::class, 'storeSchedule'])->name('partner.org.devices.schedules.store');
+    Route::delete('/devices/{deviceId}/schedules/{scheduleId}', [OrgAdminController::class, 'destroySchedule'])->name('partner.org.devices.schedules.destroy');
 
     // 組織通知設定
-    Route::get('/notification', [OrgAdminController::class, 'getNotification'])->name('admin.org.notification');
-    Route::post('/notification', [OrgAdminController::class, 'updateNotification'])->name('admin.org.notification.update');
+    Route::get('/notification', [OrgAdminController::class, 'getNotification'])->name('partner.org.notification');
+    Route::post('/notification', [OrgAdminController::class, 'updateNotification'])->name('partner.org.notification.update');
 });

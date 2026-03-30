@@ -5,7 +5,9 @@ namespace App\Console\Commands;
 use Illuminate\Console\Command;
 use App\Models\Device;
 use App\Models\Organization;
+use App\Mail\DeviceAlertMail;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 use Carbon\Carbon;
 
 class CheckUndetectedDevices extends Command
@@ -85,7 +87,7 @@ class CheckUndetectedDevices extends Command
     }
 
     /**
-     * 通知ログを記録（メール送信はTODO）
+     * 通知を送信
      */
     private function sendNotification(Device $device, string $type, string $subject): void
     {
@@ -104,37 +106,20 @@ class CheckUndetectedDevices extends Command
         $notif = $device->notificationSetting;
 
         // メールアドレスが登録されていて有効な場合
-        if ($notif && $notif->email_enabled && $notif->email_1) {
-            // 通知ログに記録
-            DB::table('notification_logs')->insert([
-                'device_id' => $device->id,
-                'type' => $type,
-                'channel' => 'email',
-                'recipient' => $notif->email_1,
-                'subject' => "[みまもりデバイス] {$subject}",
-                'body' => $this->buildNotificationBody($device, $type),
-                'status' => 'pending',
-                'created_at' => now(),
-            ]);
+        if (!$notif || !$notif->email_enabled) {
+            return;
+        }
 
-            // TODO: 実際のメール送信
-            // Mail::to($notif->email_1)->send(new DeviceAlertMail($device, $type));
+        $mailSubject = "[みまもりデバイス] {$subject}";
+        $body = $this->buildNotificationBody($device, $type);
 
-            // email_2, email_3 にも送信
-            foreach (['email_2', 'email_3'] as $field) {
-                if ($notif->$field) {
-                    DB::table('notification_logs')->insert([
-                        'device_id' => $device->id,
-                        'type' => $type,
-                        'channel' => 'email',
-                        'recipient' => $notif->$field,
-                        'subject' => "[みまもりデバイス] {$subject}",
-                        'body' => $this->buildNotificationBody($device, $type),
-                        'status' => 'pending',
-                        'created_at' => now(),
-                    ]);
-                }
+        // email_1, email_2, email_3 に送信
+        foreach (['email_1', 'email_2', 'email_3'] as $field) {
+            if (empty($notif->$field)) {
+                continue;
             }
+
+            $this->sendMailWithLog($device, $type, $notif->$field, $mailSubject, $body);
         }
     }
 
@@ -162,6 +147,7 @@ class CheckUndetectedDevices extends Command
         // デバイス個別の通知先と重複するメールは除外
         $deviceEmails = $this->getDeviceNotificationEmails($device);
 
+        $mailSubject = "[みまもりデバイス] [{$organization->name}] {$subject}";
         $body = $this->buildOrgNotificationBody($device, $type, $organization);
 
         foreach ($orgEmails as $email) {
@@ -170,19 +156,46 @@ class CheckUndetectedDevices extends Command
                 continue;
             }
 
-            DB::table('notification_logs')->insert([
-                'device_id' => $device->id,
-                'type' => $type,
-                'channel' => 'email',
-                'recipient' => $email,
-                'subject' => "[みまもりデバイス] [{$organization->name}] {$subject}",
-                'body' => $body,
-                'status' => 'pending',
-                'created_at' => now(),
-            ]);
+            $this->sendMailWithLog($device, $type, $email, $mailSubject, $body);
+        }
+    }
 
-            // TODO: 実際のメール送信
-            // Mail::to($email)->send(new OrgDeviceAlertMail($device, $type, $organization));
+    /**
+     * メール送信 + 通知ログ記録
+     */
+    private function sendMailWithLog(Device $device, string $type, string $recipient, string $subject, string $body): void
+    {
+        $logId = DB::table('notification_logs')->insertGetId([
+            'device_id' => $device->id,
+            'type' => $type,
+            'channel' => 'email',
+            'recipient' => $recipient,
+            'subject' => $subject,
+            'body' => $body,
+            'status' => 'pending',
+            'created_at' => now(),
+        ]);
+
+        try {
+            Mail::to($recipient)->send(new DeviceAlertMail($subject, $body, $type));
+
+            DB::table('notification_logs')
+                ->where('id', $logId)
+                ->update([
+                    'status' => 'sent',
+                    'sent_at' => now(),
+                ]);
+
+            $this->info("  MAIL SENT: {$recipient}");
+        } catch (\Exception $e) {
+            DB::table('notification_logs')
+                ->where('id', $logId)
+                ->update([
+                    'status' => 'failed',
+                    'error_message' => mb_substr($e->getMessage(), 0, 500),
+                ]);
+
+            $this->error("  MAIL FAILED: {$recipient} - {$e->getMessage()}");
         }
     }
 

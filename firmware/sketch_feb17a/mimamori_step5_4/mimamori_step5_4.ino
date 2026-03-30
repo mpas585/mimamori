@@ -30,6 +30,7 @@
 #define PWM_BRIGHTNESS     30       // LED明るさ(抵抗なし対策)
 #define HEARTBEAT_INTERVAL 3600000  // ハートビート間隔(ms) 1時間
 #define DETECTION_COOLDOWN 10000    // 検知送信クールダウン(ms) 10秒
+#define STATUS_UPDATE_INTERVAL 60000 // 電圧・電波更新間隔(ms) 1分
 #define APN                "iot.1nce.net"
 #define SERVER_URL         "http://care.gud.co.jp"
 
@@ -42,6 +43,10 @@ bool lastPirState = LOW;
 int detectionCount = 0;
 unsigned long lastHeartbeat = 0;
 unsigned long lastDetectionSent = 0;
+unsigned long lastStatusUpdate = 0;
+String simICCID = "";              // SIM固有ID (ICCID)
+int cachedRSSI = -1;               // キャッシュ済み電波強度
+int cachedBatteryMV = -1;          // キャッシュ済み電池電圧(mV)
 
 // ========================================
 // LED制御
@@ -137,6 +142,30 @@ bool simInit() {
   }
   Serial.println("[OK] SIM READY");
   
+  // ICCID取得（SIM7080Gは数字のみ返す形式）
+  String iccidResp = sendAT("AT+CCID", 3000);
+  // 応答から数字列(ICCID)を抽出
+  simICCID = "";
+  for (unsigned int i = 0; i < iccidResp.length(); i++) {
+    char c = iccidResp.charAt(i);
+    if (c >= '0' && c <= '9') {
+      simICCID += c;
+    } else if (simICCID.length() >= 18) {
+      break;
+    }
+  }
+  // 20桁の場合は末尾チェックディジットを除去（1NCE APIは19桁）
+  if (simICCID.length() == 20) {
+    simICCID = simICCID.substring(0, 19);
+  }
+  if (simICCID.length() >= 18) {
+    Serial.print("[OK] ICCID: ");
+    Serial.println(simICCID);
+  } else {
+    simICCID = "";
+    Serial.println("[WARN] ICCID取得失敗");
+  }
+  
   return true;
 }
 
@@ -187,6 +216,39 @@ bool lteConnect() {
   Serial.println("[OK] LTE接続完了！");
   lteConnected = true;
   return true;
+}
+
+// ========================================
+// ステータス値の更新（HTTP通信の外で実行）
+// ========================================
+void updateCachedStatus() {
+  // 電波強度
+  String csqResp = sendAT("AT+CSQ", 1000);
+  int csqIdx = csqResp.indexOf("+CSQ: ");
+  if (csqIdx >= 0) {
+    cachedRSSI = csqResp.substring(csqIdx + 6, csqResp.indexOf(",", csqIdx)).toInt();
+  }
+  
+  // 電池電圧
+  String cbcResp = sendAT("AT+CBC", 2000);
+  int cbcIdx = cbcResp.indexOf("+CBC:");
+  if (cbcIdx >= 0) {
+    int lastComma = cbcResp.lastIndexOf(",");
+    if (lastComma >= 0) {
+      String voltStr = cbcResp.substring(lastComma + 1);
+      int nlIdx = voltStr.indexOf("\n");
+      if (nlIdx >= 0) voltStr = voltStr.substring(0, nlIdx);
+      voltStr.trim();
+      cachedBatteryMV = voltStr.toInt();
+    }
+  }
+  
+  lastStatusUpdate = millis();
+  Serial.print("[STATUS] RSSI=");
+  Serial.print(cachedRSSI);
+  Serial.print(" Battery=");
+  Serial.print(cachedBatteryMV);
+  Serial.println("mV");
 }
 
 // ========================================
@@ -287,17 +349,19 @@ bool httpPost(const char* path, const char* jsonBody) {
 }
 
 // ========================================
-// データ送信ヘルパー
+// データ送信ヘルパー（キャッシュ値を使用）
 // ========================================
 void sendDetection(int distance_cm, bool isNear) {
   if (millis() - lastDetectionSent < DETECTION_COOLDOWN) return;
   
-  char json[200];
+  char json[300];
   snprintf(json, sizeof(json),
-    "{\"type\":\"detection\",\"count\":%d,\"distance\":%d,\"near\":%s,\"rssi\":%d}",
+    "{\"type\":\"detection\",\"count\":%d,\"distance\":%d,\"near\":%s,\"rssi\":%d,\"battery\":%d,\"iccid\":\"%s\"}",
     detectionCount, distance_cm,
     isNear ? "true" : "false",
-    getSignalStrength()
+    cachedRSSI,
+    cachedBatteryMV,
+    simICCID.c_str()
   );
   
   httpPost("/test_mock/mimamori/index.php", json);
@@ -305,23 +369,18 @@ void sendDetection(int distance_cm, bool isNear) {
 }
 
 void sendHeartbeat() {
-  char json[128];
+  char json[300];
   snprintf(json, sizeof(json),
-    "{\"type\":\"heartbeat\",\"uptime\":%lu,\"detections\":%d,\"rssi\":%d}",
+    "{\"type\":\"heartbeat\",\"uptime\":%lu,\"detections\":%d,\"rssi\":%d,\"battery\":%d,\"iccid\":\"%s\"}",
     millis() / 1000,
     detectionCount,
-    getSignalStrength()
+    cachedRSSI,
+    cachedBatteryMV,
+    simICCID.c_str()
   );
   
   httpPost("/test_mock/mimamori/index.php", json);
   lastHeartbeat = millis();
-}
-
-int getSignalStrength() {
-  String resp = sendAT("AT+CSQ", 1000);
-  int idx = resp.indexOf("+CSQ: ");
-  if (idx < 0) return -1;
-  return resp.substring(idx + 6, resp.indexOf(",", idx)).toInt();
 }
 
 // ========================================
@@ -330,6 +389,7 @@ int getSignalStrength() {
 bool sensorInit() {
   Serial.println("\n--- センサー初期化 ---");
   
+  delay(500);
   Wire.begin(I2C_SDA, I2C_SCL);
   
   Serial.print("VL53L0X...");
@@ -391,7 +451,8 @@ void setup() {
   delay(3000);
   ledOff();
   
-  // 初回ハートビート送信
+  // 初回ステータス取得 → ハートビート送信
+  updateCachedStatus();
   sendHeartbeat();
 }
 
@@ -399,6 +460,11 @@ void setup() {
 // メインループ
 // ========================================
 void loop() {
+  // --- ステータス値の定期更新（HTTP外で安全に実行）---
+  if (millis() - lastStatusUpdate > STATUS_UPDATE_INTERVAL) {
+    updateCachedStatus();
+  }
+  
   // --- PIR検知処理 ---
   bool pirState = digitalRead(PIR_PIN);
   
@@ -425,7 +491,7 @@ void loop() {
       
       if (isNear) ledGreen(); else ledRed();
       
-      // サーバーに送信
+      // サーバーに送信（キャッシュ済みのRSSI/Batteryを使用）
       sendDetection(distance_cm, isNear);
     }
   }
@@ -439,6 +505,7 @@ void loop() {
   
   // --- 定期ハートビート ---
   if (millis() - lastHeartbeat > HEARTBEAT_INTERVAL) {
+    updateCachedStatus();  // ハートビート前にも最新値取得
     sendHeartbeat();
   }
   

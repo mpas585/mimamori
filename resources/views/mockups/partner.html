@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>みまもりデバイス（仮） 〇〇マンション 管理画面</title>
+<style>
+:root{--beige:#f5f0e8;--cream:#faf8f4;--white:#fff;--gray-100:#f5f5f5;--gray-200:#e5e5e5;--gray-300:#d4d4d4;--gray-400:#a3a3a3;--gray-500:#737373;--gray-600:#525252;--gray-700:#404040;--gray-800:#262626;--green:#4caf50;--green-dark:#2e7d32;--green-light:#e8f5e9;--yellow:#ffc107;--yellow-light:#fff8e1;--orange:#ff9800;--red:#ef5350;--red-light:#fbe9e7;--radius:8px;--radius-lg:12px;--shadow-sm:0 1px 3px rgba(0,0,0,.08);--shadow:0 4px 12px rgba(0,0,0,.1)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans JP',Helvetica,sans-serif;background:var(--beige);color:var(--gray-800);min-height:100vh;font-size:13px}
+.nav{background:var(--gray-800);padding:0 20px;display:flex;align-items:center;justify-content:space-between;height:52px;position:sticky;top:0;z-index:100}
+.nav-brand{font-size:15px;font-weight:700;color:#fff;text-decoration:none}
+.org-name{font-size:12px;font-weight:400;color:var(--gray-400);margin-left:8px}
+.nav-links{display:flex;gap:16px}
+.nav-link{font-size:13px;color:var(--gray-400);text-decoration:none}
+.nav-link:hover{color:#fff}
+.main{max-width:1200px;margin:0 auto;padding:24px 20px}
+
+/* PWA バナー */
+.pwa-banner{background:var(--white);border-radius:var(--radius);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;font-size:12px;color:var(--gray-600);border:1px solid var(--gray-200)}
+.pwa-close{background:none;border:none;cursor:pointer;color:var(--gray-400);font-size:14px}
+
+/* 契約情報 */
+.contract-info{display:flex;gap:16px;margin-bottom:16px;flex-wrap:wrap}
+.contract-item{background:var(--white);border-radius:var(--radius-lg);padding:16px 20px;box-shadow:var(--shadow-sm);border:1px solid var(--gray-200);flex:1;min-width:180px}
+.contract-label{font-size:12px;color:var(--gray-500);margin-bottom:4px}
+.contract-value{font-size:16px;font-weight:700;color:var(--gray-800)}
+.contract-note{font-size:11px;color:var(--gray-400);margin-top:4px}
+
+/* アラートバナー */
+.alert-banner{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-radius:var(--radius);margin-bottom:12px;font-size:13px;font-weight:500}
+.alert-banner.warning{background:#fbe9e7;color:#c62828;border:1px solid #ffcdd2}
+.alert-banner.offline{background:var(--gray-100);color:var(--gray-600);border:1px solid var(--gray-300)}
+.alert-btn{padding:4px 12px;font-size:12px;font-weight:600;font-family:inherit;border:1px solid currentColor;border-radius:4px;background:transparent;color:inherit;cursor:pointer;margin-left:12px}
+
+/* ステータスグリッド */
+.status-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:20px}
+.status-card{background:var(--white);border-radius:var(--radius-lg);padding:16px;text-align:center;box-shadow:var(--shadow-sm);border:1px solid var(--gray-200);cursor:pointer}
+.status-card:hover{box-shadow:var(--shadow)}
+.sv{font-size:28px;font-weight:700;line-height:1.2}
+.sv.g{color:var(--green-dark)}.sv.y{color:var(--yellow)}.sv.r{color:var(--red)}.sv.gray{color:var(--gray-600)}.sv.lt{color:var(--gray-400)}
+.sl{font-size:11px;color:var(--gray-500);margin-top:4px}
+.sd{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:3px;vertical-align:middle}
+.sd.g{background:var(--green)}.sd.y{background:var(--yellow)}.sd.r{background:var(--red)}.sd.gray{background:var(--gray-600)}.sd.lt{background:var(--gray-300)}
+.status-legend{display:flex;gap:12px;font-size:11px;color:var(--gray-500);margin-bottom:16px;flex-wrap:wrap}
+
+/* ツールバー */
+.toolbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;gap:12px;flex-wrap:wrap}
+.toolbar-left{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.toolbar-right{display:flex;gap:8px;flex-wrap:wrap}
+.search-box{display:flex;align-items:center;background:var(--white);border:1px solid var(--gray-300);border-radius:var(--radius);padding:0 12px;width:220px}
+.search-box input{flex:1;padding:8px;border:none;background:transparent;font-size:13px;font-family:inherit}
+.search-box input:focus{outline:none}
+.filter-select{padding:8px 12px;font-size:13px;font-family:inherit;border:1px solid var(--gray-300);border-radius:var(--radius);background:var(--white);color:var(--gray-700)}
+.toolbar-count{font-size:13px;color:var(--gray-500);font-weight:500}
+.toolbar-btn{padding:8px 14px;font-size:13px;font-weight:600;font-family:inherit;border:1px solid var(--gray-300);border-radius:var(--radius);background:var(--white);color:var(--gray-700);cursor:pointer;text-decoration:none}
+.toolbar-btn:hover{background:var(--beige)}
+
+/* テーブル */
+.table-card{background:var(--white);border-radius:var(--radius-lg);box-shadow:var(--shadow-sm);overflow:hidden;border:1px solid var(--gray-200)}
+.table-wrapper{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead{background:var(--beige)}
+th{padding:12px 14px;text-align:left;font-weight:600;color:var(--gray-700);white-space:nowrap;border-bottom:2px solid var(--gray-300);border-right:1px solid var(--gray-200);font-size:12px}
+th:last-child{border-right:none}
+td{padding:12px 14px;border-bottom:1px solid var(--gray-200);border-right:1px solid var(--gray-100);vertical-align:middle}
+td:last-child{border-right:none}
+tbody tr:nth-child(even){background:var(--cream)}
+tbody tr:hover{background:var(--gray-100)}
+.ds{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;font-size:11px;font-weight:600;border-radius:4px}
+.ds.n{background:var(--green-light);color:var(--green-dark)}
+.ds.w{background:var(--yellow-light);color:#a16207}
+.ds.a{background:var(--red-light);color:var(--red)}
+.ds.o{background:var(--gray-100);color:var(--gray-600)}
+.ds.v{background:#f8fafc;color:var(--gray-400);border:1px solid var(--gray-200)}
+.mono{font-family:monospace;font-weight:700;letter-spacing:1px}
+.watch-toggle{position:relative;width:44px;height:24px;display:inline-block}
+.watch-toggle input{opacity:0;width:0;height:0}
+.ws{position:absolute;cursor:pointer;inset:0;background:var(--gray-300);border-radius:12px;transition:.3s}
+.ws::before{content:'';position:absolute;height:18px;width:18px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.3s}
+.watch-toggle input:checked+.ws{background:var(--green)}
+.watch-toggle input:checked+.ws::before{transform:translateX(20px)}
+.bat-low{color:var(--red);font-weight:600}
+.action-btn{padding:5px 10px;font-size:11px;font-weight:600;font-family:inherit;border:1px solid var(--gray-300);border-radius:4px;background:var(--white);color:var(--gray-700);cursor:pointer;margin-right:4px}
+.action-btn:hover{background:var(--beige)}
+.action-btn.d{color:var(--red);border-color:#fecaca}
+.action-btn.d:hover{background:var(--red-light)}
+.action-btn.s{background:var(--green);color:#fff;border-color:var(--green)}
+
+/* ページネーション */
+.pag-bar{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-top:2px solid var(--gray-200);background:var(--cream)}
+.pag-info{color:var(--gray-600);font-weight:500}
+.pag-btns{display:flex;gap:4px}
+.pg{min-width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;font-family:inherit;border:1px solid var(--gray-300);border-radius:6px;background:var(--white);color:var(--gray-700);cursor:pointer;text-decoration:none}
+.pg:hover{background:var(--beige)}
+.pg.active{background:var(--gray-800);color:#fff;border-color:var(--gray-800)}
+
+/* モーダル */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:1000;align-items:center;justify-content:center;padding:20px}
+.modal-overlay.show{display:flex}
+.modal{background:var(--white);border-radius:var(--radius-lg);box-shadow:var(--shadow);width:100%;max-width:480px;max-height:90vh;overflow-y:auto}
+.modal-header{display:flex;align-items:center;justify-content:space-between;padding:20px 20px 16px;border-bottom:1px solid var(--gray-200)}
+.modal-header h3{font-size:16px;font-weight:700}
+.modal-close{width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--gray-400);background:transparent;border:none;border-radius:var(--radius);cursor:pointer}
+.modal-close:hover{background:var(--gray-100)}
+.modal-body{padding:20px}
+.modal-footer{display:flex;justify-content:flex-end;gap:8px;padding:16px 20px;border-top:1px solid var(--gray-200)}
+.form-group{margin-bottom:16px}
+.form-label{display:block;font-size:13px;font-weight:600;color:var(--gray-700);margin-bottom:6px}
+.form-input{width:100%;padding:10px 12px;font-size:14px;font-family:inherit;border:1px solid var(--gray-300);border-radius:var(--radius);background:var(--white);color:var(--gray-800)}
+.form-hint{font-size:11px;color:var(--gray-400);margin-top:4px}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:10px 18px;font-size:13px;font-weight:600;font-family:inherit;border:none;border-radius:var(--radius);cursor:pointer;text-decoration:none}
+.btn-primary{background:var(--gray-800);color:#fff}
+.btn-primary:hover{background:var(--gray-700)}
+.btn-secondary{background:var(--white);color:var(--gray-700);border:1px solid var(--gray-300)}
+.btn-secondary:hover{background:var(--beige)}
+.btn-danger{background:var(--red);color:#fff}
+.btn-danger:hover{background:#c62828}
+.btn-sm{padding:6px 12px;font-size:12px}
+
+/* 詳細モーダル */
+.detail-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.detail-item{padding:10px 12px;background:var(--beige);border-radius:var(--radius)}
+.detail-item-label{font-size:11px;color:var(--gray-500);margin-bottom:2px}
+.detail-item-value{font-size:14px;font-weight:600;color:var(--gray-800)}
+.detail-section{margin-bottom:20px}
+.detail-section-title{font-size:14px;font-weight:600;color:var(--gray-700);margin-bottom:12px}
+.detail-status{display:inline-block;padding:4px 12px;font-size:12px;font-weight:600;border-radius:6px;background:var(--green-light);color:var(--green-dark);margin-bottom:16px}
+
+/* トースト */
+.toast{position:fixed;bottom:24px;right:24px;padding:14px 20px;border-radius:var(--radius);font-size:13px;font-weight:600;color:#fff;z-index:9999;transform:translateY(100px);opacity:0;transition:all .3s}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.success{background:var(--green-dark)}
+.toast.error{background:var(--red)}
+
+@media(max-width:768px){.status-grid{grid-template-columns:repeat(3,1fr)}.toolbar{flex-direction:column;align-items:stretch}.search-box{width:100%}}
+@media(max-width:480px){.status-grid{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<nav class="nav">
+  <a href="#" class="nav-brand">🧈 みまもりデバイス（仮）<span class="org-name">〇〇マンション 管理画面</span></a>
+  <div class="nav-links">
+    <a href="partner-password-change.html" class="nav-link">🔐 パスワード変更</a>
+    <a href="partner-login.html" class="nav-link">ログアウト</a>
+  </div>
+</nav>
+
+<main class="main">
+
+  <!-- PWAバナー -->
+  <div class="pwa-banner" id="pwaBanner">
+    <span>📱 ホーム画面に追加すると便利です</span>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-sm btn-primary" onclick="document.getElementById('pwaBanner').style.display='none'">追加する</button>
+      <button class="pwa-close" onclick="document.getElementById('pwaBanner').style.display='none'">×</button>
+    </div>
+  </div>
+
+  <!-- 契約情報 -->
+  <div class="contract-info">
+    <div class="contract-item">
+      <div class="contract-label">契約プラン</div>
+      <div class="contract-value">ビジネスプラン（45台）</div>
+    </div>
+    <div class="contract-item">
+      <div class="contract-label">有効期限</div>
+      <div class="contract-value">2025/12/31 （あと345日）</div>
+      <div class="contract-note">ご契約に関するお問い合わせは管理会社まで</div>
+    </div>
+  </div>
+
+  <!-- アラートバナー -->
+  <div class="alert-banner warning">
+    <span>🔴 <strong>1件</strong>のデバイスで24時間以上検知がありません（要確認）</span>
+    <button class="alert-btn">確認する</button>
+  </div>
+  <div class="alert-banner offline">
+    <span>⚫ <strong>1件</strong>のデバイスが48時間以上通信していません（電波障害または電池切れの可能性）</span>
+    <button class="alert-btn">確認する</button>
+  </div>
+
+  <!-- ステータスグリッド -->
+  <div class="status-grid">
+    <div class="status-card"><div class="sv g">40</div><div class="sl"><span class="sd g"></span>正常</div></div>
+    <div class="status-card"><div class="sv y">2</div><div class="sl"><span class="sd y"></span>注意</div></div>
+    <div class="status-card"><div class="sv r">1</div><div class="sl"><span class="sd r"></span>警告</div></div>
+    <div class="status-card"><div class="sv gray">1</div><div class="sl"><span class="sd gray"></span>離線</div></div>
+    <div class="status-card"><div class="sv lt">1</div><div class="sl"><span class="sd lt"></span>空室</div></div>
+  </div>
+  <div class="status-legend">
+    <span>正常: 検知あり</span><span>注意: 電池低下/未検知気味</span><span>警告: 長時間未検知</span><span>離線: 通信途絶</span><span>空室: デバイス未割当</span>
+  </div>
+
+  <!-- ツールバー -->
+  <div class="toolbar">
+    <div class="toolbar-left">
+      <div class="search-box"><span>🔍</span><input type="text" placeholder="部屋番号・名前で検索..."></div>
+      <select class="filter-select">
+        <option>すべてのステータス</option><option>🟢 正常のみ</option><option>🟡 注意のみ</option><option>🔴 警告のみ</option><option>⚫ 離線のみ</option><option>⚪ 空室のみ</option>
+      </select>
+      <select class="filter-select">
+        <option>すべての見守り状態</option><option>見守りON</option><option>見守りOFF</option><option>⏰ タイマー設定中</option>
+      </select>
+      <span class="toolbar-count">登録: <strong>45</strong> / 100台</span>
+    </div>
+    <div class="toolbar-right">
+      <button class="toolbar-btn" onclick="showModal('timerModal')">⏰ タイマー一覧</button>
+      <button class="toolbar-btn" onclick="showModal('addModal')">➕ デバイス追加</button>
+      <a href="#" class="toolbar-btn">📥 CSV出力</a>
+    </div>
+  </div>
+
+  <!-- デバイステーブル -->
+  <div class="table-card">
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>状態 ↕</th><th>部屋 / 名前 ↑</th><th>デバイスID ↕</th><th>見守り</th><th>最終検知 ↕</th><th>電池 ↕</th><th>電波 ↕</th><th>操作</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="ds n">正常</span></td>
+            <td><strong>101</strong><br><span style="font-size:12px;color:var(--gray-500);">山田 太郎</span></td>
+            <td class="mono">A3K9X2</td>
+            <td><label class="watch-toggle"><input type="checkbox" checked><span class="ws"></span></label></td>
+            <td>3分前</td><td>85%</td><td>良好</td>
+            <td><button class="action-btn" onclick="showModal('detailModal')">詳細</button><button class="action-btn d" onclick="showModal('deleteModal')">削除</button></td>
+          </tr>
+          <tr>
+            <td><span class="ds n">正常</span></td>
+            <td><strong>102</strong><br><span style="font-size:12px;color:var(--gray-500);">佐藤 花子</span></td>
+            <td class="mono">B7X2K9</td>
+            <td><label class="watch-toggle"><input type="checkbox" checked><span class="ws"></span></label> <span style="font-size:12px;color:var(--orange);">⏰</span></td>
+            <td>5分前</td><td>72%</td><td>良好</td>
+            <td><button class="action-btn" onclick="showModal('detailModal')">詳細</button><button class="action-btn d" onclick="showModal('deleteModal')">削除</button></td>
+          </tr>
+          <tr>
+            <td><span class="ds w">注意</span></td>
+            <td><strong>103</strong><br><span style="font-size:12px;color:var(--gray-500);">田中 次郎</span></td>
+            <td class="mono">C4M8P2</td>
+            <td><label class="watch-toggle"><input type="checkbox" checked><span class="ws"></span></label></td>
+            <td>45分前</td><td class="bat-low">28%</td><td>普通</td>
+            <td><button class="action-btn" onclick="showModal('detailModal')">詳細</button><button class="action-btn d" onclick="showModal('deleteModal')">削除</button></td>
+          </tr>
+          <tr>
+            <td><span class="ds a">警告</span></td>
+            <td><strong>201</strong><br><span style="font-size:12px;color:var(--gray-500);">鈴木 三郎</span></td>
+            <td class="mono">D9L3Q7</td>
+            <td><label class="watch-toggle"><input type="checkbox" checked><span class="ws"></span></label></td>
+            <td>26時間前</td><td>45%</td><td>良好</td>
+            <td><button class="action-btn" onclick="showModal('detailModal')">詳細</button><button class="action-btn d" onclick="showModal('deleteModal')">削除</button></td>
+          </tr>
+          <tr>
+            <td><span class="ds o">離線</span></td>
+            <td><strong>202</strong><br><span style="font-size:12px;color:var(--gray-500);">高橋 四郎</span></td>
+            <td class="mono">E2P7R4</td>
+            <td><label class="watch-toggle"><input type="checkbox"><span class="ws"></span></label></td>
+            <td>3日前</td><td>-</td><td>-</td>
+            <td><button class="action-btn" onclick="showModal('detailModal')">詳細</button><button class="action-btn d" onclick="showModal('deleteModal')">削除</button></td>
+          </tr>
+          <tr>
+            <td><span class="ds n">正常</span></td>
+            <td><strong>203</strong><br><span style="font-size:12px;color:var(--gray-500);">伊藤 五郎</span></td>
+            <td class="mono">F8K2M6</td>
+            <td><label class="watch-toggle"><input type="checkbox" checked><span class="ws"></span></label></td>
+            <td>8分前</td><td>68%</td><td>良好</td>
+            <td><button class="action-btn" onclick="showModal('detailModal')">詳細</button><button class="action-btn d" onclick="showModal('deleteModal')">削除</button></td>
+          </tr>
+          <tr>
+            <td><span class="ds w">注意</span></td>
+            <td><strong>301</strong><br><span style="font-size:12px;color:var(--gray-500);">渡辺 六子</span></td>
+            <td class="mono">G5N9T1</td>
+            <td><label class="watch-toggle"><input type="checkbox" checked><span class="ws"></span></label></td>
+            <td>38分前</td><td class="bat-low">32%</td><td style="color:var(--orange);">弱い</td>
+            <td><button class="action-btn" onclick="showModal('detailModal')">詳細</button><button class="action-btn d" onclick="showModal('deleteModal')">削除</button></td>
+          </tr>
+          <tr>
+            <td><span class="ds n">正常</span></td>
+            <td><strong>302</strong><br><span style="font-size:12px;color:var(--gray-500);">中村 七美</span></td>
+            <td class="mono">H1Q4W8</td>
+            <td><label class="watch-toggle"><input type="checkbox" checked><span class="ws"></span></label></td>
+            <td>2分前</td><td>91%</td><td>良好</td>
+            <td><button class="action-btn" onclick="showModal('detailModal')">詳細</button><button class="action-btn d" onclick="showModal('deleteModal')">削除</button></td>
+          </tr>
+          <tr>
+            <td><span class="ds v">空室</span></td>
+            <td><strong>303</strong><br><span style="font-size:12px;color:var(--gray-400);">-</span></td>
+            <td>-</td><td></td><td>-</td><td>-</td><td>-</td>
+            <td><button class="action-btn s" onclick="showModal('addModal')">設置</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="pag-bar">
+      <span class="pag-info">1〜9件 / 全45件</span>
+      <div class="pag-btns">
+        <span class="pg" style="opacity:.5">‹</span>
+        <a href="#" class="pg active">1</a>
+        <a href="#" class="pg">2</a>
+        <a href="#" class="pg">3</a>
+        <a href="#" class="pg">4</a>
+        <a href="#" class="pg">5</a>
+        <a href="#" class="pg">›</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- モーダル: デバイス追加 -->
+  <div id="addModal" class="modal-overlay" onclick="if(event.target===this)hideModal('addModal')">
+    <div class="modal">
+      <div class="modal-header"><h3>➕ デバイス追加</h3><button class="modal-close" onclick="hideModal('addModal')">×</button></div>
+      <div class="modal-body">
+        <div class="form-group"><label class="form-label">デバイスID</label><input type="text" class="form-input" placeholder="A3K9X2"><p class="form-hint">製品ラベルに記載の6文字</p></div>
+        <div class="form-group"><label class="form-label">部屋番号</label><input type="text" class="form-input"></div>
+        <div class="form-group"><label class="form-label">入居者名（任意）</label><input type="text" class="form-input"></div>
+        <div class="form-group"><label class="form-label">メモ（任意）</label><input type="text" class="form-input"></div>
+      </div>
+      <div class="modal-footer"><button class="btn btn-secondary" onclick="hideModal('addModal')">キャンセル</button><button class="btn btn-primary">追加</button></div>
+    </div>
+  </div>
+
+  <!-- モーダル: デバイス削除 -->
+  <div id="deleteModal" class="modal-overlay" onclick="if(event.target===this)hideModal('deleteModal')">
+    <div class="modal">
+      <div class="modal-header"><h3>⚠️ デバイス削除</h3><button class="modal-close" onclick="hideModal('deleteModal')">×</button></div>
+      <div class="modal-body"><p>デバイス <strong class="mono">A3K9X2</strong> を削除しますか？<br>この操作は取り消せません。</p></div>
+      <div class="modal-footer"><button class="btn btn-secondary" onclick="hideModal('deleteModal')">キャンセル</button><button class="btn btn-danger">削除する</button></div>
+    </div>
+  </div>
+
+  <!-- モーダル: タイマー一覧 -->
+  <div id="timerModal" class="modal-overlay" onclick="if(event.target===this)hideModal('timerModal')">
+    <div class="modal" style="max-width:540px;">
+      <div class="modal-header"><h3>⏰ タイマー設定一覧</h3><button class="modal-close" onclick="hideModal('timerModal')">×</button></div>
+      <div class="modal-body"><p style="font-size:13px;color:var(--gray-500);">タイマー設定中のデバイス一覧です。停止中または停止予定のデバイスが表示されます。</p></div>
+      <div class="modal-footer"><button class="btn btn-secondary" onclick="hideModal('timerModal')">閉じる</button></div>
+    </div>
+  </div>
+
+  <!-- モーダル: 見守りOFF確認 -->
+  <div id="watchOffModal" class="modal-overlay" onclick="if(event.target===this)hideModal('watchOffModal')">
+    <div class="modal">
+      <div class="modal-header"><h3>⚠️ 見守りをOFFにしますか？</h3><button class="modal-close" onclick="hideModal('watchOffModal')">×</button></div>
+      <div class="modal-body"><p><strong>⚠️ 注意:</strong> OFFにすると、このデバイスの未検知アラートが送信されなくなります。</p></div>
+      <div class="modal-footer"><button class="btn btn-secondary" onclick="hideModal('watchOffModal')">キャンセル</button><button class="btn btn-danger">OFFにする</button></div>
+    </div>
+  </div>
+
+  <!-- モーダル: デバイス詳細 -->
+  <div id="detailModal" class="modal-overlay" onclick="if(event.target===this)hideModal('detailModal')">
+    <div class="modal" style="max-width:540px;">
+      <div class="modal-header"><h3>📋 デバイス詳細</h3><button class="modal-close" onclick="hideModal('detailModal')">×</button></div>
+      <div class="modal-body">
+        <div class="detail-status">正常稼働中</div>
+        <div class="detail-section"><div class="detail-grid">
+          <div class="detail-item"><p class="detail-item-label">デバイスID</p><p class="detail-item-value mono">A3K9X2</p></div>
+          <div class="detail-item"><p class="detail-item-label">部屋番号</p><p class="detail-item-value">101</p></div>
+          <div class="detail-item"><p class="detail-item-label">入居者名</p><p class="detail-item-value">山田 太郎</p></div>
+          <div class="detail-item"><p class="detail-item-label">最終検知</p><p class="detail-item-value">3分前</p></div>
+        </div></div>
+        <div class="detail-section"><div class="detail-section-title">📊 デバイス状態</div><div class="detail-grid">
+          <div class="detail-item"><p class="detail-item-label">電池残量</p><p class="detail-item-value">85%</p></div>
+          <div class="detail-item"><p class="detail-item-label">電波強度</p><p class="detail-item-value">良好 (-65dBm)</p></div>
+        </div></div>
+        <div class="detail-section"><div class="detail-section-title">⚙️ 見守り設定</div><div class="detail-grid">
+          <div class="detail-item"><p class="detail-item-label">見守りON/OFF</p><p class="detail-item-value">ON</p></div>
+          <div class="detail-item"><p class="detail-item-label">アラート時間</p><p class="detail-item-value">24時間</p></div>
+          <div class="detail-item"><p class="detail-item-label">設置高さ</p><p class="detail-item-value">200cm</p></div>
+          <div class="detail-item"><p class="detail-item-label">ペット除外</p><p class="detail-item-value">ON（100cm）</p></div>
+        </div></div>
+        <div class="detail-section"><div class="detail-section-title">⏰ タイマー設定</div><p style="font-size:12px;color:var(--gray-400);">設定なし</p></div>
+        <div class="detail-section"><div class="detail-section-title">📝 登録情報</div><div class="detail-grid">
+          <div class="detail-item"><p class="detail-item-label">登録日</p><p class="detail-item-value">2024/06/15</p></div>
+          <div class="detail-item"><p class="detail-item-label">メモ</p><p class="detail-item-value">息子が緊急連絡先</p></div>
+        </div></div>
+      </div>
+      <div class="modal-footer"><button class="btn btn-secondary" onclick="hideModal('detailModal')">閉じる</button><button class="btn btn-primary">編集</button></div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+</main>
+
+<script>
+function showModal(id) { document.getElementById(id).classList.add('show'); }
+function hideModal(id) { document.getElementById(id).classList.remove('show'); }
+</script>
+</body>
+</html>
