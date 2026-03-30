@@ -9,6 +9,8 @@ use App\Models\Organization;
 use App\Models\OrgDeviceAssignment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class OrgAdminController extends Controller
@@ -567,5 +569,84 @@ class OrgAdminController extends Controller
         $schedule->delete();
 
         return response()->json(['success' => true, 'message' => 'スケジュールを削除しました']);
+    }
+
+    /**
+     * デバイス一括生成 + 組織紐付け（AJAX）
+     * Step3「決済へ進む」から呼ばれる
+     */
+    public function bulkCheckout(Request $request)
+    {
+        $organization = $this->getOrganization();
+
+        $request->validate([
+            'count'   => 'required|integer|min:1|max:300',
+            'opt_ai'  => 'nullable|boolean',
+            'opt_sms' => 'nullable|boolean',
+        ]);
+
+        $count  = (int) $request->count;
+        $optAi  = (bool) $request->opt_ai;
+        $optSms = (bool) $request->opt_sms;
+
+        $issued = [];
+
+        for ($i = 0; $i < $count; $i++) {
+            $deviceId = $this->generateDeviceId();
+            $pin      = $this->generatePin();
+
+            $device = Device::create([
+                'device_id'       => $deviceId,
+                'pin_hash'        => Hash::make($pin),
+                'status'          => 'inactive',
+                'organization_id' => $organization->id,
+            ]);
+
+            DB::table('notification_settings')->insert([
+                'device_id'     => $device->id,
+                'email_enabled' => 1,
+                'created_at'    => now(),
+                'updated_at'    => now(),
+            ]);
+
+            $issued[] = [
+                'device_id' => $deviceId,
+                'pin'       => $pin,
+            ];
+        }
+
+        // TODO: $optAi, $optSms を pay.jp 決済フローへ引き渡す
+        // checkout_url が null の場合はフロント側でCSVのみダウンロード
+        return response()->json([
+            'success'      => true,
+            'count'        => $count,
+            'issued'       => $issued,
+            'checkout_url' => null,
+        ]);
+    }
+
+    /**
+     * デバイスIDを生成（英数字6文字、重複なし）
+     */
+    private function generateDeviceId(): string
+    {
+        $chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+
+        do {
+            $id = '';
+            for ($i = 0; $i < 6; $i++) {
+                $id .= $chars[random_int(0, strlen($chars) - 1)];
+            }
+        } while (Device::where('device_id', $id)->exists());
+
+        return $id;
+    }
+
+    /**
+     * PIN生成（数字4桁）
+     */
+    private function generatePin(): string
+    {
+        return str_pad((string) random_int(0, 9999), 4, '0', STR_PAD_LEFT);
     }
 }

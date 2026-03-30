@@ -113,6 +113,7 @@ Route::middleware(PartnerAuth::class)->prefix('partner')->group(function () {
 Route::middleware(PartnerAuth::class.':operator')->prefix('partner/org')->group(function () {
     Route::get('/', [OrgAdminController::class, 'index'])->name('partner.org.dashboard');
     Route::post('/devices/add', [OrgAdminController::class, 'addDevice'])->name('partner.org.devices.add');
+    Route::post('/devices/bulk-checkout', [OrgAdminController::class, 'bulkCheckout'])->name('partner.org.devices.bulk-checkout');
     Route::post('/devices/{deviceId}/remove', [OrgAdminController::class, 'removeDevice'])->name('partner.org.devices.remove');
     Route::post('/devices/{deviceId}/toggle-watch', [OrgAdminController::class, 'toggleWatch'])->name('partner.org.devices.toggle-watch');
     Route::post('/devices/{deviceId}/clear-alert', [OrgAdminController::class, 'clearAlert'])->name('partner.org.devices.clear-alert');
