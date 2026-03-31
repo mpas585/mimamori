@@ -86,14 +86,19 @@
     .detail-section-title { font-size: 14px; font-weight: 600; color: var(--gray-700); margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
     .detail-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
     .detail-item { padding: 10px 12px; background: var(--beige); border-radius: var(--radius); }
-    .detail-item-label { font-size: 11px; color: var(--gray-500); margin-bottom: 2px; }
+    .detail-item-label { font-size: 11px; color: var(--gray-500); margin-bottom: 4px; }
     .detail-item-value { font-size: 14px; font-weight: 600; color: var(--gray-800); }
+    .detail-form-input { width: 100%; padding: 6px 8px; font-size: 13px; font-family: inherit; border: 1px solid var(--gray-300); border-radius: var(--radius); background: var(--white); color: var(--gray-800); box-sizing: border-box; }
+    .detail-form-input:focus { outline: none; border-color: var(--gray-500); box-shadow: 0 0 0 2px rgba(168,162,158,0.15); }
     .detail-status-row { display: flex; align-items: center; margin-bottom: 16px; }
     .detail-status-badge { display: inline-block; padding: 4px 12px; font-size: 12px; font-weight: 600; border-radius: 6px; }
     .detail-status-badge.normal { background: var(--green-light); color: var(--green-dark); }
     .detail-status-badge.warning { background: var(--yellow-light); color: #a16207; }
     .detail-status-badge.alert { background: var(--red-light); color: var(--red); }
     .detail-status-badge.offline { background: var(--gray-100); color: var(--gray-600); }
+    .detail-notify-note { font-size: 11px; color: var(--gray-500); margin-top: 6px; line-height: 1.5; }
+    .cancel-link { font-size: 11px; color: var(--gray-400); text-decoration: underline; cursor: pointer; transition: color 0.2s; align-self: center; background: none; border: none; font-family: inherit; padding: 0; }
+    .cancel-link:hover { color: var(--red); }
     .toast { position: fixed; bottom: 24px; right: 24px; padding: 14px 20px; border-radius: var(--radius); font-size: 13px; font-weight: 600; color: var(--white); z-index: 9999; transform: translateY(100px); opacity: 0; transition: all 0.3s; }
     .toast.show { transform: translateY(0); opacity: 1; }
     .toast.success { background: var(--green-dark); }
@@ -156,7 +161,7 @@
     .detail-schedule-empty { padding: 16px; text-align: center; font-size: 12px; color: var(--gray-400); }
     .detail-schedule-add { display: flex; align-items: center; justify-content: center; gap: 4px; width: 100%; padding: 8px; font-size: 12px; font-weight: 600; font-family: inherit; color: var(--gray-500); background: var(--cream); border: 1px dashed var(--gray-300); border-radius: var(--radius); cursor: pointer; transition: all 0.2s; }
     .detail-schedule-add:hover { background: var(--beige); color: var(--gray-700); }
-    /* ===== デバイス一括追加モーダル ===== */
+    /* ===== デバイス新規お申込みモーダル ===== */
     .bulk-step-bar { display: flex; align-items: center; padding: 14px 20px; border-bottom: 1px solid var(--gray-200); }
     .bulk-step { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--gray-400); }
     .bulk-step.active { color: var(--gray-800); font-weight: 600; }
@@ -186,12 +191,19 @@
     .bulk-opt-badge { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 4px; background: var(--green-light); color: var(--green-dark); }
     .bulk-opt-price { font-size: 13px; font-weight: 600; color: var(--gray-600); }
     .bulk-opt-desc { font-size: 12px; color: var(--gray-500); margin-top: 6px; padding-left: 28px; line-height: 1.5; }
+    .bulk-form-group { margin-bottom: 14px; }
+    .bulk-form-group label { display: block; font-size: 12px; font-weight: 600; color: var(--gray-700); margin-bottom: 4px; }
+    .bulk-form-required { color: var(--red); margin-left: 2px; }
+    .bulk-form-input { width: 100%; padding: 8px 10px; font-size: 13px; font-family: inherit; border: 1px solid var(--gray-300); border-radius: var(--radius); background: var(--white); color: var(--gray-800); box-sizing: border-box; }
+    .bulk-form-input:focus { outline: none; border-color: var(--gray-500); box-shadow: 0 0 0 2px rgba(168,162,158,0.15); }
     .bulk-summary-card { background: var(--beige); border-radius: var(--radius); padding: 16px; }
     .bulk-summary-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; font-size: 13px; border-bottom: 1px solid var(--gray-200); }
     .bulk-summary-row:last-of-type { border-bottom: none; }
     .bulk-summary-label { color: var(--gray-500); }
     .bulk-summary-value { font-weight: 600; color: var(--gray-800); }
-    .bulk-summary-total { display: flex; justify-content: space-between; align-items: baseline; padding-top: 12px; margin-top: 4px; border-top: 2px solid var(--gray-300); }
+    .bulk-summary-subtotal { display: flex; justify-content: space-between; align-items: center; padding: 8px 0 4px; border-top: 1px solid var(--gray-300); margin-top: 4px; font-size: 13px; color: var(--gray-600); }
+    .bulk-summary-tax { display: flex; justify-content: space-between; align-items: center; padding: 4px 0 8px; font-size: 12px; color: var(--gray-500); border-bottom: 2px solid var(--gray-300); }
+    .bulk-summary-total { display: flex; justify-content: space-between; align-items: baseline; padding-top: 12px; margin-top: 4px; }
     .bulk-summary-total-label { font-size: 13px; color: var(--gray-600); }
     .bulk-summary-total-value { font-size: 22px; font-weight: 700; color: var(--gray-800); }
     .bulk-summary-note { font-size: 11px; color: var(--gray-400); margin-top: 12px; line-height: 1.6; }
@@ -284,7 +296,7 @@
         <div class="toolbar-right">
             <button class="toolbar-btn" onclick="showNotificationModal()">🔔 通知設定</button>
             <button class="toolbar-btn" onclick="showTimerListModal()">⏰ タイマー一覧</button>
-            <button class="toolbar-btn" onclick="showAddDeviceModal()">➕ デバイス追加</button>
+            <button class="toolbar-btn" onclick="showAddDeviceModal()">デバイス新規お申込み</button>
             <a href="{{ route('partner.org.csv') }}" class="toolbar-btn">📥 CSV出力</a>
         </div>
     </div>
@@ -373,11 +385,11 @@
         @endif
     </div>
 
-    {{-- モーダル: デバイス一括追加（3ステップ） --}}
+    {{-- モーダル: デバイス新規お申込み（4ステップ） --}}
     <div id="addDeviceModal" class="modal-overlay" onclick="if(event.target===this)hideModal('addDeviceModal')">
         <div class="modal">
             <div class="modal-header">
-                <h3>➕ デバイス一括追加</h3>
+                <h3>デバイス新規お申込み</h3>
                 <button class="modal-close" onclick="hideModal('addDeviceModal')">×</button>
             </div>
 
@@ -387,7 +399,9 @@
                 <div class="bulk-step-line"></div>
                 <div class="bulk-step" id="bulk-step-ind-2"><div class="bulk-step-num">2</div><span>オプション</span></div>
                 <div class="bulk-step-line"></div>
-                <div class="bulk-step" id="bulk-step-ind-3"><div class="bulk-step-num">3</div><span>確認・決済</span></div>
+                <div class="bulk-step" id="bulk-step-ind-3"><div class="bulk-step-num">3</div><span>配送先</span></div>
+                <div class="bulk-step-line"></div>
+                <div class="bulk-step" id="bulk-step-ind-4"><div class="bulk-step-num">4</div><span>確認・決済</span></div>
             </div>
 
             {{-- Step 1: 台数 --}}
@@ -431,16 +445,45 @@
                 </div>
             </div>
 
-            {{-- Step 3: 確認 --}}
+            {{-- Step 3: 配送先 --}}
             <div id="bulk-panel-3" class="bulk-panel modal-body">
+                <p class="bulk-section-label">デバイスの配送先をご入力ください</p>
+                <div class="bulk-form-group">
+                    <label>お名前<span class="bulk-form-required">*</span></label>
+                    <input type="text" class="bulk-form-input" id="bulk-delivery-name" placeholder="山田 太郎">
+                </div>
+                <div class="bulk-form-group">
+                    <label>郵便番号<span class="bulk-form-required">*</span></label>
+                    <input type="text" class="bulk-form-input" id="bulk-delivery-postal" placeholder="000-0000" maxlength="8">
+                </div>
+                <div class="bulk-form-group">
+                    <label>住所<span class="bulk-form-required">*</span></label>
+                    <input type="text" class="bulk-form-input" id="bulk-delivery-address" placeholder="東京都千代田区〇〇 1-2-3">
+                </div>
+                <div class="bulk-form-group">
+                    <label>電話番号<span class="bulk-form-required">*</span></label>
+                    <input type="tel" class="bulk-form-input" id="bulk-delivery-phone" placeholder="090-0000-0000">
+                </div>
+            </div>
+
+            {{-- Step 4: 確認 --}}
+            <div id="bulk-panel-4" class="bulk-panel modal-body">
                 <div class="bulk-summary-card">
                     <div class="bulk-summary-row"><span class="bulk-summary-label">追加台数</span><span class="bulk-summary-value" id="bulk-sum-qty">10台</span></div>
                     <div class="bulk-summary-row"><span class="bulk-summary-label">基本料金</span><span class="bulk-summary-value">¥700 / 台 / 月</span></div>
                     <div class="bulk-summary-row" id="bulk-sum-ai-row" style="display:none;"><span class="bulk-summary-label">AIコール</span><span class="bulk-summary-value">+¥300 / 台 / 月</span></div>
                     <div class="bulk-summary-row" id="bulk-sum-sms-row" style="display:none;"><span class="bulk-summary-label">SMS通知</span><span class="bulk-summary-value">+¥100 / 台 / 月</span></div>
+                    <div class="bulk-summary-subtotal">
+                        <span class="bulk-summary-label">小計（税抜）</span>
+                        <span class="bulk-summary-value" id="bulk-sum-subtotal">¥7,000 / 月</span>
+                    </div>
+                    <div class="bulk-summary-tax">
+                        <span class="bulk-summary-label">消費税（10%）</span>
+                        <span class="bulk-summary-value" id="bulk-sum-tax">¥700 / 月</span>
+                    </div>
                     <div class="bulk-summary-total">
-                        <span class="bulk-summary-total-label">月額合計（税抜）</span>
-                        <span class="bulk-summary-total-value" id="bulk-sum-total">¥7,000 / 月</span>
+                        <span class="bulk-summary-total-label">月額合計（税込）</span>
+                        <span class="bulk-summary-total-value" id="bulk-sum-total">¥7,700 / 月</span>
                     </div>
                 </div>
                 <p class="bulk-summary-note">※ 24ヶ月最低契約。解約時は¥8,400の違約金が発生します。<br>※「決済へ進む」を押すとデバイスが生成され、IDとPINのCSVが自動でダウンロードされます。</p>
@@ -472,38 +515,78 @@
         </div>
     </div>
 
-    {{-- モーダル: デバイス詳細 --}}
+    {{-- モーダル: デバイス詳細（編集可能） --}}
     <div id="detailModal" class="modal-overlay" onclick="if(event.target===this)hideModal('detailModal')">
         <div class="modal" style="max-width:560px;"><div class="modal-header"><h3>📋 デバイス詳細</h3><button class="modal-close" onclick="hideModal('detailModal')">×</button></div>
             <div class="modal-body">
                 <div class="detail-status-row"><div class="detail-status-badge normal" id="detailStatusBadge">-</div><button class="detail-clear-alert-btn" id="detailClearAlertBtn" style="display:none;" onclick="confirmClearAlertFromDetail()">✕ 警告解除</button></div>
+
                 <div class="detail-section"><div class="detail-grid">
                     <div class="detail-item"><p class="detail-item-label">デバイスID</p><p class="detail-item-value mono" id="detailDeviceId">-</p></div>
-                    <div class="detail-item"><p class="detail-item-label">部屋番号</p><p class="detail-item-value" id="detailRoom">-</p></div>
-                    <div class="detail-item"><p class="detail-item-label">入居者名</p><p class="detail-item-value" id="detailTenant">-</p></div>
                     <div class="detail-item"><p class="detail-item-label">最終検知</p><p class="detail-item-value" id="detailLastDetected">-</p></div>
+                    <div class="detail-item"><p class="detail-item-label">部屋番号</p><input type="text" class="detail-form-input" id="detailRoomInput" placeholder="101"></div>
+                    <div class="detail-item"><p class="detail-item-label">入居者名</p><input type="text" class="detail-form-input" id="detailTenantInput" placeholder="山田 太郎"></div>
                 </div></div>
+
                 <div class="detail-section"><div class="detail-section-title">📊 デバイス状態</div><div class="detail-grid">
                     <div class="detail-item"><p class="detail-item-label">電池残量</p><p class="detail-item-value" id="detailBattery">-</p></div>
                     <div class="detail-item"><p class="detail-item-label">電波強度</p><p class="detail-item-value" id="detailSignal">-</p></div>
                 </div></div>
+
                 <div class="detail-section"><div class="detail-section-title">⚙️ 見守り設定</div><div class="detail-grid">
-                    <div class="detail-item"><p class="detail-item-label">アラート時間</p><p class="detail-item-value" id="detailAlertHours">-</p></div>
-                    <div class="detail-item"><p class="detail-item-label">設置高さ</p><p class="detail-item-value" id="detailHeight">-</p></div>
-                    <div class="detail-item"><p class="detail-item-label">ペット除外</p><p class="detail-item-value" id="detailPetExclusion">-</p></div>
+                    <div class="detail-item"><p class="detail-item-label">アラート時間</p>
+                        <select class="detail-form-input" id="detailAlertHoursInput">
+                            <option value="12">12時間</option>
+                            <option value="24">24時間</option>
+                            <option value="36">36時間</option>
+                            <option value="48">48時間</option>
+                            <option value="72">72時間</option>
+                        </select>
+                    </div>
+                    <div class="detail-item"><p class="detail-item-label">設置高さ</p>
+                        <div style="display:flex;align-items:center;gap:4px;">
+                            <input type="number" class="detail-form-input" id="detailHeightInput" min="100" max="300" style="width:70px;">
+                            <span style="font-size:12px;color:var(--gray-500);">cm</span>
+                        </div>
+                    </div>
+                    <div class="detail-item"><p class="detail-item-label">ペット除外</p>
+                        <select class="detail-form-input" id="detailPetExclusionInput">
+                            <option value="0">OFF</option>
+                            <option value="1">ON</option>
+                        </select>
+                    </div>
                     <div class="detail-item"><p class="detail-item-label">見守り</p><p class="detail-item-value" id="detailAwayMode">-</p></div>
                 </div></div>
+
                 <div class="detail-section"><div class="detail-section-title">📝 登録情報</div><div class="detail-grid">
                     <div class="detail-item"><p class="detail-item-label">登録日</p><p class="detail-item-value" id="detailRegistered">-</p></div>
-                    <div class="detail-item"><p class="detail-item-label">メモ</p><p class="detail-item-value" id="detailMemo">-</p></div>
+                    <div class="detail-item"><p class="detail-item-label">メモ</p><input type="text" class="detail-form-input" id="detailMemoInput" placeholder="メモを入力..." maxlength="200"></div>
                 </div></div>
+
+                <div class="detail-section"><div class="detail-section-title">🔔 通知サービス</div>
+                    <div style="display:flex;align-items:center;gap:12px;margin-bottom:6px;">
+                        <label class="watch-toggle">
+                            <input type="checkbox" id="detailNotifyEnabled" checked onchange="toggleNotifyService(this.checked)">
+                            <span class="watch-slider"></span>
+                        </label>
+                        <span id="detailNotifyLabel" style="font-size:13px;color:var(--gray-700);">有効</span>
+                    </div>
+                    <p class="detail-notify-note">※ご契約後〇ヶ月は停止機能はご利用になれません。</p>
+                </div>
+
                 <div class="detail-section"><div class="detail-section-title">📅 スケジュール</div><div id="detailScheduleList"></div><button class="detail-schedule-add" onclick="openScheduleAddFromDetail()">＋ スケジュール追加</button></div>
             </div>
-            <div class="modal-footer"><button class="btn btn-secondary" onclick="hideModal('detailModal')">閉じる</button><button class="btn btn-primary" onclick="openEditFromDetail()">編集</button></div>
+            <div class="modal-footer" style="justify-content:space-between;">
+                <button type="button" class="cancel-link" onclick="showCancelFlow()">解約</button>
+                <div style="display:flex;gap:8px;">
+                    <button class="btn btn-secondary" onclick="hideModal('detailModal')">閉じる</button>
+                    <button class="btn btn-primary" onclick="saveDetailChanges()">保存</button>
+                </div>
+            </div>
         </div>
     </div>
 
-    {{-- モーダル: デバイス編集 --}}
+    {{-- モーダル: デバイス編集（後方互換） --}}
     <div id="editModal" class="modal-overlay" onclick="if(event.target===this)hideModal('editModal')">
         <div class="modal"><div class="modal-header"><h3>✏️ デバイス編集</h3><button class="modal-close" onclick="hideModal('editModal')">×</button></div>
             <form id="editForm" method="POST" action="">@csrf @method('PUT')
@@ -578,6 +661,38 @@
         </div>
     </div>
 
+    {{-- モーダル: 解約・端末返却案内 --}}
+    <div id="cancelFlowModal" class="modal-overlay" onclick="if(event.target===this)hideModal('cancelFlowModal')">
+        <div class="modal" style="max-width:520px;">
+            <div class="modal-header"><h3>📦 解約・端末返却のご案内</h3><button class="modal-close" onclick="hideModal('cancelFlowModal')">×</button></div>
+            <div class="modal-body">
+                <div style="background:var(--yellow-light);border-left:3px solid var(--yellow);padding:12px 14px;border-radius:var(--radius);margin-bottom:16px;">
+                    <p style="font-size:13px;font-weight:600;color:#a16207;margin-bottom:4px;">⚠️ 解約前にご確認ください</p>
+                    <p style="font-size:12px;color:#a16207;line-height:1.6;">ご契約から<strong>〇ヶ月以内</strong>の解約は、1台あたり<strong>¥8,400の違約金</strong>が発生します。</p>
+                </div>
+                <div class="detail-section">
+                    <div class="detail-section-title">📋 解約・返却の流れ</div>
+                    <div style="font-size:13px;color:var(--gray-700);line-height:1.8;">
+                        <p style="margin-bottom:6px;"><strong>① 解約申請</strong></p>
+                        <p style="color:var(--gray-500);font-size:12px;margin-bottom:12px;">下記の「解約を申請する」ボタン、またはお問い合わせフォームより解約のご意思をお知らせください。</p>
+                        <p style="margin-bottom:6px;"><strong>② 端末の返送</strong></p>
+                        <p style="color:var(--gray-500);font-size:12px;margin-bottom:12px;">端末を<strong>レターパックライト等の郵送</strong>にてご返送ください。送料はお客様のご負担となります。</p>
+                        <p style="margin-bottom:6px;"><strong>③ 返送確認・解約完了</strong></p>
+                        <p style="color:var(--gray-500);font-size:12px;margin-bottom:4px;">弊社にて返送を確認後、解約処理を行います。<strong>返送確認ができない場合は端末代金を請求させていただく場合があります。</strong></p>
+                    </div>
+                </div>
+                <div style="background:var(--beige);border-radius:var(--radius);padding:12px 14px;font-size:12px;color:var(--gray-600);line-height:1.8;">
+                    <strong>返送先：</strong>担当者よりご案内いたします<br>
+                    <strong>お問い合わせ：</strong>管理者までご連絡ください
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="hideModal('cancelFlowModal')">閉じる</button>
+                <a href="mailto:support@example.com" class="btn btn-danger" style="text-decoration:none;">解約を申請する</a>
+            </div>
+        </div>
+    </div>
+
     @include('partner.partials.notification-modal')
     <div id="toast" class="toast"></div>
 @endsection
@@ -591,7 +706,7 @@ function showToast(msg, type) { const t = document.getElementById('toast'); t.te
 function escapeHtml(s) { if (!s) return ''; const d = document.createElement('div'); d.appendChild(document.createTextNode(s)); return d.innerHTML; }
 function filterByStatus(s) { const u = new URL(window.location); u.searchParams.get('status') === s ? u.searchParams.delete('status') : u.searchParams.set('status', s); window.location = u; }
 
-// ===== デバイス一括追加（3ステップ） =====
+// ===== デバイス新規お申込み（4ステップ） =====
 var bulkStep = 1;
 var bulkOpts = { ai: false, sms: false };
 
@@ -603,21 +718,24 @@ function showAddDeviceModal() {
     ['ai', 'sms'].forEach(function(k) {
         document.getElementById('bulk-opt-' + k).classList.remove('selected');
     });
+    ['bulk-delivery-name', 'bulk-delivery-postal', 'bulk-delivery-address', 'bulk-delivery-phone'].forEach(function(id) {
+        document.getElementById(id).value = '';
+    });
     document.getElementById('bulk-loading').classList.remove('show');
     bulkUpdateStepUI();
     showModal('addDeviceModal');
 }
 
 function bulkUpdateStepUI() {
-    [1, 2, 3].forEach(function(i) {
+    [1, 2, 3, 4].forEach(function(i) {
         document.getElementById('bulk-panel-' + i).classList.toggle('active', i === bulkStep);
         var ind = document.getElementById('bulk-step-ind-' + i);
         ind.className = 'bulk-step' + (i < bulkStep ? ' done' : i === bulkStep ? ' active' : '');
     });
     document.getElementById('bulk-btn-back').style.display = bulkStep > 1 ? '' : 'none';
     var btn = document.getElementById('bulk-btn-next');
-    if (bulkStep === 3) { btn.textContent = '決済へ進む'; }
-    else if (bulkStep === 2) { btn.textContent = '確認へ →'; }
+    if (bulkStep === 4) { btn.textContent = '決済へ進む'; }
+    else if (bulkStep === 3) { btn.textContent = '確認へ →'; }
     else { btn.textContent = '次へ →'; }
     btn.disabled = false;
 }
@@ -632,18 +750,28 @@ function bulkGetQty() {
 function bulkUpdateSummary() {
     var q = bulkGetQty();
     var add = (bulkOpts.ai ? 300 : 0) + (bulkOpts.sms ? 100 : 0);
-    var total = (700 + add) * q;
+    var subtotal = (700 + add) * q;
+    var tax = Math.floor(subtotal * 0.1);
+    var total = subtotal + tax;
     document.getElementById('bulk-sum-qty').textContent = q + '台';
     document.getElementById('bulk-sum-ai-row').style.display = bulkOpts.ai ? '' : 'none';
     document.getElementById('bulk-sum-sms-row').style.display = bulkOpts.sms ? '' : 'none';
+    document.getElementById('bulk-sum-subtotal').textContent = '¥' + subtotal.toLocaleString() + ' / 月';
+    document.getElementById('bulk-sum-tax').textContent = '¥' + tax.toLocaleString() + ' / 月';
     document.getElementById('bulk-sum-total').textContent = '¥' + total.toLocaleString() + ' / 月';
 }
 
 function bulkNextStep() {
-    if (bulkStep < 3) {
+    if (bulkStep === 3) {
+        if (!document.getElementById('bulk-delivery-name').value.trim()) { showToast('お名前を入力してください', 'error'); return; }
+        if (!document.getElementById('bulk-delivery-postal').value.trim()) { showToast('郵便番号を入力してください', 'error'); return; }
+        if (!document.getElementById('bulk-delivery-address').value.trim()) { showToast('住所を入力してください', 'error'); return; }
+        if (!document.getElementById('bulk-delivery-phone').value.trim()) { showToast('電話番号を入力してください', 'error'); return; }
+    }
+    if (bulkStep < 4) {
         bulkStep++;
         bulkUpdateStepUI();
-        if (bulkStep === 3) bulkUpdateSummary();
+        if (bulkStep === 4) bulkUpdateSummary();
     } else {
         bulkExecute();
     }
@@ -668,12 +796,19 @@ async function bulkExecute() {
         var res = await fetch('{{ route("partner.org.devices.bulk-checkout") }}', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' },
-            body: JSON.stringify({ count: bulkGetQty(), opt_ai: bulkOpts.ai, opt_sms: bulkOpts.sms })
+            body: JSON.stringify({
+                count: bulkGetQty(),
+                opt_ai: bulkOpts.ai,
+                opt_sms: bulkOpts.sms,
+                delivery_name: document.getElementById('bulk-delivery-name').value,
+                delivery_postal: document.getElementById('bulk-delivery-postal').value,
+                delivery_address: document.getElementById('bulk-delivery-address').value,
+                delivery_phone: document.getElementById('bulk-delivery-phone').value
+            })
         });
         var data = await res.json();
 
         if (res.ok && data.success) {
-            // CSVダウンロード
             bulkDownloadCsv(data.issued);
             hideModal('addDeviceModal');
             showToast(data.count + '台のデバイスを追加しました', 'success');
@@ -738,8 +873,10 @@ function bulkSyncPresets() {
 }
 bulkSyncPresets();
 
-// ===== 以降は既存のJS（変更なし） =====
+// ===== デバイス削除 =====
 function confirmDelete(deviceId) { document.getElementById('deleteDeviceId').textContent = deviceId; document.getElementById('deleteForm').action = '/partner/org/devices/' + deviceId + '/remove'; showModal('deleteModal'); }
+
+// ===== 警告解除 =====
 let clearAlertDeviceId = null;
 function confirmClearAlert(deviceId, roomNumber, tenantName) {
     clearAlertDeviceId = deviceId;
@@ -747,13 +884,15 @@ function confirmClearAlert(deviceId, roomNumber, tenantName) {
     document.getElementById('clearAlertTarget').innerHTML = '対象: <strong class="mono">' + escapeHtml(label) + '</strong>';
     showModal('clearAlertModal');
 }
-function confirmClearAlertFromDetail() { if (!currentDetailDeviceId) return; hideModal('detailModal'); confirmClearAlert(currentDetailDeviceId, currentDetailRoomNumber, currentDetailTenantName); }
+function confirmClearAlertFromDetail() { if (!currentDetailDeviceId) return; hideModal('detailModal'); confirmClearAlert(currentDetailDeviceId, document.getElementById('detailRoomInput').value, document.getElementById('detailTenantInput').value); }
 function executeClearAlert() {
     if (!clearAlertDeviceId) return;
     fetch('/partner/org/devices/' + clearAlertDeviceId + '/clear-alert', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' } })
     .then(r => r.json()).then(d => { if (d.success) { showToast(d.message, 'success'); hideModal('clearAlertModal'); setTimeout(() => location.reload(), 500); } else showToast(d.message || 'エラー', 'error'); })
     .catch(() => showToast('通信エラー', 'error'));
 }
+
+// ===== 見守りトグル =====
 let pendingToggleDevice = null, pendingToggleCheckbox = null;
 function toggleWatch(deviceId, checked, checkbox) { if (!checked) { pendingToggleDevice = deviceId; pendingToggleCheckbox = checkbox; checkbox.checked = true; showModal('watchOffModal'); return; } sendToggleWatch(deviceId, false); }
 function cancelWatchOff() { hideModal('watchOffModal'); pendingToggleDevice = null; pendingToggleCheckbox = null; }
@@ -763,7 +902,9 @@ function sendToggleWatch(deviceId, awayMode) {
     .then(r => r.json()).then(d => { if (d.success) showToast(d.message, 'success'); else showToast('エラー', 'error'); })
     .catch(() => showToast('通信エラー', 'error'));
 }
-let currentDetailDeviceId = null, currentDetailRoomNumber = '', currentDetailTenantName = '';
+
+// ===== デバイス詳細（編集可能） =====
+let currentDetailDeviceId = null;
 function showDeviceDetail(deviceId) {
     currentDetailDeviceId = deviceId;
     fetch('/partner/org/devices/' + deviceId + '/detail', { headers: { 'Accept': 'application/json' } })
@@ -773,36 +914,78 @@ function showDeviceDetail(deviceId) {
         badge.textContent = labels[data.status] || data.status;
         badge.className = 'detail-status-badge ' + (data.status || 'offline');
         document.getElementById('detailClearAlertBtn').style.display = data.status === 'alert' ? 'inline-flex' : 'none';
+
+        // 読み取り専用フィールド
         document.getElementById('detailDeviceId').textContent = data.device_id;
-        document.getElementById('detailRoom').textContent = data.room_number || '-';
-        document.getElementById('detailTenant').textContent = data.tenant_name || '-';
         document.getElementById('detailLastDetected').textContent = data.last_human_detected || '-';
-        currentDetailRoomNumber = data.room_number || ''; currentDetailTenantName = data.tenant_name || '';
-        document.getElementById('detailBattery').textContent = data.battery_pct !== null ? data.battery_pct + '%' : '-';
         var rssiLabel = '-';
-        if (data.rssi !== null) rssiLabel = data.rssi > -70 ? '良好 (' + data.rssi + 'dBm)' : data.rssi > -85 ? '普通 (' + data.rssi + 'dBm)' : '弱い (' + data.rssi + 'dBm)';
+        if (data.rssi !== null && data.rssi !== undefined) rssiLabel = data.rssi > -70 ? '良好 (' + data.rssi + 'dBm)' : data.rssi > -85 ? '普通 (' + data.rssi + 'dBm)' : '弱い (' + data.rssi + 'dBm)';
+        document.getElementById('detailBattery').textContent = data.battery_pct !== null && data.battery_pct !== undefined ? data.battery_pct + '%' : '-';
         document.getElementById('detailSignal').textContent = rssiLabel;
-        document.getElementById('detailAlertHours').textContent = data.alert_threshold_hours + '時間';
-        document.getElementById('detailHeight').textContent = data.install_height_cm + 'cm';
-        document.getElementById('detailPetExclusion').textContent = data.pet_exclusion_enabled ? 'ON（' + data.pet_exclusion_threshold_cm + 'cm）' : 'OFF';
         var awayText = data.away_mode ? 'OFF（見守り停止中）' : 'ON'; if (data.away_until) awayText += '（〜' + data.away_until + '）';
         document.getElementById('detailAwayMode').textContent = awayText;
         document.getElementById('detailRegistered').textContent = data.registered_at || '-';
-        document.getElementById('detailMemo').textContent = data.memo || '-';
+
+        // 編集可能フィールド
+        document.getElementById('detailRoomInput').value = data.room_number || '';
+        document.getElementById('detailTenantInput').value = data.tenant_name || '';
+        document.getElementById('detailAlertHoursInput').value = data.alert_threshold_hours || 24;
+        document.getElementById('detailHeightInput').value = data.install_height_cm || 200;
+        document.getElementById('detailPetExclusionInput').value = data.pet_exclusion_enabled ? '1' : '0';
+        document.getElementById('detailMemoInput').value = data.memo || '';
+
+        // 通知サービス
+        var notifyEnabled = data.notification_service_enabled !== false;
+        document.getElementById('detailNotifyEnabled').checked = notifyEnabled;
+        document.getElementById('detailNotifyLabel').textContent = notifyEnabled ? '有効' : '停止中';
+
         renderDetailSchedules(data.schedules || [], data.device_id);
         showModal('detailModal');
     }).catch(() => showToast('詳細の取得に失敗しました', 'error'));
 }
+
+async function saveDetailChanges() {
+    if (!currentDetailDeviceId) return;
+    var payload = {
+        room_number: document.getElementById('detailRoomInput').value || null,
+        tenant_name: document.getElementById('detailTenantInput').value || null,
+        memo: document.getElementById('detailMemoInput').value || null,
+        alert_threshold_hours: parseInt(document.getElementById('detailAlertHoursInput').value) || 24,
+        install_height_cm: parseInt(document.getElementById('detailHeightInput').value) || 200,
+        pet_exclusion_enabled: document.getElementById('detailPetExclusionInput').value === '1' ? 1 : 0
+    };
+    try {
+        var res = await fetch('/partner/org/devices/' + currentDetailDeviceId + '/assignment', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        var data = await res.json();
+        if (res.ok && data.success) { showToast(data.message || '保存しました', 'success'); setTimeout(() => location.reload(), 800); }
+        else showToast(data.message || '保存に失敗しました', 'error');
+    } catch(e) { console.error(e); showToast('通信エラーが発生しました', 'error'); }
+}
+
+function toggleNotifyService(enabled) {
+    document.getElementById('detailNotifyLabel').textContent = enabled ? '有効' : '停止中';
+    // TODO: API call to update notification_service_enabled
+    showToast(enabled ? '通知サービスを有効にしました' : '通知サービスを停止しました', 'success');
+}
+
+function showCancelFlow() {
+    showModal('cancelFlowModal');
+}
+
 function openEditFromDetail() {
     if (!currentDetailDeviceId) return; hideModal('detailModal');
     document.getElementById('editDeviceId').value = document.getElementById('detailDeviceId').textContent;
-    var room = document.getElementById('detailRoom').textContent, tenant = document.getElementById('detailTenant').textContent, memo = document.getElementById('detailMemo').textContent;
-    document.getElementById('editRoomNumber').value = room !== '-' ? room : '';
-    document.getElementById('editTenantName').value = tenant !== '-' ? tenant : '';
-    document.getElementById('editMemo').value = memo !== '-' ? memo : '';
+    document.getElementById('editRoomNumber').value = document.getElementById('detailRoomInput').value;
+    document.getElementById('editTenantName').value = document.getElementById('detailTenantInput').value;
+    document.getElementById('editMemo').value = document.getElementById('detailMemoInput').value;
     document.getElementById('editForm').action = '/partner/org/devices/' + currentDetailDeviceId + '/assignment';
     showModal('editModal');
 }
+
 function renderDetailSchedules(schedules, deviceId) {
     var c = document.getElementById('detailScheduleList');
     if (!schedules || !schedules.length) { c.innerHTML = '<div class="detail-schedule-empty">スケジュールなし</div>'; return; }
@@ -815,8 +998,9 @@ function renderDetailSchedules(schedules, deviceId) {
     });
     c.innerHTML = html + '</div>';
 }
+
 let scheduleAddOrigin = null;
-function openScheduleAddFromDetail() { scheduleAddOrigin = 'detail'; openScheduleAddModal(currentDetailDeviceId, currentDetailRoomNumber, currentDetailTenantName); }
+function openScheduleAddFromDetail() { scheduleAddOrigin = 'detail'; openScheduleAddModal(currentDetailDeviceId, document.getElementById('detailRoomInput').value, document.getElementById('detailTenantInput').value); }
 function showTimerListModal() { showModal('timerListModal'); loadTimerList(); }
 async function loadTimerList() {
     const body = document.getElementById('timerListBody');
@@ -849,12 +1033,14 @@ async function loadTimerList() {
         body.innerHTML = html;
     } catch (e) { console.error(e); body.innerHTML = '<div class="timer-list-empty">通信エラーが発生しました</div>'; }
 }
+
 function formatTimerDateTime(dtStr) {
     if (!dtStr) return '-';
     var p = dtStr.split(' ');
     if (p.length === 2) { var d = p[0].split('-'); if (d.length === 3) return parseInt(d[1]) + '/' + parseInt(d[2]) + ' ' + p[1]; }
     return dtStr;
 }
+
 let scheduleTargetDeviceId = null, scheduleType = 'oneshot';
 function openScheduleAddModal(deviceId, roomNumber, tenantName) {
     scheduleTargetDeviceId = deviceId; scheduleType = 'oneshot';
@@ -896,6 +1082,7 @@ async function submitSchedule() {
         else showToast(data.message || (data.errors ? Object.values(data.errors).flat().join(', ') : '追加に失敗しました'), 'error');
     } catch (e) { console.error(e); showToast('通信エラーが発生しました', 'error'); }
 }
+
 let deleteScheduleDeviceId = null, deleteScheduleId = null;
 function confirmDeleteSchedule(deviceId, scheduleId, detail) { deleteScheduleDeviceId = deviceId; deleteScheduleId = scheduleId; document.getElementById('scheduleDeleteDetail').textContent = deviceId + ' のスケジュール: ' + detail; showModal('scheduleDeleteModal'); }
 async function executeDeleteSchedule() {
@@ -907,6 +1094,7 @@ async function executeDeleteSchedule() {
         else showToast(data.message || '削除に失敗しました', 'error');
     } catch (e) { console.error(e); showToast('通信エラーが発生しました', 'error'); }
 }
+
 function showNotificationModal() {
     fetch('{{ route("partner.org.notification") }}', { headers: { 'Accept': 'application/json' } })
     .then(r => r.json()).then(d => { document.getElementById('orgNotifEmail1').value = d.notification_email_1 || ''; document.getElementById('orgNotifEmail2').value = d.notification_email_2 || ''; document.getElementById('orgNotifEmail3').value = d.notification_email_3 || ''; document.getElementById('orgNotifEnabled').checked = d.notification_enabled; showModal('notificationModal'); })
