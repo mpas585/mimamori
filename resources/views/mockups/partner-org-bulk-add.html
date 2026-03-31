@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>デバイス一括追加 | みまもりトーフ 管理画面</title>
+<style>
+  :root {
+    --white: #ffffff; --cream: #fafaf8; --beige: #f5f4f0;
+    --gray-100: #f1f0ec; --gray-200: #e2e1dc; --gray-300: #c8c7c1;
+    --gray-400: #a8a7a0; --gray-500: #888780; --gray-600: #666560;
+    --gray-700: #4a4945; --gray-800: #2c2b28;
+    --green: #16a34a; --green-dark: #15803d; --green-light: #dcfce7;
+    --yellow: #ca8a04; --yellow-light: #fef9c3;
+    --red: #dc2626; --red-light: #fee2e2; --orange: #ea580c;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.08); --shadow: 0 4px 16px rgba(0,0,0,0.14);
+    --radius: 8px; --radius-lg: 12px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--beige); color: var(--gray-800); font-size: 14px; line-height: 1.6; }
+
+  .nav { background: var(--gray-800); color: white; padding: 0 24px; height: 52px; display: flex; align-items: center; justify-content: space-between; }
+  .nav-brand { font-size: 15px; font-weight: 700; color: white; text-decoration: none; }
+  .nav-right { display: flex; align-items: center; gap: 16px; font-size: 13px; }
+  .nav-right a { color: rgba(255,255,255,0.8); text-decoration: none; }
+
+  .main { padding: 24px; max-width: 1100px; margin: 0 auto; }
+
+  .status-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 20px; }
+  .status-card { background: var(--white); border-radius: var(--radius-lg); padding: 16px; text-align: center; box-shadow: var(--shadow-sm); border: 1px solid var(--gray-200); cursor: pointer; }
+  .status-value { font-size: 28px; font-weight: 700; }
+  .status-value.green { color: var(--green-dark); }
+  .status-value.yellow { color: var(--yellow); }
+  .status-value.red { color: var(--red); }
+  .status-value.gray { color: var(--gray-600); }
+  .status-value.light { color: var(--gray-400); }
+  .status-label { font-size: 11px; color: var(--gray-500); margin-top: 4px; }
+
+  .toolbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  .toolbar-right { display: flex; gap: 8px; }
+  .toolbar-btn { padding: 8px 14px; font-size: 13px; font-weight: 600; font-family: inherit; border: 1px solid var(--gray-300); border-radius: var(--radius); background: var(--white); color: var(--gray-700); cursor: pointer; display: flex; align-items: center; gap: 6px; }
+  .toolbar-btn:hover { background: var(--beige); }
+  .toolbar-btn.active { background: var(--gray-800); color: white; border-color: var(--gray-800); }
+
+  .table-card { background: var(--white); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); overflow: hidden; border: 1px solid var(--gray-200); filter: blur(1.5px); opacity: 0.5; pointer-events: none; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  thead { background: var(--beige); }
+  th { padding: 12px 14px; text-align: left; font-weight: 600; color: var(--gray-700); border-bottom: 2px solid var(--gray-300); font-size: 12px; }
+  td { padding: 12px 14px; border-bottom: 1px solid var(--gray-200); vertical-align: middle; }
+  tbody tr:nth-child(even) { background: var(--cream); }
+
+  /* モーダル */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.45); display: flex; align-items: center; justify-content: center; z-index: 100; }
+  .modal { background: var(--white); border-radius: var(--radius-lg); width: 100%; max-width: 480px; box-shadow: var(--shadow); }
+  .modal-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid var(--gray-200); }
+  .modal-header h3 { font-size: 15px; font-weight: 700; }
+  .modal-close { width: 28px; height: 28px; border: 1px solid var(--gray-200); border-radius: 6px; background: var(--beige); cursor: pointer; font-size: 14px; color: var(--gray-500); display: flex; align-items: center; justify-content: center; font-family: inherit; }
+  .modal-body { padding: 20px; }
+  .modal-footer { display: flex; gap: 8px; justify-content: flex-end; padding: 14px 20px; border-top: 1px solid var(--gray-200); }
+
+  /* ステップバー */
+  .step-bar { display: flex; align-items: center; padding: 12px 20px; border-bottom: 1px solid var(--gray-200); background: var(--cream); }
+  .step { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--gray-400); font-weight: 500; }
+  .step.active { color: var(--gray-800); font-weight: 600; }
+  .step.done { color: var(--green-dark); }
+  .step-num { width: 22px; height: 22px; border-radius: 50%; border: 2px solid currentColor; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0; }
+  .step.active .step-num { background: var(--gray-800); color: white; border-color: var(--gray-800); }
+  .step.done .step-num { background: var(--green-dark); color: white; border-color: var(--green-dark); }
+  .step-line { flex: 1; height: 1px; background: var(--gray-200); margin: 0 10px; }
+
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  /* 台数 */
+  .section-label { font-size: 12px; color: var(--gray-500); margin-bottom: 12px; }
+  .qty-row { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+  .qty-btn { width: 36px; height: 36px; border: 1px solid var(--gray-300); border-radius: var(--radius); background: var(--beige); font-family: inherit; font-size: 20px; font-weight: 700; color: var(--gray-700); cursor: pointer; display: flex; align-items: center; justify-content: center; }
+  .qty-btn:hover { background: var(--gray-200); }
+  .qty-input { width: 80px; padding: 6px 10px; font-size: 22px; font-weight: 700; font-family: inherit; border: 1px solid var(--gray-300); border-radius: var(--radius); text-align: center; color: var(--gray-800); }
+  .qty-presets { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+  .qty-preset { padding: 5px 13px; font-size: 12px; font-weight: 600; font-family: inherit; border: 1px solid var(--gray-300); border-radius: 20px; background: var(--white); color: var(--gray-600); cursor: pointer; transition: all 0.15s; }
+  .qty-preset:hover, .qty-preset.on { background: var(--gray-800); color: white; border-color: var(--gray-800); }
+  .qty-note { font-size: 11px; color: var(--gray-400); line-height: 1.6; }
+
+  /* オプション */
+  .opt-card { border: 1px solid var(--gray-200); border-radius: var(--radius); padding: 14px 16px; margin-bottom: 10px; cursor: pointer; transition: all 0.15s; }
+  .opt-card:hover { border-color: var(--gray-400); }
+  .opt-card.selected { border: 2px solid var(--gray-800); background: var(--beige); }
+  .opt-header { display: flex; align-items: center; gap: 10px; }
+  .opt-check { width: 18px; height: 18px; border: 2px solid var(--gray-300); border-radius: 4px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: transparent; transition: all 0.15s; }
+  .opt-card.selected .opt-check { background: var(--gray-800); border-color: var(--gray-800); color: white; }
+  .opt-name { font-size: 14px; font-weight: 700; color: var(--gray-800); flex: 1; }
+  .opt-badge { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 4px; background: var(--green-light); color: var(--green-dark); }
+  .opt-price { font-size: 13px; font-weight: 600; color: var(--gray-600); }
+  .opt-desc { font-size: 12px; color: var(--gray-500); margin-top: 6px; padding-left: 28px; line-height: 1.5; }
+
+  /* サマリー */
+  .summary-card { background: var(--beige); border-radius: var(--radius); padding: 16px; border: 1px solid var(--gray-200); }
+  .summary-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; font-size: 13px; border-bottom: 1px solid var(--gray-200); }
+  .summary-row:last-of-type { border-bottom: none; }
+  .summary-label { color: var(--gray-500); }
+  .summary-value { font-weight: 600; color: var(--gray-800); }
+  .summary-total { display: flex; justify-content: space-between; align-items: baseline; padding-top: 12px; margin-top: 6px; border-top: 2px solid var(--gray-300); }
+  .summary-total-label { font-size: 13px; color: var(--gray-600); }
+  .summary-total-value { font-size: 22px; font-weight: 700; color: var(--gray-800); }
+  .summary-note { font-size: 11px; color: var(--gray-400); margin-top: 12px; line-height: 1.7; }
+
+  /* ボタン */
+  .btn { padding: 9px 18px; font-size: 13px; font-weight: 600; font-family: inherit; border-radius: var(--radius); cursor: pointer; }
+  .btn-secondary { border: 1px solid var(--gray-300); background: var(--white); color: var(--gray-700); }
+  .btn-secondary:hover { background: var(--beige); }
+  .btn-primary { border: none; background: var(--gray-800); color: white; }
+  .btn-primary:hover { background: var(--gray-700); }
+
+  /* ページ説明ラベル */
+  .page-note { font-size: 12px; color: var(--gray-500); margin-bottom: 16px; display: flex; align-items: center; gap: 6px; }
+  .step-demo { display: flex; gap: 8px; margin-bottom: 24px; }
+  .step-demo-btn { padding: 6px 14px; font-size: 12px; font-weight: 600; font-family: inherit; border: 1px solid var(--gray-300); border-radius: 20px; background: var(--white); color: var(--gray-600); cursor: pointer; }
+  .step-demo-btn.active { background: var(--gray-800); color: white; border-color: var(--gray-800); }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <a href="partner.html" class="nav-brand">🧈 みまもりトーフ｜〇〇マンション 管理画面</a>
+  <div class="nav-right">
+    <a href="partner-password-change.html">🔐 パスワード変更</a>
+    <a href="partner-login.html">ログアウト</a>
+  </div>
+</nav>
+
+<div class="main">
+  <div class="status-grid">
+    <div class="status-card"><div class="status-value green">40</div><div class="status-label">正常</div></div>
+    <div class="status-card"><div class="status-value yellow">2</div><div class="status-label">注意</div></div>
+    <div class="status-card"><div class="status-value red">1</div><div class="status-label">警告</div></div>
+    <div class="status-card"><div class="status-value gray">1</div><div class="status-label">離線</div></div>
+    <div class="status-card"><div class="status-value light">1</div><div class="status-label">空室</div></div>
+  </div>
+
+  <div class="toolbar">
+    <div></div>
+    <div class="toolbar-right">
+      <button class="toolbar-btn">🔔 通知設定</button>
+      <button class="toolbar-btn">⏰ タイマー一覧</button>
+      <button class="toolbar-btn active">➕ デバイス追加</button>
+      <button class="toolbar-btn">📥 CSV出力</button>
+    </div>
+  </div>
+
+  <div class="table-card">
+    <table>
+      <thead><tr><th>状態</th><th>部屋 / 名前</th><th>デバイスID</th><th>見守り</th><th>最終検知</th><th>電池</th><th>電波</th><th>操作</th></tr></thead>
+      <tbody>
+        <tr><td>正常</td><td><strong>101</strong><br><span style="font-size:12px;color:var(--gray-500);">山田 太郎</span></td><td style="font-family:monospace;font-weight:700;">A3K9X2</td><td>ON</td><td style="font-size:12px;">3分前</td><td style="font-size:12px;">85%</td><td style="font-size:12px;">良好</td><td>...</td></tr>
+        <tr><td>正常</td><td><strong>102</strong><br><span style="font-size:12px;color:var(--gray-500);">佐藤 花子</span></td><td style="font-family:monospace;font-weight:700;">B7X2K9</td><td>ON</td><td style="font-size:12px;">5分前</td><td style="font-size:12px;">72%</td><td style="font-size:12px;">良好</td><td>...</td></tr>
+        <tr><td>注意</td><td><strong>103</strong><br><span style="font-size:12px;color:var(--gray-500);">田中 次郎</span></td><td style="font-family:monospace;font-weight:700;">C4M8P2</td><td>ON</td><td style="font-size:12px;">45分前</td><td style="font-size:12px;">28%</td><td style="font-size:12px;">普通</td><td>...</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- モーダル -->
+<div class="modal-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>➕ デバイス一括追加</h3>
+      <button class="modal-close" onclick="closeModal()">×</button>
+    </div>
+
+    <div class="step-bar">
+      <div class="step" id="si1"><div class="step-num">1</div><span>台数</span></div>
+      <div class="step-line"></div>
+      <div class="step" id="si2"><div class="step-num">2</div><span>オプション</span></div>
+      <div class="step-line"></div>
+      <div class="step" id="si3"><div class="step-num">3</div><span>確認・決済</span></div>
+    </div>
+
+    <!-- Step 1 -->
+    <div class="modal-body panel" id="panel-1">
+      <p class="section-label">追加する台数を選択してください（1〜300台）</p>
+      <div class="qty-row">
+        <button class="qty-btn" onclick="adj(-1)">−</button>
+        <input class="qty-input" type="number" id="qty" value="10" min="1" max="300" oninput="syncPresets()">
+        <button class="qty-btn" onclick="adj(1)">＋</button>
+      </div>
+      <div class="qty-presets">
+        <button class="qty-preset on" data-v="10" onclick="setQty(10)">10台</button>
+        <button class="qty-preset" data-v="20" onclick="setQty(20)">20台</button>
+        <button class="qty-preset" data-v="50" onclick="setQty(50)">50台</button>
+        <button class="qty-preset" data-v="100" onclick="setQty(100)">100台</button>
+        <button class="qty-preset" data-v="200" onclick="setQty(200)">200台</button>
+        <button class="qty-preset" data-v="300" onclick="setQty(300)">300台</button>
+      </div>
+      <p class="qty-note">生成されたデバイスIDとPINは一覧CSVで自動ダウンロードされます</p>
+    </div>
+
+    <!-- Step 2 -->
+    <div class="modal-body panel" id="panel-2">
+      <p class="section-label">オプションを選択してください（複数可）</p>
+      <div class="opt-card" id="opt-ai" onclick="toggleOpt('ai')">
+        <div class="opt-header">
+          <div class="opt-check" id="chk-ai">✓</div>
+          <span class="opt-name">AIコール</span>
+          <span class="opt-badge">Phase 3</span>
+          <span class="opt-price">+¥300 / 台 / 月</span>
+        </div>
+        <p class="opt-desc">異常検知時にAIが自動音声でご家族に電話通知します。NTT CPaaS + OpenAI Realtime API使用。</p>
+      </div>
+      <div class="opt-card" id="opt-sms" onclick="toggleOpt('sms')">
+        <div class="opt-header">
+          <div class="opt-check" id="chk-sms">✓</div>
+          <span class="opt-name">SMS通知</span>
+          <span class="opt-price">+¥100 / 台 / 月</span>
+        </div>
+        <p class="opt-desc">アラート時にSMSで緊急連絡先へ通知します。メール通知に加えて利用できます。</p>
+      </div>
+    </div>
+
+    <!-- Step 3 -->
+    <div class="modal-body panel" id="panel-3">
+      <div class="summary-card">
+        <div class="summary-row"><span class="summary-label">追加台数</span><span class="summary-value" id="sum-qty">10台</span></div>
+        <div class="summary-row"><span class="summary-label">基本料金</span><span class="summary-value">¥700 / 台 / 月</span></div>
+        <div class="summary-row" id="sum-ai-row" style="display:none;"><span class="summary-label">AIコール</span><span class="summary-value">+¥300 / 台 / 月</span></div>
+        <div class="summary-row" id="sum-sms-row" style="display:none;"><span class="summary-label">SMS通知</span><span class="summary-value">+¥100 / 台 / 月</span></div>
+        <div class="summary-total">
+          <span class="summary-total-label">月額合計（税抜）</span>
+          <span class="summary-total-value" id="sum-total">¥7,000 / 月</span>
+        </div>
+      </div>
+      <p class="summary-note">※ 24ヶ月最低契約。解約時は¥8,400の違約金が発生します。<br>※「決済へ進む」でデバイスが生成され、IDとPINのCSVが自動ダウンロードされます。</p>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-secondary" id="btn-back" style="display:none;" onclick="prev()">戻る</button>
+      <button class="btn btn-primary" id="btn-next" onclick="next()">次へ →</button>
+    </div>
+  </div>
+</div>
+
+<script>
+var step = 1;
+var opts = { ai: false, sms: false };
+
+function syncUI() {
+  [1,2,3].forEach(function(i) {
+    document.getElementById('panel-' + i).classList.toggle('active', i === step);
+    var el = document.getElementById('si' + i);
+    el.className = 'step' + (i < step ? ' done' : i === step ? ' active' : '');
+  });
+  document.getElementById('btn-back').style.display = step > 1 ? '' : 'none';
+  var btn = document.getElementById('btn-next');
+  btn.textContent = step === 3 ? '決済へ進む' : step === 2 ? '確認へ →' : '次へ →';
+}
+
+function next() {
+  if (step < 3) { step++; syncUI(); if (step === 3) updateSum(); }
+}
+function prev() { if (step > 1) { step--; syncUI(); } }
+
+function getQty() { var v = parseInt(document.getElementById('qty').value) || 1; if (v < 1) v = 1; if (v > 300) v = 300; return v; }
+
+function adj(d) { document.getElementById('qty').value = Math.min(300, Math.max(1, getQty() + d)); syncPresets(); }
+function setQty(v) { document.getElementById('qty').value = v; syncPresets(); }
+function syncPresets() {
+  var v = getQty();
+  document.querySelectorAll('.qty-preset').forEach(function(b) { b.classList.toggle('on', parseInt(b.dataset.v) === v); });
+}
+
+function toggleOpt(k) {
+  opts[k] = !opts[k];
+  document.getElementById('opt-' + k).classList.toggle('selected', opts[k]);
+}
+
+function updateSum() {
+  var q = getQty();
+  var add = (opts.ai ? 300 : 0) + (opts.sms ? 100 : 0);
+  document.getElementById('sum-qty').textContent = q + '台';
+  document.getElementById('sum-ai-row').style.display = opts.ai ? '' : 'none';
+  document.getElementById('sum-sms-row').style.display = opts.sms ? '' : 'none';
+  document.getElementById('sum-total').textContent = '¥' + ((700 + add) * q).toLocaleString() + ' / 月';
+}
+
+function closeModal() { document.querySelector('.modal-overlay').style.display = 'none'; }
+syncUI();
+</script>
+</body>
+</html>

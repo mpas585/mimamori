@@ -135,6 +135,45 @@ tbody tr:hover{background:var(--gray-100)}
 
 @media(max-width:768px){.status-grid{grid-template-columns:repeat(3,1fr)}.toolbar{flex-direction:column;align-items:stretch}.search-box{width:100%}}
 @media(max-width:480px){.status-grid{grid-template-columns:repeat(2,1fr)}}
+/* 一括追加ステップバー */
+.bulk-step-bar{display:flex;align-items:center;padding:12px 20px;border-bottom:1px solid var(--gray-200);background:var(--cream)}
+.bulk-step{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--gray-400);font-weight:500}
+.bulk-step.active{color:var(--gray-800);font-weight:600}
+.bulk-step.done{color:var(--green-dark)}
+.bulk-step-num{width:22px;height:22px;border-radius:50%;border:2px solid currentColor;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0}
+.bulk-step.active .bulk-step-num{background:var(--gray-800);color:#fff;border-color:var(--gray-800)}
+.bulk-step.done .bulk-step-num{background:var(--green-dark);color:#fff;border-color:var(--green-dark)}
+.bulk-step-line{flex:1;height:1px;background:var(--gray-200);margin:0 8px}
+.bulk-panel{display:none}
+.bulk-panel.active{display:block}
+.bulk-section-label{font-size:12px;color:var(--gray-500);margin-bottom:10px}
+.bulk-qty-row{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.bulk-qty-btn{width:36px;height:36px;border:1px solid var(--gray-300);border-radius:var(--radius);background:var(--cream);font-family:inherit;font-size:18px;font-weight:700;color:var(--gray-700);cursor:pointer;display:flex;align-items:center;justify-content:center}
+.bulk-qty-btn:hover{background:var(--beige)}
+.bulk-qty-input{width:80px;padding:8px 10px;font-size:20px;font-weight:700;font-family:inherit;border:1px solid var(--gray-300);border-radius:var(--radius);text-align:center;color:var(--gray-800)}
+.bulk-qty-presets{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+.bulk-qty-preset{padding:4px 12px;font-size:12px;font-family:inherit;border:1px solid var(--gray-300);border-radius:20px;background:var(--white);color:var(--gray-600);cursor:pointer;transition:all .15s}
+.bulk-qty-preset:hover,.bulk-qty-preset.active{background:var(--gray-800);color:#fff;border-color:var(--gray-800)}
+.bulk-qty-note{font-size:11px;color:var(--gray-400)}
+.bulk-opt-card{border:1px solid var(--gray-200);border-radius:var(--radius);padding:14px 16px;margin-bottom:10px;cursor:pointer;transition:all .15s}
+.bulk-opt-card:hover{border-color:var(--gray-400)}
+.bulk-opt-card.selected{border:2px solid var(--gray-800);background:var(--beige)}
+.bulk-opt-header{display:flex;align-items:center;gap:10px}
+.bulk-opt-check{width:18px;height:18px;border:1.5px solid var(--gray-400);border-radius:4px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:transparent;transition:all .15s}
+.bulk-opt-card.selected .bulk-opt-check{background:var(--gray-800);border-color:var(--gray-800);color:#fff}
+.bulk-opt-name{font-size:14px;font-weight:600;color:var(--gray-800);flex:1}
+.bulk-opt-badge{font-size:10px;font-weight:600;padding:2px 7px;border-radius:4px;background:var(--green-light);color:var(--green-dark)}
+.bulk-opt-price{font-size:13px;font-weight:600;color:var(--gray-600)}
+.bulk-opt-desc{font-size:12px;color:var(--gray-500);margin-top:6px;padding-left:28px;line-height:1.5}
+.bulk-sum-card{background:var(--beige);border-radius:var(--radius);padding:16px}
+.bulk-sum-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;font-size:13px;border-bottom:1px solid var(--gray-200)}
+.bulk-sum-row:last-of-type{border-bottom:none}
+.bulk-sum-label{color:var(--gray-500)}
+.bulk-sum-value{font-weight:600;color:var(--gray-800)}
+.bulk-sum-total{display:flex;justify-content:space-between;align-items:baseline;padding-top:12px;margin-top:6px;border-top:2px solid var(--gray-300)}
+.bulk-sum-total-label{font-size:13px;color:var(--gray-600)}
+.bulk-sum-total-value{font-size:22px;font-weight:700;color:var(--gray-800)}
+.bulk-sum-note{font-size:11px;color:var(--gray-400);margin-top:12px;line-height:1.7}
 </style>
 </head>
 <body>
@@ -206,7 +245,7 @@ tbody tr:hover{background:var(--gray-100)}
     </div>
     <div class="toolbar-right">
       <button class="toolbar-btn" onclick="showModal('timerModal')">⏰ タイマー一覧</button>
-      <button class="toolbar-btn" onclick="showModal('addModal')">➕ デバイス追加</button>
+      <button class="toolbar-btn" onclick="showBulkAddModal()">➕ デバイス追加</button>
       <a href="#" class="toolbar-btn">📥 CSV出力</a>
     </div>
   </div>
@@ -308,17 +347,75 @@ tbody tr:hover{background:var(--gray-100)}
     </div>
   </div>
 
-  <!-- モーダル: デバイス追加 -->
+  <!-- モーダル: デバイス一括追加（3ステップ） -->
   <div id="addModal" class="modal-overlay" onclick="if(event.target===this)hideModal('addModal')">
     <div class="modal">
-      <div class="modal-header"><h3>➕ デバイス追加</h3><button class="modal-close" onclick="hideModal('addModal')">×</button></div>
-      <div class="modal-body">
-        <div class="form-group"><label class="form-label">デバイスID</label><input type="text" class="form-input" placeholder="A3K9X2"><p class="form-hint">製品ラベルに記載の6文字</p></div>
-        <div class="form-group"><label class="form-label">部屋番号</label><input type="text" class="form-input"></div>
-        <div class="form-group"><label class="form-label">入居者名（任意）</label><input type="text" class="form-input"></div>
-        <div class="form-group"><label class="form-label">メモ（任意）</label><input type="text" class="form-input"></div>
+      <div class="modal-header"><h3>➕ デバイス一括追加</h3><button class="modal-close" onclick="hideModal('addModal')">×</button></div>
+      <!-- ステップバー -->
+      <div class="bulk-step-bar">
+        <div class="bulk-step active" id="bsi1"><div class="bulk-step-num">1</div><span>台数</span></div>
+        <div class="bulk-step-line"></div>
+        <div class="bulk-step" id="bsi2"><div class="bulk-step-num">2</div><span>オプション</span></div>
+        <div class="bulk-step-line"></div>
+        <div class="bulk-step" id="bsi3"><div class="bulk-step-num">3</div><span>確認・決済</span></div>
       </div>
-      <div class="modal-footer"><button class="btn btn-secondary" onclick="hideModal('addModal')">キャンセル</button><button class="btn btn-primary">追加</button></div>
+      <!-- Step 1: 台数 -->
+      <div class="modal-body bulk-panel active" id="bpanel-1">
+        <p class="bulk-section-label">追加する台数を選択してください（1〜300台）</p>
+        <div class="bulk-qty-row">
+          <button type="button" class="bulk-qty-btn" onclick="bAdj(-1)">−</button>
+          <input type="number" class="bulk-qty-input" id="bqty" value="10" min="1" max="300" oninput="bSyncPresets()">
+          <button type="button" class="bulk-qty-btn" onclick="bAdj(1)">＋</button>
+        </div>
+        <div class="bulk-qty-presets">
+          <button type="button" class="bulk-qty-preset active" data-v="10" onclick="bSetQty(10)">10台</button>
+          <button type="button" class="bulk-qty-preset" data-v="20" onclick="bSetQty(20)">20台</button>
+          <button type="button" class="bulk-qty-preset" data-v="50" onclick="bSetQty(50)">50台</button>
+          <button type="button" class="bulk-qty-preset" data-v="100" onclick="bSetQty(100)">100台</button>
+          <button type="button" class="bulk-qty-preset" data-v="200" onclick="bSetQty(200)">200台</button>
+          <button type="button" class="bulk-qty-preset" data-v="300" onclick="bSetQty(300)">300台</button>
+        </div>
+        <p class="bulk-qty-note">生成されたデバイスIDとPINは一覧CSVで自動ダウンロードされます</p>
+      </div>
+      <!-- Step 2: オプション -->
+      <div class="modal-body bulk-panel" id="bpanel-2">
+        <p class="bulk-section-label">オプションを選択してください（複数可）</p>
+        <div class="bulk-opt-card" id="bopt-ai" onclick="bToggleOpt('ai')">
+          <div class="bulk-opt-header">
+            <div class="bulk-opt-check" id="bchk-ai">✓</div>
+            <span class="bulk-opt-name">AIコール</span>
+            <span class="bulk-opt-badge">Phase 3</span>
+            <span class="bulk-opt-price">+¥300 / 台 / 月</span>
+          </div>
+          <p class="bulk-opt-desc">異常検知時にAIが自動音声でご家族に電話通知します。NTT CPaaS + OpenAI Realtime API使用。</p>
+        </div>
+        <div class="bulk-opt-card" id="bopt-sms" onclick="bToggleOpt('sms')">
+          <div class="bulk-opt-header">
+            <div class="bulk-opt-check" id="bchk-sms">✓</div>
+            <span class="bulk-opt-name">SMS通知</span>
+            <span class="bulk-opt-price">+¥100 / 台 / 月</span>
+          </div>
+          <p class="bulk-opt-desc">アラート時にSMSで緊急連絡先へ通知します。メール通知に加えて利用できます。</p>
+        </div>
+      </div>
+      <!-- Step 3: 確認 -->
+      <div class="modal-body bulk-panel" id="bpanel-3">
+        <div class="bulk-sum-card">
+          <div class="bulk-sum-row"><span class="bulk-sum-label">追加台数</span><span class="bulk-sum-value" id="bsum-qty">10台</span></div>
+          <div class="bulk-sum-row"><span class="bulk-sum-label">基本料金</span><span class="bulk-sum-value">¥700 / 台 / 月</span></div>
+          <div class="bulk-sum-row" id="bsum-ai-row" style="display:none"><span class="bulk-sum-label">AIコール</span><span class="bulk-sum-value">+¥300 / 台 / 月</span></div>
+          <div class="bulk-sum-row" id="bsum-sms-row" style="display:none"><span class="bulk-sum-label">SMS通知</span><span class="bulk-sum-value">+¥100 / 台 / 月</span></div>
+          <div class="bulk-sum-total">
+            <span class="bulk-sum-total-label">月額合計（税抜）</span>
+            <span class="bulk-sum-total-value" id="bsum-total">¥7,000 / 月</span>
+          </div>
+        </div>
+        <p class="bulk-sum-note">※ 24ヶ月最低契約。解約時は¥8,400の違約金が発生します。<br>※「決済へ進む」でデバイスが生成され、IDとPINのCSVが自動ダウンロードされます。</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" id="b-btn-back" style="display:none" onclick="bPrev()">戻る</button>
+        <button type="button" class="btn btn-primary" id="b-btn-next" onclick="bNext()">次へ →</button>
+      </div>
     </div>
   </div>
 
@@ -387,6 +484,47 @@ tbody tr:hover{background:var(--gray-100)}
 <script>
 function showModal(id) { document.getElementById(id).classList.add('show'); }
 function hideModal(id) { document.getElementById(id).classList.remove('show'); }
+
+// ===== 一括追加 3ステップ =====
+var bStep = 1, bOpts = {ai:false, sms:false};
+function showBulkAddModal() {
+  bStep = 1; bOpts = {ai:false, sms:false};
+  document.getElementById('bqty').value = 10;
+  document.querySelectorAll('.bulk-opt-card').forEach(function(c){c.classList.remove('selected');});
+  bSyncUI(); showModal('addModal');
+}
+function bSyncUI() {
+  [1,2,3].forEach(function(i){
+    document.getElementById('bpanel-'+i).classList.toggle('active', i===bStep);
+    var el = document.getElementById('bsi'+i);
+    el.className = 'bulk-step'+(i<bStep?' done':i===bStep?' active':'');
+  });
+  document.getElementById('b-btn-back').style.display = bStep>1?'':'none';
+  document.getElementById('b-btn-next').textContent = bStep===3?'決済へ進む':bStep===2?'確認へ →':'次へ →';
+}
+function bNext() {
+  if(bStep<3){bStep++;bSyncUI();if(bStep===3)bUpdateSum();}
+  else{alert('（実装では決済へ遷移）');}
+}
+function bPrev(){if(bStep>1){bStep--;bSyncUI();}}
+function bGetQty(){var v=parseInt(document.getElementById('bqty').value)||1;return Math.min(300,Math.max(1,v));}
+function bAdj(d){document.getElementById('bqty').value=bGetQty()+d;bSyncPresets();}
+function bSetQty(v){document.getElementById('bqty').value=v;bSyncPresets();}
+function bSyncPresets(){
+  var v=bGetQty();
+  document.querySelectorAll('.bulk-qty-preset').forEach(function(b){b.classList.toggle('active',parseInt(b.dataset.v)===v);});
+}
+function bToggleOpt(k){
+  bOpts[k]=!bOpts[k];
+  document.getElementById('bopt-'+k).classList.toggle('selected',bOpts[k]);
+}
+function bUpdateSum(){
+  var q=bGetQty(), add=(bOpts.ai?300:0)+(bOpts.sms?100:0);
+  document.getElementById('bsum-qty').textContent=q+'台';
+  document.getElementById('bsum-ai-row').style.display=bOpts.ai?'':'none';
+  document.getElementById('bsum-sms-row').style.display=bOpts.sms?'':'none';
+  document.getElementById('bsum-total').textContent='¥'+((700+add)*q).toLocaleString()+' / 月';
+}
 </script>
 </body>
 </html>
