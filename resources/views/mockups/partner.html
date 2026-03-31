@@ -175,6 +175,9 @@ tbody tr:hover{background:var(--gray-100)}
 .bulk-sum-total-label{font-size:13px;color:var(--gray-600)}
 .bulk-sum-total-value{font-size:22px;font-weight:700;color:var(--gray-800)}
 .bulk-sum-note{font-size:11px;color:var(--gray-400);margin-top:12px;line-height:1.7}
+/* 外出スケジュール追加ボタン */
+.detail-schedule-add{display:flex;align-items:center;justify-content:center;gap:4px;width:100%;padding:8px;font-size:12px;font-weight:600;font-family:inherit;color:var(--gray-500);background:var(--cream);border:1px dashed var(--gray-300);border-radius:var(--radius);cursor:pointer;transition:all .2s;margin-top:8px}
+.detail-schedule-add:hover{background:var(--beige);color:var(--gray-700)}
 /* 解約モーダル */
 .cancel-flow-section{margin-bottom:16px}
 .cancel-flow-warning{background:var(--yellow-light);border-left:3px solid var(--yellow);padding:12px 14px;border-radius:var(--radius);margin-bottom:16px}
@@ -522,7 +525,7 @@ tbody tr:hover{background:var(--gray-100)}
           <p class="detail-notify-note">※ご契約後〇ヶ月は停止機能はご利用になれません。</p>
         </div>
 
-        <div class="detail-section"><div class="detail-section-title">🚶 外出スケジュール</div><p style="font-size:12px;color:var(--gray-400);">設定なし</p><button class="detail-schedule-add" style="margin-top:8px;">＋ 外出スケジュール追加</button></div>
+        <div class="detail-section"><div class="detail-section-title">🚶 外出スケジュール</div><p style="font-size:12px;color:var(--gray-400);">設定なし</p><button class="detail-schedule-add" onclick="showModal('scheduleAddModal')">＋ 外出スケジュール追加</button></div>
 
         <div class="detail-section"><div class="detail-section-title">📝 登録情報</div><div class="detail-grid">
           <div class="detail-item"><p class="detail-item-label">登録日</p><p class="detail-item-value">2024/06/15</p></div>
@@ -535,6 +538,49 @@ tbody tr:hover{background:var(--gray-100)}
           <button class="btn btn-secondary" onclick="hideModal('detailModal')">閉じる</button>
           <button class="btn btn-primary">保存</button>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- モーダル: 外出スケジュール追加 -->
+  <div id="scheduleAddModal" class="modal-overlay" onclick="if(event.target===this)hideModal('scheduleAddModal')">
+    <div class="modal" style="max-width:480px;">
+      <div class="modal-header"><h3>🚶 外出スケジュール追加</h3><button class="modal-close" onclick="hideModal('scheduleAddModal')">×</button></div>
+      <div class="modal-body">
+        <div style="font-size:12px;color:var(--gray-500);margin-bottom:12px;padding:8px 12px;background:var(--beige);border-radius:var(--radius);">対象: <strong>101 山田 太郎（A3K9X2）</strong></div>
+        <div style="display:flex;gap:8px;margin-bottom:16px;">
+          <button type="button" id="tabOneshot" style="flex:1;padding:10px;text-align:center;font-size:13px;font-weight:600;font-family:inherit;border:2px solid var(--gray-800);border-radius:var(--radius);background:var(--beige);cursor:pointer;color:var(--gray-800);" onclick="switchSchedTab('oneshot')">📅 単発</button>
+          <button type="button" id="tabRecurring" style="flex:1;padding:10px;text-align:center;font-size:13px;font-weight:600;font-family:inherit;border:2px solid var(--gray-200);border-radius:var(--radius);background:var(--white);cursor:pointer;color:var(--gray-600);" onclick="switchSchedTab('recurring')">🔁 定期</button>
+        </div>
+        <div id="oneshotForm">
+          <div style="margin-bottom:14px;"><label style="display:block;font-size:12px;font-weight:600;color:var(--gray-700);margin-bottom:4px;">開始日時</label><input type="datetime-local" style="width:100%;padding:8px 10px;font-size:13px;font-family:inherit;border:1px solid var(--gray-300);border-radius:var(--radius);background:var(--white);"></div>
+          <div style="margin-bottom:14px;"><label style="display:block;font-size:12px;font-weight:600;color:var(--gray-700);margin-bottom:4px;">終了日時（空欄＝手動復帰）</label><input type="datetime-local" style="width:100%;padding:8px 10px;font-size:13px;font-family:inherit;border:1px solid var(--gray-300);border-radius:var(--radius);background:var(--white);"></div>
+        </div>
+        <div id="recurringForm" style="display:none;">
+          <div style="margin-bottom:14px;"><label style="display:block;font-size:12px;font-weight:600;color:var(--gray-700);margin-bottom:6px;">曜日</label>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;">
+              <button type="button" style="width:36px;height:36px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;font-family:inherit;border:2px solid var(--gray-200);border-radius:50%;background:var(--white);cursor:pointer;color:var(--gray-600);">日</button>
+              <button type="button" style="width:36px;height:36px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;font-family:inherit;border:2px solid var(--gray-800);border-radius:50%;background:var(--gray-800);cursor:pointer;color:#fff;">月</button>
+              <button type="button" style="width:36px;height:36px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;font-family:inherit;border:2px solid var(--gray-800);border-radius:50%;background:var(--gray-800);cursor:pointer;color:#fff;">火</button>
+              <button type="button" style="width:36px;height:36px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;font-family:inherit;border:2px solid var(--gray-200);border-radius:50%;background:var(--white);cursor:pointer;color:var(--gray-600);">水</button>
+              <button type="button" style="width:36px;height:36px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;font-family:inherit;border:2px solid var(--gray-200);border-radius:50%;background:var(--white);cursor:pointer;color:var(--gray-600);">木</button>
+              <button type="button" style="width:36px;height:36px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;font-family:inherit;border:2px solid var(--gray-200);border-radius:50%;background:var(--white);cursor:pointer;color:var(--gray-600);">金</button>
+              <button type="button" style="width:36px;height:36px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;font-family:inherit;border:2px solid var(--gray-200);border-radius:50%;background:var(--white);cursor:pointer;color:var(--gray-600);">土</button>
+            </div>
+          </div>
+          <div style="margin-bottom:14px;"><label style="display:block;font-size:12px;font-weight:600;color:var(--gray-700);margin-bottom:4px;">時間帯</label>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <input type="time" value="09:00" style="flex:1;padding:8px 10px;font-size:13px;font-family:inherit;border:1px solid var(--gray-300);border-radius:var(--radius);background:var(--white);">
+              <span style="font-size:13px;color:var(--gray-500);">〜</span>
+              <input type="time" value="18:00" style="flex:1;padding:8px 10px;font-size:13px;font-family:inherit;border:1px solid var(--gray-300);border-radius:var(--radius);background:var(--white);">
+            </div>
+          </div>
+        </div>
+        <div style="margin-bottom:14px;"><label style="display:block;font-size:12px;font-weight:600;color:var(--gray-700);margin-bottom:4px;">メモ（任意）</label><input type="text" placeholder="例: デイサービス" style="width:100%;padding:8px 10px;font-size:13px;font-family:inherit;border:1px solid var(--gray-300);border-radius:var(--radius);background:var(--white);"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="hideModal('scheduleAddModal')">キャンセル</button>
+        <button class="btn btn-primary" onclick="hideModal('scheduleAddModal');alert('（実装では保存されます）')">追加</button>
       </div>
     </div>
   </div>
@@ -628,6 +674,12 @@ function bUpdateSum(){
   document.getElementById('bsum-total').textContent='¥'+total.toLocaleString()+' / 月';
 }
 
+function switchSchedTab(type) {
+  document.getElementById('oneshotForm').style.display = type === 'oneshot' ? 'block' : 'none';
+  document.getElementById('recurringForm').style.display = type === 'recurring' ? 'block' : 'none';
+  document.getElementById('tabOneshot').style.cssText = 'flex:1;padding:10px;text-align:center;font-size:13px;font-weight:600;font-family:inherit;border-radius:var(--radius);cursor:pointer;' + (type==='oneshot' ? 'border:2px solid var(--gray-800);background:var(--beige);color:var(--gray-800);' : 'border:2px solid var(--gray-200);background:var(--white);color:var(--gray-600);');
+  document.getElementById('tabRecurring').style.cssText = 'flex:1;padding:10px;text-align:center;font-size:13px;font-weight:600;font-family:inherit;border-radius:var(--radius);cursor:pointer;' + (type==='recurring' ? 'border:2px solid var(--gray-800);background:var(--beige);color:var(--gray-800);' : 'border:2px solid var(--gray-200);background:var(--white);color:var(--gray-600);');
+}
 // 通知サービストグル: チェックONで緑、OFFでグレー
 document.addEventListener('DOMContentLoaded', function(){
   var notifyToggle = document.querySelector('#detailModal .watch-toggle input');
