@@ -15,24 +15,20 @@ body{font-family:'Noto Sans JP',Helvetica,sans-serif;background:var(--beige);col
 .nav-link{font-size:13px;color:var(--gray-400);text-decoration:none}
 .nav-link:hover{color:#fff}
 .main{max-width:1200px;margin:0 auto;padding:24px 20px}
-
 /* PWA バナー */
 .pwa-banner{background:var(--white);border-radius:var(--radius);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;font-size:12px;color:var(--gray-600);border:1px solid var(--gray-200)}
 .pwa-close{background:none;border:none;cursor:pointer;color:var(--gray-400);font-size:14px}
-
 /* 契約情報 */
 .contract-info{display:flex;gap:16px;margin-bottom:16px;flex-wrap:wrap}
 .contract-item{background:var(--white);border-radius:var(--radius-lg);padding:16px 20px;box-shadow:var(--shadow-sm);border:1px solid var(--gray-200);flex:1;min-width:180px}
 .contract-label{font-size:12px;color:var(--gray-500);margin-bottom:4px}
 .contract-value{font-size:16px;font-weight:700;color:var(--gray-800)}
 .contract-note{font-size:11px;color:var(--gray-400);margin-top:4px}
-
 /* アラートバナー */
 .alert-banner{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-radius:var(--radius);margin-bottom:12px;font-size:13px;font-weight:500}
 .alert-banner.warning{background:#fbe9e7;color:#c62828;border:1px solid #ffcdd2}
 .alert-banner.offline{background:var(--gray-100);color:var(--gray-600);border:1px solid var(--gray-300)}
 .alert-btn{padding:4px 12px;font-size:12px;font-weight:600;font-family:inherit;border:1px solid currentColor;border-radius:4px;background:transparent;color:inherit;cursor:pointer;margin-left:12px}
-
 /* ステータスグリッド */
 .status-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:20px}
 .status-card{background:var(--white);border-radius:var(--radius-lg);padding:16px;text-align:center;box-shadow:var(--shadow-sm);border:1px solid var(--gray-200);cursor:pointer}
@@ -43,7 +39,6 @@ body{font-family:'Noto Sans JP',Helvetica,sans-serif;background:var(--beige);col
 .sd{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:3px;vertical-align:middle}
 .sd.g{background:var(--green)}.sd.y{background:var(--yellow)}.sd.r{background:var(--red)}.sd.gray{background:var(--gray-600)}.sd.lt{background:var(--gray-300)}
 .status-legend{display:flex;gap:12px;font-size:11px;color:var(--gray-500);margin-bottom:16px;flex-wrap:wrap}
-
 /* ツールバー */
 .toolbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;gap:12px;flex-wrap:wrap}
 .toolbar-left{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
@@ -55,7 +50,6 @@ body{font-family:'Noto Sans JP',Helvetica,sans-serif;background:var(--beige);col
 .toolbar-count{font-size:13px;color:var(--gray-500);font-weight:500}
 .toolbar-btn{padding:8px 14px;font-size:13px;font-weight:600;font-family:inherit;border:1px solid var(--gray-300);border-radius:var(--radius);background:var(--white);color:var(--gray-700);cursor:pointer;text-decoration:none}
 .toolbar-btn:hover{background:var(--beige)}
-
 /* テーブル */
 .table-card{background:var(--white);border-radius:var(--radius-lg);box-shadow:var(--shadow-sm);overflow:hidden;border:1px solid var(--gray-200)}
 .table-wrapper{overflow-x:auto}
@@ -78,7 +72,7 @@ tbody tr:hover{background:var(--gray-100)}
 .watch-toggle input{opacity:0;width:0;height:0}
 .ws{position:absolute;cursor:pointer;inset:0;background:var(--gray-300);border-radius:12px;transition:.3s}
 .ws::before{content:'';position:absolute;height:18px;width:18px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.3s}
-.watch-toggle input:checked+.ws{background:var(--green)}
+.watch-toggle input:checked+.ws{background:var(--orange)}
 .watch-toggle input:checked+.ws::before{transform:translateX(20px)}
 .bat-low{color:var(--red);font-weight:600}
 .action-btn{padding:5px 10px;font-size:11px;font-weight:600;font-family:inherit;border:1px solid var(--gray-300);border-radius:4px;background:var(--white);color:var(--gray-700);cursor:pointer;margin-right:4px}
@@ -86,7 +80,6 @@ tbody tr:hover{background:var(--gray-100)}
 .action-btn.d{color:var(--red);border-color:#fecaca}
 .action-btn.d:hover{background:var(--red-light)}
 .action-btn.s{background:var(--green);color:#fff;border-color:var(--green)}
-
 /* ページネーション */
 .pag-bar{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-top:2px solid var(--gray-200);background:var(--cream)}
 .pag-info{color:var(--gray-600);font-weight:500}
@@ -94,7 +87,6 @@ tbody tr:hover{background:var(--gray-100)}
 .pg{min-width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;font-family:inherit;border:1px solid var(--gray-300);border-radius:6px;background:var(--white);color:var(--gray-700);cursor:pointer;text-decoration:none}
 .pg:hover{background:var(--beige)}
 .pg.active{background:var(--gray-800);color:#fff;border-color:var(--gray-800)}
-
 /* モーダル */
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:1000;align-items:center;justify-content:center;padding:20px}
 .modal-overlay.show{display:flex}
@@ -117,22 +109,24 @@ tbody tr:hover{background:var(--gray-100)}
 .btn-danger{background:var(--red);color:#fff}
 .btn-danger:hover{background:#c62828}
 .btn-sm{padding:6px 12px;font-size:12px}
-
 /* 詳細モーダル */
 .detail-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
 .detail-item{padding:10px 12px;background:var(--beige);border-radius:var(--radius)}
 .detail-item-label{font-size:11px;color:var(--gray-500);margin-bottom:2px}
 .detail-item-value{font-size:14px;font-weight:600;color:var(--gray-800)}
+.detail-form-input{width:100%;padding:6px 8px;font-size:13px;font-family:inherit;border:1px solid var(--gray-300);border-radius:var(--radius);background:var(--white);color:var(--gray-800);box-sizing:border-box;margin-top:2px}
+.detail-form-input:focus{outline:none;border-color:var(--gray-500)}
 .detail-section{margin-bottom:20px}
 .detail-section-title{font-size:14px;font-weight:600;color:var(--gray-700);margin-bottom:12px}
 .detail-status{display:inline-block;padding:4px 12px;font-size:12px;font-weight:600;border-radius:6px;background:var(--green-light);color:var(--green-dark);margin-bottom:16px}
-
+.detail-notify-note{font-size:11px;color:var(--gray-500);margin-top:6px;line-height:1.5}
+.cancel-link{font-size:11px;color:var(--gray-400);text-decoration:underline;cursor:pointer;background:none;border:none;font-family:inherit;padding:0}
+.cancel-link:hover{color:var(--red)}
 /* トースト */
 .toast{position:fixed;bottom:24px;right:24px;padding:14px 20px;border-radius:var(--radius);font-size:13px;font-weight:600;color:#fff;z-index:9999;transform:translateY(100px);opacity:0;transition:all .3s}
 .toast.show{transform:translateY(0);opacity:1}
 .toast.success{background:var(--green-dark)}
 .toast.error{background:var(--red)}
-
 @media(max-width:768px){.status-grid{grid-template-columns:repeat(3,1fr)}.toolbar{flex-direction:column;align-items:stretch}.search-box{width:100%}}
 @media(max-width:480px){.status-grid{grid-template-columns:repeat(2,1fr)}}
 /* 一括追加ステップバー */
@@ -155,6 +149,11 @@ tbody tr:hover{background:var(--gray-100)}
 .bulk-qty-preset{padding:4px 12px;font-size:12px;font-family:inherit;border:1px solid var(--gray-300);border-radius:20px;background:var(--white);color:var(--gray-600);cursor:pointer;transition:all .15s}
 .bulk-qty-preset:hover,.bulk-qty-preset.active{background:var(--gray-800);color:#fff;border-color:var(--gray-800)}
 .bulk-qty-note{font-size:11px;color:var(--gray-400)}
+.bulk-form-group{margin-bottom:14px}
+.bulk-form-group label{display:block;font-size:12px;font-weight:600;color:var(--gray-700);margin-bottom:4px}
+.bulk-form-required{color:var(--red);margin-left:2px}
+.bulk-form-input{width:100%;padding:8px 10px;font-size:13px;font-family:inherit;border:1px solid var(--gray-300);border-radius:var(--radius);background:var(--white);color:var(--gray-800);box-sizing:border-box}
+.bulk-form-input:focus{outline:none;border-color:var(--gray-500)}
 .bulk-opt-card{border:1px solid var(--gray-200);border-radius:var(--radius);padding:14px 16px;margin-bottom:10px;cursor:pointer;transition:all .15s}
 .bulk-opt-card:hover{border-color:var(--gray-400)}
 .bulk-opt-card.selected{border:2px solid var(--gray-800);background:var(--beige)}
@@ -170,10 +169,17 @@ tbody tr:hover{background:var(--gray-100)}
 .bulk-sum-row:last-of-type{border-bottom:none}
 .bulk-sum-label{color:var(--gray-500)}
 .bulk-sum-value{font-weight:600;color:var(--gray-800)}
-.bulk-sum-total{display:flex;justify-content:space-between;align-items:baseline;padding-top:12px;margin-top:6px;border-top:2px solid var(--gray-300)}
+.bulk-sum-subtotal{display:flex;justify-content:space-between;align-items:center;padding:8px 0 4px;border-top:1px solid var(--gray-300);margin-top:4px;font-size:13px;color:var(--gray-600)}
+.bulk-sum-tax{display:flex;justify-content:space-between;align-items:center;padding:4px 0 8px;font-size:12px;color:var(--gray-500);border-bottom:2px solid var(--gray-300)}
+.bulk-sum-total{display:flex;justify-content:space-between;align-items:baseline;padding-top:12px;margin-top:4px}
 .bulk-sum-total-label{font-size:13px;color:var(--gray-600)}
 .bulk-sum-total-value{font-size:22px;font-weight:700;color:var(--gray-800)}
 .bulk-sum-note{font-size:11px;color:var(--gray-400);margin-top:12px;line-height:1.7}
+/* 解約モーダル */
+.cancel-flow-section{margin-bottom:16px}
+.cancel-flow-warning{background:var(--yellow-light);border-left:3px solid var(--yellow);padding:12px 14px;border-radius:var(--radius);margin-bottom:16px}
+.cancel-flow-steps p{margin-bottom:6px;font-size:13px;font-weight:600;color:var(--gray-700)}
+.cancel-flow-steps p.sub{font-size:12px;font-weight:400;color:var(--gray-500);margin-bottom:12px;margin-top:2px}
 </style>
 </head>
 <body>
@@ -186,7 +192,6 @@ tbody tr:hover{background:var(--gray-100)}
 </nav>
 
 <main class="main">
-
   <!-- PWAバナー -->
   <div class="pwa-banner" id="pwaBanner">
     <span>📱 ホーム画面に追加すると便利です</span>
@@ -238,14 +243,15 @@ tbody tr:hover{background:var(--gray-100)}
       <select class="filter-select">
         <option>すべてのステータス</option><option>🟢 正常のみ</option><option>🟡 注意のみ</option><option>🔴 警告のみ</option><option>⚫ 離線のみ</option><option>⚪ 空室のみ</option>
       </select>
+      <!-- ★ 変更: 見守り状態 → 外出モード状態 -->
       <select class="filter-select">
-        <option>すべての見守り状態</option><option>見守りON</option><option>見守りOFF</option><option>⏰ タイマー設定中</option>
+        <option>すべての外出モード状態</option><option>外出モードOFF（通常）</option><option>外出モードON（外出中）</option><option>⏰ タイマー設定中</option>
       </select>
       <span class="toolbar-count">登録: <strong>45</strong> / 100台</span>
     </div>
     <div class="toolbar-right">
       <button class="toolbar-btn" onclick="showModal('timerModal')">⏰ タイマー一覧</button>
-      <button class="toolbar-btn" onclick="showBulkAddModal()">➕ デバイス追加</button>
+      <button class="toolbar-btn" onclick="showBulkAddModal()">デバイス新規お申込み</button>
       <a href="#" class="toolbar-btn">📥 CSV出力</a>
     </div>
   </div>
@@ -256,7 +262,8 @@ tbody tr:hover{background:var(--gray-100)}
       <table>
         <thead>
           <tr>
-            <th>状態 ↕</th><th>部屋 / 名前 ↑</th><th>デバイスID ↕</th><th>見守り</th><th>最終検知 ↕</th><th>電池 ↕</th><th>電波 ↕</th><th>操作</th>
+            <!-- ★ 変更: 見守り → 外出モード -->
+            <th>状態 ↕</th><th>部屋 / 名前 ↑</th><th>デバイスID ↕</th><th>外出モード</th><th>最終検知 ↕</th><th>電池 ↕</th><th>電波 ↕</th><th>操作</th>
           </tr>
         </thead>
         <tbody>
@@ -264,7 +271,8 @@ tbody tr:hover{background:var(--gray-100)}
             <td><span class="ds n">正常</span></td>
             <td><strong>101</strong><br><span style="font-size:12px;color:var(--gray-500);">山田 太郎</span></td>
             <td class="mono">A3K9X2</td>
-            <td><label class="watch-toggle"><input type="checkbox" checked><span class="ws"></span></label></td>
+            <!-- 外出モードOFF（通常）= チェックなし -->
+            <td><label class="watch-toggle"><input type="checkbox"><span class="ws"></span></label></td>
             <td>3分前</td><td>85%</td><td>良好</td>
             <td><button class="action-btn" onclick="showModal('detailModal')">詳細</button><button class="action-btn d" onclick="showModal('deleteModal')">削除</button></td>
           </tr>
@@ -272,7 +280,7 @@ tbody tr:hover{background:var(--gray-100)}
             <td><span class="ds n">正常</span></td>
             <td><strong>102</strong><br><span style="font-size:12px;color:var(--gray-500);">佐藤 花子</span></td>
             <td class="mono">B7X2K9</td>
-            <td><label class="watch-toggle"><input type="checkbox" checked><span class="ws"></span></label> <span style="font-size:12px;color:var(--orange);">⏰</span></td>
+            <td><label class="watch-toggle"><input type="checkbox"><span class="ws"></span></label> <span style="font-size:12px;color:var(--orange);">⏰</span></td>
             <td>5分前</td><td>72%</td><td>良好</td>
             <td><button class="action-btn" onclick="showModal('detailModal')">詳細</button><button class="action-btn d" onclick="showModal('deleteModal')">削除</button></td>
           </tr>
@@ -280,7 +288,7 @@ tbody tr:hover{background:var(--gray-100)}
             <td><span class="ds w">注意</span></td>
             <td><strong>103</strong><br><span style="font-size:12px;color:var(--gray-500);">田中 次郎</span></td>
             <td class="mono">C4M8P2</td>
-            <td><label class="watch-toggle"><input type="checkbox" checked><span class="ws"></span></label></td>
+            <td><label class="watch-toggle"><input type="checkbox"><span class="ws"></span></label></td>
             <td>45分前</td><td class="bat-low">28%</td><td>普通</td>
             <td><button class="action-btn" onclick="showModal('detailModal')">詳細</button><button class="action-btn d" onclick="showModal('deleteModal')">削除</button></td>
           </tr>
@@ -288,15 +296,16 @@ tbody tr:hover{background:var(--gray-100)}
             <td><span class="ds a">警告</span></td>
             <td><strong>201</strong><br><span style="font-size:12px;color:var(--gray-500);">鈴木 三郎</span></td>
             <td class="mono">D9L3Q7</td>
-            <td><label class="watch-toggle"><input type="checkbox" checked><span class="ws"></span></label></td>
+            <td><label class="watch-toggle"><input type="checkbox"><span class="ws"></span></label></td>
             <td>26時間前</td><td>45%</td><td>良好</td>
             <td><button class="action-btn" onclick="showModal('detailModal')">詳細</button><button class="action-btn d" onclick="showModal('deleteModal')">削除</button></td>
           </tr>
           <tr>
+            <!-- 外出モードON（外出中）= チェックあり + オレンジ色 -->
             <td><span class="ds o">離線</span></td>
             <td><strong>202</strong><br><span style="font-size:12px;color:var(--gray-500);">高橋 四郎</span></td>
             <td class="mono">E2P7R4</td>
-            <td><label class="watch-toggle"><input type="checkbox"><span class="ws"></span></label></td>
+            <td><label class="watch-toggle"><input type="checkbox" checked><span class="ws"></span></label></td>
             <td>3日前</td><td>-</td><td>-</td>
             <td><button class="action-btn" onclick="showModal('detailModal')">詳細</button><button class="action-btn d" onclick="showModal('deleteModal')">削除</button></td>
           </tr>
@@ -304,7 +313,7 @@ tbody tr:hover{background:var(--gray-100)}
             <td><span class="ds n">正常</span></td>
             <td><strong>203</strong><br><span style="font-size:12px;color:var(--gray-500);">伊藤 五郎</span></td>
             <td class="mono">F8K2M6</td>
-            <td><label class="watch-toggle"><input type="checkbox" checked><span class="ws"></span></label></td>
+            <td><label class="watch-toggle"><input type="checkbox"><span class="ws"></span></label></td>
             <td>8分前</td><td>68%</td><td>良好</td>
             <td><button class="action-btn" onclick="showModal('detailModal')">詳細</button><button class="action-btn d" onclick="showModal('deleteModal')">削除</button></td>
           </tr>
@@ -312,7 +321,7 @@ tbody tr:hover{background:var(--gray-100)}
             <td><span class="ds w">注意</span></td>
             <td><strong>301</strong><br><span style="font-size:12px;color:var(--gray-500);">渡辺 六子</span></td>
             <td class="mono">G5N9T1</td>
-            <td><label class="watch-toggle"><input type="checkbox" checked><span class="ws"></span></label></td>
+            <td><label class="watch-toggle"><input type="checkbox"><span class="ws"></span></label></td>
             <td>38分前</td><td class="bat-low">32%</td><td style="color:var(--orange);">弱い</td>
             <td><button class="action-btn" onclick="showModal('detailModal')">詳細</button><button class="action-btn d" onclick="showModal('deleteModal')">削除</button></td>
           </tr>
@@ -320,7 +329,7 @@ tbody tr:hover{background:var(--gray-100)}
             <td><span class="ds n">正常</span></td>
             <td><strong>302</strong><br><span style="font-size:12px;color:var(--gray-500);">中村 七美</span></td>
             <td class="mono">H1Q4W8</td>
-            <td><label class="watch-toggle"><input type="checkbox" checked><span class="ws"></span></label></td>
+            <td><label class="watch-toggle"><input type="checkbox"><span class="ws"></span></label></td>
             <td>2分前</td><td>91%</td><td>良好</td>
             <td><button class="action-btn" onclick="showModal('detailModal')">詳細</button><button class="action-btn d" onclick="showModal('deleteModal')">削除</button></td>
           </tr>
@@ -337,29 +346,26 @@ tbody tr:hover{background:var(--gray-100)}
       <span class="pag-info">1〜9件 / 全45件</span>
       <div class="pag-btns">
         <span class="pg" style="opacity:.5">‹</span>
-        <a href="#" class="pg active">1</a>
-        <a href="#" class="pg">2</a>
-        <a href="#" class="pg">3</a>
-        <a href="#" class="pg">4</a>
-        <a href="#" class="pg">5</a>
+        <a href="#" class="pg active">1</a><a href="#" class="pg">2</a><a href="#" class="pg">3</a><a href="#" class="pg">4</a><a href="#" class="pg">5</a>
         <a href="#" class="pg">›</a>
       </div>
     </div>
   </div>
 
-  <!-- モーダル: デバイス一括追加（3ステップ） -->
+  <!-- モーダル: デバイス新規お申込み（4ステップ） -->
   <div id="addModal" class="modal-overlay" onclick="if(event.target===this)hideModal('addModal')">
     <div class="modal">
-      <div class="modal-header"><h3>➕ デバイス一括追加</h3><button class="modal-close" onclick="hideModal('addModal')">×</button></div>
-      <!-- ステップバー -->
+      <div class="modal-header"><h3>デバイス新規お申込み</h3><button class="modal-close" onclick="hideModal('addModal')">×</button></div>
       <div class="bulk-step-bar">
         <div class="bulk-step active" id="bsi1"><div class="bulk-step-num">1</div><span>台数</span></div>
         <div class="bulk-step-line"></div>
         <div class="bulk-step" id="bsi2"><div class="bulk-step-num">2</div><span>オプション</span></div>
         <div class="bulk-step-line"></div>
-        <div class="bulk-step" id="bsi3"><div class="bulk-step-num">3</div><span>確認・決済</span></div>
+        <div class="bulk-step" id="bsi3"><div class="bulk-step-num">3</div><span>配送先</span></div>
+        <div class="bulk-step-line"></div>
+        <div class="bulk-step" id="bsi4"><div class="bulk-step-num">4</div><span>確認・決済</span></div>
       </div>
-      <!-- Step 1: 台数 -->
+      <!-- Step 1 -->
       <div class="modal-body bulk-panel active" id="bpanel-1">
         <p class="bulk-section-label">追加する台数を選択してください（1〜300台）</p>
         <div class="bulk-qty-row">
@@ -377,7 +383,7 @@ tbody tr:hover{background:var(--gray-100)}
         </div>
         <p class="bulk-qty-note">生成されたデバイスIDとPINは一覧CSVで自動ダウンロードされます</p>
       </div>
-      <!-- Step 2: オプション -->
+      <!-- Step 2 -->
       <div class="modal-body bulk-panel" id="bpanel-2">
         <p class="bulk-section-label">オプションを選択してください（複数可）</p>
         <div class="bulk-opt-card" id="bopt-ai" onclick="bToggleOpt('ai')">
@@ -398,16 +404,38 @@ tbody tr:hover{background:var(--gray-100)}
           <p class="bulk-opt-desc">アラート時にSMSで緊急連絡先へ通知します。メール通知に加えて利用できます。</p>
         </div>
       </div>
-      <!-- Step 3: 確認 -->
+      <!-- Step 3: 配送先 -->
       <div class="modal-body bulk-panel" id="bpanel-3">
+        <p class="bulk-section-label">デバイスの配送先をご入力ください</p>
+        <div class="bulk-form-group">
+          <label>お名前<span class="bulk-form-required">*</span></label>
+          <input type="text" class="bulk-form-input" placeholder="山田 太郎">
+        </div>
+        <div class="bulk-form-group">
+          <label>郵便番号<span class="bulk-form-required">*</span></label>
+          <input type="text" class="bulk-form-input" placeholder="000-0000" maxlength="8">
+        </div>
+        <div class="bulk-form-group">
+          <label>住所<span class="bulk-form-required">*</span></label>
+          <input type="text" class="bulk-form-input" placeholder="東京都千代田区〇〇 1-2-3">
+        </div>
+        <div class="bulk-form-group">
+          <label>電話番号<span class="bulk-form-required">*</span></label>
+          <input type="tel" class="bulk-form-input" placeholder="090-0000-0000">
+        </div>
+      </div>
+      <!-- Step 4: 確認 -->
+      <div class="modal-body bulk-panel" id="bpanel-4">
         <div class="bulk-sum-card">
           <div class="bulk-sum-row"><span class="bulk-sum-label">追加台数</span><span class="bulk-sum-value" id="bsum-qty">10台</span></div>
           <div class="bulk-sum-row"><span class="bulk-sum-label">基本料金</span><span class="bulk-sum-value">¥700 / 台 / 月</span></div>
           <div class="bulk-sum-row" id="bsum-ai-row" style="display:none"><span class="bulk-sum-label">AIコール</span><span class="bulk-sum-value">+¥300 / 台 / 月</span></div>
           <div class="bulk-sum-row" id="bsum-sms-row" style="display:none"><span class="bulk-sum-label">SMS通知</span><span class="bulk-sum-value">+¥100 / 台 / 月</span></div>
+          <div class="bulk-sum-subtotal"><span>小計（税抜）</span><span id="bsum-subtotal">¥7,000 / 月</span></div>
+          <div class="bulk-sum-tax"><span>消費税（10%）</span><span id="bsum-tax">¥700 / 月</span></div>
           <div class="bulk-sum-total">
-            <span class="bulk-sum-total-label">月額合計（税抜）</span>
-            <span class="bulk-sum-total-value" id="bsum-total">¥7,000 / 月</span>
+            <span class="bulk-sum-total-label">月額合計（税込）</span>
+            <span class="bulk-sum-total-value" id="bsum-total">¥7,700 / 月</span>
           </div>
         </div>
         <p class="bulk-sum-note">※ 24ヶ月最低契約。解約時は¥8,400の違約金が発生します。<br>※「決済へ進む」でデバイスが生成され、IDとPINのCSVが自動ダウンロードされます。</p>
@@ -437,44 +465,109 @@ tbody tr:hover{background:var(--gray-100)}
     </div>
   </div>
 
-  <!-- モーダル: 見守りOFF確認 -->
+  <!-- ★ 変更: 見守りをOFFにしますか → 外出モードをONにしますか -->
   <div id="watchOffModal" class="modal-overlay" onclick="if(event.target===this)hideModal('watchOffModal')">
     <div class="modal">
-      <div class="modal-header"><h3>⚠️ 見守りをOFFにしますか？</h3><button class="modal-close" onclick="hideModal('watchOffModal')">×</button></div>
-      <div class="modal-body"><p><strong>⚠️ 注意:</strong> OFFにすると、このデバイスの未検知アラートが送信されなくなります。</p></div>
-      <div class="modal-footer"><button class="btn btn-secondary" onclick="hideModal('watchOffModal')">キャンセル</button><button class="btn btn-danger">OFFにする</button></div>
+      <div class="modal-header"><h3>🚶 外出モードをONにしますか？</h3><button class="modal-close" onclick="hideModal('watchOffModal')">×</button></div>
+      <div class="modal-body">
+        <p><strong>⚠️ 注意:</strong> 外出モードをONにすると、このデバイスの未検知アラートが送信されなくなります。</p>
+        <p style="color:var(--gray-500);font-size:13px;margin-top:8px;">外出・旅行などで一時的に通知を止めたい場合にご利用ください。</p>
+      </div>
+      <div class="modal-footer"><button class="btn btn-secondary" onclick="hideModal('watchOffModal')">キャンセル</button><button class="btn btn-danger">外出モードをONにする</button></div>
     </div>
   </div>
 
-  <!-- モーダル: デバイス詳細 -->
+  <!-- モーダル: デバイス詳細（編集可能） -->
   <div id="detailModal" class="modal-overlay" onclick="if(event.target===this)hideModal('detailModal')">
     <div class="modal" style="max-width:540px;">
       <div class="modal-header"><h3>📋 デバイス詳細</h3><button class="modal-close" onclick="hideModal('detailModal')">×</button></div>
       <div class="modal-body">
         <div class="detail-status">正常稼働中</div>
+
         <div class="detail-section"><div class="detail-grid">
           <div class="detail-item"><p class="detail-item-label">デバイスID</p><p class="detail-item-value mono">A3K9X2</p></div>
-          <div class="detail-item"><p class="detail-item-label">部屋番号</p><p class="detail-item-value">101</p></div>
-          <div class="detail-item"><p class="detail-item-label">入居者名</p><p class="detail-item-value">山田 太郎</p></div>
           <div class="detail-item"><p class="detail-item-label">最終検知</p><p class="detail-item-value">3分前</p></div>
+          <div class="detail-item"><p class="detail-item-label">部屋番号</p><input type="text" class="detail-form-input" value="101"></div>
+          <div class="detail-item"><p class="detail-item-label">入居者名</p><input type="text" class="detail-form-input" value="山田 太郎"></div>
         </div></div>
+
         <div class="detail-section"><div class="detail-section-title">📊 デバイス状態</div><div class="detail-grid">
           <div class="detail-item"><p class="detail-item-label">電池残量</p><p class="detail-item-value">85%</p></div>
           <div class="detail-item"><p class="detail-item-label">電波強度</p><p class="detail-item-value">良好 (-65dBm)</p></div>
         </div></div>
-        <div class="detail-section"><div class="detail-section-title">⚙️ 見守り設定</div><div class="detail-grid">
-          <div class="detail-item"><p class="detail-item-label">見守りON/OFF</p><p class="detail-item-value">ON</p></div>
-          <div class="detail-item"><p class="detail-item-label">アラート時間</p><p class="detail-item-value">24時間</p></div>
-          <div class="detail-item"><p class="detail-item-label">設置高さ</p><p class="detail-item-value">200cm</p></div>
-          <div class="detail-item"><p class="detail-item-label">ペット除外</p><p class="detail-item-value">ON（100cm）</p></div>
+
+        <!-- ★ 変更: 見守り設定 → 外出モード設定 -->
+        <div class="detail-section"><div class="detail-section-title">⚙️ 外出モード設定</div><div class="detail-grid">
+          <!-- ★ 変更: 外出モードOFF（通常）で表示 -->
+          <div class="detail-item"><p class="detail-item-label">外出モード</p><p class="detail-item-value">OFF（通常）</p></div>
+          <div class="detail-item"><p class="detail-item-label">アラート時間</p>
+            <select class="detail-form-input"><option>12時間</option><option selected>24時間</option><option>36時間</option><option>48時間</option><option>72時間</option></select>
+          </div>
+          <div class="detail-item"><p class="detail-item-label">設置高さ</p>
+            <div style="display:flex;align-items:center;gap:4px;margin-top:2px;"><input type="number" class="detail-form-input" value="200" style="width:70px;"><span style="font-size:12px;color:var(--gray-500);">cm</span></div>
+          </div>
+          <div class="detail-item"><p class="detail-item-label">ペット除外</p>
+            <select class="detail-form-input"><option>OFF</option><option selected>ON</option></select>
+          </div>
         </div></div>
+
+        <div class="detail-section"><div class="detail-section-title">🔔 通知サービス</div>
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:6px;">
+            <label class="watch-toggle" style="--green:var(--green-dark)">
+              <input type="checkbox" checked onchange="document.getElementById('notifyLabel').textContent=this.checked?'有効':'停止中'">
+              <span class="ws" style="background:var(--green-dark)"></span>
+            </label>
+            <span id="notifyLabel" style="font-size:13px;color:var(--gray-700);">有効</span>
+          </div>
+          <p class="detail-notify-note">※ご契約後〇ヶ月は停止機能はご利用になれません。</p>
+        </div>
+
         <div class="detail-section"><div class="detail-section-title">⏰ タイマー設定</div><p style="font-size:12px;color:var(--gray-400);">設定なし</p></div>
+
         <div class="detail-section"><div class="detail-section-title">📝 登録情報</div><div class="detail-grid">
           <div class="detail-item"><p class="detail-item-label">登録日</p><p class="detail-item-value">2024/06/15</p></div>
-          <div class="detail-item"><p class="detail-item-label">メモ</p><p class="detail-item-value">息子が緊急連絡先</p></div>
+          <div class="detail-item"><p class="detail-item-label">メモ</p><input type="text" class="detail-form-input" value="息子が緊急連絡先"></div>
         </div></div>
       </div>
-      <div class="modal-footer"><button class="btn btn-secondary" onclick="hideModal('detailModal')">閉じる</button><button class="btn btn-primary">編集</button></div>
+      <div class="modal-footer" style="justify-content:space-between;">
+        <button class="cancel-link" onclick="showModal('cancelFlowModal')">解約</button>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-secondary" onclick="hideModal('detailModal')">閉じる</button>
+          <button class="btn btn-primary">保存</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- モーダル: 解約・端末返却案内 -->
+  <div id="cancelFlowModal" class="modal-overlay" onclick="if(event.target===this)hideModal('cancelFlowModal')">
+    <div class="modal" style="max-width:520px;">
+      <div class="modal-header"><h3>📦 解約・端末返却のご案内</h3><button class="modal-close" onclick="hideModal('cancelFlowModal')">×</button></div>
+      <div class="modal-body">
+        <div class="cancel-flow-warning">
+          <p style="font-size:13px;font-weight:600;color:#a16207;margin-bottom:4px;">⚠️ 解約前にご確認ください</p>
+          <p style="font-size:12px;color:#a16207;line-height:1.6;">ご契約から<strong>〇ヶ月以内</strong>の解約は、1台あたり<strong>¥8,400の違約金</strong>が発生します。</p>
+        </div>
+        <div class="cancel-flow-section">
+          <div class="detail-section-title" style="margin-bottom:12px;">📋 解約・返却の流れ</div>
+          <div class="cancel-flow-steps">
+            <p>① 解約申請</p>
+            <p class="sub">下記の「解約を申請する」ボタン、またはお問い合わせフォームより解約のご意思をお知らせください。</p>
+            <p>② 端末の返送</p>
+            <p class="sub">端末を<strong>レターパックライト等の郵送</strong>にてご返送ください。送料はお客様のご負担となります。</p>
+            <p>③ 返送確認・解約完了</p>
+            <p class="sub">弊社にて返送を確認後、解約処理を行います。<strong>返送確認ができない場合は端末代金を請求させていただく場合があります。</strong></p>
+          </div>
+        </div>
+        <div style="background:var(--beige);border-radius:var(--radius);padding:12px 14px;font-size:12px;color:var(--gray-600);line-height:1.8;">
+          <strong>返送先：</strong>担当者よりご案内いたします<br>
+          <strong>お問い合わせ：</strong>管理者までご連絡ください
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="hideModal('cancelFlowModal')">閉じる</button>
+        <a href="mailto:support@example.com" class="btn btn-danger" style="text-decoration:none;">解約を申請する</a>
+      </div>
     </div>
   </div>
 
@@ -485,25 +578,29 @@ tbody tr:hover{background:var(--gray-100)}
 function showModal(id) { document.getElementById(id).classList.add('show'); }
 function hideModal(id) { document.getElementById(id).classList.remove('show'); }
 
-// ===== 一括追加 3ステップ =====
+// ===== 一括追加 4ステップ =====
 var bStep = 1, bOpts = {ai:false, sms:false};
+
 function showBulkAddModal() {
   bStep = 1; bOpts = {ai:false, sms:false};
   document.getElementById('bqty').value = 10;
   document.querySelectorAll('.bulk-opt-card').forEach(function(c){c.classList.remove('selected');});
   bSyncUI(); showModal('addModal');
 }
+
 function bSyncUI() {
-  [1,2,3].forEach(function(i){
+  [1,2,3,4].forEach(function(i){
     document.getElementById('bpanel-'+i).classList.toggle('active', i===bStep);
     var el = document.getElementById('bsi'+i);
     el.className = 'bulk-step'+(i<bStep?' done':i===bStep?' active':'');
   });
   document.getElementById('b-btn-back').style.display = bStep>1?'':'none';
-  document.getElementById('b-btn-next').textContent = bStep===3?'決済へ進む':bStep===2?'確認へ →':'次へ →';
+  var btn = document.getElementById('b-btn-next');
+  btn.textContent = bStep===4?'決済へ進む':bStep===3?'確認へ →':'次へ →';
 }
+
 function bNext() {
-  if(bStep<3){bStep++;bSyncUI();if(bStep===3)bUpdateSum();}
+  if(bStep<4){bStep++;bSyncUI();if(bStep===4)bUpdateSum();}
   else{alert('（実装では決済へ遷移）');}
 }
 function bPrev(){if(bStep>1){bStep--;bSyncUI();}}
@@ -520,11 +617,26 @@ function bToggleOpt(k){
 }
 function bUpdateSum(){
   var q=bGetQty(), add=(bOpts.ai?300:0)+(bOpts.sms?100:0);
+  var subtotal = (700+add)*q;
+  var tax = Math.floor(subtotal*0.1);
+  var total = subtotal+tax;
   document.getElementById('bsum-qty').textContent=q+'台';
   document.getElementById('bsum-ai-row').style.display=bOpts.ai?'':'none';
   document.getElementById('bsum-sms-row').style.display=bOpts.sms?'':'none';
-  document.getElementById('bsum-total').textContent='¥'+((700+add)*q).toLocaleString()+' / 月';
+  document.getElementById('bsum-subtotal').textContent='¥'+subtotal.toLocaleString()+' / 月';
+  document.getElementById('bsum-tax').textContent='¥'+tax.toLocaleString()+' / 月';
+  document.getElementById('bsum-total').textContent='¥'+total.toLocaleString()+' / 月';
 }
+
+// 通知サービストグル: チェックONで緑、OFFでグレー
+document.addEventListener('DOMContentLoaded', function(){
+  var notifyToggle = document.querySelector('#detailModal .watch-toggle input');
+  if(notifyToggle){
+    notifyToggle.addEventListener('change', function(){
+      this.parentNode.querySelector('.ws').style.background = this.checked ? 'var(--green-dark)' : 'var(--gray-300)';
+    });
+  }
+});
 </script>
 </body>
 </html>

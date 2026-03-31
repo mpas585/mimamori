@@ -284,9 +284,9 @@
                     <option value="vacant" {{ request('status') === 'vacant' ? 'selected' : '' }}>⚪ 空室のみ</option>
                 </select>
                 <select name="watch" class="filter-select">
-                    <option value="">すべての見守り状態</option>
-                    <option value="on" {{ request('watch') === 'on' ? 'selected' : '' }}>見守りON</option>
-                    <option value="off" {{ request('watch') === 'off' ? 'selected' : '' }}>見守りOFF</option>
+                    <option value="">すべての外出モード状態</option>
+                    <option value="off" {{ request('watch') === 'off' ? 'selected' : '' }}>外出モードOFF（通常）</option>
+                    <option value="on" {{ request('watch') === 'on' ? 'selected' : '' }}>外出モードON（外出中）</option>
                     <option value="timer" {{ request('watch') === 'timer' ? 'selected' : '' }}>⏰ タイマー設定中</option>
                 </select>
                 <button type="submit" class="btn btn-sm btn-secondary">絞り込み</button>
@@ -306,7 +306,7 @@
             <table>
                 <thead>
                     <tr>
-                        <th>状態</th><th>部屋 / 名前</th><th>デバイスID</th><th>見守り</th><th>最終検知</th><th>電池</th><th>電波</th><th>操作</th>
+                        <th>状態</th><th>部屋 / 名前</th><th>デバイスID</th><th>外出モード</th><th>最終検知</th><th>電池</th><th>電波</th><th>操作</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -350,7 +350,7 @@
                             <td>
                                 @if(!$isVacant)
                                     <label class="watch-toggle">
-                                        <input type="checkbox" {{ !$device->away_mode ? 'checked' : '' }} onchange="toggleWatch('{{ $device->device_id }}', this.checked, this)">
+                                        <input type="checkbox" {{ $device->away_mode ? 'checked' : '' }} onchange="toggleAwayMode('{{ $device->device_id }}', this.checked, this)">
                                         <span class="watch-slider"></span>
                                     </label>
                                     @if($device->away_until) <span class="watch-timer-icon">⏰</span> @endif
@@ -533,7 +533,7 @@
                     <div class="detail-item"><p class="detail-item-label">電波強度</p><p class="detail-item-value" id="detailSignal">-</p></div>
                 </div></div>
 
-                <div class="detail-section"><div class="detail-section-title">⚙️ 見守り設定</div><div class="detail-grid">
+                <div class="detail-section"><div class="detail-section-title">⚙️ 外出モード設定</div><div class="detail-grid">
                     <div class="detail-item"><p class="detail-item-label">アラート時間</p>
                         <select class="detail-form-input" id="detailAlertHoursInput">
                             <option value="12">12時間</option>
@@ -555,7 +555,7 @@
                             <option value="1">ON</option>
                         </select>
                     </div>
-                    <div class="detail-item"><p class="detail-item-label">見守り</p><p class="detail-item-value" id="detailAwayMode">-</p></div>
+                    <div class="detail-item"><p class="detail-item-label">外出モード</p><p class="detail-item-value" id="detailAwayMode">-</p></div>
                 </div></div>
 
                 <div class="detail-section"><div class="detail-section-title">📝 登録情報</div><div class="detail-grid">
@@ -601,11 +601,11 @@
         </div>
     </div>
 
-    {{-- モーダル: 見守りOFF確認 --}}
+    {{-- モーダル: 外出モードON確認 --}}
     <div id="watchOffModal" class="modal-overlay" onclick="if(event.target===this)hideModal('watchOffModal')">
-        <div class="modal"><div class="modal-header"><h3>⚠️ 見守りをOFFにしますか？</h3><button class="modal-close" onclick="hideModal('watchOffModal')">×</button></div>
-            <div class="modal-body"><p><strong>⚠️ 注意:</strong> OFFにすると、このデバイスの未検知アラートが送信されなくなります。</p></div>
-            <div class="modal-footer"><button class="btn btn-secondary" onclick="cancelWatchOff()">キャンセル</button><button class="btn btn-danger" onclick="executeWatchOff()">OFFにする</button></div>
+        <div class="modal"><div class="modal-header"><h3>🚶 外出モードをONにしますか？</h3><button class="modal-close" onclick="hideModal('watchOffModal')">×</button></div>
+            <div class="modal-body"><p><strong>⚠️ 注意:</strong> 外出モードをONにすると、このデバイスの未検知アラートが送信されなくなります。</p><p style="color:var(--gray-500);font-size:13px;margin-top:8px;">外出・旅行などで一時的に通知を止めたい場合にご利用ください。</p></div>
+            <div class="modal-footer"><button class="btn btn-secondary" onclick="cancelAwayModeOn()">キャンセル</button><button class="btn btn-danger" onclick="executeAwayModeOn()">外出モードをONにする</button></div>
         </div>
     </div>
 
@@ -892,12 +892,29 @@ function executeClearAlert() {
     .catch(() => showToast('通信エラー', 'error'));
 }
 
-// ===== 見守りトグル =====
+// ===== 外出モード =====
 let pendingToggleDevice = null, pendingToggleCheckbox = null;
-function toggleWatch(deviceId, checked, checkbox) { if (!checked) { pendingToggleDevice = deviceId; pendingToggleCheckbox = checkbox; checkbox.checked = true; showModal('watchOffModal'); return; } sendToggleWatch(deviceId, false); }
-function cancelWatchOff() { hideModal('watchOffModal'); pendingToggleDevice = null; pendingToggleCheckbox = null; }
-function executeWatchOff() { if (pendingToggleDevice) { sendToggleWatch(pendingToggleDevice, true); if (pendingToggleCheckbox) pendingToggleCheckbox.checked = false; } hideModal('watchOffModal'); }
-function sendToggleWatch(deviceId, awayMode) {
+function toggleAwayMode(deviceId, checked, checkbox) {
+    if (checked) {
+        // チェック=外出モードON → 確認モーダル
+        pendingToggleDevice = deviceId;
+        pendingToggleCheckbox = checkbox;
+        checkbox.checked = false; // 確認前は元に戻す
+        showModal('watchOffModal');
+        return;
+    }
+    // チェック解除=外出モードOFF → 即実行
+    sendToggleAwayMode(deviceId, false);
+}
+function cancelAwayModeOn() { hideModal('watchOffModal'); pendingToggleDevice = null; pendingToggleCheckbox = null; }
+function executeAwayModeOn() {
+    if (pendingToggleDevice) {
+        sendToggleAwayMode(pendingToggleDevice, true);
+        if (pendingToggleCheckbox) pendingToggleCheckbox.checked = true;
+    }
+    hideModal('watchOffModal');
+}
+function sendToggleAwayMode(deviceId, awayMode) {
     fetch('/partner/org/devices/' + deviceId + '/toggle-watch', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' }, body: JSON.stringify({ away_mode: awayMode }) })
     .then(r => r.json()).then(d => { if (d.success) showToast(d.message, 'success'); else showToast('エラー', 'error'); })
     .catch(() => showToast('通信エラー', 'error'));
@@ -922,7 +939,7 @@ function showDeviceDetail(deviceId) {
         if (data.rssi !== null && data.rssi !== undefined) rssiLabel = data.rssi > -70 ? '良好 (' + data.rssi + 'dBm)' : data.rssi > -85 ? '普通 (' + data.rssi + 'dBm)' : '弱い (' + data.rssi + 'dBm)';
         document.getElementById('detailBattery').textContent = data.battery_pct !== null && data.battery_pct !== undefined ? data.battery_pct + '%' : '-';
         document.getElementById('detailSignal').textContent = rssiLabel;
-        var awayText = data.away_mode ? 'OFF（見守り停止中）' : 'ON'; if (data.away_until) awayText += '（〜' + data.away_until + '）';
+        var awayText = data.away_mode ? 'ON（外出中）' : 'OFF'; if (data.away_until) awayText += '（〜' + data.away_until + '）';
         document.getElementById('detailAwayMode').textContent = awayText;
         document.getElementById('detailRegistered').textContent = data.registered_at || '-';
 
