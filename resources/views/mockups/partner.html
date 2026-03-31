@@ -245,12 +245,12 @@ tbody tr:hover{background:var(--gray-100)}
       </select>
       <!-- ★ 変更: 見守り状態 → 外出モード状態 -->
       <select class="filter-select">
-        <option>すべての外出モード状態</option><option>外出モードOFF（通常）</option><option>外出モードON（外出中）</option><option>⏰ タイマー設定中</option>
+        <option>すべての外出モード状態</option><option>外出モードOFF（通常）</option><option>外出モードON（外出中）</option><option>🚶 外出スケジュール設定中</option>
       </select>
       <span class="toolbar-count">登録: <strong>45</strong> / 100台</span>
     </div>
     <div class="toolbar-right">
-      <button class="toolbar-btn" onclick="showModal('timerModal')">⏰ タイマー一覧</button>
+      <button class="toolbar-btn" onclick="showModal('timerModal')">🚶 外出スケジュール一覧</button>
       <button class="toolbar-btn" onclick="showBulkAddModal()">デバイス新規お申込み</button>
       <a href="#" class="toolbar-btn">📥 CSV出力</a>
     </div>
@@ -459,8 +459,8 @@ tbody tr:hover{background:var(--gray-100)}
   <!-- モーダル: タイマー一覧 -->
   <div id="timerModal" class="modal-overlay" onclick="if(event.target===this)hideModal('timerModal')">
     <div class="modal" style="max-width:540px;">
-      <div class="modal-header"><h3>⏰ タイマー設定一覧</h3><button class="modal-close" onclick="hideModal('timerModal')">×</button></div>
-      <div class="modal-body"><p style="font-size:13px;color:var(--gray-500);">タイマー設定中のデバイス一覧です。停止中または停止予定のデバイスが表示されます。</p></div>
+      <div class="modal-header"><h3>🚶 外出スケジュール一覧</h3><button class="modal-close" onclick="hideModal('timerModal')">×</button></div>
+      <div class="modal-body"><p style="font-size:13px;color:var(--gray-500);">外出スケジュールが設定されているデバイスの一覧です。外出モード中または外出予定のデバイスが表示されます。</p></div>
       <div class="modal-footer"><button class="btn btn-secondary" onclick="hideModal('timerModal')">閉じる</button></div>
     </div>
   </div>
@@ -522,7 +522,7 @@ tbody tr:hover{background:var(--gray-100)}
           <p class="detail-notify-note">※ご契約後〇ヶ月は停止機能はご利用になれません。</p>
         </div>
 
-        <div class="detail-section"><div class="detail-section-title">⏰ タイマー設定</div><p style="font-size:12px;color:var(--gray-400);">設定なし</p></div>
+        <div class="detail-section"><div class="detail-section-title">🚶 外出スケジュール</div><p style="font-size:12px;color:var(--gray-400);">設定なし</p><button class="detail-schedule-add" style="margin-top:8px;">＋ 外出スケジュール追加</button></div>
 
         <div class="detail-section"><div class="detail-section-title">📝 登録情報</div><div class="detail-grid">
           <div class="detail-item"><p class="detail-item-label">登録日</p><p class="detail-item-value">2024/06/15</p></div>

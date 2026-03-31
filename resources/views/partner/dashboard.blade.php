@@ -287,7 +287,7 @@
                     <option value="">すべての外出モード状態</option>
                     <option value="off" {{ request('watch') === 'off' ? 'selected' : '' }}>外出モードOFF（通常）</option>
                     <option value="on" {{ request('watch') === 'on' ? 'selected' : '' }}>外出モードON（外出中）</option>
-                    <option value="timer" {{ request('watch') === 'timer' ? 'selected' : '' }}>⏰ タイマー設定中</option>
+                    <option value="timer" {{ request('watch') === 'timer' ? 'selected' : '' }}>🚶 外出スケジュール設定中</option>
                 </select>
                 <button type="submit" class="btn btn-sm btn-secondary">絞り込み</button>
             </form>
@@ -295,7 +295,7 @@
         </div>
         <div class="toolbar-right">
             <button class="toolbar-btn" onclick="showNotificationModal()">🔔 通知設定</button>
-            <button class="toolbar-btn" onclick="showTimerListModal()">⏰ タイマー一覧</button>
+            <button class="toolbar-btn" onclick="showTimerListModal()">🚶 外出スケジュール一覧</button>
             <button class="toolbar-btn" onclick="showAddDeviceModal()">デバイス新規お申込み</button>
             <a href="{{ route('partner.org.csv') }}" class="toolbar-btn">📥 CSV出力</a>
         </div>
@@ -574,7 +574,7 @@
                     <p class="detail-notify-note">※ご契約後〇ヶ月は停止機能はご利用になれません。</p>
                 </div>
 
-                <div class="detail-section"><div class="detail-section-title">📅 スケジュール</div><div id="detailScheduleList"></div><button class="detail-schedule-add" onclick="openScheduleAddFromDetail()">＋ スケジュール追加</button></div>
+                <div class="detail-section"><div class="detail-section-title">🚶 外出スケジュール</div><div id="detailScheduleList"></div><button class="detail-schedule-add" onclick="openScheduleAddFromDetail()">＋ 外出スケジュール追加</button></div>
             </div>
             <div class="modal-footer" style="justify-content:space-between;">
                 <button type="button" class="cancel-link" onclick="showCancelFlow()">解約</button>
@@ -611,7 +611,7 @@
 
     {{-- モーダル: タイマー一覧 --}}
     <div id="timerListModal" class="modal-overlay" onclick="if(event.target===this)hideModal('timerListModal')">
-        <div class="modal" style="max-width:620px;"><div class="modal-header"><h3>⏰ タイマー一覧</h3><button class="modal-close" onclick="hideModal('timerListModal')">×</button></div>
+        <div class="modal" style="max-width:620px;"><div class="modal-header"><h3>🚶 外出スケジュール一覧</h3><button class="modal-close" onclick="hideModal('timerListModal')">×</button></div>
             <div class="modal-body" id="timerListBody"><div class="timer-list-loading">読み込み中...</div></div>
             <div class="modal-footer"><button class="btn btn-secondary" onclick="hideModal('timerListModal')">閉じる</button></div>
         </div>
@@ -619,7 +619,7 @@
 
     {{-- モーダル: スケジュール追加 --}}
     <div id="scheduleAddModal" class="modal-overlay" onclick="if(event.target===this)hideScheduleAddModal()">
-        <div class="modal" style="max-width:480px;"><div class="modal-header"><h3>📅 スケジュール追加</h3><button class="modal-close" onclick="hideScheduleAddModal()">×</button></div>
+        <div class="modal" style="max-width:480px;"><div class="modal-header"><h3>🚶 外出スケジュール追加</h3><button class="modal-close" onclick="hideScheduleAddModal()">×</button></div>
             <div class="modal-body">
                 <div class="schedule-device-label" id="scheduleDeviceLabel">対象: <strong>-</strong></div>
                 <div class="schedule-type-tabs">
@@ -655,8 +655,8 @@
 
     {{-- モーダル: スケジュール削除 --}}
     <div id="scheduleDeleteModal" class="modal-overlay" onclick="if(event.target===this)hideModal('scheduleDeleteModal')">
-        <div class="modal"><div class="modal-header"><h3>⚠️ スケジュール削除</h3><button class="modal-close" onclick="hideModal('scheduleDeleteModal')">×</button></div>
-            <div class="modal-body"><p>このスケジュールを削除しますか？</p><p id="scheduleDeleteDetail" style="color:var(--gray-500);font-size:13px;margin-top:8px;"></p></div>
+        <div class="modal"><div class="modal-header"><h3>⚠️ 外出スケジュール削除</h3><button class="modal-close" onclick="hideModal('scheduleDeleteModal')">×</button></div>
+            <div class="modal-body"><p>この外出スケジュールを削除しますか？</p><p id="scheduleDeleteDetail" style="color:var(--gray-500);font-size:13px;margin-top:8px;"></p></div>
             <div class="modal-footer"><button class="btn btn-secondary" onclick="hideModal('scheduleDeleteModal')">キャンセル</button><button class="btn btn-danger" onclick="executeDeleteSchedule()">削除する</button></div>
         </div>
     </div>
@@ -1005,7 +1005,7 @@ function openEditFromDetail() {
 
 function renderDetailSchedules(schedules, deviceId) {
     var c = document.getElementById('detailScheduleList');
-    if (!schedules || !schedules.length) { c.innerHTML = '<div class="detail-schedule-empty">スケジュールなし</div>'; return; }
+    if (!schedules || !schedules.length) { c.innerHTML = '<div class="detail-schedule-empty">外出スケジュールなし</div>'; return; }
     var html = '<div class="detail-schedule-list">';
     schedules.forEach(s => {
         html += '<div class="detail-schedule-item">';
@@ -1026,10 +1026,10 @@ async function loadTimerList() {
         const res = await fetch('{{ route("partner.org.timers") }}', { headers: { 'Accept': 'application/json' } });
         if (!res.ok) { body.innerHTML = '<div class="timer-list-empty">データの取得に失敗しました</div>'; return; }
         const data = await res.json();
-        if (!data.length) { body.innerHTML = '<div class="timer-list-empty">タイマーが設定されているデバイスはありません</div>'; return; }
+        if (!data.length) { body.innerHTML = '<div class="timer-list-empty">外出スケジュールが設定されているデバイスはありません</div>'; return; }
         let awayCount = 0, oneshotCount = 0, recurringCount = 0;
         data.forEach(d => { if (d.away_mode) awayCount++; d.schedules.forEach(s => { if (s.type === 'oneshot') oneshotCount++; else recurringCount++; }); });
-        let html = '<div class="timer-summary"><div class="timer-summary-item"><div class="timer-summary-value">' + data.length + '</div><div class="timer-summary-label">対象デバイス</div></div><div class="timer-summary-item"><div class="timer-summary-value">' + awayCount + '</div><div class="timer-summary-label">見守りOFF中</div></div><div class="timer-summary-item"><div class="timer-summary-value">' + oneshotCount + '</div><div class="timer-summary-label">単発予定</div></div><div class="timer-summary-item"><div class="timer-summary-value">' + recurringCount + '</div><div class="timer-summary-label">定期スケジュール</div></div></div>';
+        let html = '<div class="timer-summary"><div class="timer-summary-item"><div class="timer-summary-value">' + data.length + '</div><div class="timer-summary-label">対象デバイス</div></div><div class="timer-summary-item"><div class="timer-summary-value">' + awayCount + '</div><div class="timer-summary-label">外出モード中</div></div><div class="timer-summary-item"><div class="timer-summary-value">' + oneshotCount + '</div><div class="timer-summary-label">単発予定</div></div><div class="timer-summary-item"><div class="timer-summary-value">' + recurringCount + '</div><div class="timer-summary-label">定期スケジュール</div></div></div>';
         data.forEach(d => {
             html += '<div class="timer-device-group"><div class="timer-device-header"><div class="timer-device-info">';
             if (d.room_number) html += '<span class="timer-device-room">' + escapeHtml(d.room_number) + '</span>';
@@ -1044,8 +1044,8 @@ async function loadTimerList() {
                     else { html += '<div class="timer-schedule-icon recurring">🔁</div><div class="timer-schedule-info"><p class="timer-schedule-main">毎週 ' + escapeHtml(s.days_label) + ' ' + s.start_time + '〜' + (s.next_day ? '翌' : '') + s.end_time + '</p><p class="timer-schedule-sub">' + (s.memo ? escapeHtml(s.memo) : '（メモなし）') + '</p></div><span class="timer-schedule-type recurring">定期</span>'; }
                     html += '<button class="timer-delete-btn" onclick="confirmDeleteSchedule(\'' + escapeHtml(d.device_id) + '\',' + s.id + ',\'' + escapeHtml(s.type === 'oneshot' ? formatTimerDateTime(s.start_at) : s.days_label) + '\')">×</button></div>';
                 });
-            } else if (d.away_mode) { html += '<div class="timer-schedule-item"><div class="timer-schedule-icon oneshot">⏸</div><div class="timer-schedule-info"><p class="timer-schedule-main">手動で見守りOFF中</p><p class="timer-schedule-sub">スケジュール設定なし</p></div></div>'; }
-            html += '<button class="timer-add-btn" onclick="scheduleAddOrigin=\'timerlist\';openScheduleAddModal(\'' + escapeHtml(d.device_id) + '\',\'' + escapeHtml(d.room_number || '') + '\',\'' + escapeHtml(d.tenant_name || '') + '\')">＋ スケジュール追加</button></div>';
+            } else if (d.away_mode) { html += '<div class="timer-schedule-item"><div class="timer-schedule-icon oneshot">🚶</div><div class="timer-schedule-info"><p class="timer-schedule-main">手動で外出モード中</p><p class="timer-schedule-sub">外出スケジュール設定なし</p></div></div>'; }
+            html += '<button class="timer-add-btn" onclick="scheduleAddOrigin=\'timerlist\';openScheduleAddModal(\'' + escapeHtml(d.device_id) + '\',\'' + escapeHtml(d.room_number || '') + '\',\'' + escapeHtml(d.tenant_name || '') + '\')">＋ 外出スケジュール追加</button></div>';
         });
         body.innerHTML = html;
     } catch (e) { console.error(e); body.innerHTML = '<div class="timer-list-empty">通信エラーが発生しました</div>'; }
@@ -1095,7 +1095,7 @@ async function submitSchedule() {
     try {
         var res = await fetch('/partner/org/devices/' + scheduleTargetDeviceId + '/schedules', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' }, body: JSON.stringify(payload) });
         var data = await res.json();
-        if (res.ok && data.success) { showToast('スケジュールを追加しました', 'success'); hideScheduleAddModal(); if (scheduleAddOrigin === 'detail' && currentDetailDeviceId) showDeviceDetail(currentDetailDeviceId); loadTimerList(); }
+        if (res.ok && data.success) { showToast('外出スケジュールを追加しました', 'success'); hideScheduleAddModal(); if (scheduleAddOrigin === 'detail' && currentDetailDeviceId) showDeviceDetail(currentDetailDeviceId); loadTimerList(); }
         else showToast(data.message || (data.errors ? Object.values(data.errors).flat().join(', ') : '追加に失敗しました'), 'error');
     } catch (e) { console.error(e); showToast('通信エラーが発生しました', 'error'); }
 }
@@ -1107,7 +1107,7 @@ async function executeDeleteSchedule() {
     try {
         var res = await fetch('/partner/org/devices/' + deleteScheduleDeviceId + '/schedules/' + deleteScheduleId, { method: 'DELETE', headers: { 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' } });
         var data = await res.json();
-        if (res.ok && data.success) { showToast('スケジュールを削除しました', 'success'); hideModal('scheduleDeleteModal'); if (currentDetailDeviceId && document.getElementById('detailModal').classList.contains('show')) showDeviceDetail(currentDetailDeviceId); loadTimerList(); }
+        if (res.ok && data.success) { showToast('外出スケジュールを削除しました', 'success'); hideModal('scheduleDeleteModal'); if (currentDetailDeviceId && document.getElementById('detailModal').classList.contains('show')) showDeviceDetail(currentDetailDeviceId); loadTimerList(); }
         else showToast(data.message || '削除に失敗しました', 'error');
     } catch (e) { console.error(e); showToast('通信エラーが発生しました', 'error'); }
 }
