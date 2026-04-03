@@ -13,7 +13,7 @@ return new class extends Migration
             $table->unsignedBigInteger('device_id');
             $table->string('token', 64)->unique();
             $table->timestamp('created_at')->useCurrent();
-            $table->timestamp('expires_at');
+            $table->timestamp('expires_at')->nullable();
 
             $table->foreign('device_id')->references('id')->on('devices')->onDelete('cascade');
             $table->index('token');
