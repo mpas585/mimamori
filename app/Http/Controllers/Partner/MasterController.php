@@ -161,6 +161,7 @@ class MasterController extends Controller
         return response()->json([
             'device_id'              => $device->device_id,
             'status'                 => $device->status,
+            'organization_id'        => $device->organization_id,
             'organization_name'      => $device->organization ? $device->organization->name : null,
             'room_number'            => $assignment ? $assignment->room_number : null,
             'tenant_name'            => $assignment ? $assignment->tenant_name : null,
@@ -191,9 +192,6 @@ class MasterController extends Controller
     // デバイス編集系
     // ============================================================
 
-    /**
-     * 割当情報・設定更新（部屋番号・入居者名・メモ・アラート閾値・設置高さ・ペット除外）
-     */
     public function updateDeviceAssignment(Request $request, string $deviceId)
     {
         $device = Device::where('device_id', $deviceId)->firstOrFail();
@@ -207,7 +205,6 @@ class MasterController extends Controller
             'pet_exclusion_enabled' => 'nullable|boolean',
         ]);
 
-        // 割当情報更新
         if ($device->organization_id) {
             OrgDeviceAssignment::updateOrCreate(
                 ['organization_id' => $device->organization_id, 'device_id' => $device->id],
@@ -216,18 +213,15 @@ class MasterController extends Controller
         }
 
         $device->update([
-            'location_memo'          => $request->memo,
-            'alert_threshold_hours'  => $request->alert_threshold_hours ?? $device->alert_threshold_hours,
-            'install_height_cm'      => $request->install_height_cm     ?? $device->install_height_cm,
-            'pet_exclusion_enabled'  => $request->has('pet_exclusion_enabled') ? (int) $request->pet_exclusion_enabled : $device->pet_exclusion_enabled,
+            'location_memo'         => $request->memo,
+            'alert_threshold_hours' => $request->alert_threshold_hours ?? $device->alert_threshold_hours,
+            'install_height_cm'     => $request->install_height_cm     ?? $device->install_height_cm,
+            'pet_exclusion_enabled' => $request->has('pet_exclusion_enabled') ? (int) $request->pet_exclusion_enabled : $device->pet_exclusion_enabled,
         ]);
 
         return response()->json(['success' => true, 'message' => '更新しました']);
     }
 
-    /**
-     * 通知設定更新（SMS/電話）
-     */
     public function updateDeviceNotification(Request $request, string $deviceId)
     {
         $device = Device::where('device_id', $deviceId)->firstOrFail();
@@ -259,15 +253,10 @@ class MasterController extends Controller
         return response()->json(['success' => true, 'message' => '通知設定を保存しました']);
     }
 
-    /**
-     * 外出モードトグル
-     */
     public function toggleDeviceWatch(Request $request, string $deviceId)
     {
         $device = Device::where('device_id', $deviceId)->firstOrFail();
-
         $request->validate(['away_mode' => 'required|boolean']);
-
         $device->update(['away_mode' => $request->away_mode]);
 
         return response()->json([
@@ -277,9 +266,6 @@ class MasterController extends Controller
         ]);
     }
 
-    /**
-     * 警告解除
-     */
     public function clearDeviceAlert(Request $request, string $deviceId)
     {
         $device = Device::where('device_id', $deviceId)->firstOrFail();
@@ -298,23 +284,20 @@ class MasterController extends Controller
         return response()->json(['success' => true, 'message' => "デバイス {$deviceId} の警告を解除しました"]);
     }
 
-    /**
-     * スケジュール追加
-     */
     public function storeDeviceSchedule(Request $request, string $deviceId)
     {
         $device = Device::where('device_id', $deviceId)->firstOrFail();
 
         $validated = $request->validate([
-            'type'         => 'required|in:oneshot,recurring',
-            'start_at'     => 'required_if:type,oneshot|nullable|date',
-            'end_at'       => 'nullable|date|after:start_at',
-            'days_of_week' => 'required_if:type,recurring|nullable|array',
+            'type'           => 'required|in:oneshot,recurring',
+            'start_at'       => 'required_if:type,oneshot|nullable|date',
+            'end_at'         => 'nullable|date|after:start_at',
+            'days_of_week'   => 'required_if:type,recurring|nullable|array',
             'days_of_week.*' => 'integer|between:0,6',
-            'start_time'   => 'required_if:type,recurring|nullable|date_format:H:i',
-            'end_time'     => 'required_if:type,recurring|nullable|date_format:H:i',
-            'next_day'     => 'nullable|boolean',
-            'memo'         => 'nullable|string|max:200',
+            'start_time'     => 'required_if:type,recurring|nullable|date_format:H:i',
+            'end_time'       => 'required_if:type,recurring|nullable|date_format:H:i',
+            'next_day'       => 'nullable|boolean',
+            'memo'           => 'nullable|string|max:200',
         ]);
 
         $schedule = $device->schedules()->create([
@@ -331,9 +314,6 @@ class MasterController extends Controller
         return response()->json(['success' => true, 'schedule' => $schedule], 201);
     }
 
-    /**
-     * スケジュール削除
-     */
     public function destroyDeviceSchedule(Request $request, string $deviceId, int $scheduleId)
     {
         $device   = Device::where('device_id', $deviceId)->firstOrFail();

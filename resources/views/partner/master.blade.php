@@ -102,7 +102,6 @@
     .detail-status-badge.inactive { background: #f5f5f5; color: #9e9e9e; }
     .detail-clear-alert-btn { display: inline-flex; align-items: center; gap: 4px; padding: 4px 12px; font-size: 12px; font-weight: 600; font-family: inherit; color: var(--red); background: var(--white); border: 1px solid var(--red-light); border-radius: 6px; cursor: pointer; transition: all 0.2s; margin-left: 10px; }
     .detail-clear-alert-btn:hover { background: var(--red-light); border-color: var(--red); }
-    .detail-notify-note { font-size: 11px; color: var(--gray-500); margin-top: 6px; line-height: 1.5; }
     .detail-schedule-list { border: 1px solid var(--gray-200); border-radius: var(--radius); overflow: hidden; margin-bottom: 10px; }
     .detail-schedule-item { display: flex; align-items: center; padding: 8px 12px; border-bottom: 1px solid var(--gray-100); font-size: 13px; }
     .detail-schedule-item:last-child { border-bottom: none; }
@@ -138,6 +137,10 @@
     .toast.show { transform: translateY(0); opacity: 1; }
     .toast.success { background: #2e7d32; }
     .toast.error { background: var(--red); }
+    .premium-toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; background: var(--beige); border-radius: var(--radius); margin-bottom: 14px; border: 1px solid var(--gray-200); }
+    .premium-toggle-info p:first-child { font-size: 13px; font-weight: 600; color: var(--gray-700); }
+    .premium-toggle-info p:last-child { font-size: 11px; color: var(--gray-500); margin-top: 2px; }
+    .premium-toggle-control { display: flex; align-items: center; gap: 8px; }
 </style>
 @endsection
 
@@ -412,8 +415,19 @@
             </div>
             <div class="modal-section">
                 <div class="modal-section-title">🔔 通知設定</div>
+                {{-- プレミアムトグル（マスター専用） --}}
+                <div class="premium-toggle-row" id="masterPremiumToggleRow">
+                    <div class="premium-toggle-info">
+                        <p>⭐ プレミアム（SMS/電話通知）</p>
+                        <p id="masterPremiumOrgLabel">組織全体に適用されます</p>
+                    </div>
+                    <div class="premium-toggle-control">
+                        <label class="watch-toggle"><input type="checkbox" id="masterDetailPremiumToggle" onchange="masterTogglePremium(this.checked)"><span class="watch-slider"></span></label>
+                        <span id="masterDetailPremiumLabel" style="font-size:12px;color:var(--gray-500);">無効</span>
+                    </div>
+                </div>
                 <div id="masterDetailPremiumNote" style="display:none;padding:10px 12px;background:var(--yellow-light);border-radius:var(--radius);margin-bottom:12px;font-size:12px;color:#a16207;">
-                    ⚠️ SMS・電話通知はプレミアム契約が必要です。
+                    ⚠️ SMS・電話通知はプレミアム契約が必要です。上のトグルで有効にしてください。
                 </div>
                 <div style="border:1px solid var(--gray-200);border-radius:var(--radius);padding:14px;margin-bottom:10px;">
                     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
@@ -507,7 +521,7 @@
                         <option value="operator">オペレーター（組織管理者）</option>
                         <option value="master">マスター（全権限）</option>
                     </select>
-                    <p class="form-hint">オペレーター：担当組織のデバイスのみ / マスター：全機能</p>
+                    <p class="form-hint">オペレーター：担当組織のみ / マスター：全機能</p>
                 </div>
                 <div class="form-group" id="addAdminOrgRow">
                     <label class="form-label">所属組織</label>
@@ -652,6 +666,7 @@
 <script>
 const csrfToken = '{{ csrf_token() }}';
 let masterCurrentDeviceId = null;
+let masterCurrentOrgId = null;
 let masterScheduleType = 'oneshot';
 let masterDeleteScheduleId = null;
 
@@ -688,11 +703,14 @@ function generatePassword(inputId) {
 // ===== デバイス詳細 =====
 async function showDeviceDetail(deviceId) {
     masterCurrentDeviceId = deviceId;
+    masterCurrentOrgId = null;
     showModal('deviceDetailModal');
 
     try {
         const res = await fetch('/partner/devices/' + deviceId + '/detail', { headers: { 'Accept': 'application/json' } });
         const d = await res.json();
+
+        masterCurrentOrgId = d.organization_id || null;
 
         const statusLabels = { normal: '正常稼働中', warning: '注意', alert: '未検知警告', offline: '通信途絶', inactive: '未稼働' };
         const badge = document.getElementById('masterDetailStatusBadge');
@@ -705,10 +723,8 @@ async function showDeviceDetail(deviceId) {
         document.getElementById('masterDetailRoom').value = d.room_number || '';
         document.getElementById('masterDetailTenant').value = d.tenant_name || '';
 
-        const battPct = d.battery_pct !== null ? d.battery_pct + '%' : '-';
-        const battV = d.battery_voltage ? ' / ' + d.battery_voltage + 'V' : '';
         const battEl = document.getElementById('masterDetailBattery');
-        battEl.textContent = battPct + battV;
+        battEl.textContent = (d.battery_pct !== null ? d.battery_pct + '%' : '-') + (d.battery_voltage ? ' / ' + d.battery_voltage + 'V' : '');
         battEl.style.color = (d.battery_pct !== null && d.battery_pct < 20) ? '#c62828' : '';
         document.getElementById('masterDetailSignal').textContent = d.rssi_label || '-';
 
@@ -720,14 +736,20 @@ async function showDeviceDetail(deviceId) {
         document.getElementById('masterDetailRegistered').textContent = d.registered_at || '-';
         document.getElementById('masterDetailMemo').value = d.memo || '';
 
+        // プレミアムトグル
         const isPremium = d.premium_enabled || false;
-        document.getElementById('masterDetailPremiumNote').style.display = isPremium ? 'none' : '';
-        ['masterDetailSmsEnabled','masterDetailSmsPhone1','masterDetailSmsPhone2','masterDetailVoiceEnabled','masterDetailVoicePhone1','masterDetailVoicePhone2'].forEach(id => {
-            const el = document.getElementById(id);
-            el.disabled = !isPremium;
-            el.style.opacity = isPremium ? '' : '0.4';
-            el.style.cursor = isPremium ? '' : 'not-allowed';
-        });
+        document.getElementById('masterDetailPremiumToggle').checked = isPremium;
+        document.getElementById('masterDetailPremiumLabel').textContent = isPremium ? '有効' : '無効';
+        // 組織未割当の場合はトグルを無効化
+        const premiumToggle = document.getElementById('masterDetailPremiumToggle');
+        premiumToggle.disabled = !masterCurrentOrgId;
+        premiumToggle.style.opacity = masterCurrentOrgId ? '' : '0.4';
+        premiumToggle.style.cursor = masterCurrentOrgId ? '' : 'not-allowed';
+        const orgLabel = d.organization_name ? d.organization_name + ' 全体に適用' : '組織未割当（変更不可）';
+        document.getElementById('masterPremiumOrgLabel').textContent = orgLabel;
+
+        // SMS/電話のinput活性制御
+        masterApplyPremiumState(isPremium);
 
         document.getElementById('masterDetailSmsEnabled').checked = d.sms_enabled || false;
         document.getElementById('masterDetailSmsPhone1').value = d.sms_phone_1 || '';
@@ -738,6 +760,46 @@ async function showDeviceDetail(deviceId) {
 
         masterRenderSchedules(d.schedules || []);
     } catch(e) { showToast('詳細の取得に失敗しました', 'error'); }
+}
+
+function masterApplyPremiumState(isPremium) {
+    document.getElementById('masterDetailPremiumNote').style.display = isPremium ? 'none' : '';
+    ['masterDetailSmsEnabled','masterDetailSmsPhone1','masterDetailSmsPhone2','masterDetailVoiceEnabled','masterDetailVoicePhone1','masterDetailVoicePhone2'].forEach(id => {
+        const el = document.getElementById(id);
+        el.disabled = !isPremium;
+        el.style.opacity = isPremium ? '' : '0.4';
+        el.style.cursor = isPremium ? '' : 'not-allowed';
+    });
+}
+
+async function masterTogglePremium(enabled) {
+    if (!masterCurrentOrgId) {
+        showToast('組織に割り当てられていないデバイスです', 'error');
+        document.getElementById('masterDetailPremiumToggle').checked = !enabled;
+        return;
+    }
+    try {
+        const res = await fetch('/partner/orgs/' + masterCurrentOrgId + '/toggle-premium', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' },
+            body: JSON.stringify({ premium_enabled: enabled ? 1 : 0 })
+        });
+        const data = await res.json();
+        if (data.success) {
+            document.getElementById('masterDetailPremiumLabel').textContent = enabled ? '有効' : '無効';
+            masterApplyPremiumState(enabled);
+            // 組織タブのトグルも同期
+            const orgLabel = document.querySelector('.org-premium-label-' + masterCurrentOrgId);
+            if (orgLabel) orgLabel.textContent = enabled ? '有効' : '無効';
+            showToast(enabled ? 'プレミアムを有効にしました' : 'プレミアムを無効にしました', 'success');
+        } else {
+            document.getElementById('masterDetailPremiumToggle').checked = !enabled;
+            showToast('エラーが発生しました', 'error');
+        }
+    } catch(e) {
+        document.getElementById('masterDetailPremiumToggle').checked = !enabled;
+        showToast('通信エラーが発生しました', 'error');
+    }
 }
 
 async function masterSaveAssignment() {
