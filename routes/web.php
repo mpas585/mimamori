@@ -82,6 +82,7 @@ Route::post('/partner/password-reset/{token}', [PartnerPasswordResetController::
 
 Route::middleware(PartnerAuth::class)->prefix('partner')->group(function () {
     Route::get('/', [MasterController::class, 'index'])->name('partner.dashboard');
+    Route::post('/orgs/{orgId}/toggle-premium', [MasterController::class, 'toggleOrgPremium'])->name('partner.orgs.toggle-premium');
     Route::post('/issue', [MasterController::class, 'issueDevice'])->name('partner.issue');
     Route::post('/issue-bulk', [MasterController::class, 'issueBulk'])->name('partner.issue-bulk');
     Route::post('/logout', [PartnerLoginController::class, 'logout'])->name('partner.logout');

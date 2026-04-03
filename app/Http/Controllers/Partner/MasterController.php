@@ -5,21 +5,20 @@ namespace App\Http\Controllers\Partner;
 use App\Http\Controllers\Controller;
 use App\Models\PartnerUser;
 use App\Models\Device;
+use App\Models\Organization;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
 class MasterController extends Controller
 {
     /**
-     * ダッシュボード（デバイス一覧 + 統計 + 管理者一覧）
+     * ダッシュボード（デバイス一覧 + 統計 + 管理者一覧 + 組織一覧）
      */
     public function index(Request $request)
     {
-        // 統計
         $stats = [
             'total' => Device::count(),
             'active' => Device::where('status', '!=', 'inactive')->count(),
@@ -29,7 +28,6 @@ class MasterController extends Controller
             'inactive' => Device::where('status', 'inactive')->count(),
         ];
 
-        // デバイス一覧（検索・フィルタ対応）
         $query = Device::query();
 
         if ($request->filled('search')) {
@@ -46,10 +44,31 @@ class MasterController extends Controller
 
         $devices = $query->orderBy('created_at', 'desc')->paginate(20);
 
-        // 管理者一覧
         $adminUsers = PartnerUser::orderBy('role', 'asc')->orderBy('created_at', 'desc')->get();
 
-        return view('partner.master', compact('stats', 'devices', 'adminUsers'));
+        $organizations = Organization::withCount('devices')->orderBy('created_at', 'desc')->get();
+
+        return view('partner.master', compact('stats', 'devices', 'adminUsers', 'organizations'));
+    }
+
+    /**
+     * 組織のpremiumトグル
+     */
+    public function toggleOrgPremium(Request $request, int $orgId)
+    {
+        $org = Organization::findOrFail($orgId);
+
+        $request->validate([
+            'premium_enabled' => 'required|boolean',
+        ]);
+
+        $org->update(['premium_enabled' => (bool) $request->premium_enabled]);
+
+        return response()->json([
+            'success' => true,
+            'premium_enabled' => (bool) $org->premium_enabled,
+            'message' => $org->premium_enabled ? 'プレミアム機能を有効にしました' : 'プレミアム機能を無効にしました',
+        ]);
     }
 
     /**
@@ -66,7 +85,6 @@ class MasterController extends Controller
             'status' => 'inactive',
         ]);
 
-        // 通知設定を初期作成
         DB::table('notification_settings')->insert([
             'device_id' => $device->id,
             'email_enabled' => 1,
@@ -121,13 +139,6 @@ class MasterController extends Controller
         return back()->with('issued_bulk', $issued);
     }
 
-    // ============================================================
-    // 管理者アカウント管理
-    // ============================================================
-
-    /**
-     * 管理者アカウント作成
-     */
     public function storeAdminUser(Request $request)
     {
         $request->validate([
@@ -153,9 +164,6 @@ class MasterController extends Controller
         return redirect('/partner?tab=admins')->with('success', '管理者アカウント「' . $request->name . '」を作成しました');
     }
 
-    /**
-     * 管理者アカウント更新
-     */
     public function updateAdminUser(Request $request, int $id)
     {
         $admin = PartnerUser::findOrFail($id);
@@ -185,14 +193,10 @@ class MasterController extends Controller
         return redirect('/partner?tab=admins')->with('success', '管理者アカウント「' . $request->name . '」を更新しました');
     }
 
-    /**
-     * 管理者アカウント削除
-     */
     public function destroyAdminUser(int $id)
     {
         $admin = PartnerUser::findOrFail($id);
 
-        // 自分自身は削除不可
         if ($admin->id === Auth::guard('partner')->id()) {
             return redirect('/partner?tab=admins')->with('error', '自分自身のアカウントは削除できません');
         }
@@ -203,16 +207,9 @@ class MasterController extends Controller
         return redirect('/partner?tab=admins')->with('success', '管理者アカウント「' . $name . '」を削除しました');
     }
 
-    // ============================================================
-    // ヘルパー
-    // ============================================================
-
-    /**
-     * デバイスIDを生成（英数字6文字、重複なし）
-     */
     private function generateDeviceId(): string
     {
-        $chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // 紛らわしい文字を除外（0,O,1,I）
+        $chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 
         do {
             $id = '';
@@ -224,9 +221,6 @@ class MasterController extends Controller
         return $id;
     }
 
-    /**
-     * PIN生成（数字4桁）
-     */
     private function generatePin(): string
     {
         return str_pad((string) random_int(0, 9999), 4, '0', STR_PAD_LEFT);

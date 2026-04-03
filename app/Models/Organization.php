@@ -21,11 +21,13 @@ class Organization extends Model
         'notification_sms_1',
         'notification_sms_2',
         'notification_sms_enabled',
+        'premium_enabled',
     ];
 
     protected $casts = [
         'notification_enabled'     => 'boolean',
         'notification_sms_enabled' => 'boolean',
+        'premium_enabled'           => 'boolean',
     ];
 
     public function devices(): HasMany

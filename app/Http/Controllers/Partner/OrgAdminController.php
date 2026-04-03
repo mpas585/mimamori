@@ -341,6 +341,7 @@ class OrgAdminController extends Controller
             'voice_enabled' => $notif ? (bool) $notif->voice_enabled : false,
             'voice_phone_1' => $notif && $notif->voice_phone_1 ? preg_replace('/^\+81/', '0', $notif->voice_phone_1) : null,
             'voice_phone_2' => $notif && $notif->voice_phone_2 ? preg_replace('/^\+81/', '0', $notif->voice_phone_2) : null,
+            'premium_enabled' => (bool) ($device->organization?->premium_enabled ?? false),
         ]);
     }
 
