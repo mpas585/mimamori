@@ -4,6 +4,7 @@
 
 @section('styles')
 <style>
+<style>
     /* ===== 契紁E��報 ===== */
     .contract-info { display: flex; gap: 20px; margin-bottom: 16px; flex-wrap: wrap; }
     .contract-item { background: var(--white); border-radius: var(--radius-lg); padding: 16px 20px; box-shadow: var(--shadow-sm); border: 1px solid var(--gray-200); flex: 1; min-width: 200px; }
@@ -211,6 +212,7 @@
     .bulk-loading.show { display: block; }
     @media (max-width: 768px) { .status-grid { grid-template-columns: repeat(3, 1fr); } .toolbar { flex-direction: column; align-items: stretch; } .search-box { width: 100%; } .contract-info { flex-direction: column; } }
     @media (max-width: 480px) { .status-grid { grid-template-columns: repeat(2, 1fr); } }
+</style>
 </style>
 @endsection
 
