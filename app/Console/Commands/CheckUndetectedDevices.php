@@ -9,6 +9,7 @@ use App\Mail\DeviceAlertMail;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Carbon\Carbon;
+use Twilio\Rest\Client as TwilioClient;
 
 class CheckUndetectedDevices extends Command
 {
@@ -91,10 +92,7 @@ class CheckUndetectedDevices extends Command
      */
     private function sendNotification(Device $device, string $type, string $subject): void
     {
-        // --- デバイス個別の通知先に送信 ---
         $this->sendDeviceNotification($device, $type, $subject);
-
-        // --- 組織管理者への通知 ---
         $this->sendOrgNotification($device, $type, $subject);
     }
 
@@ -104,31 +102,40 @@ class CheckUndetectedDevices extends Command
     private function sendDeviceNotification(Device $device, string $type, string $subject): void
     {
         $notif = $device->notificationSetting;
-
-        // メールアドレスが登録されていて有効な場合
-        if (!$notif || !$notif->email_enabled) {
+        if (!$notif) {
             return;
         }
 
-        $mailSubject = "[みまもりデバイス] {$subject}";
         $body = $this->buildNotificationBody($device, $type);
+        $mailSubject = "[みまもりデバイス] {$subject}";
 
-        // email_1, email_2, email_3 に送信
-        foreach (['email_1', 'email_2', 'email_3'] as $field) {
-            if (empty($notif->$field)) {
-                continue;
+        // メール通知
+        if ($notif->email_enabled) {
+            foreach (['email_1', 'email_2', 'email_3'] as $field) {
+                if (empty($notif->$field)) {
+                    continue;
+                }
+                $this->sendMailWithLog($device, $type, $notif->$field, $mailSubject, $body);
             }
+        }
 
-            $this->sendMailWithLog($device, $type, $notif->$field, $mailSubject, $body);
+        // SMS通知（プレミアム機能）
+        if ($notif->sms_enabled) {
+            $smsBody = $this->buildSmsBody($device, $type);
+            foreach (['sms_phone_1', 'sms_phone_2'] as $field) {
+                if (empty($notif->$field)) {
+                    continue;
+                }
+                $this->sendSmsWithLog($device, $type, $notif->$field, $smsBody);
+            }
         }
     }
 
     /**
-     * 組織管理者への通知（デバイス個別の通知設定とは独立して動作）
+     * 組織管理者への通知
      */
     private function sendOrgNotification(Device $device, string $type, string $subject): void
     {
-        // 組織に所属していない場合はスキップ
         if (!$device->organization_id) {
             return;
         }
@@ -138,24 +145,19 @@ class CheckUndetectedDevices extends Command
             return;
         }
 
-        // 組織の通知メールアドレスを取得（notification_enabledがfalseなら空配列）
         $orgEmails = $organization->getNotificationEmails();
         if (empty($orgEmails)) {
             return;
         }
 
-        // デバイス個別の通知先と重複するメールは除外
         $deviceEmails = $this->getDeviceNotificationEmails($device);
-
         $mailSubject = "[みまもりデバイス] [{$organization->name}] {$subject}";
         $body = $this->buildOrgNotificationBody($device, $type, $organization);
 
         foreach ($orgEmails as $email) {
-            // デバイス個別通知と同じメアドには二重送信しない
             if (in_array($email, $deviceEmails)) {
                 continue;
             }
-
             $this->sendMailWithLog($device, $type, $email, $mailSubject, $body);
         }
     }
@@ -181,10 +183,7 @@ class CheckUndetectedDevices extends Command
 
             DB::table('notification_logs')
                 ->where('id', $logId)
-                ->update([
-                    'status' => 'sent',
-                    'sent_at' => now(),
-                ]);
+                ->update(['status' => 'sent', 'sent_at' => now()]);
 
             $this->info("  MAIL SENT: {$recipient}");
         } catch (\Exception $e) {
@@ -196,6 +195,50 @@ class CheckUndetectedDevices extends Command
                 ]);
 
             $this->error("  MAIL FAILED: {$recipient} - {$e->getMessage()}");
+        }
+    }
+
+    /**
+     * SMS送信 + 通知ログ記録
+     */
+    private function sendSmsWithLog(Device $device, string $type, string $recipient, string $body): void
+    {
+        $logId = DB::table('notification_logs')->insertGetId([
+            'device_id' => $device->id,
+            'type' => $type,
+            'channel' => 'sms',
+            'recipient' => $recipient,
+            'subject' => null,
+            'body' => $body,
+            'status' => 'pending',
+            'created_at' => now(),
+        ]);
+
+        try {
+            $twilio = new TwilioClient(
+                config('services.twilio.sid'),
+                config('services.twilio.token')
+            );
+
+            $twilio->messages->create($recipient, [
+                'from' => config('services.twilio.from'),
+                'body' => $body,
+            ]);
+
+            DB::table('notification_logs')
+                ->where('id', $logId)
+                ->update(['status' => 'sent', 'sent_at' => now()]);
+
+            $this->info("  SMS SENT: {$recipient}");
+        } catch (\Exception $e) {
+            DB::table('notification_logs')
+                ->where('id', $logId)
+                ->update([
+                    'status' => 'failed',
+                    'error_message' => mb_substr($e->getMessage(), 0, 500),
+                ]);
+
+            $this->error("  SMS FAILED: {$recipient} - {$e->getMessage()}");
         }
     }
 
@@ -217,6 +260,25 @@ class CheckUndetectedDevices extends Command
         }
 
         return $emails;
+    }
+
+    /**
+     * SMS本文を生成（短文）
+     */
+    private function buildSmsBody(Device $device, string $type): string
+    {
+        $name = $device->nickname ?: $device->device_id;
+
+        if ($type === 'alert') {
+            $hours = $device->alert_threshold_hours;
+            return "【みまもりデバイス】{$name}：{$hours}時間以上、人の動きが検知されていません。ご確認ください。";
+        }
+
+        if ($type === 'offline') {
+            return "【みまもりデバイス】{$name}：デバイスとの通信が途絶えています。電池切れまたは電波状況をご確認ください。";
+        }
+
+        return '';
     }
 
     /**
@@ -259,14 +321,13 @@ class CheckUndetectedDevices extends Command
     }
 
     /**
-     * 組織管理者向け通知の本文を生成（部屋番号等の追加情報あり）
+     * 組織管理者向け通知の本文を生成
      */
     private function buildOrgNotificationBody(Device $device, string $type, Organization $organization): string
     {
         $name = $device->nickname ?: $device->device_id;
         $now = Carbon::now()->format('Y/m/d H:i');
 
-        // 部屋番号・入居者名を取得
         $assignment = $device->orgAssignment;
         $roomNumber = $assignment ? $assignment->room_number : null;
         $tenantName = $assignment ? $assignment->tenant_name : null;
