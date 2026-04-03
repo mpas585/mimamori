@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title', 'みまもりトーフ 管理画面')</title>
+    <title>@yield('title', '縺ｿ縺ｾ繧ゅｊ繝医・繝・邂｡逅・判髱｢')</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
@@ -43,7 +43,7 @@
             min-height: 100vh;
         }
 
-        /* ナビゲーション */
+        /* 繝翫ン繧ｲ繝ｼ繧ｷ繝ｧ繝ｳ */
         .nav {
             background: var(--gray-800);
             padding: 0 20px;
@@ -83,14 +83,14 @@
         }
         .nav-link:hover { color: var(--white); }
 
-        /* メインコンテンツ */
+        /* 繝｡繧､繝ｳ繧ｳ繝ｳ繝・Φ繝・*/
         .main {
             max-width: 1200px;
             margin: 0 auto;
             padding: 24px 20px;
         }
 
-        /* カード */
+        /* 繧ｫ繝ｼ繝・*/
         .card {
             background: var(--white);
             border-radius: var(--radius-lg);
@@ -106,7 +106,7 @@
             margin-bottom: 16px;
         }
 
-        /* ボタン */
+        /* 繝懊ち繝ｳ */
         .btn {
             display: inline-flex;
             align-items: center;
@@ -139,7 +139,7 @@
         .btn-danger:hover { background: #c62828; }
         .btn-sm { padding: 6px 12px; font-size: 12px; }
 
-        /* フォーム */
+        /* 繝輔か繝ｼ繝 */
         .form-group { margin-bottom: 16px; }
         .form-label {
             display: block;
@@ -170,7 +170,7 @@
             margin-top: 4px;
         }
 
-        /* アラートバナー */
+        /* 繧｢繝ｩ繝ｼ繝医ヰ繝翫・ */
         .alert-banner {
             display: flex;
             align-items: center;
@@ -205,7 +205,7 @@
             margin-left: 12px;
         }
 
-        /* モーダル */
+        /* 繝｢繝ｼ繝繝ｫ */
         .modal-overlay {
             display: none;
             position: fixed;
@@ -261,7 +261,7 @@
             border-top: 1px solid var(--gray-200);
         }
 
-        /* フラッシュメッセージ */
+        /* 繝輔Λ繝・す繝･繝｡繝・そ繝ｼ繧ｸ */
         .flash-success {
             background: var(--green-light);
             color: var(--green-dark);
@@ -288,18 +288,17 @@
             .main { padding: 16px 12px; }
         }
     </style>
-    <style>@yield('styles')</style>
+    @yield('styles')
 </head>
 <body>
     <nav class="nav">
         <a href="/partner" class="nav-brand">
-            🧈 みまもりトーフ
-            @if(isset($organization))
-                <span class="org-name">{{ $organization->name }} 管理画面</span>
+            ｧ・縺ｿ縺ｾ繧ゅｊ繝医・繝・            @if(isset($organization))
+                <span class="org-name">{{ $organization->name }} 邂｡逅・判髱｢</span>
             @endif
         </a>
         <div class="nav-right">
-            <a href="{{ route('partner.password-change') }}" class="nav-link">🔐 アカウント設定</a>
+            <a href="{{ route('partner.password-change') }}" class="nav-link">柏 繧｢繧ｫ繧ｦ繝ｳ繝郁ｨｭ螳・/a>
         </div>
     </nav>
 
