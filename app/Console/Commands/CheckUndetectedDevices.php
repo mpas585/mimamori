@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
+use App\Models\AiCallLog;
 use App\Models\Device;
 use App\Models\Organization;
 use App\Mail\DeviceAlertMail;
@@ -106,6 +107,14 @@ class CheckUndetectedDevices extends Command
             return;
         }
 
+        // AIコール契約済み（voice_enabled）かつアラート時 → 電話を先に発信
+        // 通話結果の通知はAiCallControllerのWebhookで処理するのでここでは終了
+        if ($notif->voice_enabled && !empty($notif->voice_phone_1) && $type === 'alert') {
+            $this->makeAiCall($device, $notif->voice_phone_1);
+            $this->info("  AI CALL: {$notif->voice_phone_1}");
+            return;
+        }
+
         $body = $this->buildNotificationBody($device, $type);
         $mailSubject = "[みまもりデバイス] {$subject}";
 
@@ -128,6 +137,43 @@ class CheckUndetectedDevices extends Command
                 }
                 $this->sendSmsWithLog($device, $type, $notif->$field, $smsBody);
             }
+        }
+    }
+
+    /**
+     * AIコール発信
+     */
+    private function makeAiCall(Device $device, string $phone): void
+    {
+        $log = AiCallLog::create([
+            'device_id'   => $device->id,
+            'call_status' => 'failed',
+            'called_at'   => now(),
+        ]);
+
+        try {
+            $twilio = new TwilioClient(
+                config('services.twilio.sid'),
+                config('services.twilio.token')
+            );
+
+            $call = $twilio->calls->create(
+                $phone,
+                config('services.twilio.from'),
+                [
+                    'url'                  => config('app.url') . '/api/ai-call/twiml',
+                    'statusCallback'       => config('app.url') . '/api/ai-call/status-webhook',
+                    'statusCallbackMethod' => 'POST',
+                    'statusCallbackEvent'  => ['completed', 'no-answer', 'busy', 'failed'],
+                    'timeout'              => 30,
+                ]
+            );
+
+            $log->update(['call_sid' => $call->sid]);
+
+        } catch (\Exception $e) {
+            $log->update(['error_message' => mb_substr($e->getMessage(), 0, 500)]);
+            $this->error("  AI CALL FAILED: {$e->getMessage()}");
         }
     }
 
