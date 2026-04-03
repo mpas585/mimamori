@@ -20,13 +20,11 @@ use App\Http\Middleware\PartnerAuth;
 // ユーザー画面
 // ============================================================
 
-// ゲスト（未ログイン）
 Route::middleware('guest')->group(function () {
     Route::get('/login', [DeviceLoginController::class, 'showLoginForm'])->name('login');
     Route::post('/login', [DeviceLoginController::class, 'login']);
 });
 
-// PIN再設定（ゲスト・認証済み両方アクセス可）
 Route::middleware('throttle:5,1')->group(function () {
     Route::get('/pin-reset', [PinResetController::class, 'showForm'])->name('pin-reset');
     Route::post('/pin-reset', [PinResetController::class, 'verifyDevice']);
@@ -37,10 +35,8 @@ Route::middleware('throttle:5,1')->group(function () {
     Route::post('/pin-reset/token/{token}', [PinResetController::class, 'resetWithToken']);
 });
 
-// メール認証リンク（ログイン不要でアクセス可能にする）
 Route::get('/email-settings/verify/{token}', [EmailSettingsController::class, 'verify'])->name('email-settings.verify');
 
-// 公開ページ（ゲスト・認証済み両方アクセス可）
 Route::get('/terms', function () {
     return view('terms');
 })->name('terms');
@@ -48,7 +44,6 @@ Route::get('/terms', function () {
 Route::get('/contact', [ContactController::class, 'index'])->name('contact');
 Route::post('/contact', [ContactController::class, 'send'])->middleware('throttle:5,1');
 
-// 認証済みユーザー
 Route::middleware('auth')->group(function () {
     Route::get('/', function () {
         return redirect('/mypage');
@@ -58,22 +53,18 @@ Route::middleware('auth')->group(function () {
     Route::post('/mypage/toggle-watch', [MypageController::class, 'toggleWatch']);
     Route::post('/logout', [DeviceLoginController::class, 'logout'])->name('logout');
 
-    // 設定
     Route::get('/settings', [SettingsController::class, 'index'])->name('settings');
     Route::post('/settings/device', [SettingsController::class, 'updateDevice']);
     Route::post('/settings/notification', [SettingsController::class, 'updateNotification']);
     Route::post('/settings/test-notification', [SettingsController::class, 'sendTestNotification']);
 
-    // メールアドレス設定
     Route::get('/email-settings', [EmailSettingsController::class, 'index'])->name('email-settings');
     Route::post('/email-settings/send', [EmailSettingsController::class, 'sendVerification'])->name('email-settings.send');
     Route::get('/email-settings/sent', [EmailSettingsController::class, 'sent'])->name('email-settings.sent');
     Route::post('/email-settings/delete', [EmailSettingsController::class, 'delete'])->name('email-settings.delete');
 
-    // 検知ログ
     Route::get('/logs', [LogController::class, 'index'])->name('logs');
 
-    // スケジュール（外出モード）
     Route::apiResource('schedules', ScheduleController::class)->except(['show']);
 });
 
@@ -81,35 +72,29 @@ Route::middleware('auth')->group(function () {
 // パートナー（管理会社）画面
 // ============================================================
 
-// パートナーログイン（未認証）
 Route::get('/partner/login', [PartnerLoginController::class, 'showLoginForm'])->name('partner.login');
 Route::post('/partner/login', [PartnerLoginController::class, 'login']);
 
-// パスワードリセット（未認証）
 Route::get('/partner/password-reset', [PartnerPasswordResetController::class, 'showRequestForm'])->name('partner.password-reset');
 Route::post('/partner/password-reset', [PartnerPasswordResetController::class, 'sendResetLink']);
 Route::get('/partner/password-reset/{token}', [PartnerPasswordResetController::class, 'showResetForm'])->name('partner.password-reset.show');
 Route::post('/partner/password-reset/{token}', [PartnerPasswordResetController::class, 'reset']);
 
-// パートナー認証済み（共通）
 Route::middleware(PartnerAuth::class)->prefix('partner')->group(function () {
     Route::get('/', [MasterController::class, 'index'])->name('partner.dashboard');
     Route::post('/issue', [MasterController::class, 'issueDevice'])->name('partner.issue');
     Route::post('/issue-bulk', [MasterController::class, 'issueBulk'])->name('partner.issue-bulk');
     Route::post('/logout', [PartnerLoginController::class, 'logout'])->name('partner.logout');
 
-    // アカウント設定（パスワード変更 + メール変更）
     Route::get('/password-change', [PartnerPasswordController::class, 'showForm'])->name('partner.password-change');
     Route::post('/password-change', [PartnerPasswordController::class, 'update'])->name('partner.password-change.update');
     Route::post('/email-change', [PartnerPasswordController::class, 'updateEmail'])->name('partner.email-change');
 
-    // 管理者アカウント管理
     Route::post('/admin-users', [MasterController::class, 'storeAdminUser'])->name('partner.admin-users.store');
     Route::put('/admin-users/{id}', [MasterController::class, 'updateAdminUser'])->name('partner.admin-users.update');
     Route::delete('/admin-users/{id}', [MasterController::class, 'destroyAdminUser'])->name('partner.admin-users.destroy');
 });
 
-// 組織管理者（operator）専用
 Route::middleware(PartnerAuth::class.':operator')->prefix('partner/org')->group(function () {
     Route::get('/', [OrgAdminController::class, 'index'])->name('partner.org.dashboard');
     Route::post('/devices/add', [OrgAdminController::class, 'addDevice'])->name('partner.org.devices.add');
@@ -119,12 +104,12 @@ Route::middleware(PartnerAuth::class.':operator')->prefix('partner/org')->group(
     Route::post('/devices/{deviceId}/clear-alert', [OrgAdminController::class, 'clearAlert'])->name('partner.org.devices.clear-alert');
     Route::get('/devices/{deviceId}/detail', [OrgAdminController::class, 'deviceDetail'])->name('partner.org.devices.detail');
     Route::put('/devices/{deviceId}/assignment', [OrgAdminController::class, 'updateAssignment'])->name('partner.org.devices.update-assignment');
+    Route::post('/devices/{deviceId}/notification', [OrgAdminController::class, 'updateDeviceNotification'])->name('partner.org.devices.update-notification');
     Route::get('/csv', [OrgAdminController::class, 'exportCsv'])->name('partner.org.csv');
     Route::get('/timers', [OrgAdminController::class, 'timerList'])->name('partner.org.timers');
     Route::post('/devices/{deviceId}/schedules', [OrgAdminController::class, 'storeSchedule'])->name('partner.org.devices.schedules.store');
     Route::delete('/devices/{deviceId}/schedules/{scheduleId}', [OrgAdminController::class, 'destroySchedule'])->name('partner.org.devices.schedules.destroy');
 
-    // 組織通知設定
     Route::get('/notification', [OrgAdminController::class, 'getNotification'])->name('partner.org.notification');
     Route::post('/notification', [OrgAdminController::class, 'updateNotification'])->name('partner.org.notification.update');
 });

@@ -313,6 +313,8 @@ class OrgAdminController extends Controller
             return $data;
         });
 
+        $notif = $device->notificationSetting;
+
         return response()->json([
             'device_id' => $device->device_id,
             'status' => $device->status,
@@ -333,6 +335,12 @@ class OrgAdminController extends Controller
             'memo' => $device->location_memo,
             'registered_at' => $device->created_at->format('Y/m/d'),
             'schedules' => $schedules,
+            'sms_enabled'   => $notif ? (bool) $notif->sms_enabled : false,
+            'sms_phone_1'   => $notif && $notif->sms_phone_1 ? preg_replace('/^\+81/', '0', $notif->sms_phone_1) : null,
+            'sms_phone_2'   => $notif && $notif->sms_phone_2 ? preg_replace('/^\+81/', '0', $notif->sms_phone_2) : null,
+            'voice_enabled' => $notif ? (bool) $notif->voice_enabled : false,
+            'voice_phone_1' => $notif && $notif->voice_phone_1 ? preg_replace('/^\+81/', '0', $notif->voice_phone_1) : null,
+            'voice_phone_2' => $notif && $notif->voice_phone_2 ? preg_replace('/^\+81/', '0', $notif->voice_phone_2) : null,
         ]);
     }
 
@@ -577,6 +585,46 @@ class OrgAdminController extends Controller
         $schedule->delete();
 
         return response()->json(['success' => true, 'message' => 'スケジュールを削除しました']);
+    }
+
+    /**
+     * デバイス個別の通知先設定を更新（SMS/電話）
+     */
+    public function updateDeviceNotification(Request $request, $deviceId)
+    {
+        $organization = $this->getOrganization();
+
+        $device = Device::where('device_id', $deviceId)
+            ->where('organization_id', $organization->id)
+            ->firstOrFail();
+
+        $request->validate([
+            'sms_enabled'   => 'nullable|boolean',
+            'sms_phone_1'   => 'nullable|string|max:20',
+            'sms_phone_2'   => 'nullable|string|max:20',
+            'voice_enabled' => 'nullable|boolean',
+            'voice_phone_1' => 'nullable|string|max:20',
+            'voice_phone_2' => 'nullable|string|max:20',
+        ]);
+
+        $notif = $device->notificationSetting;
+        if (!$notif) {
+            $notif = \App\Models\NotificationSetting::create(['device_id' => $device->id]);
+        }
+
+        $data = [];
+        if ($request->has('sms_enabled'))   $data['sms_enabled']   = (bool) $request->sms_enabled;
+        if ($request->has('sms_phone_1'))   $data['sms_phone_1']   = \App\Helpers\PhoneHelper::normalize($request->sms_phone_1);
+        if ($request->has('sms_phone_2'))   $data['sms_phone_2']   = \App\Helpers\PhoneHelper::normalize($request->sms_phone_2);
+        if ($request->has('voice_enabled')) $data['voice_enabled'] = (bool) $request->voice_enabled;
+        if ($request->has('voice_phone_1')) $data['voice_phone_1'] = \App\Helpers\PhoneHelper::normalize($request->voice_phone_1);
+        if ($request->has('voice_phone_2')) $data['voice_phone_2'] = \App\Helpers\PhoneHelper::normalize($request->voice_phone_2);
+
+        if (!empty($data)) {
+            $notif->update($data);
+        }
+
+        return response()->json(['success' => true, 'message' => '通知設定を更新しました']);
     }
 
     /**

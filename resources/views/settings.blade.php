@@ -470,7 +470,7 @@
         <input type="tel" class="form-input" id="phoneInput1" placeholder="+819012345678" style="margin-bottom:12px;">
         <p class="phone-modal-hint">電話番号2（任意）</p>
         <input type="tel" class="form-input" id="phoneInput2" placeholder="+819012345678">
-        <p style="font-size:11px;color:var(--gray-400);margin-top:8px;">国際形式（+81から始まる形式）で入力してください</p>
+
         <div class="phone-modal-actions">
             <button class="btn-cancel" onclick="closePhoneModal()">キャンセル</button>
             <button class="btn-save" onclick="savePhone()">保存</button>

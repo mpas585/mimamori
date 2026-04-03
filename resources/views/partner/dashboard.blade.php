@@ -507,11 +507,29 @@
                     <div class="detail-item"><p class="detail-item-label">メモ</p><input type="text" class="detail-form-input" id="detailMemoInput" placeholder="メモを入力..." maxlength="200"></div>
                 </div></div>
                 <div class="detail-section"><div class="detail-section-title">🔔 通知サービス</div>
-                    <div style="display:flex;align-items:center;gap:12px;margin-bottom:6px;">
+                    <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
                         <label class="watch-toggle"><input type="checkbox" id="detailNotifyEnabled" checked onchange="toggleNotifyService(this.checked)"><span class="watch-slider"></span></label>
                         <span id="detailNotifyLabel" style="font-size:13px;color:var(--gray-700);">有効</span>
                     </div>
-                    <p class="detail-notify-note">※ご契約後〇ヶ月は停止機能はご利用になれません。</p>
+                    <p class="detail-notify-note" style="margin-bottom:16px;">※ご契約後〇ヶ月は停止機能はご利用になれません。</p>
+                    {{-- SMS通知 --}}
+                    <div style="border:1px solid var(--gray-200);border-radius:var(--radius);padding:14px;margin-bottom:10px;">
+                        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+                            <p style="font-size:13px;font-weight:600;color:var(--gray-700);">💬 SMS通知</p>
+                            <label class="watch-toggle"><input type="checkbox" id="detailSmsEnabled" onchange="saveDetailNotification()"><span class="watch-slider"></span></label>
+                        </div>
+                        <input type="tel" class="detail-form-input" id="detailSmsPhone1" placeholder="09012345678" style="margin-bottom:6px;" onblur="saveDetailNotification()">
+                        <input type="tel" class="detail-form-input" id="detailSmsPhone2" placeholder="09012345678（任意）" onblur="saveDetailNotification()">
+                    </div>
+                    {{-- 電話通知 --}}
+                    <div style="border:1px solid var(--gray-200);border-radius:var(--radius);padding:14px;">
+                        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+                            <p style="font-size:13px;font-weight:600;color:var(--gray-700);">📞 電話通知（AIコール）</p>
+                            <label class="watch-toggle"><input type="checkbox" id="detailVoiceEnabled" onchange="saveDetailNotification()"><span class="watch-slider"></span></label>
+                        </div>
+                        <input type="tel" class="detail-form-input" id="detailVoicePhone1" placeholder="09012345678" style="margin-bottom:6px;" onblur="saveDetailNotification()">
+                        <input type="tel" class="detail-form-input" id="detailVoicePhone2" placeholder="09012345678（任意）" onblur="saveDetailNotification()">
+                    </div>
                 </div>
                 <div class="detail-section"><div class="detail-section-title">🚶 外出スケジュール</div><div id="detailScheduleList"></div><button class="detail-schedule-add" onclick="openScheduleAddFromDetail()">＋ 外出スケジュール追加</button></div>
             </div>
@@ -800,6 +818,12 @@ function showDeviceDetail(deviceId) {
         var notifyEnabled = data.notification_service_enabled !== false;
         document.getElementById('detailNotifyEnabled').checked = notifyEnabled;
         document.getElementById('detailNotifyLabel').textContent = notifyEnabled ? '有効' : '停止中';
+        document.getElementById('detailSmsEnabled').checked = data.sms_enabled || false;
+        document.getElementById('detailSmsPhone1').value = data.sms_phone_1 || '';
+        document.getElementById('detailSmsPhone2').value = data.sms_phone_2 || '';
+        document.getElementById('detailVoiceEnabled').checked = data.voice_enabled || false;
+        document.getElementById('detailVoicePhone1').value = data.voice_phone_1 || '';
+        document.getElementById('detailVoicePhone2').value = data.voice_phone_2 || '';
         renderDetailSchedules(data.schedules || [], data.device_id);
         showModal('detailModal');
     }).catch(() => showToast('詳細の取得に失敗しました', 'error'));
@@ -817,6 +841,24 @@ async function saveDetailChanges() {
 }
 
 function toggleNotifyService(enabled) { document.getElementById('detailNotifyLabel').textContent = enabled ? '有効' : '停止中'; showToast(enabled ? '通知サービスを有効にしました' : '通知サービスを停止しました', 'success'); }
+function saveDetailNotification() {
+    if (!currentDetailDeviceId) return;
+    var payload = {
+        sms_enabled: document.getElementById('detailSmsEnabled').checked ? 1 : 0,
+        sms_phone_1: document.getElementById('detailSmsPhone1').value || null,
+        sms_phone_2: document.getElementById('detailSmsPhone2').value || null,
+        voice_enabled: document.getElementById('detailVoiceEnabled').checked ? 1 : 0,
+        voice_phone_1: document.getElementById('detailVoicePhone1').value || null,
+        voice_phone_2: document.getElementById('detailVoicePhone2').value || null,
+    };
+    fetch('/partner/org/devices/' + currentDetailDeviceId + '/notification', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' },
+        body: JSON.stringify(payload)
+    })
+    .then(r => r.json()).then(d => { if (d.success) showToast('通知設定を保存しました', 'success'); })
+    .catch(() => showToast('保存に失敗しました', 'error'));
+}
 function showCancelFlow() { showModal('cancelFlowModal'); }
 
 function renderDetailSchedules(schedules, deviceId) {
