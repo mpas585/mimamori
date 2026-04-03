@@ -37,16 +37,13 @@ Route::middleware('throttle:5,1')->group(function () {
 
 Route::get('/email-settings/verify/{token}', [EmailSettingsController::class, 'verify'])->name('email-settings.verify');
 
-Route::get('/terms', function () {
-    return view('terms');
-})->name('terms');
+Route::get('/terms', function () { return view('terms'); })->name('terms');
 
 Route::get('/contact', [ContactController::class, 'index'])->name('contact');
 Route::post('/contact', [ContactController::class, 'send'])->middleware('throttle:5,1');
 
 Route::middleware('auth')->group(function () {
     Route::get('/', function () { return redirect('/mypage'); });
-
     Route::get('/mypage', [MypageController::class, 'index'])->name('mypage');
     Route::post('/mypage/toggle-watch', [MypageController::class, 'toggleWatch']);
     Route::post('/logout', [DeviceLoginController::class, 'logout'])->name('logout');
@@ -62,7 +59,6 @@ Route::middleware('auth')->group(function () {
     Route::post('/email-settings/delete', [EmailSettingsController::class, 'delete'])->name('email-settings.delete');
 
     Route::get('/logs', [LogController::class, 'index'])->name('logs');
-
     Route::apiResource('schedules', ScheduleController::class)->except(['show']);
 });
 
@@ -94,6 +90,7 @@ Route::middleware(PartnerAuth::class)->prefix('partner')->group(function () {
     Route::post('/devices/{deviceId}/notification', [MasterController::class, 'updateDeviceNotification'])->name('partner.devices.update-notification');
     Route::post('/devices/{deviceId}/toggle-watch', [MasterController::class, 'toggleDeviceWatch'])->name('partner.devices.toggle-watch');
     Route::post('/devices/{deviceId}/clear-alert', [MasterController::class, 'clearDeviceAlert'])->name('partner.devices.clear-alert');
+    Route::post('/devices/{deviceId}/toggle-premium', [MasterController::class, 'toggleDevicePremium'])->name('partner.devices.toggle-premium');
     Route::post('/devices/{deviceId}/schedules', [MasterController::class, 'storeDeviceSchedule'])->name('partner.devices.schedules.store');
     Route::delete('/devices/{deviceId}/schedules/{scheduleId}', [MasterController::class, 'destroyDeviceSchedule'])->name('partner.devices.schedules.destroy');
 
@@ -119,6 +116,7 @@ Route::middleware(PartnerAuth::class.':operator')->prefix('partner/org')->group(
     Route::get('/devices/{deviceId}/detail', [OrgAdminController::class, 'deviceDetail'])->name('partner.org.devices.detail');
     Route::put('/devices/{deviceId}/assignment', [OrgAdminController::class, 'updateAssignment'])->name('partner.org.devices.update-assignment');
     Route::post('/devices/{deviceId}/notification', [OrgAdminController::class, 'updateDeviceNotification'])->name('partner.org.devices.update-notification');
+    Route::post('/devices/{deviceId}/toggle-premium', [OrgAdminController::class, 'toggleDevicePremium'])->name('partner.org.devices.toggle-premium');
     Route::get('/csv', [OrgAdminController::class, 'exportCsv'])->name('partner.org.csv');
     Route::get('/timers', [OrgAdminController::class, 'timerList'])->name('partner.org.timers');
     Route::post('/devices/{deviceId}/schedules', [OrgAdminController::class, 'storeSchedule'])->name('partner.org.devices.schedules.store');

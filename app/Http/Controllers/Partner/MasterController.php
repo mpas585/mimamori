@@ -53,10 +53,8 @@ class MasterController extends Controller
             }
         }
 
-        $devices = $query->orderBy('created_at', 'desc')->paginate(20);
-
-        $adminUsers = PartnerUser::orderBy('role', 'asc')->orderBy('created_at', 'desc')->get();
-
+        $devices      = $query->orderBy('created_at', 'desc')->paginate(20);
+        $adminUsers   = PartnerUser::orderBy('role', 'asc')->orderBy('created_at', 'desc')->get();
         $organizations = Organization::withCount('devices')->orderBy('created_at', 'desc')->get();
 
         return view('partner.master', compact('stats', 'devices', 'adminUsers', 'organizations'));
@@ -71,18 +69,9 @@ class MasterController extends Controller
         $deviceId = $this->generateDeviceId();
         $pin      = $this->generatePin();
 
-        $device = Device::create([
-            'device_id' => $deviceId,
-            'pin_hash'  => Hash::make($pin),
-            'status'    => 'inactive',
-        ]);
+        $device = Device::create(['device_id' => $deviceId, 'pin_hash' => Hash::make($pin), 'status' => 'inactive']);
 
-        DB::table('notification_settings')->insert([
-            'device_id'     => $device->id,
-            'email_enabled' => 1,
-            'created_at'    => now(),
-            'updated_at'    => now(),
-        ]);
+        DB::table('notification_settings')->insert(['device_id' => $device->id, 'email_enabled' => 1, 'created_at' => now(), 'updated_at' => now()]);
 
         return back()->with('issued', ['device_id' => $deviceId, 'pin' => $pin]);
     }
@@ -100,20 +89,8 @@ class MasterController extends Controller
         for ($i = 0; $i < $count; $i++) {
             $deviceId = $this->generateDeviceId();
             $pin      = $this->generatePin();
-
-            $device = Device::create([
-                'device_id' => $deviceId,
-                'pin_hash'  => Hash::make($pin),
-                'status'    => 'inactive',
-            ]);
-
-            DB::table('notification_settings')->insert([
-                'device_id'     => $device->id,
-                'email_enabled' => 1,
-                'created_at'    => now(),
-                'updated_at'    => now(),
-            ]);
-
+            $device   = Device::create(['device_id' => $deviceId, 'pin_hash' => Hash::make($pin), 'status' => 'inactive']);
+            DB::table('notification_settings')->insert(['device_id' => $device->id, 'email_enabled' => 1, 'created_at' => now(), 'updated_at' => now()]);
             $issued[] = ['device_id' => $deviceId, 'pin' => $pin];
         }
 
@@ -121,7 +98,7 @@ class MasterController extends Controller
     }
 
     // ============================================================
-    // デバイス詳細（JSON）
+    // デバイス詳細・編集系
     // ============================================================
 
     public function deviceDetail(string $deviceId)
@@ -142,7 +119,7 @@ class MasterController extends Controller
             else                          $rssiLabel = '弱い (' . $device->rssi . 'dBm)';
         }
 
-        $dayNames = ['日', '月', '火', '水', '木', '金', '土'];
+        $dayNames  = ['日', '月', '火', '水', '木', '金', '土'];
         $schedules = $device->schedules->map(function ($s) use ($dayNames) {
             $data = ['id' => $s->id, 'type' => $s->type, 'memo' => $s->memo];
             if ($s->type === 'oneshot') {
@@ -184,13 +161,27 @@ class MasterController extends Controller
             'voice_enabled'          => $notif ? (bool) $notif->voice_enabled : false,
             'voice_phone_1'          => $notif && $notif->voice_phone_1 ? preg_replace('/^\+81/', '0', $notif->voice_phone_1) : null,
             'voice_phone_2'          => $notif && $notif->voice_phone_2 ? preg_replace('/^\+81/', '0', $notif->voice_phone_2) : null,
-            'premium_enabled'        => (bool) ($device->organization?->premium_enabled ?? false),
+            'premium_enabled'        => (bool) ($device->premium_enabled ?? false),
         ]);
     }
 
-    // ============================================================
-    // デバイス編集系
-    // ============================================================
+    /**
+     * デバイス個別プレミアムトグル（マスター用）
+     */
+    public function toggleDevicePremium(Request $request, string $deviceId)
+    {
+        $device = Device::where('device_id', $deviceId)->firstOrFail();
+
+        $request->validate(['premium_enabled' => 'required|boolean']);
+
+        $device->update(['premium_enabled' => (bool) $request->premium_enabled]);
+
+        return response()->json([
+            'success'         => true,
+            'premium_enabled' => (bool) $device->premium_enabled,
+            'message'         => $device->premium_enabled ? 'プレミアムを有効にしました' : 'プレミアムを無効にしました',
+        ]);
+    }
 
     public function updateDeviceAssignment(Request $request, string $deviceId)
     {
@@ -286,8 +277,7 @@ class MasterController extends Controller
 
     public function storeDeviceSchedule(Request $request, string $deviceId)
     {
-        $device = Device::where('device_id', $deviceId)->firstOrFail();
-
+        $device    = Device::where('device_id', $deviceId)->firstOrFail();
         $validated = $request->validate([
             'type'           => 'required|in:oneshot,recurring',
             'start_at'       => 'required_if:type,oneshot|nullable|date',
@@ -490,13 +480,28 @@ class MasterController extends Controller
         return redirect('/partner?tab=orgs')->with('success', '組織「' . $name . '」を削除しました');
     }
 
+    /**
+     * 組織プレミアムトグル → 組織内全デバイスを一括更新
+     */
     public function toggleOrgPremium(Request $request, int $orgId)
     {
         $org = Organization::findOrFail($orgId);
-        $request->validate(['premium_enabled' => 'required|boolean']);
-        $org->update(['premium_enabled' => (bool) $request->premium_enabled]);
 
-        return response()->json(['success' => true, 'premium_enabled' => $org->premium_enabled]);
+        $request->validate(['premium_enabled' => 'required|boolean']);
+
+        $enabled = (bool) $request->premium_enabled;
+
+        // 組織フラグ更新
+        $org->update(['premium_enabled' => $enabled]);
+
+        // 組織内全デバイスを一括更新
+        Device::where('organization_id', $orgId)->update(['premium_enabled' => $enabled ? 1 : 0]);
+
+        return response()->json([
+            'success'         => true,
+            'premium_enabled' => $org->premium_enabled,
+            'message'         => $enabled ? '組織内全デバイスのプレミアムを有効にしました' : '組織内全デバイスのプレミアムを無効にしました',
+        ]);
     }
 
     // ============================================================

@@ -28,6 +28,7 @@ class Device extends Authenticatable
         'away_mode',
         'away_until',
         'organization_id',
+        'premium_enabled',
         'activated_at',
         'warranty_expires_at',
     ];
@@ -39,25 +40,21 @@ class Device extends Authenticatable
     protected function casts(): array
     {
         return [
-            'last_received_at' => 'datetime',
+            'last_received_at'       => 'datetime',
             'last_human_detected_at' => 'datetime',
-            'activated_at' => 'datetime',
-            'away_until' => 'datetime',
-            'warranty_expires_at' => 'date',
-            'pet_exclusion_enabled' => 'boolean',
-            'away_mode' => 'boolean',
+            'activated_at'           => 'datetime',
+            'away_until'             => 'datetime',
+            'warranty_expires_at'    => 'date',
+            'pet_exclusion_enabled'  => 'boolean',
+            'away_mode'              => 'boolean',
+            'premium_enabled'        => 'boolean',
         ];
     }
 
-    /**
-     * 認証用：PIN（パスワード）カラム名
-     */
     public function getAuthPassword(): string
     {
         return $this->pin_hash;
     }
-
-    // --- リレーション ---
 
     public function detectionLogs(): HasMany
     {
@@ -89,33 +86,21 @@ class Device extends Authenticatable
         return $this->belongsTo(Organization::class);
     }
 
-    /**
-     * B2B組織へのデバイス割当情報
-     */
     public function orgAssignment(): HasOne
     {
         return $this->hasOne(OrgDeviceAssignment::class);
     }
 
-    /**
-     * このデバイスが見守っている相手
-     */
     public function watchingTargets(): HasMany
     {
         return $this->hasMany(Watcher::class, 'watcher_device_id');
     }
 
-    /**
-     * このデバイスを見守っている人
-     */
     public function watchedBy(): HasMany
     {
         return $this->hasMany(Watcher::class, 'target_device_id');
     }
 
-    /**
-     * スケジュール（単発・定期）
-     */
     public function schedules(): HasMany
     {
         return $this->hasMany(DeviceSchedule::class);
