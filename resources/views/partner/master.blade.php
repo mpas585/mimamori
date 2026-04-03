@@ -81,8 +81,8 @@
     .org-table tr:hover td { background: #faf8f4; }
     .expires-warn { color: #c62828; font-weight: 600; }
     .expires-ok { color: #2e7d32; }
-    .org-notify-icons { display: flex; gap: 6px; align-items: center; font-size: 11px; color: var(--gray-500); }
-    /* モーダル内共通 */
+    .org-notify-icons { display: flex; gap: 6px; align-items: center; font-size: 11px; }
+    /* モーダル共通 */
     .modal-section { margin-bottom: 20px; }
     .modal-section-title { font-size: 13px; font-weight: 700; color: var(--gray-600); margin-bottom: 10px; padding-bottom: 6px; border-bottom: 1px solid var(--gray-200); }
     .form-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
@@ -91,21 +91,53 @@
     .detail-item { padding: 10px 12px; background: var(--beige, #faf8f4); border-radius: var(--radius, 6px); }
     .detail-item-label { font-size: 11px; color: var(--gray-500, #888); margin-bottom: 4px; }
     .detail-item-value { font-size: 14px; font-weight: 600; color: var(--gray-800, #333); }
-    .detail-status-badge { display: inline-block; padding: 4px 14px; font-size: 12px; font-weight: 600; border-radius: 6px; margin-bottom: 16px; }
+    .detail-form-input { width: 100%; padding: 6px 8px; font-size: 13px; font-family: inherit; border: 1px solid var(--gray-300); border-radius: var(--radius); background: var(--white); color: var(--gray-800); box-sizing: border-box; }
+    .detail-form-input:focus { outline: none; border-color: var(--gray-500); box-shadow: 0 0 0 2px rgba(168,162,158,0.15); }
+    .detail-status-row { display: flex; align-items: center; margin-bottom: 16px; }
+    .detail-status-badge { display: inline-block; padding: 4px 12px; font-size: 12px; font-weight: 600; border-radius: 6px; }
     .detail-status-badge.normal { background: #e8f5e9; color: #2e7d32; }
     .detail-status-badge.warning { background: #fff3e0; color: #e65100; }
     .detail-status-badge.alert { background: #fbe9e7; color: #c62828; }
     .detail-status-badge.offline { background: #eeeeee; color: #616161; }
     .detail-status-badge.inactive { background: #f5f5f5; color: #9e9e9e; }
-    .detail-notify-row { display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: var(--beige, #faf8f4); border-radius: var(--radius, 6px); font-size: 13px; margin-bottom: 6px; }
-    .detail-notify-label { min-width: 90px; font-size: 12px; color: var(--gray-500, #888); }
-    .detail-notify-value { font-weight: 600; color: var(--gray-800, #333); }
-    .detail-notify-enabled { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 10px; }
-    .detail-notify-enabled.on { background: #e8f5e9; color: #2e7d32; }
-    .detail-notify-enabled.off { background: #f5f5f5; color: #9e9e9e; }
+    .detail-clear-alert-btn { display: inline-flex; align-items: center; gap: 4px; padding: 4px 12px; font-size: 12px; font-weight: 600; font-family: inherit; color: var(--red); background: var(--white); border: 1px solid var(--red-light); border-radius: 6px; cursor: pointer; transition: all 0.2s; margin-left: 10px; }
+    .detail-clear-alert-btn:hover { background: var(--red-light); border-color: var(--red); }
+    .detail-notify-note { font-size: 11px; color: var(--gray-500); margin-top: 6px; line-height: 1.5; }
+    .detail-schedule-list { border: 1px solid var(--gray-200); border-radius: var(--radius); overflow: hidden; margin-bottom: 10px; }
+    .detail-schedule-item { display: flex; align-items: center; padding: 8px 12px; border-bottom: 1px solid var(--gray-100); font-size: 13px; }
+    .detail-schedule-item:last-child { border-bottom: none; }
+    .detail-schedule-item:nth-child(even) { background: var(--cream); }
+    .detail-schedule-icon { width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; border-radius: 6px; font-size: 13px; margin-right: 8px; flex-shrink: 0; }
+    .detail-schedule-icon.oneshot { background: #eff6ff; }
+    .detail-schedule-icon.recurring { background: #f0fdf4; }
+    .detail-schedule-info { flex: 1; min-width: 0; }
+    .detail-schedule-main { font-size: 12px; font-weight: 600; color: var(--gray-800); }
+    .detail-schedule-sub { font-size: 11px; color: var(--gray-500); }
+    .detail-schedule-del { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-size: 13px; color: var(--gray-400); background: transparent; border: none; border-radius: 4px; cursor: pointer; flex-shrink: 0; transition: all 0.2s; }
+    .detail-schedule-del:hover { color: var(--red); background: var(--red-light); }
+    .detail-schedule-empty { padding: 16px; text-align: center; font-size: 12px; color: var(--gray-400); }
+    .detail-schedule-add { display: flex; align-items: center; justify-content: center; gap: 4px; width: 100%; padding: 8px; font-size: 12px; font-weight: 600; font-family: inherit; color: var(--gray-500); background: var(--cream); border: 1px dashed var(--gray-300); border-radius: var(--radius); cursor: pointer; transition: all 0.2s; }
+    .detail-schedule-add:hover { background: var(--beige); color: var(--gray-700); }
+    .schedule-type-tabs { display: flex; gap: 8px; margin-bottom: 16px; }
+    .schedule-type-tab { flex: 1; padding: 10px; text-align: center; font-size: 13px; font-weight: 600; font-family: inherit; border: 2px solid var(--gray-200); border-radius: var(--radius); background: var(--white); cursor: pointer; transition: all 0.2s; color: var(--gray-600); }
+    .schedule-type-tab.active { border-color: var(--gray-800); background: var(--beige); color: var(--gray-800); }
+    .schedule-form-group { margin-bottom: 14px; }
+    .schedule-form-group label { display: block; font-size: 12px; font-weight: 600; color: var(--gray-700); margin-bottom: 4px; }
+    .schedule-form-group input, .schedule-form-group select { width: 100%; padding: 8px 10px; font-size: 13px; font-family: inherit; border: 1px solid var(--gray-300); border-radius: var(--radius); background: var(--white); }
+    .schedule-days { display: flex; gap: 6px; flex-wrap: wrap; }
+    .schedule-day-btn { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; font-family: inherit; border: 2px solid var(--gray-200); border-radius: 50%; background: var(--white); cursor: pointer; transition: all 0.2s; color: var(--gray-600); }
+    .schedule-day-btn.active { border-color: var(--gray-800); background: var(--gray-800); color: var(--white); }
+    .schedule-time-row { display: flex; align-items: center; gap: 8px; }
+    .schedule-time-row input { width: auto; flex: 1; }
+    .schedule-time-row span { font-size: 13px; color: var(--gray-500); white-space: nowrap; }
+    .schedule-nextday-check { display: flex; align-items: center; gap: 6px; margin-top: 8px; font-size: 12px; color: var(--gray-600); }
     .mono { font-family: monospace; font-weight: 700; letter-spacing: 1px; }
     .flash-success { background: #e8f5e9; color: #2e7d32; padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; font-size: 13px; font-weight: 600; }
     .flash-error { background: #fbe9e7; color: #c62828; padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; font-size: 13px; font-weight: 600; }
+    .toast { position: fixed; bottom: 24px; right: 24px; padding: 14px 20px; border-radius: var(--radius); font-size: 13px; font-weight: 600; color: var(--white); z-index: 9999; transform: translateY(100px); opacity: 0; transition: all 0.3s; }
+    .toast.show { transform: translateY(0); opacity: 1; }
+    .toast.success { background: #2e7d32; }
+    .toast.error { background: var(--red); }
 </style>
 @endsection
 
@@ -120,12 +152,8 @@
     <div class="stat-card"><div class="stat-value">{{ $stats['inactive'] }}</div><div class="stat-label">未稼働</div></div>
 </div>
 
-@if(session('success'))
-    <div class="flash-success">✅ {{ session('success') }}</div>
-@endif
-@if(session('error'))
-    <div class="flash-error">⚠️ {{ session('error') }}</div>
-@endif
+@if(session('success')) <div class="flash-success">✅ {{ session('success') }}</div> @endif
+@if(session('error')) <div class="flash-error">⚠️ {{ session('error') }}</div> @endif
 
 <div class="tab-bar">
     <button class="tab active" onclick="switchTab('devices', this)">デバイス管理</button>
@@ -151,9 +179,7 @@
                 <button type="submit" class="btn btn-secondary">一括発番</button>
             </form>
         </div>
-        @error('count')
-            <div style="color:#c62828;font-size:12px;margin-top:8px;">{{ $message }}</div>
-        @enderror
+        @error('count') <div style="color:#c62828;font-size:12px;margin-top:8px;">{{ $message }}</div> @enderror
     </div>
 
     @if(session('issued'))
@@ -285,7 +311,7 @@
         </div>
         <table class="org-table">
             <thead>
-                <tr><th>組織名</th><th>担当者</th><th>連絡先</th><th>デバイス数</th><th>台数上限</th><th>契約期限</th><th>プレミアム</th><th>通知設定</th><th>操作</th></tr>
+                <tr><th>組織名</th><th>担当者</th><th>連絡先</th><th>デバイス数</th><th>台数上限</th><th>契約期限</th><th>プレミアム</th><th>通知</th><th>操作</th></tr>
             </thead>
             <tbody>
                 @forelse($organizations as $org)
@@ -293,61 +319,34 @@
                         $expiresAt = $org->expires_at;
                         $isExpired = $expiresAt && $expiresAt->isPast();
                         $isExpiringSoon = $expiresAt && !$isExpired && $expiresAt->diffInDays(now()) <= 30;
-                        $hasNotifyEmail = $org->notification_email_1 || $org->notification_email_2 || $org->notification_email_3;
-                        $hasNotifySms = $org->notification_sms_1 || $org->notification_sms_2;
+                        $hasEmail = $org->notification_email_1 || $org->notification_email_2 || $org->notification_email_3;
+                        $hasSms = $org->notification_sms_1 || $org->notification_sms_2;
                     @endphp
                     <tr>
                         <td style="font-weight:500;">{{ $org->name }}</td>
                         <td style="font-size:12px;">{{ $org->contact_name ?: '-' }}</td>
                         <td style="font-size:12px;">{{ $org->contact_email }}</td>
-                        <td style="font-size:13px;">
-                            <span style="{{ $org->devices_count >= ($org->device_limit ?? 100) ? 'color:var(--red);font-weight:600;' : '' }}">{{ $org->devices_count }}台</span>
-                        </td>
+                        <td style="font-size:13px;"><span style="{{ $org->devices_count >= ($org->device_limit ?? 100) ? 'color:var(--red);font-weight:600;' : '' }}">{{ $org->devices_count }}台</span></td>
                         <td style="font-size:13px;">{{ $org->device_limit ?? 100 }}台</td>
                         <td style="font-size:12px;">
                             @if($expiresAt)
-                                <span class="{{ $isExpired || $isExpiringSoon ? 'expires-warn' : 'expires-ok' }}">
-                                    {{ $expiresAt->format('Y/m/d') }}
-                                    @if($isExpired) ⚠️期限切れ @elseif($isExpiringSoon) ⚠️あと{{ $expiresAt->diffInDays(now()) }}日 @endif
-                                </span>
-                            @else
-                                <span style="color:var(--gray-400);">-</span>
-                            @endif
+                                <span class="{{ $isExpired || $isExpiringSoon ? 'expires-warn' : 'expires-ok' }}">{{ $expiresAt->format('Y/m/d') }}@if($isExpired) ⚠️期限切れ @elseif($isExpiringSoon) ⚠️あと{{ $expiresAt->diffInDays(now()) }}日 @endif</span>
+                            @else <span style="color:var(--gray-400);">-</span> @endif
                         </td>
                         <td>
-                            <label class="watch-toggle">
-                                <input type="checkbox" {{ $org->premium_enabled ? 'checked' : '' }} onchange="toggleOrgPremium({{ $org->id }}, this.checked, this)">
-                                <span class="watch-slider"></span>
-                            </label>
+                            <label class="watch-toggle"><input type="checkbox" {{ $org->premium_enabled ? 'checked' : '' }} onchange="toggleOrgPremium({{ $org->id }}, this.checked, this)"><span class="watch-slider"></span></label>
                             <span class="org-premium-label-{{ $org->id }}" style="font-size:12px;color:var(--gray-500);margin-left:8px;">{{ $org->premium_enabled ? '有効' : '無効' }}</span>
                         </td>
                         <td>
                             <div class="org-notify-icons">
-                                @if($hasNotifyEmail) <span title="メール通知設定あり" style="{{ $org->notification_enabled ? '' : 'opacity:0.4;' }}">📧</span> @endif
-                                @if($hasNotifySms) <span title="SMS通知設定あり" style="{{ $org->notification_sms_enabled ? '' : 'opacity:0.4;' }}">💬</span> @endif
-                                @if(!$hasNotifyEmail && !$hasNotifySms) <span style="color:var(--gray-300);">未設定</span> @endif
+                                @if($hasEmail) <span title="メール" style="{{ $org->notification_enabled ? '' : 'opacity:0.4;' }}">📧</span> @endif
+                                @if($hasSms) <span title="SMS" style="{{ $org->notification_sms_enabled ? '' : 'opacity:0.4;' }}">💬</span> @endif
+                                @if(!$hasEmail && !$hasSms) <span style="color:var(--gray-300);font-size:11px;">未設定</span> @endif
                             </div>
                         </td>
                         <td>
-                            <button class="action-btn" onclick="showEditOrgModal({{ json_encode([
-                                'id' => $org->id,
-                                'name' => $org->name,
-                                'contact_name' => $org->contact_name,
-                                'contact_email' => $org->contact_email,
-                                'contact_phone' => $org->contact_phone,
-                                'address' => $org->address,
-                                'notes' => $org->notes,
-                                'device_limit' => $org->device_limit ?? 100,
-                                'expires_at' => $org->expires_at ? $org->expires_at->format('Y-m-d') : '',
-                                'notification_email_1' => $org->notification_email_1,
-                                'notification_email_2' => $org->notification_email_2,
-                                'notification_email_3' => $org->notification_email_3,
-                                'notification_sms_1' => $org->notification_sms_1,
-                                'notification_sms_2' => $org->notification_sms_2,
-                            ]) }})">編集</button>
-                            @if($org->devices_count === 0)
-                                <button class="action-btn danger" onclick="confirmDeleteOrg({{ $org->id }}, '{{ $org->name }}')">削除</button>
-                            @endif
+                            <button class="action-btn" onclick="showEditOrgModal({{ json_encode(['id'=>$org->id,'name'=>$org->name,'contact_name'=>$org->contact_name,'contact_email'=>$org->contact_email,'contact_phone'=>$org->contact_phone,'address'=>$org->address,'notes'=>$org->notes,'device_limit'=>$org->device_limit??100,'expires_at'=>$org->expires_at?$org->expires_at->format('Y-m-d'):'','notification_email_1'=>$org->notification_email_1,'notification_email_2'=>$org->notification_email_2,'notification_email_3'=>$org->notification_email_3,'notification_sms_1'=>$org->notification_sms_1,'notification_sms_2'=>$org->notification_sms_2]) }})">編集</button>
+                            @if($org->devices_count === 0) <button class="action-btn danger" onclick="confirmDeleteOrg({{ $org->id }}, '{{ $org->name }}')">削除</button> @endif
                         </td>
                     </tr>
                 @empty
@@ -358,14 +357,138 @@
     </div>
 </div>
 
-{{-- ===== デバイス詳細モーダル ===== --}}
-<div id="deviceDetailModal" class="modal-overlay" onclick="if(event.target===this)hideDeviceDetailModal()">
+{{-- ===== デバイス詳細モーダル（編集可能） ===== --}}
+<div id="deviceDetailModal" class="modal-overlay" onclick="if(event.target===this)hideModal('deviceDetailModal')">
     <div class="modal" style="max-width:560px;">
-        <div class="modal-header"><h3>📋 デバイス詳細</h3><button class="modal-close" onclick="hideDeviceDetailModal()">×</button></div>
-        <div class="modal-body" id="deviceDetailBody">
-            <div style="text-align:center;color:#aaa;padding:40px 0;">読み込み中...</div>
+        <div class="modal-header"><h3>📋 デバイス詳細</h3><button class="modal-close" onclick="hideModal('deviceDetailModal')">×</button></div>
+        <div class="modal-body">
+            <div class="detail-status-row">
+                <div class="detail-status-badge normal" id="masterDetailStatusBadge">-</div>
+                <button class="detail-clear-alert-btn" id="masterDetailClearAlertBtn" style="display:none;" onclick="masterClearAlert()">✕ 警告解除</button>
+            </div>
+            <div class="modal-section">
+                <div class="detail-grid">
+                    <div class="detail-item"><p class="detail-item-label">デバイスID</p><p class="detail-item-value mono" id="masterDetailDeviceId">-</p></div>
+                    <div class="detail-item"><p class="detail-item-label">最終検知</p><p class="detail-item-value" id="masterDetailLastDetected">-</p></div>
+                    <div class="detail-item"><p class="detail-item-label">部屋番号</p><input type="text" class="detail-form-input" id="masterDetailRoom" placeholder="101"></div>
+                    <div class="detail-item"><p class="detail-item-label">入居者名</p><input type="text" class="detail-form-input" id="masterDetailTenant" placeholder="山田 太郎"></div>
+                </div>
+            </div>
+            <div class="modal-section">
+                <div class="modal-section-title">📊 センサー状態</div>
+                <div class="detail-grid">
+                    <div class="detail-item"><p class="detail-item-label">電池残量</p><p class="detail-item-value" id="masterDetailBattery">-</p></div>
+                    <div class="detail-item"><p class="detail-item-label">電波強度</p><p class="detail-item-value" id="masterDetailSignal">-</p></div>
+                </div>
+            </div>
+            <div class="modal-section">
+                <div class="modal-section-title">⚙️ 設定</div>
+                <div class="detail-grid">
+                    <div class="detail-item"><p class="detail-item-label">アラート閾値</p>
+                        <select class="detail-form-input" id="masterDetailAlertHours">
+                            <option value="12">12時間</option><option value="24">24時間</option><option value="36">36時間</option><option value="48">48時間</option><option value="72">72時間</option>
+                        </select>
+                    </div>
+                    <div class="detail-item"><p class="detail-item-label">設置高さ</p>
+                        <div style="display:flex;align-items:center;gap:4px;"><input type="number" class="detail-form-input" id="masterDetailHeight" min="100" max="300" style="width:70px;"><span style="font-size:12px;color:var(--gray-500);">cm</span></div>
+                    </div>
+                    <div class="detail-item"><p class="detail-item-label">ペット除外</p>
+                        <select class="detail-form-input" id="masterDetailPetExclusion"><option value="0">OFF</option><option value="1">ON</option></select>
+                    </div>
+                    <div class="detail-item"><p class="detail-item-label">外出モード</p>
+                        <div style="display:flex;align-items:center;gap:8px;">
+                            <label class="watch-toggle"><input type="checkbox" id="masterDetailAwayMode" onchange="masterToggleAwayMode(this.checked)"><span class="watch-slider"></span></label>
+                            <span id="masterDetailAwayLabel" style="font-size:12px;color:var(--gray-600);">OFF</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-section">
+                <div class="modal-section-title">📝 登録情報</div>
+                <div class="detail-grid">
+                    <div class="detail-item"><p class="detail-item-label">登録日</p><p class="detail-item-value" id="masterDetailRegistered">-</p></div>
+                    <div class="detail-item"><p class="detail-item-label">メモ</p><input type="text" class="detail-form-input" id="masterDetailMemo" placeholder="メモを追加..." maxlength="200"></div>
+                </div>
+            </div>
+            <div class="modal-section">
+                <div class="modal-section-title">🔔 通知設定</div>
+                <div id="masterDetailPremiumNote" style="display:none;padding:10px 12px;background:var(--yellow-light);border-radius:var(--radius);margin-bottom:12px;font-size:12px;color:#a16207;">
+                    ⚠️ SMS・電話通知はプレミアム契約が必要です。
+                </div>
+                <div style="border:1px solid var(--gray-200);border-radius:var(--radius);padding:14px;margin-bottom:10px;">
+                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+                        <p style="font-size:13px;font-weight:600;color:var(--gray-700);">💬 SMS通知</p>
+                        <label class="watch-toggle"><input type="checkbox" id="masterDetailSmsEnabled" onchange="masterSaveNotification()"><span class="watch-slider"></span></label>
+                    </div>
+                    <input type="tel" class="detail-form-input" id="masterDetailSmsPhone1" placeholder="09012345678" style="margin-bottom:6px;" onblur="masterSaveNotification()">
+                    <input type="tel" class="detail-form-input" id="masterDetailSmsPhone2" placeholder="09012345678（任意）" onblur="masterSaveNotification()">
+                </div>
+                <div style="border:1px solid var(--gray-200);border-radius:var(--radius);padding:14px;">
+                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+                        <p style="font-size:13px;font-weight:600;color:var(--gray-700);">📞 電話通知（AIコール）</p>
+                        <label class="watch-toggle"><input type="checkbox" id="masterDetailVoiceEnabled" onchange="masterSaveNotification()"><span class="watch-slider"></span></label>
+                    </div>
+                    <input type="tel" class="detail-form-input" id="masterDetailVoicePhone1" placeholder="09012345678" style="margin-bottom:6px;" onblur="masterSaveNotification()">
+                    <input type="tel" class="detail-form-input" id="masterDetailVoicePhone2" placeholder="09012345678（任意）" onblur="masterSaveNotification()">
+                </div>
+            </div>
+            <div class="modal-section">
+                <div class="modal-section-title">🚶 外出スケジュール</div>
+                <div id="masterDetailScheduleList"></div>
+                <button class="detail-schedule-add" onclick="masterOpenScheduleAdd()">＋ 外出スケジュール追加</button>
+            </div>
         </div>
-        <div class="modal-footer"><button class="btn btn-secondary" onclick="hideDeviceDetailModal()">閉じる</button></div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="hideModal('deviceDetailModal')">閉じる</button>
+            <button class="btn btn-primary" onclick="masterSaveAssignment()">保存</button>
+        </div>
+    </div>
+</div>
+
+{{-- ===== スケジュール追加モーダル ===== --}}
+<div id="masterScheduleAddModal" class="modal-overlay" onclick="if(event.target===this)hideModal('masterScheduleAddModal')">
+    <div class="modal" style="max-width:480px;">
+        <div class="modal-header"><h3>🚶 外出スケジュール追加</h3><button class="modal-close" onclick="hideModal('masterScheduleAddModal')">×</button></div>
+        <div class="modal-body">
+            <div class="schedule-type-tabs">
+                <button class="schedule-type-tab active" id="masterTabOneshot" onclick="masterSwitchScheduleType('oneshot')">📅 単発</button>
+                <button class="schedule-type-tab" id="masterTabRecurring" onclick="masterSwitchScheduleType('recurring')">🔁 定期</button>
+            </div>
+            <div id="masterOneshotForm">
+                <div class="schedule-form-group"><label>開始日時</label><input type="datetime-local" id="masterSchedStartAt"></div>
+                <div class="schedule-form-group"><label>終了日時（空欄＝手動復帰）</label><input type="datetime-local" id="masterSchedEndAt"></div>
+            </div>
+            <div id="masterRecurringForm" style="display:none;">
+                <div class="schedule-form-group"><label>曜日</label>
+                    <div class="schedule-days" id="masterScheduleDays">
+                        <button type="button" class="schedule-day-btn" data-day="0" onclick="toggleDay(this)">日</button>
+                        <button type="button" class="schedule-day-btn" data-day="1" onclick="toggleDay(this)">月</button>
+                        <button type="button" class="schedule-day-btn" data-day="2" onclick="toggleDay(this)">火</button>
+                        <button type="button" class="schedule-day-btn" data-day="3" onclick="toggleDay(this)">水</button>
+                        <button type="button" class="schedule-day-btn" data-day="4" onclick="toggleDay(this)">木</button>
+                        <button type="button" class="schedule-day-btn" data-day="5" onclick="toggleDay(this)">金</button>
+                        <button type="button" class="schedule-day-btn" data-day="6" onclick="toggleDay(this)">土</button>
+                    </div>
+                </div>
+                <div class="schedule-form-group"><label>時間帯</label>
+                    <div class="schedule-time-row"><input type="time" id="masterSchedStartTime"><span>〜</span><input type="time" id="masterSchedEndTime"></div>
+                    <label class="schedule-nextday-check"><input type="checkbox" id="masterSchedNextDay"> 翌日にまたがる</label>
+                </div>
+            </div>
+            <div class="schedule-form-group"><label>メモ（任意）</label><input type="text" id="masterSchedMemo" placeholder="例：デイサービス" maxlength="200"></div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="hideModal('masterScheduleAddModal')">キャンセル</button>
+            <button class="btn btn-primary" onclick="masterSubmitSchedule()">追加</button>
+        </div>
+    </div>
+</div>
+
+{{-- ===== スケジュール削除確認モーダル ===== --}}
+<div id="masterScheduleDeleteModal" class="modal-overlay" onclick="if(event.target===this)hideModal('masterScheduleDeleteModal')">
+    <div class="modal"><div class="modal-header"><h3>⚠️ 外出スケジュール削除</h3><button class="modal-close" onclick="hideModal('masterScheduleDeleteModal')">×</button></div>
+        <div class="modal-body"><p>このスケジュールを削除しますか？</p></div>
+        <div class="modal-footer"><button class="btn btn-secondary" onclick="hideModal('masterScheduleDeleteModal')">キャンセル</button><button class="btn btn-danger" onclick="masterExecuteDeleteSchedule()">削除する</button></div>
     </div>
 </div>
 
@@ -384,24 +507,22 @@
                         <option value="operator">オペレーター（組織管理者）</option>
                         <option value="master">マスター（全権限）</option>
                     </select>
-                    <p class="form-hint">オペレーター：担当組織のデバイスのみ管理可能 / マスター：全機能にアクセス可能</p>
+                    <p class="form-hint">オペレーター：担当組織のデバイスのみ / マスター：全機能</p>
                 </div>
                 <div class="form-group" id="addAdminOrgRow">
                     <label class="form-label">所属組織</label>
                     <select name="organization_id" class="form-input">
                         <option value="">未割当</option>
-                        @foreach($organizations as $org)
-                            <option value="{{ $org->id }}">{{ $org->name }}</option>
-                        @endforeach
+                        @foreach($organizations as $org) <option value="{{ $org->id }}">{{ $org->name }}</option> @endforeach
                     </select>
                 </div>
                 <div class="form-group">
                     <label class="form-label">初期パスワード *</label>
                     <div class="password-field">
-                        <input type="text" name="password" id="addAdminPassword" class="form-input" placeholder="自動生成されます" required>
+                        <input type="text" name="password" id="addAdminPassword" class="form-input" required>
                         <button type="button" class="password-generate-btn" onclick="generatePassword('addAdminPassword')">生成</button>
                     </div>
-                    <p class="form-hint">初回ログイン後にパスワード変更を推奨してください</p>
+                    <p class="form-hint">初回ログイン後にパスワード変更を推奨</p>
                 </div>
             </div>
             <div class="modal-footer"><button type="button" class="btn btn-secondary" onclick="hideAddAdminModal()">キャンセル</button><button type="submit" class="btn btn-primary">作成</button></div>
@@ -414,25 +535,22 @@
     <div class="modal" style="max-width:500px;">
         <div class="modal-header"><h3>管理者アカウント編集</h3><button class="modal-close" onclick="hideEditAdminModal()">×</button></div>
         <form method="POST" id="editAdminForm" action="">
-            @csrf
-            @method('PUT')
+            @csrf @method('PUT')
             <div class="modal-body">
                 <div class="form-group"><label class="form-label">名前 *</label><input type="text" name="name" id="editAdminName" class="form-input" required></div>
                 <div class="form-group"><label class="form-label">メールアドレス *</label><input type="email" name="email" id="editAdminEmail" class="form-input" required></div>
                 <div class="form-group">
                     <label class="form-label">権限 *</label>
                     <select name="role" id="editAdminRole" class="form-input" onchange="toggleOrgSelect('editAdminOrgRow', this.value)">
-                        <option value="operator">オペレーター（組織管理者）</option>
-                        <option value="master">マスター（全権限）</option>
+                        <option value="operator">オペレーター</option>
+                        <option value="master">マスター</option>
                     </select>
                 </div>
                 <div class="form-group" id="editAdminOrgRow">
                     <label class="form-label">所属組織</label>
                     <select name="organization_id" id="editAdminOrg" class="form-input">
                         <option value="">未割当</option>
-                        @foreach($organizations as $org)
-                            <option value="{{ $org->id }}">{{ $org->name }}</option>
-                        @endforeach
+                        @foreach($organizations as $org) <option value="{{ $org->id }}">{{ $org->name }}</option> @endforeach
                     </select>
                 </div>
                 <div class="form-group">
@@ -441,7 +559,6 @@
                         <input type="text" name="password" id="editAdminPassword" class="form-input" placeholder="変更しない場合は空欄">
                         <button type="button" class="password-generate-btn" onclick="generatePassword('editAdminPassword')">生成</button>
                     </div>
-                    <p class="form-hint">空欄の場合、パスワードは変更されません</p>
                 </div>
             </div>
             <div class="modal-footer"><button type="button" class="btn btn-secondary" onclick="hideEditAdminModal()">キャンセル</button><button type="submit" class="btn btn-primary">保存</button></div>
@@ -449,10 +566,7 @@
     </div>
 </div>
 
-<form id="deleteAdminForm" method="POST" action="" style="display:none;">
-    @csrf
-    @method('DELETE')
-</form>
+<form id="deleteAdminForm" method="POST" action="" style="display:none;">@csrf @method('DELETE')</form>
 
 {{-- ===== 組織追加モーダル ===== --}}
 <div id="addOrgModal" class="modal-overlay" onclick="if(event.target===this)hideAddOrgModal()">
@@ -461,25 +575,23 @@
         <form method="POST" action="{{ route('partner.orgs.store') }}">
             @csrf
             <div class="modal-body">
-                <div class="modal-section">
-                    <div class="modal-section-title">基本情報</div>
-                    <div class="form-group"><label class="form-label">組織名 *</label><input type="text" name="name" class="form-input" placeholder="例：〇〇不動産株式会社" required></div>
+                <div class="modal-section"><div class="modal-section-title">基本情報</div>
+                    <div class="form-group"><label class="form-label">組織名 *</label><input type="text" name="name" class="form-input" required></div>
                     <div class="form-row-2">
-                        <div class="form-group"><label class="form-label">担当者名</label><input type="text" name="contact_name" class="form-input" placeholder="山田 太郎"></div>
-                        <div class="form-group"><label class="form-label">連絡先メール *</label><input type="email" name="contact_email" class="form-input" placeholder="admin@example.com" required></div>
+                        <div class="form-group"><label class="form-label">担当者名</label><input type="text" name="contact_name" class="form-input"></div>
+                        <div class="form-group"><label class="form-label">連絡先メール *</label><input type="email" name="contact_email" class="form-input" required></div>
                     </div>
                     <div class="form-row-2">
-                        <div class="form-group"><label class="form-label">電話番号</label><input type="text" name="contact_phone" class="form-input" placeholder="03-0000-0000"></div>
+                        <div class="form-group"><label class="form-label">電話番号</label><input type="text" name="contact_phone" class="form-input"></div>
                         <div class="form-group"></div>
                     </div>
-                    <div class="form-group"><label class="form-label">住所</label><input type="text" name="address" class="form-input" placeholder="東京都〇〇区..."></div>
+                    <div class="form-group"><label class="form-label">住所</label><input type="text" name="address" class="form-input"></div>
                     <div class="form-group"><label class="form-label">メモ</label><textarea name="notes" class="form-input" rows="2" style="resize:vertical;"></textarea></div>
                 </div>
-                <div class="modal-section">
-                    <div class="modal-section-title">契約情報</div>
+                <div class="modal-section"><div class="modal-section-title">契約情報</div>
                     <div class="form-row-2">
-                        <div class="form-group"><label class="form-label">台数上限</label><input type="number" name="device_limit" class="form-input" value="100" min="1" max="9999"><p class="form-hint">デバイス登録できる最大台数</p></div>
-                        <div class="form-group"><label class="form-label">契約期限</label><input type="date" name="expires_at" class="form-input"><p class="form-hint">空欄の場合は無期限</p></div>
+                        <div class="form-group"><label class="form-label">台数上限</label><input type="number" name="device_limit" class="form-input" value="100" min="1" max="9999"><p class="form-hint">最大登録台数</p></div>
+                        <div class="form-group"><label class="form-label">契約期限</label><input type="date" name="expires_at" class="form-input"><p class="form-hint">空欄＝無期限</p></div>
                     </div>
                 </div>
             </div>
@@ -493,11 +605,9 @@
     <div class="modal" style="max-width:560px;">
         <div class="modal-header"><h3>組織編集</h3><button class="modal-close" onclick="hideEditOrgModal()">×</button></div>
         <form method="POST" id="editOrgForm" action="">
-            @csrf
-            @method('PUT')
+            @csrf @method('PUT')
             <div class="modal-body">
-                <div class="modal-section">
-                    <div class="modal-section-title">基本情報</div>
+                <div class="modal-section"><div class="modal-section-title">基本情報</div>
                     <div class="form-group"><label class="form-label">組織名 *</label><input type="text" name="name" id="editOrgName" class="form-input" required></div>
                     <div class="form-row-2">
                         <div class="form-group"><label class="form-label">担当者名</label><input type="text" name="contact_name" id="editOrgContactName" class="form-input"></div>
@@ -510,21 +620,19 @@
                     <div class="form-group"><label class="form-label">住所</label><input type="text" name="address" id="editOrgAddress" class="form-input"></div>
                     <div class="form-group"><label class="form-label">メモ</label><textarea name="notes" id="editOrgNotes" class="form-input" rows="2" style="resize:vertical;"></textarea></div>
                 </div>
-                <div class="modal-section">
-                    <div class="modal-section-title">契約情報</div>
+                <div class="modal-section"><div class="modal-section-title">契約情報</div>
                     <div class="form-row-2">
-                        <div class="form-group"><label class="form-label">台数上限</label><input type="number" name="device_limit" id="editOrgDeviceLimit" class="form-input" min="1" max="9999"><p class="form-hint">デバイス登録できる最大台数</p></div>
-                        <div class="form-group"><label class="form-label">契約期限</label><input type="date" name="expires_at" id="editOrgExpiresAt" class="form-input"><p class="form-hint">空欄の場合は無期限</p></div>
+                        <div class="form-group"><label class="form-label">台数上限</label><input type="number" name="device_limit" id="editOrgDeviceLimit" class="form-input" min="1" max="9999"></div>
+                        <div class="form-group"><label class="form-label">契約期限</label><input type="date" name="expires_at" id="editOrgExpiresAt" class="form-input"><p class="form-hint">空欄＝無期限</p></div>
                     </div>
                 </div>
-                <div class="modal-section">
-                    <div class="modal-section-title">通知設定（確認・修正用）</div>
-                    <p style="font-size:12px;color:var(--gray-500);margin-bottom:12px;">通常はパートナー側で設定します。緊急時のみ修正してください。</p>
-                    <div class="form-group"><label class="form-label">通知メール 1</label><input type="email" name="notification_email_1" id="editOrgEmail1" class="form-input" placeholder="notify@example.com"></div>
+                <div class="modal-section"><div class="modal-section-title">通知設定（確認・修正用）</div>
+                    <p style="font-size:12px;color:var(--gray-500);margin-bottom:12px;">通常はパートナー側で設定します。</p>
+                    <div class="form-group"><label class="form-label">通知メール 1</label><input type="email" name="notification_email_1" id="editOrgEmail1" class="form-input"></div>
                     <div class="form-group"><label class="form-label">通知メール 2</label><input type="email" name="notification_email_2" id="editOrgEmail2" class="form-input"></div>
                     <div class="form-group"><label class="form-label">通知メール 3</label><input type="email" name="notification_email_3" id="editOrgEmail3" class="form-input"></div>
                     <div class="form-row-2">
-                        <div class="form-group"><label class="form-label">SMS通知先 1</label><input type="text" name="notification_sms_1" id="editOrgSms1" class="form-input" placeholder="09012345678"></div>
+                        <div class="form-group"><label class="form-label">SMS通知先 1</label><input type="text" name="notification_sms_1" id="editOrgSms1" class="form-input"></div>
                         <div class="form-group"><label class="form-label">SMS通知先 2</label><input type="text" name="notification_sms_2" id="editOrgSms2" class="form-input"></div>
                     </div>
                 </div>
@@ -534,16 +642,23 @@
     </div>
 </div>
 
-<form id="deleteOrgForm" method="POST" action="" style="display:none;">
-    @csrf
-    @method('DELETE')
-</form>
+<form id="deleteOrgForm" method="POST" action="" style="display:none;">@csrf @method('DELETE')</form>
+
+<div id="toast" class="toast"></div>
 
 @endsection
 
 @section('scripts')
 <script>
 const csrfToken = '{{ csrf_token() }}';
+let masterCurrentDeviceId = null;
+let masterScheduleType = 'oneshot';
+let masterDeleteScheduleId = null;
+
+function showModal(id) { document.getElementById(id).classList.add('show'); }
+function hideModal(id) { document.getElementById(id).classList.remove('show'); }
+function showToast(msg, type) { const t = document.getElementById('toast'); t.textContent = msg; t.className = 'toast ' + type + ' show'; setTimeout(() => t.classList.remove('show'), 3000); }
+function escapeHtml(s) { if (!s) return '-'; const d = document.createElement('div'); d.appendChild(document.createTextNode(s)); return d.innerHTML; }
 
 function switchTab(tabName, btn) {
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -553,113 +668,228 @@ function switchTab(tabName, btn) {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-    const params = new URLSearchParams(window.location.search);
-    const tab = params.get('tab');
+    const tab = new URLSearchParams(window.location.search).get('tab');
     if (tab === 'admins') switchTab('admins', document.querySelectorAll('.tab')[1]);
     else if (tab === 'orgs') switchTab('orgs', document.querySelectorAll('.tab')[2]);
 });
 
 function copyText(id) {
-    const text = document.getElementById(id).textContent;
-    navigator.clipboard.writeText(text).then(() => {
-        const btn = event.target;
-        btn.textContent = 'コピー済';
-        setTimeout(() => { btn.textContent = 'コピー'; }, 1500);
+    navigator.clipboard.writeText(document.getElementById(id).textContent).then(() => {
+        const btn = event.target; btn.textContent = 'コピー済'; setTimeout(() => { btn.textContent = 'コピー'; }, 1500);
     });
 }
 
 function generatePassword(inputId) {
     const chars = 'abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-    let pw = '';
-    for (let i = 0; i < 12; i++) pw += chars.charAt(Math.floor(Math.random() * chars.length));
+    let pw = ''; for (let i = 0; i < 12; i++) pw += chars.charAt(Math.floor(Math.random() * chars.length));
     document.getElementById(inputId).value = pw;
-}
-
-function escapeHtml(s) {
-    if (!s) return '-';
-    const d = document.createElement('div');
-    d.appendChild(document.createTextNode(s));
-    return d.innerHTML;
 }
 
 // ===== デバイス詳細 =====
 async function showDeviceDetail(deviceId) {
-    document.getElementById('deviceDetailBody').innerHTML = '<div style="text-align:center;color:#aaa;padding:40px 0;">読み込み中...</div>';
-    document.getElementById('deviceDetailModal').classList.add('show');
+    masterCurrentDeviceId = deviceId;
+    showModal('deviceDetailModal');
 
     try {
         const res = await fetch('/partner/devices/' + deviceId + '/detail', { headers: { 'Accept': 'application/json' } });
         const d = await res.json();
 
         const statusLabels = { normal: '正常稼働中', warning: '注意', alert: '未検知警告', offline: '通信途絶', inactive: '未稼働' };
-        const awayText = d.away_mode ? ('外出中' + (d.away_until ? '（' + d.away_until + 'まで）' : '')) : 'OFF';
+        const badge = document.getElementById('masterDetailStatusBadge');
+        badge.textContent = statusLabels[d.status] || d.status;
+        badge.className = 'detail-status-badge ' + (d.status || 'inactive');
+        document.getElementById('masterDetailClearAlertBtn').style.display = d.status === 'alert' ? 'inline-flex' : 'none';
 
-        let html = '<div class="detail-status-badge ' + (d.status || 'inactive') + '">' + (statusLabels[d.status] || d.status) + '</div>';
+        document.getElementById('masterDetailDeviceId').textContent = d.device_id;
+        document.getElementById('masterDetailLastDetected').textContent = d.last_human_detected_at || '-';
+        document.getElementById('masterDetailRoom').value = d.room_number || '';
+        document.getElementById('masterDetailTenant').value = d.tenant_name || '';
 
-        html += '<div class="modal-section"><div class="modal-section-title">基本情報</div><div class="detail-grid">';
-        html += '<div class="detail-item"><p class="detail-item-label">デバイスID</p><p class="detail-item-value mono">' + escapeHtml(d.device_id) + '</p></div>';
-        html += '<div class="detail-item"><p class="detail-item-label">組織</p><p class="detail-item-value">' + escapeHtml(d.organization_name) + '</p></div>';
-        html += '<div class="detail-item"><p class="detail-item-label">部屋番号</p><p class="detail-item-value">' + escapeHtml(d.room_number) + '</p></div>';
-        html += '<div class="detail-item"><p class="detail-item-label">入居者名</p><p class="detail-item-value">' + escapeHtml(d.tenant_name) + '</p></div>';
-        html += '<div class="detail-item"><p class="detail-item-label">最終受信</p><p class="detail-item-value">' + (d.last_received_at || '-') + '</p></div>';
-        html += '<div class="detail-item"><p class="detail-item-label">最終検知</p><p class="detail-item-value">' + (d.last_human_detected_at || '-') + '</p></div>';
-        html += '</div></div>';
+        const battPct = d.battery_pct !== null ? d.battery_pct + '%' : '-';
+        const battV = d.battery_voltage ? ' / ' + d.battery_voltage + 'V' : '';
+        const battEl = document.getElementById('masterDetailBattery');
+        battEl.textContent = battPct + battV;
+        battEl.style.color = (d.battery_pct !== null && d.battery_pct < 20) ? '#c62828' : '';
+        document.getElementById('masterDetailSignal').textContent = d.rssi_label || '-';
 
-        html += '<div class="modal-section"><div class="modal-section-title">センサー状態</div><div class="detail-grid">';
-        const batteryClass = (d.battery_pct !== null && d.battery_pct < 20) ? ' style="color:#c62828;"' : '';
-        html += '<div class="detail-item"><p class="detail-item-label">電池残量</p><p class="detail-item-value"' + batteryClass + '>' + (d.battery_pct !== null ? d.battery_pct + '%' : '-') + (d.battery_voltage ? ' / ' + d.battery_voltage + 'V' : '') + '</p></div>';
-        html += '<div class="detail-item"><p class="detail-item-label">電波強度</p><p class="detail-item-value">' + escapeHtml(d.rssi_label) + '</p></div>';
-        html += '</div></div>';
+        document.getElementById('masterDetailAlertHours').value = d.alert_threshold_hours || 24;
+        document.getElementById('masterDetailHeight').value = d.install_height_cm || 200;
+        document.getElementById('masterDetailPetExclusion').value = d.pet_exclusion_enabled ? '1' : '0';
+        document.getElementById('masterDetailAwayMode').checked = d.away_mode;
+        document.getElementById('masterDetailAwayLabel').textContent = d.away_mode ? ('ON' + (d.away_until ? '（' + d.away_until + 'まで）' : '')) : 'OFF';
+        document.getElementById('masterDetailRegistered').textContent = d.registered_at || '-';
+        document.getElementById('masterDetailMemo').value = d.memo || '';
 
-        html += '<div class="modal-section"><div class="modal-section-title">設定</div><div class="detail-grid">';
-        html += '<div class="detail-item"><p class="detail-item-label">アラート閾値</p><p class="detail-item-value">' + (d.alert_threshold_hours || 24) + '時間</p></div>';
-        html += '<div class="detail-item"><p class="detail-item-label">ペット除外</p><p class="detail-item-value">' + (d.pet_exclusion_enabled ? 'ON' : 'OFF') + '</p></div>';
-        html += '<div class="detail-item"><p class="detail-item-label">設置高さ</p><p class="detail-item-value">' + (d.install_height_cm ? d.install_height_cm + 'cm' : '-') + '</p></div>';
-        html += '<div class="detail-item"><p class="detail-item-label">外出モード</p><p class="detail-item-value">' + awayText + '</p></div>';
-        html += '</div></div>';
+        const isPremium = d.premium_enabled || false;
+        document.getElementById('masterDetailPremiumNote').style.display = isPremium ? 'none' : '';
+        ['masterDetailSmsEnabled','masterDetailSmsPhone1','masterDetailSmsPhone2','masterDetailVoiceEnabled','masterDetailVoicePhone1','masterDetailVoicePhone2'].forEach(id => {
+            const el = document.getElementById(id);
+            el.disabled = !isPremium;
+            el.style.opacity = isPremium ? '' : '0.4';
+            el.style.cursor = isPremium ? '' : 'not-allowed';
+        });
 
-        html += '<div class="modal-section"><div class="modal-section-title">通知設定</div>';
-        // SMS
-        html += '<div class="detail-notify-row"><span class="detail-notify-label">💬 SMS通知</span>';
-        html += '<span class="detail-notify-enabled ' + (d.sms_enabled ? 'on' : 'off') + '">' + (d.sms_enabled ? '有効' : '無効') + '</span>';
-        if (d.sms_phone_1) html += '<span class="detail-notify-value" style="margin-left:8px;">' + escapeHtml(d.sms_phone_1) + (d.sms_phone_2 ? ' / ' + escapeHtml(d.sms_phone_2) : '') + '</span>';
-        html += '</div>';
-        // 電話
-        html += '<div class="detail-notify-row"><span class="detail-notify-label">📞 電話通知</span>';
-        html += '<span class="detail-notify-enabled ' + (d.voice_enabled ? 'on' : 'off') + '">' + (d.voice_enabled ? '有効' : '無効') + '</span>';
-        if (d.voice_phone_1) html += '<span class="detail-notify-value" style="margin-left:8px;">' + escapeHtml(d.voice_phone_1) + (d.voice_phone_2 ? ' / ' + escapeHtml(d.voice_phone_2) : '') + '</span>';
-        html += '</div>';
-        // プレミアム
-        html += '<div style="font-size:12px;color:var(--gray-500);margin-top:8px;">プレミアム: ' + (d.premium_enabled ? '<span style="color:#2e7d32;font-weight:600;">有効</span>' : '<span style="color:#9e9e9e;">無効</span>') + '</div>';
-        html += '</div>';
+        document.getElementById('masterDetailSmsEnabled').checked = d.sms_enabled || false;
+        document.getElementById('masterDetailSmsPhone1').value = d.sms_phone_1 || '';
+        document.getElementById('masterDetailSmsPhone2').value = d.sms_phone_2 || '';
+        document.getElementById('masterDetailVoiceEnabled').checked = d.voice_enabled || false;
+        document.getElementById('masterDetailVoicePhone1').value = d.voice_phone_1 || '';
+        document.getElementById('masterDetailVoicePhone2').value = d.voice_phone_2 || '';
 
-        if (d.memo) {
-            html += '<div class="modal-section"><div class="modal-section-title">メモ</div><div style="font-size:13px;color:var(--gray-700);padding:8px 0;">' + escapeHtml(d.memo) + '</div></div>';
-        }
-
-        html += '<div style="font-size:11px;color:var(--gray-400);margin-top:8px;">登録日: ' + (d.registered_at || '-') + '</div>';
-
-        document.getElementById('deviceDetailBody').innerHTML = html;
-    } catch(e) {
-        document.getElementById('deviceDetailBody').innerHTML = '<div style="text-align:center;color:#c62828;padding:40px 0;">詳細の取得に失敗しました</div>';
-    }
+        masterRenderSchedules(d.schedules || []);
+    } catch(e) { showToast('詳細の取得に失敗しました', 'error'); }
 }
 
-function hideDeviceDetailModal() { document.getElementById('deviceDetailModal').classList.remove('show'); }
+async function masterSaveAssignment() {
+    if (!masterCurrentDeviceId) return;
+    const payload = {
+        room_number: document.getElementById('masterDetailRoom').value || null,
+        tenant_name: document.getElementById('masterDetailTenant').value || null,
+        memo: document.getElementById('masterDetailMemo').value || null,
+        alert_threshold_hours: parseInt(document.getElementById('masterDetailAlertHours').value) || 24,
+        install_height_cm: parseInt(document.getElementById('masterDetailHeight').value) || 200,
+        pet_exclusion_enabled: document.getElementById('masterDetailPetExclusion').value === '1' ? 1 : 0,
+    };
+    try {
+        const res = await fetch('/partner/devices/' + masterCurrentDeviceId + '/assignment', {
+            method: 'PUT', headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' }, body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (res.ok && data.success) { showToast('保存しました', 'success'); setTimeout(() => location.reload(), 800); }
+        else showToast(data.message || '保存に失敗しました', 'error');
+    } catch(e) { showToast('通信エラーが発生しました', 'error'); }
+}
+
+async function masterSaveNotification() {
+    if (!masterCurrentDeviceId) return;
+    const payload = {
+        sms_enabled: document.getElementById('masterDetailSmsEnabled').checked ? 1 : 0,
+        sms_phone_1: document.getElementById('masterDetailSmsPhone1').value || null,
+        sms_phone_2: document.getElementById('masterDetailSmsPhone2').value || null,
+        voice_enabled: document.getElementById('masterDetailVoiceEnabled').checked ? 1 : 0,
+        voice_phone_1: document.getElementById('masterDetailVoicePhone1').value || null,
+        voice_phone_2: document.getElementById('masterDetailVoicePhone2').value || null,
+    };
+    fetch('/partner/devices/' + masterCurrentDeviceId + '/notification', {
+        method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' }, body: JSON.stringify(payload)
+    }).then(r => r.json()).then(d => { if (d.success) showToast('通知設定を保存しました', 'success'); })
+    .catch(() => showToast('保存に失敗しました', 'error'));
+}
+
+async function masterToggleAwayMode(checked) {
+    if (!masterCurrentDeviceId) return;
+    fetch('/partner/devices/' + masterCurrentDeviceId + '/toggle-watch', {
+        method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' }, body: JSON.stringify({ away_mode: checked })
+    }).then(r => r.json()).then(d => {
+        if (d.success) { document.getElementById('masterDetailAwayLabel').textContent = checked ? 'ON' : 'OFF'; showToast(d.message, 'success'); }
+        else { document.getElementById('masterDetailAwayMode').checked = !checked; showToast('エラー', 'error'); }
+    }).catch(() => showToast('通信エラー', 'error'));
+}
+
+async function masterClearAlert() {
+    if (!masterCurrentDeviceId) return;
+    if (!confirm('デバイス ' + masterCurrentDeviceId + ' の警告を解除しますか？\nステータスが初期状態に戻り、検知ログがクリアされます。')) return;
+    fetch('/partner/devices/' + masterCurrentDeviceId + '/clear-alert', {
+        method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' }
+    }).then(r => r.json()).then(d => {
+        if (d.success) { showToast(d.message, 'success'); hideModal('deviceDetailModal'); setTimeout(() => location.reload(), 500); }
+        else showToast(d.message || 'エラー', 'error');
+    }).catch(() => showToast('通信エラー', 'error'));
+}
+
+// ===== スケジュール =====
+function masterRenderSchedules(schedules) {
+    const c = document.getElementById('masterDetailScheduleList');
+    if (!schedules.length) { c.innerHTML = '<div class="detail-schedule-empty">外出スケジュールなし</div>'; return; }
+    let html = '<div class="detail-schedule-list">';
+    schedules.forEach(s => {
+        html += '<div class="detail-schedule-item">';
+        if (s.type === 'oneshot') {
+            html += '<div class="detail-schedule-icon oneshot">📅</div><div class="detail-schedule-info"><p class="detail-schedule-main">' + formatDt(s.start_at) + ' 〜 ' + (s.end_at ? formatDt(s.end_at) : '手動復帰') + '</p><p class="detail-schedule-sub">' + escapeHtml(s.memo || '単発') + '</p></div>';
+        } else {
+            html += '<div class="detail-schedule-icon recurring">🔁</div><div class="detail-schedule-info"><p class="detail-schedule-main">毎週 ' + escapeHtml(s.days_label) + ' ' + s.start_time + '〜' + (s.next_day ? '翌' : '') + s.end_time + '</p><p class="detail-schedule-sub">' + escapeHtml(s.memo || '定期') + '</p></div>';
+        }
+        html += '<button class="detail-schedule-del" onclick="masterConfirmDeleteSchedule(' + s.id + ')">×</button></div>';
+    });
+    c.innerHTML = html + '</div>';
+}
+
+function formatDt(dtStr) {
+    if (!dtStr) return '-';
+    const p = dtStr.split(' ');
+    if (p.length === 2) { const d = p[0].split('-'); if (d.length === 3) return parseInt(d[1]) + '/' + parseInt(d[2]) + ' ' + p[1]; }
+    return dtStr;
+}
+
+function masterOpenScheduleAdd() {
+    masterScheduleType = 'oneshot';
+    ['masterSchedStartAt','masterSchedEndAt','masterSchedStartTime','masterSchedEndTime','masterSchedMemo'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('masterSchedNextDay').checked = false;
+    document.querySelectorAll('#masterScheduleDays .schedule-day-btn').forEach(b => b.classList.remove('active'));
+    masterSwitchScheduleType('oneshot');
+    showModal('masterScheduleAddModal');
+}
+
+function masterSwitchScheduleType(type) {
+    masterScheduleType = type;
+    document.getElementById('masterTabOneshot').classList.toggle('active', type === 'oneshot');
+    document.getElementById('masterTabRecurring').classList.toggle('active', type === 'recurring');
+    document.getElementById('masterOneshotForm').style.display = type === 'oneshot' ? 'block' : 'none';
+    document.getElementById('masterRecurringForm').style.display = type === 'recurring' ? 'block' : 'none';
+}
+
+function toggleDay(btn) { btn.classList.toggle('active'); }
+
+async function masterSubmitSchedule() {
+    if (!masterCurrentDeviceId) return;
+    const payload = { type: masterScheduleType, memo: document.getElementById('masterSchedMemo').value || null };
+    if (masterScheduleType === 'oneshot') {
+        const startAt = document.getElementById('masterSchedStartAt').value;
+        if (!startAt) { showToast('開始日時を入力してください', 'error'); return; }
+        payload.start_at = startAt;
+        const endAt = document.getElementById('masterSchedEndAt').value;
+        if (endAt) payload.end_at = endAt;
+    } else {
+        const days = []; document.querySelectorAll('#masterScheduleDays .schedule-day-btn.active').forEach(b => days.push(parseInt(b.dataset.day)));
+        if (!days.length) { showToast('曜日を1つ以上選択してください', 'error'); return; }
+        const st = document.getElementById('masterSchedStartTime').value, et = document.getElementById('masterSchedEndTime').value;
+        if (!st || !et) { showToast('時間帯を入力してください', 'error'); return; }
+        payload.days_of_week = days; payload.start_time = st; payload.end_time = et; payload.next_day = document.getElementById('masterSchedNextDay').checked;
+    }
+    try {
+        const res = await fetch('/partner/devices/' + masterCurrentDeviceId + '/schedules', {
+            method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' }, body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (res.ok && data.success) { showToast('スケジュールを追加しました', 'success'); hideModal('masterScheduleAddModal'); showDeviceDetail(masterCurrentDeviceId); }
+        else showToast(data.message || '追加に失敗しました', 'error');
+    } catch(e) { showToast('通信エラーが発生しました', 'error'); }
+}
+
+function masterConfirmDeleteSchedule(scheduleId) {
+    masterDeleteScheduleId = scheduleId;
+    showModal('masterScheduleDeleteModal');
+}
+
+async function masterExecuteDeleteSchedule() {
+    if (!masterCurrentDeviceId || !masterDeleteScheduleId) return;
+    try {
+        const res = await fetch('/partner/devices/' + masterCurrentDeviceId + '/schedules/' + masterDeleteScheduleId, {
+            method: 'DELETE', headers: { 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' }
+        });
+        const data = await res.json();
+        if (res.ok && data.success) { showToast('スケジュールを削除しました', 'success'); hideModal('masterScheduleDeleteModal'); showDeviceDetail(masterCurrentDeviceId); }
+        else showToast(data.message || '削除に失敗しました', 'error');
+    } catch(e) { showToast('通信エラーが発生しました', 'error'); }
+}
 
 // ===== 管理者アカウント =====
 function toggleOrgSelect(rowId, role) {
-    var row = document.getElementById(rowId);
+    const row = document.getElementById(rowId);
     if (row) row.style.display = role === 'operator' ? '' : 'none';
 }
-
-function showAddAdminModal() {
-    generatePassword('addAdminPassword');
-    toggleOrgSelect('addAdminOrgRow', 'operator');
-    document.getElementById('addAdminModal').classList.add('show');
-}
+function showAddAdminModal() { generatePassword('addAdminPassword'); toggleOrgSelect('addAdminOrgRow', 'operator'); document.getElementById('addAdminModal').classList.add('show'); }
 function hideAddAdminModal() { document.getElementById('addAdminModal').classList.remove('show'); }
-
 function showEditAdminModal(data) {
     document.getElementById('editAdminForm').action = '/partner/admin-users/' + data.id;
     document.getElementById('editAdminName').value = data.name;
@@ -671,19 +901,15 @@ function showEditAdminModal(data) {
     document.getElementById('editAdminModal').classList.add('show');
 }
 function hideEditAdminModal() { document.getElementById('editAdminModal').classList.remove('show'); }
-
 function confirmDeleteAdmin(id, name) {
     if (confirm('「' + name + '」のアカウントを削除しますか？\nこの操作は取り消せません。')) {
-        const form = document.getElementById('deleteAdminForm');
-        form.action = '/partner/admin-users/' + id;
-        form.submit();
+        const form = document.getElementById('deleteAdminForm'); form.action = '/partner/admin-users/' + id; form.submit();
     }
 }
 
 // ===== 組織管理 =====
 function showAddOrgModal() { document.getElementById('addOrgModal').classList.add('show'); }
 function hideAddOrgModal() { document.getElementById('addOrgModal').classList.remove('show'); }
-
 function showEditOrgModal(data) {
     document.getElementById('editOrgForm').action = '/partner/orgs/' + data.id;
     document.getElementById('editOrgName').value = data.name || '';
@@ -702,33 +928,21 @@ function showEditOrgModal(data) {
     document.getElementById('editOrgModal').classList.add('show');
 }
 function hideEditOrgModal() { document.getElementById('editOrgModal').classList.remove('show'); }
-
 function confirmDeleteOrg(id, name) {
     if (confirm('「' + name + '」を削除しますか？\nこの操作は取り消せません。')) {
-        const form = document.getElementById('deleteOrgForm');
-        form.action = '/partner/orgs/' + id;
-        form.submit();
+        const form = document.getElementById('deleteOrgForm'); form.action = '/partner/orgs/' + id; form.submit();
     }
 }
 
 async function toggleOrgPremium(orgId, enabled, checkbox) {
     try {
-        var res = await fetch('/partner/orgs/' + orgId + '/toggle-premium', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' },
-            body: JSON.stringify({ premium_enabled: enabled ? 1 : 0 })
+        const res = await fetch('/partner/orgs/' + orgId + '/toggle-premium', {
+            method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' }, body: JSON.stringify({ premium_enabled: enabled ? 1 : 0 })
         });
-        var data = await res.json();
-        if (data.success) {
-            var label = document.querySelector('.org-premium-label-' + orgId);
-            if (label) label.textContent = enabled ? '有効' : '無効';
-        } else {
-            checkbox.checked = !enabled;
-        }
-    } catch (e) {
-        checkbox.checked = !enabled;
-        console.error(e);
-    }
+        const data = await res.json();
+        if (data.success) { const label = document.querySelector('.org-premium-label-' + orgId); if (label) label.textContent = enabled ? '有効' : '無効'; }
+        else checkbox.checked = !enabled;
+    } catch(e) { checkbox.checked = !enabled; }
 }
 </script>
 @endsection

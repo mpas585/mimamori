@@ -6,11 +6,11 @@ use App\Http\Controllers\Controller;
 use App\Models\PartnerUser;
 use App\Models\Device;
 use App\Models\Organization;
+use App\Models\OrgDeviceAssignment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
 class MasterController extends Controller
@@ -84,17 +84,12 @@ class MasterController extends Controller
             'updated_at'    => now(),
         ]);
 
-        return back()->with('issued', [
-            'device_id' => $deviceId,
-            'pin'       => $pin,
-        ]);
+        return back()->with('issued', ['device_id' => $deviceId, 'pin' => $pin]);
     }
 
     public function issueBulk(Request $request)
     {
-        $request->validate([
-            'count' => 'required|integer|min:1|max:100',
-        ], [
+        $request->validate(['count' => 'required|integer|min:1|max:100'], [
             'count.required' => '台数を入力してください',
             'count.max'      => '一度に発番できるのは100台までです',
         ]);
@@ -119,10 +114,7 @@ class MasterController extends Controller
                 'updated_at'    => now(),
             ]);
 
-            $issued[] = [
-                'device_id' => $deviceId,
-                'pin'       => $pin,
-            ];
+            $issued[] = ['device_id' => $deviceId, 'pin' => $pin];
         }
 
         return back()->with('issued_bulk', $issued);
@@ -135,7 +127,9 @@ class MasterController extends Controller
     public function deviceDetail(string $deviceId)
     {
         $device = Device::where('device_id', $deviceId)
-            ->with(['organization', 'orgAssignment', 'notificationSetting'])
+            ->with(['organization', 'orgAssignment', 'notificationSetting', 'schedules' => function ($q) {
+                $q->where('is_active', true)->orderBy('created_at', 'desc');
+            }])
             ->firstOrFail();
 
         $assignment = $device->orgAssignment;
@@ -143,51 +137,210 @@ class MasterController extends Controller
 
         $rssiLabel = '-';
         if ($device->rssi !== null) {
-            if ($device->rssi > -70)      $rssiLabel = '良好 (' . $device->rssi . 'dBm)';
-            elseif ($device->rssi > -85)  $rssiLabel = '普通 (' . $device->rssi . 'dBm)';
-            else                           $rssiLabel = '弱い (' . $device->rssi . 'dBm)';
+            if ($device->rssi > -70)     $rssiLabel = '良好 (' . $device->rssi . 'dBm)';
+            elseif ($device->rssi > -85) $rssiLabel = '普通 (' . $device->rssi . 'dBm)';
+            else                          $rssiLabel = '弱い (' . $device->rssi . 'dBm)';
         }
 
+        $dayNames = ['日', '月', '火', '水', '木', '金', '土'];
+        $schedules = $device->schedules->map(function ($s) use ($dayNames) {
+            $data = ['id' => $s->id, 'type' => $s->type, 'memo' => $s->memo];
+            if ($s->type === 'oneshot') {
+                $data['start_at'] = $s->start_at ? $s->start_at->format('Y-m-d H:i') : null;
+                $data['end_at']   = $s->end_at   ? $s->end_at->format('Y-m-d H:i')   : null;
+            } else {
+                $days = $s->days_of_week ?? [];
+                $data['days_label'] = implode('・', array_map(fn($d) => $dayNames[$d] ?? '', $days));
+                $data['start_time'] = $s->start_time;
+                $data['end_time']   = $s->end_time;
+                $data['next_day']   = $s->next_day;
+            }
+            return $data;
+        });
+
         return response()->json([
-            'device_id'               => $device->device_id,
-            'status'                  => $device->status,
-            'organization_name'       => $device->organization ? $device->organization->name : null,
-            'room_number'             => $assignment ? $assignment->room_number : null,
-            'tenant_name'             => $assignment ? $assignment->tenant_name : null,
-            'last_received_at'        => $device->last_received_at
-                                            ? $device->last_received_at->format('Y/m/d H:i')
-                                            : null,
-            'last_human_detected_at'  => $device->last_human_detected_at
-                                            ? $device->last_human_detected_at->format('Y/m/d H:i')
-                                            : null,
-            'battery_pct'             => $device->battery_pct,
-            'battery_voltage'         => $device->battery_voltage,
-            'rssi_label'              => $rssiLabel,
-            'alert_threshold_hours'   => $device->alert_threshold_hours,
-            'pet_exclusion_enabled'   => (bool) $device->pet_exclusion_enabled,
-            'install_height_cm'       => $device->install_height_cm,
-            'away_mode'               => (bool) $device->away_mode,
-            'away_until'              => $device->away_until
-                                            ? $device->away_until->format('Y/m/d H:i')
-                                            : null,
-            'memo'                    => $device->location_memo,
-            'registered_at'           => $device->created_at->format('Y/m/d'),
-            'sms_enabled'             => $notif ? (bool) $notif->sms_enabled   : false,
-            'sms_phone_1'             => $notif && $notif->sms_phone_1
-                                            ? preg_replace('/^\+81/', '0', $notif->sms_phone_1)
-                                            : null,
-            'sms_phone_2'             => $notif && $notif->sms_phone_2
-                                            ? preg_replace('/^\+81/', '0', $notif->sms_phone_2)
-                                            : null,
-            'voice_enabled'           => $notif ? (bool) $notif->voice_enabled : false,
-            'voice_phone_1'           => $notif && $notif->voice_phone_1
-                                            ? preg_replace('/^\+81/', '0', $notif->voice_phone_1)
-                                            : null,
-            'voice_phone_2'           => $notif && $notif->voice_phone_2
-                                            ? preg_replace('/^\+81/', '0', $notif->voice_phone_2)
-                                            : null,
-            'premium_enabled'         => (bool) ($device->organization?->premium_enabled ?? false),
+            'device_id'              => $device->device_id,
+            'status'                 => $device->status,
+            'organization_name'      => $device->organization ? $device->organization->name : null,
+            'room_number'            => $assignment ? $assignment->room_number : null,
+            'tenant_name'            => $assignment ? $assignment->tenant_name : null,
+            'last_received_at'       => $device->last_received_at       ? $device->last_received_at->format('Y/m/d H:i')      : null,
+            'last_human_detected_at' => $device->last_human_detected_at ? $device->last_human_detected_at->format('Y/m/d H:i') : null,
+            'battery_pct'            => $device->battery_pct,
+            'battery_voltage'        => $device->battery_voltage,
+            'rssi_label'             => $rssiLabel,
+            'alert_threshold_hours'  => $device->alert_threshold_hours,
+            'pet_exclusion_enabled'  => (bool) $device->pet_exclusion_enabled,
+            'install_height_cm'      => $device->install_height_cm,
+            'away_mode'              => (bool) $device->away_mode,
+            'away_until'             => $device->away_until ? $device->away_until->format('Y/m/d H:i') : null,
+            'memo'                   => $device->location_memo,
+            'registered_at'          => $device->created_at->format('Y/m/d'),
+            'schedules'              => $schedules,
+            'sms_enabled'            => $notif ? (bool) $notif->sms_enabled   : false,
+            'sms_phone_1'            => $notif && $notif->sms_phone_1 ? preg_replace('/^\+81/', '0', $notif->sms_phone_1) : null,
+            'sms_phone_2'            => $notif && $notif->sms_phone_2 ? preg_replace('/^\+81/', '0', $notif->sms_phone_2) : null,
+            'voice_enabled'          => $notif ? (bool) $notif->voice_enabled : false,
+            'voice_phone_1'          => $notif && $notif->voice_phone_1 ? preg_replace('/^\+81/', '0', $notif->voice_phone_1) : null,
+            'voice_phone_2'          => $notif && $notif->voice_phone_2 ? preg_replace('/^\+81/', '0', $notif->voice_phone_2) : null,
+            'premium_enabled'        => (bool) ($device->organization?->premium_enabled ?? false),
         ]);
+    }
+
+    // ============================================================
+    // デバイス編集系
+    // ============================================================
+
+    /**
+     * 割当情報・設定更新（部屋番号・入居者名・メモ・アラート閾値・設置高さ・ペット除外）
+     */
+    public function updateDeviceAssignment(Request $request, string $deviceId)
+    {
+        $device = Device::where('device_id', $deviceId)->firstOrFail();
+
+        $request->validate([
+            'room_number'           => 'nullable|string|max:50',
+            'tenant_name'           => 'nullable|string|max:100',
+            'memo'                  => 'nullable|string|max:255',
+            'alert_threshold_hours' => 'nullable|integer|in:12,24,36,48,72',
+            'install_height_cm'     => 'nullable|integer|min:100|max:300',
+            'pet_exclusion_enabled' => 'nullable|boolean',
+        ]);
+
+        // 割当情報更新
+        if ($device->organization_id) {
+            OrgDeviceAssignment::updateOrCreate(
+                ['organization_id' => $device->organization_id, 'device_id' => $device->id],
+                ['room_number' => $request->room_number, 'tenant_name' => $request->tenant_name]
+            );
+        }
+
+        $device->update([
+            'location_memo'          => $request->memo,
+            'alert_threshold_hours'  => $request->alert_threshold_hours ?? $device->alert_threshold_hours,
+            'install_height_cm'      => $request->install_height_cm     ?? $device->install_height_cm,
+            'pet_exclusion_enabled'  => $request->has('pet_exclusion_enabled') ? (int) $request->pet_exclusion_enabled : $device->pet_exclusion_enabled,
+        ]);
+
+        return response()->json(['success' => true, 'message' => '更新しました']);
+    }
+
+    /**
+     * 通知設定更新（SMS/電話）
+     */
+    public function updateDeviceNotification(Request $request, string $deviceId)
+    {
+        $device = Device::where('device_id', $deviceId)->firstOrFail();
+
+        $request->validate([
+            'sms_enabled'   => 'nullable|boolean',
+            'sms_phone_1'   => 'nullable|string|max:20',
+            'sms_phone_2'   => 'nullable|string|max:20',
+            'voice_enabled' => 'nullable|boolean',
+            'voice_phone_1' => 'nullable|string|max:20',
+            'voice_phone_2' => 'nullable|string|max:20',
+        ]);
+
+        $notif = $device->notificationSetting;
+        if (!$notif) {
+            $notif = \App\Models\NotificationSetting::create(['device_id' => $device->id]);
+        }
+
+        $data = [];
+        if ($request->has('sms_enabled'))   $data['sms_enabled']   = (bool) $request->sms_enabled;
+        if ($request->has('sms_phone_1'))   $data['sms_phone_1']   = \App\Helpers\PhoneHelper::normalize($request->sms_phone_1);
+        if ($request->has('sms_phone_2'))   $data['sms_phone_2']   = \App\Helpers\PhoneHelper::normalize($request->sms_phone_2);
+        if ($request->has('voice_enabled')) $data['voice_enabled'] = (bool) $request->voice_enabled;
+        if ($request->has('voice_phone_1')) $data['voice_phone_1'] = \App\Helpers\PhoneHelper::normalize($request->voice_phone_1);
+        if ($request->has('voice_phone_2')) $data['voice_phone_2'] = \App\Helpers\PhoneHelper::normalize($request->voice_phone_2);
+
+        if (!empty($data)) $notif->update($data);
+
+        return response()->json(['success' => true, 'message' => '通知設定を保存しました']);
+    }
+
+    /**
+     * 外出モードトグル
+     */
+    public function toggleDeviceWatch(Request $request, string $deviceId)
+    {
+        $device = Device::where('device_id', $deviceId)->firstOrFail();
+
+        $request->validate(['away_mode' => 'required|boolean']);
+
+        $device->update(['away_mode' => $request->away_mode]);
+
+        return response()->json([
+            'success'   => true,
+            'away_mode' => (bool) $device->away_mode,
+            'message'   => $device->away_mode ? '外出モードをONにしました' : '外出モードをOFFにしました',
+        ]);
+    }
+
+    /**
+     * 警告解除
+     */
+    public function clearDeviceAlert(Request $request, string $deviceId)
+    {
+        $device = Device::where('device_id', $deviceId)->firstOrFail();
+
+        $device->update([
+            'status'                 => 'inactive',
+            'last_human_detected_at' => null,
+            'last_received_at'       => null,
+            'battery_voltage'        => null,
+            'battery_pct'            => null,
+            'rssi'                   => null,
+        ]);
+
+        $device->detectionLogs()->delete();
+
+        return response()->json(['success' => true, 'message' => "デバイス {$deviceId} の警告を解除しました"]);
+    }
+
+    /**
+     * スケジュール追加
+     */
+    public function storeDeviceSchedule(Request $request, string $deviceId)
+    {
+        $device = Device::where('device_id', $deviceId)->firstOrFail();
+
+        $validated = $request->validate([
+            'type'         => 'required|in:oneshot,recurring',
+            'start_at'     => 'required_if:type,oneshot|nullable|date',
+            'end_at'       => 'nullable|date|after:start_at',
+            'days_of_week' => 'required_if:type,recurring|nullable|array',
+            'days_of_week.*' => 'integer|between:0,6',
+            'start_time'   => 'required_if:type,recurring|nullable|date_format:H:i',
+            'end_time'     => 'required_if:type,recurring|nullable|date_format:H:i',
+            'next_day'     => 'nullable|boolean',
+            'memo'         => 'nullable|string|max:200',
+        ]);
+
+        $schedule = $device->schedules()->create([
+            'type'         => $validated['type'],
+            'start_at'     => $validated['start_at']     ?? null,
+            'end_at'       => $validated['end_at']       ?? null,
+            'days_of_week' => $validated['days_of_week'] ?? null,
+            'start_time'   => $validated['start_time']   ?? null,
+            'end_time'     => $validated['end_time']     ?? null,
+            'next_day'     => $validated['next_day']     ?? false,
+            'memo'         => $validated['memo']         ?? null,
+        ]);
+
+        return response()->json(['success' => true, 'schedule' => $schedule], 201);
+    }
+
+    /**
+     * スケジュール削除
+     */
+    public function destroyDeviceSchedule(Request $request, string $deviceId, int $scheduleId)
+    {
+        $device   = Device::where('device_id', $deviceId)->firstOrFail();
+        $schedule = $device->schedules()->findOrFail($scheduleId);
+        $schedule->delete();
+
+        return response()->json(['success' => true, 'message' => 'スケジュールを削除しました']);
     }
 
     // ============================================================
@@ -360,17 +513,10 @@ class MasterController extends Controller
     public function toggleOrgPremium(Request $request, int $orgId)
     {
         $org = Organization::findOrFail($orgId);
-
-        $request->validate([
-            'premium_enabled' => 'required|boolean',
-        ]);
-
+        $request->validate(['premium_enabled' => 'required|boolean']);
         $org->update(['premium_enabled' => (bool) $request->premium_enabled]);
 
-        return response()->json([
-            'success'         => true,
-            'premium_enabled' => $org->premium_enabled,
-        ]);
+        return response()->json(['success' => true, 'premium_enabled' => $org->premium_enabled]);
     }
 
     // ============================================================

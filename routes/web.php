@@ -45,9 +45,7 @@ Route::get('/contact', [ContactController::class, 'index'])->name('contact');
 Route::post('/contact', [ContactController::class, 'send'])->middleware('throttle:5,1');
 
 Route::middleware('auth')->group(function () {
-    Route::get('/', function () {
-        return redirect('/mypage');
-    });
+    Route::get('/', function () { return redirect('/mypage'); });
 
     Route::get('/mypage', [MypageController::class, 'index'])->name('mypage');
     Route::post('/mypage/toggle-watch', [MypageController::class, 'toggleWatch']);
@@ -90,8 +88,14 @@ Route::middleware(PartnerAuth::class)->prefix('partner')->group(function () {
     Route::post('/password-change', [PartnerPasswordController::class, 'update'])->name('partner.password-change.update');
     Route::post('/email-change', [PartnerPasswordController::class, 'updateEmail'])->name('partner.email-change');
 
-    // デバイス詳細
+    // デバイス操作（マスター用）
     Route::get('/devices/{deviceId}/detail', [MasterController::class, 'deviceDetail'])->name('partner.devices.detail');
+    Route::put('/devices/{deviceId}/assignment', [MasterController::class, 'updateDeviceAssignment'])->name('partner.devices.update-assignment');
+    Route::post('/devices/{deviceId}/notification', [MasterController::class, 'updateDeviceNotification'])->name('partner.devices.update-notification');
+    Route::post('/devices/{deviceId}/toggle-watch', [MasterController::class, 'toggleDeviceWatch'])->name('partner.devices.toggle-watch');
+    Route::post('/devices/{deviceId}/clear-alert', [MasterController::class, 'clearDeviceAlert'])->name('partner.devices.clear-alert');
+    Route::post('/devices/{deviceId}/schedules', [MasterController::class, 'storeDeviceSchedule'])->name('partner.devices.schedules.store');
+    Route::delete('/devices/{deviceId}/schedules/{scheduleId}', [MasterController::class, 'destroyDeviceSchedule'])->name('partner.devices.schedules.destroy');
 
     // 管理者アカウント管理
     Route::post('/admin-users', [MasterController::class, 'storeAdminUser'])->name('partner.admin-users.store');
