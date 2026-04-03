@@ -40,7 +40,7 @@ class DeviceReportController extends Controller
         }
 
         // ICCID検証（送信された場合）
-        if (!empty($validated['iccid']) && $device->simBinding) {
+        if (!empty($validated['iccid'] ?? null) && $device->simBinding) {
             if ($device->simBinding->iccid !== $validated['iccid']) {
                 Log::alert('ICCID mismatch', [
                     'device_id' => $validated['device_id'],
@@ -54,7 +54,7 @@ class DeviceReportController extends Controller
         // ペット除外判定
         $humanCount = 0;
         $petCount = 0;
-        $lastDistance = $validated['last_distance_cm'];
+        $lastDistance = $validated['last_distance_cm'] ?? null;
 
         if ($validated['detection_count'] > 0 && $lastDistance !== null) {
             $threshold = $device->pet_exclusion_enabled
@@ -82,10 +82,10 @@ class DeviceReportController extends Controller
             'human_count'      => $humanCount,
             'pet_count'        => $petCount,
             'last_distance_cm' => $lastDistance,
-            'battery_voltage'  => $validated['battery_v'],
-            'battery_pct'      => $validated['battery_pct'],
-            'rssi'             => $validated['rssi'],
-            'error_code'       => $validated['error_code'],
+            'battery_voltage'  => $validated['battery_v'] ?? null,
+            'battery_pct'      => $validated['battery_pct'] ?? null,
+            'rssi'             => $validated['rssi'] ?? null,
+            'error_code'       => $validated['error_code'] ?? null,
             'raw_json'         => $request->all(),
             'received_at'      => now(),
         ]);
@@ -94,9 +94,9 @@ class DeviceReportController extends Controller
         $updateData = [
             'status'           => 'normal',
             'last_received_at' => now(),
-            'battery_voltage'  => $validated['battery_v'],
-            'battery_pct'      => $validated['battery_pct'],
-            'rssi'             => $validated['rssi'],
+            'battery_voltage'  => $validated['battery_v'] ?? null,
+            'battery_pct'      => $validated['battery_pct'] ?? null,
+            'rssi'             => $validated['rssi'] ?? null,
         ];
 
         if ($humanCount > 0) {
@@ -104,7 +104,8 @@ class DeviceReportController extends Controller
         }
 
         // 電池残量低下チェック
-        if ($validated['battery_pct'] !== null && $validated['battery_pct'] <= 10) {
+        $batteryPct = $validated['battery_pct'] ?? null;
+        if ($batteryPct !== null && $batteryPct <= 10) {
             $updateData['status'] = 'warning';
         }
 
