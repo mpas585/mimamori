@@ -90,6 +90,9 @@ Route::middleware(PartnerAuth::class)->prefix('partner')->group(function () {
     Route::post('/password-change', [PartnerPasswordController::class, 'update'])->name('partner.password-change.update');
     Route::post('/email-change', [PartnerPasswordController::class, 'updateEmail'])->name('partner.email-change');
 
+    // デバイス詳細
+    Route::get('/devices/{deviceId}/detail', [MasterController::class, 'deviceDetail'])->name('partner.devices.detail');
+
     // 管理者アカウント管理
     Route::post('/admin-users', [MasterController::class, 'storeAdminUser'])->name('partner.admin-users.store');
     Route::put('/admin-users/{id}', [MasterController::class, 'updateAdminUser'])->name('partner.admin-users.update');
