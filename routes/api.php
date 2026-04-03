@@ -1,16 +1,13 @@
 <?php
 
 use App\Http\Controllers\Api\DeviceReportController;
+use App\Http\Controllers\Api\AiCallController;
 use Illuminate\Support\Facades\Route;
 
-/*
-|--------------------------------------------------------------------------
-| API Routes
-|--------------------------------------------------------------------------
-|
-| デバイスからのデータ受信API
-| 認証不要（device_id + ICCID で検証）
-|
-*/
-
 Route::post('/device/report', [DeviceReportController::class, 'store']);
+
+// AIコール
+Route::get('/ai-call/twiml', [AiCallController::class, 'twiml']);
+Route::post('/ai-call/twiml', [AiCallController::class, 'twiml']);
+Route::post('/ai-call/status-webhook', [AiCallController::class, 'statusWebhook']);
+Route::post('/ai-call/recording-webhook', [AiCallController::class, 'recordingWebhook']);
