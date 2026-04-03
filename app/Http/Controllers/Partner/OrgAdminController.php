@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Partner;
 
 use App\Http\Controllers\Controller;
+use App\Helpers\PhoneHelper;
 use App\Models\Device;
 use App\Models\DeviceSchedule;
 use App\Models\Organization;
@@ -121,17 +122,23 @@ class OrgAdminController extends Controller
         $organization = $this->getOrganization();
 
         $request->validate([
-            'notification_email_1' => 'nullable|email|max:255',
-            'notification_email_2' => 'nullable|email|max:255',
-            'notification_email_3' => 'nullable|email|max:255',
-            'notification_enabled' => 'nullable|boolean',
+            'notification_email_1'     => 'nullable|email|max:255',
+            'notification_email_2'     => 'nullable|email|max:255',
+            'notification_email_3'     => 'nullable|email|max:255',
+            'notification_enabled'     => 'nullable|boolean',
+            'notification_sms_1'       => 'nullable|string|max:20',
+            'notification_sms_2'       => 'nullable|string|max:20',
+            'notification_sms_enabled' => 'nullable|boolean',
         ]);
 
         $organization->update([
-            'notification_email_1' => $request->notification_email_1 ?: null,
-            'notification_email_2' => $request->notification_email_2 ?: null,
-            'notification_email_3' => $request->notification_email_3 ?: null,
-            'notification_enabled' => $request->has('notification_enabled') ? (bool) $request->notification_enabled : true,
+            'notification_email_1'     => $request->notification_email_1 ?: null,
+            'notification_email_2'     => $request->notification_email_2 ?: null,
+            'notification_email_3'     => $request->notification_email_3 ?: null,
+            'notification_enabled'     => $request->has('notification_enabled') ? (bool) $request->notification_enabled : true,
+            'notification_sms_1'       => PhoneHelper::normalize($request->notification_sms_1),
+            'notification_sms_2'       => PhoneHelper::normalize($request->notification_sms_2),
+            'notification_sms_enabled' => $request->has('notification_sms_enabled') ? (bool) $request->notification_sms_enabled : false,
         ]);
 
         if ($request->expectsJson()) {
@@ -152,10 +159,13 @@ class OrgAdminController extends Controller
         $organization = $this->getOrganization();
 
         return response()->json([
-            'notification_email_1' => $organization->notification_email_1,
-            'notification_email_2' => $organization->notification_email_2,
-            'notification_email_3' => $organization->notification_email_3,
-            'notification_enabled' => (bool) $organization->notification_enabled,
+            'notification_email_1'     => $organization->notification_email_1,
+            'notification_email_2'     => $organization->notification_email_2,
+            'notification_email_3'     => $organization->notification_email_3,
+            'notification_enabled'     => (bool) $organization->notification_enabled,
+            'notification_sms_1'       => $organization->notification_sms_1,
+            'notification_sms_2'       => $organization->notification_sms_2,
+            'notification_sms_enabled' => (bool) $organization->notification_sms_enabled,
         ]);
     }
 
@@ -459,7 +469,6 @@ class OrgAdminController extends Controller
     {
         $organization = $this->getOrganization();
 
-        // 組織のデバイスを取得（スケジュール・割当情報込み）
         $devices = Device::where('organization_id', $organization->id)
             ->with(['orgAssignment', 'schedules' => function ($q) {
                 $q->where('is_active', true)->orderBy('created_at', 'desc');
@@ -474,7 +483,6 @@ class OrgAdminController extends Controller
             $roomNumber = $assignment ? $assignment->room_number : null;
             $tenantName = $assignment ? $assignment->tenant_name : null;
 
-            // away_modeがON または スケジュールがあるデバイスのみ
             $hasSchedules = $device->schedules->isNotEmpty();
             $isAwayMode = $device->away_mode;
 
@@ -573,7 +581,6 @@ class OrgAdminController extends Controller
 
     /**
      * デバイス一括生成 + 組織紐付け（AJAX）
-     * Step3「決済へ進む」から呼ばれる
      */
     public function bulkCheckout(Request $request)
     {
@@ -615,8 +622,6 @@ class OrgAdminController extends Controller
             ];
         }
 
-        // TODO: $optAi, $optSms を pay.jp 決済フローへ引き渡す
-        // checkout_url が null の場合はフロント側でCSVのみダウンロード
         return response()->json([
             'success'      => true,
             'count'        => $count,

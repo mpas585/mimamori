@@ -18,10 +18,14 @@ class Organization extends Model
         'notification_email_2',
         'notification_email_3',
         'notification_enabled',
+        'notification_sms_1',
+        'notification_sms_2',
+        'notification_sms_enabled',
     ];
 
     protected $casts = [
-        'notification_enabled' => 'boolean',
+        'notification_enabled'     => 'boolean',
+        'notification_sms_enabled' => 'boolean',
     ];
 
     public function devices(): HasMany
@@ -51,5 +55,24 @@ class Organization extends Model
         }
 
         return $emails;
+    }
+
+    /**
+     * 有効な通知SMS番号一覧を取得
+     */
+    public function getNotificationSmsPhones(): array
+    {
+        if (!$this->notification_sms_enabled) {
+            return [];
+        }
+
+        $phones = [];
+        foreach (['notification_sms_1', 'notification_sms_2'] as $field) {
+            if (!empty($this->$field)) {
+                $phones[] = $this->$field;
+            }
+        }
+
+        return $phones;
     }
 }

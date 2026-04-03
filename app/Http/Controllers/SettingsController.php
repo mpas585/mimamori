@@ -6,14 +6,12 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\NotificationSetting;
 use App\Mail\DeviceAlertMail;
+use App\Helpers\PhoneHelper;
 use Illuminate\Support\Facades\Mail;
 use Twilio\Rest\Client as TwilioClient;
 
 class SettingsController extends Controller
 {
-    /**
-     * 設定画面表示
-     */
     public function index()
     {
         $device = Auth::user();
@@ -22,9 +20,6 @@ class SettingsController extends Controller
         return view('settings', compact('device', 'notif'));
     }
 
-    /**
-     * デバイス設定の更新（AJAX）
-     */
     public function updateDevice(Request $request)
     {
         $device = Auth::user();
@@ -67,9 +62,6 @@ class SettingsController extends Controller
         return redirect('/settings')->with('success', '保存しました');
     }
 
-    /**
-     * 通知設定の更新（AJAX）
-     */
     public function updateNotification(Request $request)
     {
         $device = Auth::user();
@@ -94,13 +86,11 @@ class SettingsController extends Controller
         }
 
         if ($request->has('sms_phone_1')) {
-            $rules['sms_phone_1'] = 'nullable|string|max:20';
-            $data['sms_phone_1'] = $request->sms_phone_1 ?: null;
+            $data['sms_phone_1'] = PhoneHelper::normalize($request->sms_phone_1);
         }
 
         if ($request->has('sms_phone_2')) {
-            $rules['sms_phone_2'] = 'nullable|string|max:20';
-            $data['sms_phone_2'] = $request->sms_phone_2 ?: null;
+            $data['sms_phone_2'] = PhoneHelper::normalize($request->sms_phone_2);
         }
 
         if ($request->has('voice_enabled')) {
@@ -109,13 +99,11 @@ class SettingsController extends Controller
         }
 
         if ($request->has('voice_phone_1')) {
-            $rules['voice_phone_1'] = 'nullable|string|max:20';
-            $data['voice_phone_1'] = $request->voice_phone_1 ?: null;
+            $data['voice_phone_1'] = PhoneHelper::normalize($request->voice_phone_1);
         }
 
         if ($request->has('voice_phone_2')) {
-            $rules['voice_phone_2'] = 'nullable|string|max:20';
-            $data['voice_phone_2'] = $request->voice_phone_2 ?: null;
+            $data['voice_phone_2'] = PhoneHelper::normalize($request->voice_phone_2);
         }
 
         if (!empty($rules)) {
@@ -133,9 +121,6 @@ class SettingsController extends Controller
         return redirect('/settings')->with('success', '保存しました');
     }
 
-    /**
-     * テスト通知送信
-     */
     public function sendTestNotification(Request $request)
     {
         $device = Auth::user();
@@ -144,7 +129,6 @@ class SettingsController extends Controller
         $targets = [];
         $errors = [];
 
-        // メール通知
         if ($notif && $notif->email_enabled && $notif->email_1) {
             try {
                 $subject = '[みまもりデバイス] テスト通知';
@@ -156,7 +140,6 @@ class SettingsController extends Controller
             }
         }
 
-        // SMS通知
         if ($notif && $notif->sms_enabled && $notif->sms_phone_1) {
             try {
                 $twilio = new TwilioClient(config('services.twilio.sid'), config('services.twilio.token'));
@@ -183,10 +166,7 @@ class SettingsController extends Controller
             : 'テスト通知を送信しました（' . implode('・', $targets) . '）';
 
         if ($request->expectsJson()) {
-            return response()->json([
-                'ok' => !empty($targets),
-                'message' => $message,
-            ]);
+            return response()->json(['ok' => !empty($targets), 'message' => $message]);
         }
 
         return redirect('/settings')->with('success', $message);

@@ -1,0 +1,38 @@
+// dashboard.blade.phpの以下のJS関数を差し替えてください
+
+function showNotificationModal() {
+    fetch('{{ route("partner.org.notification") }}', { headers: { 'Accept': 'application/json' } })
+    .then(r => r.json()).then(d => {
+        document.getElementById('orgNotifEmail1').value = d.notification_email_1 || '';
+        document.getElementById('orgNotifEmail2').value = d.notification_email_2 || '';
+        document.getElementById('orgNotifEmail3').value = d.notification_email_3 || '';
+        document.getElementById('orgNotifEnabled').checked = d.notification_enabled;
+        document.getElementById('orgNotifSms1').value = d.notification_sms_1 ? d.notification_sms_1.replace(/^\+81/, '0') : '';
+        document.getElementById('orgNotifSms2').value = d.notification_sms_2 ? d.notification_sms_2.replace(/^\+81/, '0') : '';
+        document.getElementById('orgNotifSmsEnabled').checked = d.notification_sms_enabled;
+        showModal('notificationModal');
+    })
+    .catch(() => showModal('notificationModal'));
+}
+
+function saveOrgNotification() {
+    var payload = {
+        notification_email_1: document.getElementById('orgNotifEmail1').value || null,
+        notification_email_2: document.getElementById('orgNotifEmail2').value || null,
+        notification_email_3: document.getElementById('orgNotifEmail3').value || null,
+        notification_enabled: document.getElementById('orgNotifEnabled').checked ? 1 : 0,
+        notification_sms_1: document.getElementById('orgNotifSms1').value || null,
+        notification_sms_2: document.getElementById('orgNotifSms2').value || null,
+        notification_sms_enabled: document.getElementById('orgNotifSmsEnabled').checked ? 1 : 0,
+    };
+    fetch('{{ route("partner.org.notification.update") }}', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' },
+        body: JSON.stringify(payload)
+    })
+    .then(r => r.json()).then(d => {
+        if (d.success) { showToast(d.message, 'success'); hideModal('notificationModal'); }
+        else showToast(d.message || '保存に失敗しました', 'error');
+    })
+    .catch(() => showToast('通信エラーが発生しました', 'error'));
+}
