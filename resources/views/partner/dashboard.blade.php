@@ -514,9 +514,14 @@
                         <span id="detailNotifyLabel" style="font-size:13px;color:var(--gray-700);">有効</span>
                     </div>
                     <p class="detail-notify-note" style="margin-bottom:16px;">※ご契約後〇ヶ月は停止機能はご利用になれません。</p>
+                    {{-- プレミアム契約/解約 --}}
+                    <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:var(--beige);border-radius:var(--radius);margin-bottom:12px;border:1px solid var(--gray-200);">
+                        <p style="font-size:13px;font-weight:600;color:var(--gray-700);">⭐ プレミアム（SMS/電話通知）</p>
+                        <div id="detailPremiumActionArea"></div>
+                    </div>
                     {{-- プレミアム未契約の注意 --}}
                     <div id="detailPremiumNote" style="display:none;padding:10px 12px;background:var(--yellow-light);border-radius:var(--radius);margin-bottom:12px;font-size:12px;color:#a16207;">
-                        ⚠️ SMS・電話通知はプレミアム契約が必要です。管理者にお問い合わせください。
+                        ⚠️ SMS・電話通知はプレミアム契約が必要です。
                     </div>
                     {{-- SMS通知 --}}
                     <div style="border:1px solid var(--gray-200);border-radius:var(--radius);padding:14px;margin-bottom:10px;">
@@ -839,6 +844,7 @@ function showDeviceDetail(deviceId) {
         });
         var premiumNote = document.getElementById('detailPremiumNote');
         if (premiumNote) premiumNote.style.display = isPremium ? 'none' : '';
+        renderDetailPremiumAction(isPremium);
         renderDetailSchedules(data.schedules || [], data.device_id);
         showModal('detailModal');
     }).catch(() => showToast('詳細の取得に失敗しました', 'error'));
@@ -856,6 +862,46 @@ async function saveDetailChanges() {
 }
 
 function toggleNotifyService(enabled) { document.getElementById('detailNotifyLabel').textContent = enabled ? '有効' : '停止中'; showToast(enabled ? '通知サービスを有効にしました' : '通知サービスを停止しました', 'success'); }
+
+// ===== プレミアム契約/解約 =====
+function renderDetailPremiumAction(isPremium) {
+    var area = document.getElementById('detailPremiumActionArea');
+    if (!area) return;
+    if (isPremium) {
+        area.innerHTML = '<span style="font-size:12px;font-weight:600;color:#2e7d32;background:#e8f5e9;padding:3px 10px;border-radius:10px;margin-right:10px;">契約中 ✓</span>'
+            + '<button style="font-size:11px;color:var(--gray-400);background:none;border:none;text-decoration:underline;cursor:pointer;font-family:inherit;padding:0;" onclick="toggleDetailPremium(false)">解約する</button>';
+    } else {
+        area.innerHTML = '<button class="btn btn-sm btn-primary" style="font-size:12px;padding:5px 14px;" onclick="toggleDetailPremium(true)">プレミアムを申し込む</button>';
+    }
+}
+
+async function toggleDetailPremium(enabled) {
+    if (!currentDetailDeviceId) return;
+    try {
+        var res = await fetch('/partner/org/devices/' + currentDetailDeviceId + '/toggle-premium', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' },
+            body: JSON.stringify({ premium_enabled: enabled ? 1 : 0 })
+        });
+        var data = await res.json();
+        if (data.success) {
+            renderDetailPremiumAction(enabled);
+            ['detailSmsEnabled','detailSmsPhone1','detailSmsPhone2','detailVoiceEnabled','detailVoicePhone1','detailVoicePhone2'].forEach(function(id) {
+                var el = document.getElementById(id);
+                el.disabled = !enabled;
+                el.style.opacity = enabled ? '' : '0.4';
+                el.style.cursor = enabled ? '' : 'not-allowed';
+            });
+            document.getElementById('detailPremiumNote').style.display = enabled ? 'none' : '';
+            showToast(enabled ? 'プレミアムを申し込みました' : 'プレミアムを解約しました', 'success');
+        } else {
+            showToast(data.message || 'エラーが発生しました', 'error');
+        }
+    } catch(e) {
+        showToast('通信エラーが発生しました', 'error');
+    }
+}
+
 function saveDetailNotification() {
     if (!currentDetailDeviceId) return;
     var payload = {
