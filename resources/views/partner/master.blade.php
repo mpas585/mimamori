@@ -74,6 +74,18 @@
     .watch-slider::before { content: ''; position: absolute; height: 18px; width: 18px; left: 3px; bottom: 3px; background: white; border-radius: 50%; transition: 0.3s; }
     .watch-toggle input:checked + .watch-slider { background: #22c55e; }
     .watch-toggle input:checked + .watch-slider::before { transform: translateX(20px); }
+    /* 組織テーブル */
+    .org-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .org-table th { text-align: left; padding: 10px 12px; border-bottom: 2px solid #e0d8cc; font-weight: 500; color: #8b7e6a; font-size: 12px; white-space: nowrap; }
+    .org-table td { padding: 10px 12px; border-bottom: 1px solid #f0ebe1; vertical-align: middle; }
+    .org-table tr:hover td { background: #faf8f4; }
+    .expires-warn { color: #c62828; font-weight: 600; }
+    .expires-ok { color: #2e7d32; }
+    .org-notify-icons { display: flex; gap: 6px; align-items: center; font-size: 11px; color: var(--gray-500); }
+    /* モーダル内セクション */
+    .modal-section { margin-bottom: 20px; }
+    .modal-section-title { font-size: 13px; font-weight: 700; color: var(--gray-600); margin-bottom: 10px; padding-bottom: 6px; border-bottom: 1px solid var(--gray-200); }
+    .form-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 </style>
 @endsection
 
@@ -87,6 +99,13 @@
     <div class="stat-card offline"><div class="stat-value">{{ $stats['offline'] }}</div><div class="stat-label">通信途絶</div></div>
     <div class="stat-card"><div class="stat-value">{{ $stats['inactive'] }}</div><div class="stat-label">未稼働</div></div>
 </div>
+
+@if(session('success'))
+    <div style="background:#e8f5e9;color:#2e7d32;padding:12px 16px;border-radius:8px;margin-bottom:16px;font-size:13px;font-weight:600;">✅ {{ session('success') }}</div>
+@endif
+@if(session('error'))
+    <div style="background:#fbe9e7;color:#c62828;padding:12px 16px;border-radius:8px;margin-bottom:16px;font-size:13px;font-weight:600;">⚠️ {{ session('error') }}</div>
+@endif
 
 <div class="tab-bar">
     <button class="tab active" onclick="switchTab('devices', this)">デバイス管理</button>
@@ -148,11 +167,18 @@
                 <option value="offline" {{ request('status') === 'offline' ? 'selected' : '' }}>通信途絶</option>
                 <option value="inactive" {{ request('status') === 'inactive' ? 'selected' : '' }}>未稼働</option>
             </select>
+            <select name="org" class="filter-select">
+                <option value="">すべての組織</option>
+                <option value="none" {{ request('org') === 'none' ? 'selected' : '' }}>組織未割当</option>
+                @foreach($organizations as $org)
+                    <option value="{{ $org->id }}" {{ request('org') == $org->id ? 'selected' : '' }}>{{ $org->name }}</option>
+                @endforeach
+            </select>
             <button type="submit" class="btn btn-sm btn-secondary">絞り込み</button>
         </form>
         <table class="device-table">
             <thead>
-                <tr><th>品番</th><th>表示名</th><th>状態</th><th>電池</th><th>電波</th><th>最終受信</th><th>最終検知</th></tr>
+                <tr><th>品番</th><th>表示名</th><th>状態</th><th>組織</th><th>電池</th><th>電波</th><th>最終受信</th><th>最終検知</th></tr>
             </thead>
             <tbody>
                 @forelse($devices as $device)
@@ -170,13 +196,14 @@
                                 @endswitch
                             </span>
                         </td>
+                        <td style="font-size:12px;color:var(--gray-600);">{{ $device->organization ? $device->organization->name : '-' }}</td>
                         <td class="battery-cell {{ $device->battery_pct && $device->battery_pct < 20 ? 'battery-low' : '' }}">{{ $device->battery_pct ? $device->battery_pct . '%' : '-' }}</td>
                         <td style="font-size:12px;">{{ $device->rssi ? $device->rssi . 'dBm' : '-' }}</td>
                         <td style="font-size:12px;">{{ $device->last_received_at ? $device->last_received_at->format('m/d H:i') : '-' }}</td>
                         <td style="font-size:12px;">{{ $device->last_human_detected_at ? $device->last_human_detected_at->format('m/d H:i') : '-' }}</td>
                     </tr>
                 @empty
-                    <tr><td colspan="7" class="empty-row">デバイスがありません</td></tr>
+                    <tr><td colspan="8" class="empty-row">デバイスがありません</td></tr>
                 @endforelse
             </tbody>
         </table>
@@ -201,7 +228,7 @@
         </div>
         <table class="admin-table">
             <thead>
-                <tr><th>ID</th><th>名前</th><th>メールアドレス</th><th>権限</th><th>最終ログイン</th><th>作成日</th><th>操作</th></tr>
+                <tr><th>ID</th><th>名前</th><th>メールアドレス</th><th>権限</th><th>所属組織</th><th>最終ログイン</th><th>作成日</th><th>操作</th></tr>
             </thead>
             <tbody>
                 @forelse($adminUsers as $admin)
@@ -210,17 +237,18 @@
                         <td style="font-weight:500;">{{ $admin->name }}</td>
                         <td style="font-size:13px;">{{ $admin->email }}</td>
                         <td><span class="role-badge {{ $admin->role === 'master' ? 'role-master' : 'role-operator' }}">{{ $admin->role === 'master' ? 'マスター' : 'オペレーター' }}</span></td>
+                        <td style="font-size:12px;color:var(--gray-600);">{{ $admin->organization ? $admin->organization->name : '-' }}</td>
                         <td style="font-size:12px;color:#888;">{{ $admin->last_login_at ? \Carbon\Carbon::parse($admin->last_login_at)->format('Y/m/d H:i') : '未ログイン' }}</td>
                         <td style="font-size:12px;color:#888;">{{ $admin->created_at->format('Y/m/d') }}</td>
                         <td>
-                            <button class="action-btn" onclick="showEditAdminModal({{ json_encode(['id' => $admin->id, 'name' => $admin->name, 'email' => $admin->email, 'role' => $admin->role]) }})">編集</button>
+                            <button class="action-btn" onclick="showEditAdminModal({{ json_encode(['id' => $admin->id, 'name' => $admin->name, 'email' => $admin->email, 'role' => $admin->role, 'organization_id' => $admin->organization_id]) }})">編集</button>
                             @if($admin->id !== Auth::guard('partner')->id())
                                 <button class="action-btn danger" onclick="confirmDeleteAdmin({{ $admin->id }}, '{{ $admin->name }}')">削除</button>
                             @endif
                         </td>
                     </tr>
                 @empty
-                    <tr><td colspan="7" class="empty-row">管理者アカウントがありません</td></tr>
+                    <tr><td colspan="8" class="empty-row">管理者アカウントがありません</td></tr>
                 @endforelse
             </tbody>
         </table>
@@ -230,19 +258,53 @@
 {{-- ===== 組織管理タブ ===== --}}
 <div id="tab-orgs" class="tab-content">
     <div class="card">
-        <div style="font-size:15px;font-weight:600;color:#5a5245;margin-bottom:16px;">組織一覧 / プレミアム管理</div>
-        <p style="font-size:12px;color:var(--gray-500);margin-bottom:16px;">プレミアムをONにすると、その組織のデバイスでSMS・電話通知が利用できます。</p>
-        <table class="admin-table">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+            <div style="font-size:15px;font-weight:600;color:#5a5245;">組織一覧</div>
+            <button class="btn btn-sm btn-primary" onclick="showAddOrgModal()">＋ 組織追加</button>
+        </div>
+        <table class="org-table">
             <thead>
-                <tr><th>組織名</th><th>担当者</th><th>連絡先</th><th>デバイス数</th><th>プレミアム（SMS/電話）</th><th>作成日</th></tr>
+                <tr>
+                    <th>組織名</th>
+                    <th>担当者</th>
+                    <th>連絡先</th>
+                    <th>デバイス数</th>
+                    <th>台数上限</th>
+                    <th>契約期限</th>
+                    <th>プレミアム</th>
+                    <th>通知設定</th>
+                    <th>操作</th>
+                </tr>
             </thead>
             <tbody>
                 @forelse($organizations as $org)
+                    @php
+                        $expiresAt = $org->expires_at;
+                        $isExpired = $expiresAt && $expiresAt->isPast();
+                        $isExpiringSoon = $expiresAt && !$isExpired && $expiresAt->diffInDays(now()) <= 30;
+                        $hasNotifyEmail = $org->notification_email_1 || $org->notification_email_2 || $org->notification_email_3;
+                        $hasNotifySms = $org->notification_sms_1 || $org->notification_sms_2;
+                    @endphp
                     <tr>
                         <td style="font-weight:500;">{{ $org->name }}</td>
                         <td style="font-size:12px;">{{ $org->contact_name ?: '-' }}</td>
                         <td style="font-size:12px;">{{ $org->contact_email }}</td>
-                        <td style="font-size:13px;">{{ $org->devices_count }}台</td>
+                        <td style="font-size:13px;">
+                            <span style="{{ $org->devices_count >= ($org->device_limit ?? 100) ? 'color:var(--red);font-weight:600;' : '' }}">
+                                {{ $org->devices_count }}台
+                            </span>
+                        </td>
+                        <td style="font-size:13px;">{{ $org->device_limit ?? 100 }}台</td>
+                        <td style="font-size:12px;">
+                            @if($expiresAt)
+                                <span class="{{ $isExpired ? 'expires-warn' : ($isExpiringSoon ? 'expires-warn' : 'expires-ok') }}">
+                                    {{ $expiresAt->format('Y/m/d') }}
+                                    @if($isExpired) ⚠️期限切れ @elseif($isExpiringSoon) ⚠️あと{{ $expiresAt->diffInDays(now()) }}日 @endif
+                                </span>
+                            @else
+                                <span style="color:var(--gray-400);">-</span>
+                            @endif
+                        </td>
                         <td>
                             <label class="watch-toggle">
                                 <input type="checkbox"
@@ -254,10 +316,43 @@
                                 {{ $org->premium_enabled ? '有効' : '無効' }}
                             </span>
                         </td>
-                        <td style="font-size:12px;color:#888;">{{ $org->created_at->format('Y/m/d') }}</td>
+                        <td>
+                            <div class="org-notify-icons">
+                                @if($hasNotifyEmail)
+                                    <span title="メール通知設定あり" style="{{ $org->notification_enabled ? '' : 'opacity:0.4;' }}">📧</span>
+                                @endif
+                                @if($hasNotifySms)
+                                    <span title="SMS通知設定あり" style="{{ $org->notification_sms_enabled ? '' : 'opacity:0.4;' }}">💬</span>
+                                @endif
+                                @if(!$hasNotifyEmail && !$hasNotifySms)
+                                    <span style="color:var(--gray-300);">未設定</span>
+                                @endif
+                            </div>
+                        </td>
+                        <td>
+                            <button class="action-btn" onclick="showEditOrgModal({{ json_encode([
+                                'id' => $org->id,
+                                'name' => $org->name,
+                                'contact_name' => $org->contact_name,
+                                'contact_email' => $org->contact_email,
+                                'contact_phone' => $org->contact_phone,
+                                'address' => $org->address,
+                                'notes' => $org->notes,
+                                'device_limit' => $org->device_limit ?? 100,
+                                'expires_at' => $org->expires_at ? $org->expires_at->format('Y-m-d') : '',
+                                'notification_email_1' => $org->notification_email_1,
+                                'notification_email_2' => $org->notification_email_2,
+                                'notification_email_3' => $org->notification_email_3,
+                                'notification_sms_1' => $org->notification_sms_1,
+                                'notification_sms_2' => $org->notification_sms_2,
+                            ]) }})">編集</button>
+                            @if($org->devices_count === 0)
+                                <button class="action-btn danger" onclick="confirmDeleteOrg({{ $org->id }}, '{{ $org->name }}')">削除</button>
+                            @endif
+                        </td>
                     </tr>
                 @empty
-                    <tr><td colspan="6" class="empty-row">組織がありません</td></tr>
+                    <tr><td colspan="9" class="empty-row">組織がありません</td></tr>
                 @endforelse
             </tbody>
         </table>
@@ -275,11 +370,20 @@
                 <div class="form-group"><label class="form-label">メールアドレス *</label><input type="email" name="email" class="form-input" placeholder="admin@example.com" required><p class="form-hint">このアドレスでログインします</p></div>
                 <div class="form-group">
                     <label class="form-label">権限 *</label>
-                    <select name="role" class="form-input">
+                    <select name="role" class="form-input" id="addAdminRole" onchange="toggleOrgSelect('addAdminOrgRow', this.value)">
                         <option value="operator">オペレーター（組織管理者）</option>
                         <option value="master">マスター（全権限）</option>
                     </select>
                     <p class="form-hint">オペレーター：担当組織のデバイスのみ管理可能 / マスター：全機能にアクセス可能</p>
+                </div>
+                <div class="form-group" id="addAdminOrgRow">
+                    <label class="form-label">所属組織</label>
+                    <select name="organization_id" class="form-input">
+                        <option value="">未割当</option>
+                        @foreach($organizations as $org)
+                            <option value="{{ $org->id }}">{{ $org->name }}</option>
+                        @endforeach
+                    </select>
                 </div>
                 <div class="form-group">
                     <label class="form-label">初期パスワード *</label>
@@ -307,9 +411,18 @@
                 <div class="form-group"><label class="form-label">メールアドレス *</label><input type="email" name="email" id="editAdminEmail" class="form-input" required></div>
                 <div class="form-group">
                     <label class="form-label">権限 *</label>
-                    <select name="role" id="editAdminRole" class="form-input">
+                    <select name="role" id="editAdminRole" class="form-input" onchange="toggleOrgSelect('editAdminOrgRow', this.value)">
                         <option value="operator">オペレーター（組織管理者）</option>
                         <option value="master">マスター（全権限）</option>
+                    </select>
+                </div>
+                <div class="form-group" id="editAdminOrgRow">
+                    <label class="form-label">所属組織</label>
+                    <select name="organization_id" id="editAdminOrg" class="form-input">
+                        <option value="">未割当</option>
+                        @foreach($organizations as $org)
+                            <option value="{{ $org->id }}">{{ $org->name }}</option>
+                        @endforeach
                     </select>
                 </div>
                 <div class="form-group">
@@ -327,6 +440,91 @@
 </div>
 
 <form id="deleteAdminForm" method="POST" action="" style="display:none;">
+    @csrf
+    @method('DELETE')
+</form>
+
+{{-- ===== 組織追加モーダル ===== --}}
+<div id="addOrgModal" class="modal-overlay" onclick="if(event.target===this)hideAddOrgModal()">
+    <div class="modal" style="max-width:560px;">
+        <div class="modal-header"><h3>組織追加</h3><button class="modal-close" onclick="hideAddOrgModal()">×</button></div>
+        <form method="POST" action="{{ route('partner.orgs.store') }}">
+            @csrf
+            <div class="modal-body">
+                <div class="modal-section">
+                    <div class="modal-section-title">基本情報</div>
+                    <div class="form-group"><label class="form-label">組織名 *</label><input type="text" name="name" class="form-input" placeholder="例：〇〇不動産株式会社" required></div>
+                    <div class="form-row-2">
+                        <div class="form-group"><label class="form-label">担当者名</label><input type="text" name="contact_name" class="form-input" placeholder="山田 太郎"></div>
+                        <div class="form-group"><label class="form-label">連絡先メール *</label><input type="email" name="contact_email" class="form-input" placeholder="admin@example.com" required></div>
+                    </div>
+                    <div class="form-row-2">
+                        <div class="form-group"><label class="form-label">電話番号</label><input type="text" name="contact_phone" class="form-input" placeholder="03-0000-0000"></div>
+                        <div class="form-group"></div>
+                    </div>
+                    <div class="form-group"><label class="form-label">住所</label><input type="text" name="address" class="form-input" placeholder="東京都〇〇区..."></div>
+                    <div class="form-group"><label class="form-label">メモ</label><textarea name="notes" class="form-input" rows="2" placeholder="備考・管理メモ" style="resize:vertical;"></textarea></div>
+                </div>
+                <div class="modal-section">
+                    <div class="modal-section-title">契約情報</div>
+                    <div class="form-row-2">
+                        <div class="form-group"><label class="form-label">台数上限</label><input type="number" name="device_limit" class="form-input" value="100" min="1" max="9999"><p class="form-hint">デバイス登録できる最大台数</p></div>
+                        <div class="form-group"><label class="form-label">契約期限</label><input type="date" name="expires_at" class="form-input"><p class="form-hint">空欄の場合は無期限</p></div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer"><button type="button" class="btn btn-secondary" onclick="hideAddOrgModal()">キャンセル</button><button type="submit" class="btn btn-primary">作成</button></div>
+        </form>
+    </div>
+</div>
+
+{{-- ===== 組織編集モーダル ===== --}}
+<div id="editOrgModal" class="modal-overlay" onclick="if(event.target===this)hideEditOrgModal()">
+    <div class="modal" style="max-width:560px;">
+        <div class="modal-header"><h3>組織編集</h3><button class="modal-close" onclick="hideEditOrgModal()">×</button></div>
+        <form method="POST" id="editOrgForm" action="">
+            @csrf
+            @method('PUT')
+            <div class="modal-body">
+                <div class="modal-section">
+                    <div class="modal-section-title">基本情報</div>
+                    <div class="form-group"><label class="form-label">組織名 *</label><input type="text" name="name" id="editOrgName" class="form-input" required></div>
+                    <div class="form-row-2">
+                        <div class="form-group"><label class="form-label">担当者名</label><input type="text" name="contact_name" id="editOrgContactName" class="form-input"></div>
+                        <div class="form-group"><label class="form-label">連絡先メール *</label><input type="email" name="contact_email" id="editOrgContactEmail" class="form-input" required></div>
+                    </div>
+                    <div class="form-row-2">
+                        <div class="form-group"><label class="form-label">電話番号</label><input type="text" name="contact_phone" id="editOrgContactPhone" class="form-input"></div>
+                        <div class="form-group"></div>
+                    </div>
+                    <div class="form-group"><label class="form-label">住所</label><input type="text" name="address" id="editOrgAddress" class="form-input"></div>
+                    <div class="form-group"><label class="form-label">メモ</label><textarea name="notes" id="editOrgNotes" class="form-input" rows="2" style="resize:vertical;"></textarea></div>
+                </div>
+                <div class="modal-section">
+                    <div class="modal-section-title">契約情報</div>
+                    <div class="form-row-2">
+                        <div class="form-group"><label class="form-label">台数上限</label><input type="number" name="device_limit" id="editOrgDeviceLimit" class="form-input" min="1" max="9999"><p class="form-hint">デバイス登録できる最大台数</p></div>
+                        <div class="form-group"><label class="form-label">契約期限</label><input type="date" name="expires_at" id="editOrgExpiresAt" class="form-input"><p class="form-hint">空欄の場合は無期限</p></div>
+                    </div>
+                </div>
+                <div class="modal-section">
+                    <div class="modal-section-title">通知設定（確認・修正用）</div>
+                    <p style="font-size:12px;color:var(--gray-500);margin-bottom:12px;">通常はパートナー側で設定します。緊急時のみ修正してください。</p>
+                    <div class="form-group"><label class="form-label">通知メール 1</label><input type="email" name="notification_email_1" id="editOrgEmail1" class="form-input" placeholder="notify@example.com"></div>
+                    <div class="form-group"><label class="form-label">通知メール 2</label><input type="email" name="notification_email_2" id="editOrgEmail2" class="form-input"></div>
+                    <div class="form-group"><label class="form-label">通知メール 3</label><input type="email" name="notification_email_3" id="editOrgEmail3" class="form-input"></div>
+                    <div class="form-row-2">
+                        <div class="form-group"><label class="form-label">SMS通知先 1</label><input type="text" name="notification_sms_1" id="editOrgSms1" class="form-input" placeholder="09012345678"></div>
+                        <div class="form-group"><label class="form-label">SMS通知先 2</label><input type="text" name="notification_sms_2" id="editOrgSms2" class="form-input"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer"><button type="button" class="btn btn-secondary" onclick="hideEditOrgModal()">キャンセル</button><button type="submit" class="btn btn-primary">保存</button></div>
+        </form>
+    </div>
+</div>
+
+<form id="deleteOrgForm" method="POST" action="" style="display:none;">
     @csrf
     @method('DELETE')
 </form>
@@ -372,8 +570,15 @@ function generatePassword(inputId) {
     document.getElementById(inputId).value = password;
 }
 
+// ===== 管理者アカウント =====
+function toggleOrgSelect(rowId, role) {
+    var row = document.getElementById(rowId);
+    if (row) row.style.display = role === 'operator' ? '' : 'none';
+}
+
 function showAddAdminModal() {
     generatePassword('addAdminPassword');
+    toggleOrgSelect('addAdminOrgRow', 'operator');
     document.getElementById('addAdminModal').classList.add('show');
 }
 function hideAddAdminModal() { document.getElementById('addAdminModal').classList.remove('show'); }
@@ -383,7 +588,9 @@ function showEditAdminModal(data) {
     document.getElementById('editAdminName').value = data.name;
     document.getElementById('editAdminEmail').value = data.email;
     document.getElementById('editAdminRole').value = data.role;
+    document.getElementById('editAdminOrg').value = data.organization_id || '';
     document.getElementById('editAdminPassword').value = '';
+    toggleOrgSelect('editAdminOrgRow', data.role);
     document.getElementById('editAdminModal').classList.add('show');
 }
 function hideEditAdminModal() { document.getElementById('editAdminModal').classList.remove('show'); }
@@ -392,6 +599,39 @@ function confirmDeleteAdmin(id, name) {
     if (confirm('「' + name + '」のアカウントを削除しますか？\nこの操作は取り消せません。')) {
         const form = document.getElementById('deleteAdminForm');
         form.action = '/partner/admin-users/' + id;
+        form.submit();
+    }
+}
+
+// ===== 組織管理 =====
+function showAddOrgModal() {
+    document.getElementById('addOrgModal').classList.add('show');
+}
+function hideAddOrgModal() { document.getElementById('addOrgModal').classList.remove('show'); }
+
+function showEditOrgModal(data) {
+    document.getElementById('editOrgForm').action = '/partner/orgs/' + data.id;
+    document.getElementById('editOrgName').value = data.name || '';
+    document.getElementById('editOrgContactName').value = data.contact_name || '';
+    document.getElementById('editOrgContactEmail').value = data.contact_email || '';
+    document.getElementById('editOrgContactPhone').value = data.contact_phone || '';
+    document.getElementById('editOrgAddress').value = data.address || '';
+    document.getElementById('editOrgNotes').value = data.notes || '';
+    document.getElementById('editOrgDeviceLimit').value = data.device_limit || 100;
+    document.getElementById('editOrgExpiresAt').value = data.expires_at || '';
+    document.getElementById('editOrgEmail1').value = data.notification_email_1 || '';
+    document.getElementById('editOrgEmail2').value = data.notification_email_2 || '';
+    document.getElementById('editOrgEmail3').value = data.notification_email_3 || '';
+    document.getElementById('editOrgSms1').value = data.notification_sms_1 || '';
+    document.getElementById('editOrgSms2').value = data.notification_sms_2 || '';
+    document.getElementById('editOrgModal').classList.add('show');
+}
+function hideEditOrgModal() { document.getElementById('editOrgModal').classList.remove('show'); }
+
+function confirmDeleteOrg(id, name) {
+    if (confirm('「' + name + '」を削除しますか？\nこの操作は取り消せません。')) {
+        const form = document.getElementById('deleteOrgForm');
+        form.action = '/partner/orgs/' + id;
         form.submit();
     }
 }

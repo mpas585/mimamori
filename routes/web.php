@@ -82,7 +82,6 @@ Route::post('/partner/password-reset/{token}', [PartnerPasswordResetController::
 
 Route::middleware(PartnerAuth::class)->prefix('partner')->group(function () {
     Route::get('/', [MasterController::class, 'index'])->name('partner.dashboard');
-    Route::post('/orgs/{orgId}/toggle-premium', [MasterController::class, 'toggleOrgPremium'])->name('partner.orgs.toggle-premium');
     Route::post('/issue', [MasterController::class, 'issueDevice'])->name('partner.issue');
     Route::post('/issue-bulk', [MasterController::class, 'issueBulk'])->name('partner.issue-bulk');
     Route::post('/logout', [PartnerLoginController::class, 'logout'])->name('partner.logout');
@@ -91,9 +90,16 @@ Route::middleware(PartnerAuth::class)->prefix('partner')->group(function () {
     Route::post('/password-change', [PartnerPasswordController::class, 'update'])->name('partner.password-change.update');
     Route::post('/email-change', [PartnerPasswordController::class, 'updateEmail'])->name('partner.email-change');
 
+    // 管理者アカウント管理
     Route::post('/admin-users', [MasterController::class, 'storeAdminUser'])->name('partner.admin-users.store');
     Route::put('/admin-users/{id}', [MasterController::class, 'updateAdminUser'])->name('partner.admin-users.update');
     Route::delete('/admin-users/{id}', [MasterController::class, 'destroyAdminUser'])->name('partner.admin-users.destroy');
+
+    // 組織管理
+    Route::post('/orgs', [MasterController::class, 'storeOrg'])->name('partner.orgs.store');
+    Route::put('/orgs/{id}', [MasterController::class, 'updateOrg'])->name('partner.orgs.update');
+    Route::delete('/orgs/{id}', [MasterController::class, 'destroyOrg'])->name('partner.orgs.destroy');
+    Route::post('/orgs/{orgId}/toggle-premium', [MasterController::class, 'toggleOrgPremium'])->name('partner.orgs.toggle-premium');
 });
 
 Route::middleware(PartnerAuth::class.':operator')->prefix('partner/org')->group(function () {

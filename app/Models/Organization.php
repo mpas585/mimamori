@@ -14,6 +14,8 @@ class Organization extends Model
         'contact_phone',
         'address',
         'notes',
+        'device_limit',
+        'expires_at',
         'notification_email_1',
         'notification_email_2',
         'notification_email_3',
@@ -27,7 +29,8 @@ class Organization extends Model
     protected $casts = [
         'notification_enabled'     => 'boolean',
         'notification_sms_enabled' => 'boolean',
-        'premium_enabled'           => 'boolean',
+        'premium_enabled'          => 'boolean',
+        'expires_at'               => 'date',
     ];
 
     public function devices(): HasMany
