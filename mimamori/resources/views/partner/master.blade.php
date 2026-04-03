@@ -82,10 +82,30 @@
     .expires-warn { color: #c62828; font-weight: 600; }
     .expires-ok { color: #2e7d32; }
     .org-notify-icons { display: flex; gap: 6px; align-items: center; font-size: 11px; color: var(--gray-500); }
-    /* モーダル内セクション */
+    /* モーダル内共通 */
     .modal-section { margin-bottom: 20px; }
     .modal-section-title { font-size: 13px; font-weight: 700; color: var(--gray-600); margin-bottom: 10px; padding-bottom: 6px; border-bottom: 1px solid var(--gray-200); }
     .form-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    /* デバイス詳細モーダル */
+    .detail-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .detail-item { padding: 10px 12px; background: var(--beige, #faf8f4); border-radius: var(--radius, 6px); }
+    .detail-item-label { font-size: 11px; color: var(--gray-500, #888); margin-bottom: 4px; }
+    .detail-item-value { font-size: 14px; font-weight: 600; color: var(--gray-800, #333); }
+    .detail-status-badge { display: inline-block; padding: 4px 14px; font-size: 12px; font-weight: 600; border-radius: 6px; margin-bottom: 16px; }
+    .detail-status-badge.normal { background: #e8f5e9; color: #2e7d32; }
+    .detail-status-badge.warning { background: #fff3e0; color: #e65100; }
+    .detail-status-badge.alert { background: #fbe9e7; color: #c62828; }
+    .detail-status-badge.offline { background: #eeeeee; color: #616161; }
+    .detail-status-badge.inactive { background: #f5f5f5; color: #9e9e9e; }
+    .detail-notify-row { display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: var(--beige, #faf8f4); border-radius: var(--radius, 6px); font-size: 13px; margin-bottom: 6px; }
+    .detail-notify-label { min-width: 90px; font-size: 12px; color: var(--gray-500, #888); }
+    .detail-notify-value { font-weight: 600; color: var(--gray-800, #333); }
+    .detail-notify-enabled { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 10px; }
+    .detail-notify-enabled.on { background: #e8f5e9; color: #2e7d32; }
+    .detail-notify-enabled.off { background: #f5f5f5; color: #9e9e9e; }
+    .mono { font-family: monospace; font-weight: 700; letter-spacing: 1px; }
+    .flash-success { background: #e8f5e9; color: #2e7d32; padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; font-size: 13px; font-weight: 600; }
+    .flash-error { background: #fbe9e7; color: #c62828; padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; font-size: 13px; font-weight: 600; }
 </style>
 @endsection
 
@@ -101,10 +121,10 @@
 </div>
 
 @if(session('success'))
-    <div style="background:#e8f5e9;color:#2e7d32;padding:12px 16px;border-radius:8px;margin-bottom:16px;font-size:13px;font-weight:600;">✅ {{ session('success') }}</div>
+    <div class="flash-success">✅ {{ session('success') }}</div>
 @endif
 @if(session('error'))
-    <div style="background:#fbe9e7;color:#c62828;padding:12px 16px;border-radius:8px;margin-bottom:16px;font-size:13px;font-weight:600;">⚠️ {{ session('error') }}</div>
+    <div class="flash-error">⚠️ {{ session('error') }}</div>
 @endif
 
 <div class="tab-bar">
@@ -178,7 +198,7 @@
         </form>
         <table class="device-table">
             <thead>
-                <tr><th>品番</th><th>表示名</th><th>状態</th><th>組織</th><th>電池</th><th>電波</th><th>最終受信</th><th>最終検知</th></tr>
+                <tr><th>品番</th><th>表示名</th><th>状態</th><th>組織</th><th>電池</th><th>電波</th><th>最終受信</th><th>最終検知</th><th>操作</th></tr>
             </thead>
             <tbody>
                 @forelse($devices as $device)
@@ -201,9 +221,10 @@
                         <td style="font-size:12px;">{{ $device->rssi ? $device->rssi . 'dBm' : '-' }}</td>
                         <td style="font-size:12px;">{{ $device->last_received_at ? $device->last_received_at->format('m/d H:i') : '-' }}</td>
                         <td style="font-size:12px;">{{ $device->last_human_detected_at ? $device->last_human_detected_at->format('m/d H:i') : '-' }}</td>
+                        <td><button class="action-btn" onclick="showDeviceDetail('{{ $device->device_id }}')">詳細</button></td>
                     </tr>
                 @empty
-                    <tr><td colspan="8" class="empty-row">デバイスがありません</td></tr>
+                    <tr><td colspan="9" class="empty-row">デバイスがありません</td></tr>
                 @endforelse
             </tbody>
         </table>
@@ -264,17 +285,7 @@
         </div>
         <table class="org-table">
             <thead>
-                <tr>
-                    <th>組織名</th>
-                    <th>担当者</th>
-                    <th>連絡先</th>
-                    <th>デバイス数</th>
-                    <th>台数上限</th>
-                    <th>契約期限</th>
-                    <th>プレミアム</th>
-                    <th>通知設定</th>
-                    <th>操作</th>
-                </tr>
+                <tr><th>組織名</th><th>担当者</th><th>連絡先</th><th>デバイス数</th><th>台数上限</th><th>契約期限</th><th>プレミアム</th><th>通知設定</th><th>操作</th></tr>
             </thead>
             <tbody>
                 @forelse($organizations as $org)
@@ -290,14 +301,12 @@
                         <td style="font-size:12px;">{{ $org->contact_name ?: '-' }}</td>
                         <td style="font-size:12px;">{{ $org->contact_email }}</td>
                         <td style="font-size:13px;">
-                            <span style="{{ $org->devices_count >= ($org->device_limit ?? 100) ? 'color:var(--red);font-weight:600;' : '' }}">
-                                {{ $org->devices_count }}台
-                            </span>
+                            <span style="{{ $org->devices_count >= ($org->device_limit ?? 100) ? 'color:var(--red);font-weight:600;' : '' }}">{{ $org->devices_count }}台</span>
                         </td>
                         <td style="font-size:13px;">{{ $org->device_limit ?? 100 }}台</td>
                         <td style="font-size:12px;">
                             @if($expiresAt)
-                                <span class="{{ $isExpired ? 'expires-warn' : ($isExpiringSoon ? 'expires-warn' : 'expires-ok') }}">
+                                <span class="{{ $isExpired || $isExpiringSoon ? 'expires-warn' : 'expires-ok' }}">
                                     {{ $expiresAt->format('Y/m/d') }}
                                     @if($isExpired) ⚠️期限切れ @elseif($isExpiringSoon) ⚠️あと{{ $expiresAt->diffInDays(now()) }}日 @endif
                                 </span>
@@ -307,26 +316,16 @@
                         </td>
                         <td>
                             <label class="watch-toggle">
-                                <input type="checkbox"
-                                    {{ $org->premium_enabled ? 'checked' : '' }}
-                                    onchange="toggleOrgPremium({{ $org->id }}, this.checked, this)">
+                                <input type="checkbox" {{ $org->premium_enabled ? 'checked' : '' }} onchange="toggleOrgPremium({{ $org->id }}, this.checked, this)">
                                 <span class="watch-slider"></span>
                             </label>
-                            <span class="org-premium-label-{{ $org->id }}" style="font-size:12px;color:var(--gray-500);margin-left:8px;">
-                                {{ $org->premium_enabled ? '有効' : '無効' }}
-                            </span>
+                            <span class="org-premium-label-{{ $org->id }}" style="font-size:12px;color:var(--gray-500);margin-left:8px;">{{ $org->premium_enabled ? '有効' : '無効' }}</span>
                         </td>
                         <td>
                             <div class="org-notify-icons">
-                                @if($hasNotifyEmail)
-                                    <span title="メール通知設定あり" style="{{ $org->notification_enabled ? '' : 'opacity:0.4;' }}">📧</span>
-                                @endif
-                                @if($hasNotifySms)
-                                    <span title="SMS通知設定あり" style="{{ $org->notification_sms_enabled ? '' : 'opacity:0.4;' }}">💬</span>
-                                @endif
-                                @if(!$hasNotifyEmail && !$hasNotifySms)
-                                    <span style="color:var(--gray-300);">未設定</span>
-                                @endif
+                                @if($hasNotifyEmail) <span title="メール通知設定あり" style="{{ $org->notification_enabled ? '' : 'opacity:0.4;' }}">📧</span> @endif
+                                @if($hasNotifySms) <span title="SMS通知設定あり" style="{{ $org->notification_sms_enabled ? '' : 'opacity:0.4;' }}">💬</span> @endif
+                                @if(!$hasNotifyEmail && !$hasNotifySms) <span style="color:var(--gray-300);">未設定</span> @endif
                             </div>
                         </td>
                         <td>
@@ -356,6 +355,17 @@
                 @endforelse
             </tbody>
         </table>
+    </div>
+</div>
+
+{{-- ===== デバイス詳細モーダル ===== --}}
+<div id="deviceDetailModal" class="modal-overlay" onclick="if(event.target===this)hideDeviceDetailModal()">
+    <div class="modal" style="max-width:560px;">
+        <div class="modal-header"><h3>📋 デバイス詳細</h3><button class="modal-close" onclick="hideDeviceDetailModal()">×</button></div>
+        <div class="modal-body" id="deviceDetailBody">
+            <div style="text-align:center;color:#aaa;padding:40px 0;">読み込み中...</div>
+        </div>
+        <div class="modal-footer"><button class="btn btn-secondary" onclick="hideDeviceDetailModal()">閉じる</button></div>
     </div>
 </div>
 
@@ -463,7 +473,7 @@
                         <div class="form-group"></div>
                     </div>
                     <div class="form-group"><label class="form-label">住所</label><input type="text" name="address" class="form-input" placeholder="東京都〇〇区..."></div>
-                    <div class="form-group"><label class="form-label">メモ</label><textarea name="notes" class="form-input" rows="2" placeholder="備考・管理メモ" style="resize:vertical;"></textarea></div>
+                    <div class="form-group"><label class="form-label">メモ</label><textarea name="notes" class="form-input" rows="2" style="resize:vertical;"></textarea></div>
                 </div>
                 <div class="modal-section">
                     <div class="modal-section-title">契約情報</div>
@@ -533,6 +543,8 @@
 
 @section('scripts')
 <script>
+const csrfToken = '{{ csrf_token() }}';
+
 function switchTab(tabName, btn) {
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
@@ -543,13 +555,8 @@ function switchTab(tabName, btn) {
 document.addEventListener('DOMContentLoaded', function() {
     const params = new URLSearchParams(window.location.search);
     const tab = params.get('tab');
-    if (tab === 'admins') {
-        const btn = document.querySelectorAll('.tab')[1];
-        switchTab('admins', btn);
-    } else if (tab === 'orgs') {
-        const btn = document.querySelectorAll('.tab')[2];
-        switchTab('orgs', btn);
-    }
+    if (tab === 'admins') switchTab('admins', document.querySelectorAll('.tab')[1]);
+    else if (tab === 'orgs') switchTab('orgs', document.querySelectorAll('.tab')[2]);
 });
 
 function copyText(id) {
@@ -563,12 +570,82 @@ function copyText(id) {
 
 function generatePassword(inputId) {
     const chars = 'abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-    let password = '';
-    for (let i = 0; i < 12; i++) {
-        password += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    document.getElementById(inputId).value = password;
+    let pw = '';
+    for (let i = 0; i < 12; i++) pw += chars.charAt(Math.floor(Math.random() * chars.length));
+    document.getElementById(inputId).value = pw;
 }
+
+function escapeHtml(s) {
+    if (!s) return '-';
+    const d = document.createElement('div');
+    d.appendChild(document.createTextNode(s));
+    return d.innerHTML;
+}
+
+// ===== デバイス詳細 =====
+async function showDeviceDetail(deviceId) {
+    document.getElementById('deviceDetailBody').innerHTML = '<div style="text-align:center;color:#aaa;padding:40px 0;">読み込み中...</div>';
+    document.getElementById('deviceDetailModal').classList.add('show');
+
+    try {
+        const res = await fetch('/partner/devices/' + deviceId + '/detail', { headers: { 'Accept': 'application/json' } });
+        const d = await res.json();
+
+        const statusLabels = { normal: '正常稼働中', warning: '注意', alert: '未検知警告', offline: '通信途絶', inactive: '未稼働' };
+        const awayText = d.away_mode ? ('外出中' + (d.away_until ? '（' + d.away_until + 'まで）' : '')) : 'OFF';
+
+        let html = '<div class="detail-status-badge ' + (d.status || 'inactive') + '">' + (statusLabels[d.status] || d.status) + '</div>';
+
+        html += '<div class="modal-section"><div class="modal-section-title">基本情報</div><div class="detail-grid">';
+        html += '<div class="detail-item"><p class="detail-item-label">デバイスID</p><p class="detail-item-value mono">' + escapeHtml(d.device_id) + '</p></div>';
+        html += '<div class="detail-item"><p class="detail-item-label">組織</p><p class="detail-item-value">' + escapeHtml(d.organization_name) + '</p></div>';
+        html += '<div class="detail-item"><p class="detail-item-label">部屋番号</p><p class="detail-item-value">' + escapeHtml(d.room_number) + '</p></div>';
+        html += '<div class="detail-item"><p class="detail-item-label">入居者名</p><p class="detail-item-value">' + escapeHtml(d.tenant_name) + '</p></div>';
+        html += '<div class="detail-item"><p class="detail-item-label">最終受信</p><p class="detail-item-value">' + (d.last_received_at || '-') + '</p></div>';
+        html += '<div class="detail-item"><p class="detail-item-label">最終検知</p><p class="detail-item-value">' + (d.last_human_detected_at || '-') + '</p></div>';
+        html += '</div></div>';
+
+        html += '<div class="modal-section"><div class="modal-section-title">センサー状態</div><div class="detail-grid">';
+        const batteryClass = (d.battery_pct !== null && d.battery_pct < 20) ? ' style="color:#c62828;"' : '';
+        html += '<div class="detail-item"><p class="detail-item-label">電池残量</p><p class="detail-item-value"' + batteryClass + '>' + (d.battery_pct !== null ? d.battery_pct + '%' : '-') + (d.battery_voltage ? ' / ' + d.battery_voltage + 'V' : '') + '</p></div>';
+        html += '<div class="detail-item"><p class="detail-item-label">電波強度</p><p class="detail-item-value">' + escapeHtml(d.rssi_label) + '</p></div>';
+        html += '</div></div>';
+
+        html += '<div class="modal-section"><div class="modal-section-title">設定</div><div class="detail-grid">';
+        html += '<div class="detail-item"><p class="detail-item-label">アラート閾値</p><p class="detail-item-value">' + (d.alert_threshold_hours || 24) + '時間</p></div>';
+        html += '<div class="detail-item"><p class="detail-item-label">ペット除外</p><p class="detail-item-value">' + (d.pet_exclusion_enabled ? 'ON' : 'OFF') + '</p></div>';
+        html += '<div class="detail-item"><p class="detail-item-label">設置高さ</p><p class="detail-item-value">' + (d.install_height_cm ? d.install_height_cm + 'cm' : '-') + '</p></div>';
+        html += '<div class="detail-item"><p class="detail-item-label">外出モード</p><p class="detail-item-value">' + awayText + '</p></div>';
+        html += '</div></div>';
+
+        html += '<div class="modal-section"><div class="modal-section-title">通知設定</div>';
+        // SMS
+        html += '<div class="detail-notify-row"><span class="detail-notify-label">💬 SMS通知</span>';
+        html += '<span class="detail-notify-enabled ' + (d.sms_enabled ? 'on' : 'off') + '">' + (d.sms_enabled ? '有効' : '無効') + '</span>';
+        if (d.sms_phone_1) html += '<span class="detail-notify-value" style="margin-left:8px;">' + escapeHtml(d.sms_phone_1) + (d.sms_phone_2 ? ' / ' + escapeHtml(d.sms_phone_2) : '') + '</span>';
+        html += '</div>';
+        // 電話
+        html += '<div class="detail-notify-row"><span class="detail-notify-label">📞 電話通知</span>';
+        html += '<span class="detail-notify-enabled ' + (d.voice_enabled ? 'on' : 'off') + '">' + (d.voice_enabled ? '有効' : '無効') + '</span>';
+        if (d.voice_phone_1) html += '<span class="detail-notify-value" style="margin-left:8px;">' + escapeHtml(d.voice_phone_1) + (d.voice_phone_2 ? ' / ' + escapeHtml(d.voice_phone_2) : '') + '</span>';
+        html += '</div>';
+        // プレミアム
+        html += '<div style="font-size:12px;color:var(--gray-500);margin-top:8px;">プレミアム: ' + (d.premium_enabled ? '<span style="color:#2e7d32;font-weight:600;">有効</span>' : '<span style="color:#9e9e9e;">無効</span>') + '</div>';
+        html += '</div>';
+
+        if (d.memo) {
+            html += '<div class="modal-section"><div class="modal-section-title">メモ</div><div style="font-size:13px;color:var(--gray-700);padding:8px 0;">' + escapeHtml(d.memo) + '</div></div>';
+        }
+
+        html += '<div style="font-size:11px;color:var(--gray-400);margin-top:8px;">登録日: ' + (d.registered_at || '-') + '</div>';
+
+        document.getElementById('deviceDetailBody').innerHTML = html;
+    } catch(e) {
+        document.getElementById('deviceDetailBody').innerHTML = '<div style="text-align:center;color:#c62828;padding:40px 0;">詳細の取得に失敗しました</div>';
+    }
+}
+
+function hideDeviceDetailModal() { document.getElementById('deviceDetailModal').classList.remove('show'); }
 
 // ===== 管理者アカウント =====
 function toggleOrgSelect(rowId, role) {
@@ -604,9 +681,7 @@ function confirmDeleteAdmin(id, name) {
 }
 
 // ===== 組織管理 =====
-function showAddOrgModal() {
-    document.getElementById('addOrgModal').classList.add('show');
-}
+function showAddOrgModal() { document.getElementById('addOrgModal').classList.add('show'); }
 function hideAddOrgModal() { document.getElementById('addOrgModal').classList.remove('show'); }
 
 function showEditOrgModal(data) {
@@ -640,11 +715,7 @@ async function toggleOrgPremium(orgId, enabled, checkbox) {
     try {
         var res = await fetch('/partner/orgs/' + orgId + '/toggle-premium', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                'Accept': 'application/json'
-            },
+            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' },
             body: JSON.stringify({ premium_enabled: enabled ? 1 : 0 })
         });
         var data = await res.json();

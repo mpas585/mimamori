@@ -46,7 +46,11 @@ class MasterController extends Controller
         }
 
         if ($request->filled('org')) {
-            $query->where('organization_id', $request->org);
+            if ($request->org === 'none') {
+                $query->whereNull('organization_id');
+            } else {
+                $query->where('organization_id', $request->org);
+            }
         }
 
         $devices = $query->orderBy('created_at', 'desc')->paginate(20);
@@ -125,6 +129,68 @@ class MasterController extends Controller
     }
 
     // ============================================================
+    // デバイス詳細（JSON）
+    // ============================================================
+
+    public function deviceDetail(string $deviceId)
+    {
+        $device = Device::where('device_id', $deviceId)
+            ->with(['organization', 'orgAssignment', 'notificationSetting'])
+            ->firstOrFail();
+
+        $assignment = $device->orgAssignment;
+        $notif      = $device->notificationSetting;
+
+        $rssiLabel = '-';
+        if ($device->rssi !== null) {
+            if ($device->rssi > -70)      $rssiLabel = '良好 (' . $device->rssi . 'dBm)';
+            elseif ($device->rssi > -85)  $rssiLabel = '普通 (' . $device->rssi . 'dBm)';
+            else                           $rssiLabel = '弱い (' . $device->rssi . 'dBm)';
+        }
+
+        return response()->json([
+            'device_id'               => $device->device_id,
+            'status'                  => $device->status,
+            'organization_name'       => $device->organization ? $device->organization->name : null,
+            'room_number'             => $assignment ? $assignment->room_number : null,
+            'tenant_name'             => $assignment ? $assignment->tenant_name : null,
+            'last_received_at'        => $device->last_received_at
+                                            ? $device->last_received_at->format('Y/m/d H:i')
+                                            : null,
+            'last_human_detected_at'  => $device->last_human_detected_at
+                                            ? $device->last_human_detected_at->format('Y/m/d H:i')
+                                            : null,
+            'battery_pct'             => $device->battery_pct,
+            'battery_voltage'         => $device->battery_voltage,
+            'rssi_label'              => $rssiLabel,
+            'alert_threshold_hours'   => $device->alert_threshold_hours,
+            'pet_exclusion_enabled'   => (bool) $device->pet_exclusion_enabled,
+            'install_height_cm'       => $device->install_height_cm,
+            'away_mode'               => (bool) $device->away_mode,
+            'away_until'              => $device->away_until
+                                            ? $device->away_until->format('Y/m/d H:i')
+                                            : null,
+            'memo'                    => $device->location_memo,
+            'registered_at'           => $device->created_at->format('Y/m/d'),
+            'sms_enabled'             => $notif ? (bool) $notif->sms_enabled   : false,
+            'sms_phone_1'             => $notif && $notif->sms_phone_1
+                                            ? preg_replace('/^\+81/', '0', $notif->sms_phone_1)
+                                            : null,
+            'sms_phone_2'             => $notif && $notif->sms_phone_2
+                                            ? preg_replace('/^\+81/', '0', $notif->sms_phone_2)
+                                            : null,
+            'voice_enabled'           => $notif ? (bool) $notif->voice_enabled : false,
+            'voice_phone_1'           => $notif && $notif->voice_phone_1
+                                            ? preg_replace('/^\+81/', '0', $notif->voice_phone_1)
+                                            : null,
+            'voice_phone_2'           => $notif && $notif->voice_phone_2
+                                            ? preg_replace('/^\+81/', '0', $notif->voice_phone_2)
+                                            : null,
+            'premium_enabled'         => (bool) ($device->organization?->premium_enabled ?? false),
+        ]);
+    }
+
+    // ============================================================
     // 管理者アカウント管理
     // ============================================================
 
@@ -144,10 +210,10 @@ class MasterController extends Controller
         ]);
 
         PartnerUser::create([
-            'name'          => $request->name,
-            'email'         => $request->email,
-            'password_hash' => Hash::make($request->password),
-            'role'          => $request->role,
+            'name'            => $request->name,
+            'email'           => $request->email,
+            'password_hash'   => Hash::make($request->password),
+            'role'            => $request->role,
             'organization_id' => $request->filled('organization_id') ? (int) $request->organization_id : null,
         ]);
 
@@ -170,9 +236,9 @@ class MasterController extends Controller
             'password.min'   => 'パスワードは8文字以上にしてください',
         ]);
 
-        $admin->name  = $request->name;
-        $admin->email = $request->email;
-        $admin->role  = $request->role;
+        $admin->name            = $request->name;
+        $admin->email           = $request->email;
+        $admin->role            = $request->role;
         $admin->organization_id = $request->filled('organization_id') ? (int) $request->organization_id : null;
 
         if ($request->filled('password')) {
@@ -202,9 +268,6 @@ class MasterController extends Controller
     // 組織管理
     // ============================================================
 
-    /**
-     * 組織新規作成
-     */
     public function storeOrg(Request $request)
     {
         $request->validate([
@@ -223,36 +286,33 @@ class MasterController extends Controller
         ]);
 
         $org = Organization::create([
-            'name'          => $request->name,
-            'contact_name'  => $request->contact_name,
-            'contact_email' => $request->contact_email,
-            'contact_phone' => $request->contact_phone,
-            'address'       => $request->address,
-            'notes'         => $request->notes,
-            'device_limit'  => $request->filled('device_limit') ? (int) $request->device_limit : 100,
-            'expires_at'    => $request->expires_at ?: null,
+            'name'            => $request->name,
+            'contact_name'    => $request->contact_name,
+            'contact_email'   => $request->contact_email,
+            'contact_phone'   => $request->contact_phone,
+            'address'         => $request->address,
+            'notes'           => $request->notes,
+            'device_limit'    => $request->filled('device_limit') ? (int) $request->device_limit : 100,
+            'expires_at'      => $request->expires_at ?: null,
             'premium_enabled' => false,
         ]);
 
         return redirect('/partner?tab=orgs')->with('success', '組織「' . $org->name . '」を作成しました');
     }
 
-    /**
-     * 組織更新
-     */
     public function updateOrg(Request $request, int $id)
     {
         $org = Organization::findOrFail($id);
 
         $request->validate([
-            'name'          => 'required|string|max:200',
-            'contact_name'  => 'nullable|string|max:100',
-            'contact_email' => 'required|email|max:255',
-            'contact_phone' => 'nullable|string|max:20',
-            'address'       => 'nullable|string|max:500',
-            'notes'         => 'nullable|string|max:1000',
-            'device_limit'  => 'nullable|integer|min:1|max:9999',
-            'expires_at'    => 'nullable|date',
+            'name'                 => 'required|string|max:200',
+            'contact_name'         => 'nullable|string|max:100',
+            'contact_email'        => 'required|email|max:255',
+            'contact_phone'        => 'nullable|string|max:20',
+            'address'              => 'nullable|string|max:500',
+            'notes'                => 'nullable|string|max:1000',
+            'device_limit'         => 'nullable|integer|min:1|max:9999',
+            'expires_at'           => 'nullable|date',
             'notification_email_1' => 'nullable|email|max:255',
             'notification_email_2' => 'nullable|email|max:255',
             'notification_email_3' => 'nullable|email|max:255',
@@ -265,14 +325,14 @@ class MasterController extends Controller
         ]);
 
         $org->update([
-            'name'          => $request->name,
-            'contact_name'  => $request->contact_name,
-            'contact_email' => $request->contact_email,
-            'contact_phone' => $request->contact_phone,
-            'address'       => $request->address,
-            'notes'         => $request->notes,
-            'device_limit'  => $request->filled('device_limit') ? (int) $request->device_limit : $org->device_limit,
-            'expires_at'    => $request->expires_at ?: null,
+            'name'                 => $request->name,
+            'contact_name'         => $request->contact_name,
+            'contact_email'        => $request->contact_email,
+            'contact_phone'        => $request->contact_phone,
+            'address'              => $request->address,
+            'notes'                => $request->notes,
+            'device_limit'         => $request->filled('device_limit') ? (int) $request->device_limit : $org->device_limit,
+            'expires_at'           => $request->expires_at ?: null,
             'notification_email_1' => $request->notification_email_1 ?: null,
             'notification_email_2' => $request->notification_email_2 ?: null,
             'notification_email_3' => $request->notification_email_3 ?: null,
@@ -283,9 +343,6 @@ class MasterController extends Controller
         return redirect('/partner?tab=orgs')->with('success', '組織「' . $org->name . '」を更新しました');
     }
 
-    /**
-     * 組織削除（デバイスが0台の場合のみ）
-     */
     public function destroyOrg(int $id)
     {
         $org = Organization::withCount('devices')->findOrFail($id);
@@ -300,9 +357,6 @@ class MasterController extends Controller
         return redirect('/partner?tab=orgs')->with('success', '組織「' . $name . '」を削除しました');
     }
 
-    /**
-     * 組織プレミアムトグル（AJAX）
-     */
     public function toggleOrgPremium(Request $request, int $orgId)
     {
         $org = Organization::findOrFail($orgId);
