@@ -57,7 +57,6 @@
     }
     .section-title span { font-size: 18px; }
 
-    /* 通知アイテム */
     .setting-item {
         display: flex;
         align-items: center;
@@ -66,7 +65,6 @@
     }
     .setting-item:last-child { border-bottom: none; }
     .setting-item:first-of-type { padding-top: 0; }
-    .setting-item.locked { opacity: 0.6; }
     .setting-icon {
         width: 44px;
         height: 44px;
@@ -101,12 +99,11 @@
         text-decoration: none;
         margin-left: 8px;
         font-weight: 500;
+        cursor: pointer;
     }
     .edit-link:hover { text-decoration: underline; }
     .setting-action { margin-left: 12px; flex-shrink: 0; }
-    .lock-icon { font-size: 14px; }
 
-    /* トグル */
     .toggle {
         position: relative;
         width: 52px;
@@ -143,7 +140,6 @@
         margin-left: 8px;
     }
 
-    /* テスト通知 */
     .test-notify-section {
         margin-top: 20px;
         padding-top: 20px;
@@ -188,7 +184,6 @@
         text-align: center;
     }
 
-    /* アラートオプション */
     .alert-options {
         display: flex;
         flex-direction: column;
@@ -204,14 +199,8 @@
         cursor: pointer;
         transition: all 0.2s;
     }
-    .alert-option:hover {
-        border-color: var(--gray-400);
-        background: var(--gray-100);
-    }
-    .alert-option.selected {
-        border-color: var(--gray-800);
-        background: var(--beige);
-    }
+    .alert-option:hover { border-color: var(--gray-400); background: var(--gray-100); }
+    .alert-option.selected { border-color: var(--gray-800); background: var(--beige); }
     .alert-radio {
         width: 20px;
         height: 20px;
@@ -231,32 +220,10 @@
         border-radius: 50%;
     }
     .alert-option-content { flex: 1; }
-    .alert-option-title {
-        font-size: 15px;
-        font-weight: 600;
-        color: var(--gray-800);
-    }
-    .alert-option-desc {
-        font-size: 12px;
-        color: var(--gray-500);
-        margin-top: 2px;
-    }
-    .alert-option-badge {
-        font-size: 11px;
-        font-weight: 600;
-        padding: 4px 8px;
-        border-radius: 4px;
-    }
-    .alert-option-badge.default {
-        background: var(--green-light);
-        color: var(--green-dark);
-    }
-    .alert-hint {
-        font-size: 12px;
-        color: var(--gray-500);
-        margin-top: 12px;
-        line-height: 1.6;
-    }
+    .alert-option-title { font-size: 15px; font-weight: 600; color: var(--gray-800); }
+    .alert-option-desc { font-size: 12px; color: var(--gray-500); margin-top: 2px; }
+    .alert-option-badge { font-size: 11px; font-weight: 600; padding: 4px 8px; border-radius: 4px; }
+    .alert-option-badge.default { background: var(--green-light); color: var(--green-dark); }
     .info-box {
         padding: 14px 16px;
         background: var(--blue-light);
@@ -268,7 +235,6 @@
     }
     .info-box strong { color: var(--gray-800); }
 
-    /* ペット除外 */
     .feature-toggle {
         display: flex;
         align-items: center;
@@ -279,31 +245,13 @@
         margin-bottom: 20px;
     }
     .feature-toggle-info { flex: 1; }
-    .feature-toggle-label {
-        font-size: 15px;
-        font-weight: 600;
-        color: var(--gray-800);
-    }
-    .feature-toggle-desc {
-        font-size: 12px;
-        color: var(--gray-500);
-        margin-top: 2px;
-    }
+    .feature-toggle-label { font-size: 15px; font-weight: 600; color: var(--gray-800); }
+    .feature-toggle-desc { font-size: 12px; color: var(--gray-500); margin-top: 2px; }
     .pet-settings { transition: all 0.3s ease; overflow: hidden; }
     .pet-settings.hidden { display: none; }
     .form-group { margin-bottom: 20px; }
-    .form-label {
-        display: block;
-        font-size: 13px;
-        font-weight: 600;
-        color: var(--gray-700);
-        margin-bottom: 8px;
-    }
-    .form-hint {
-        font-size: 11px;
-        color: var(--gray-500);
-        margin-top: 6px;
-    }
+    .form-label { display: block; font-size: 13px; font-weight: 600; color: var(--gray-700); margin-bottom: 8px; }
+    .form-hint { font-size: 11px; color: var(--gray-500); margin-top: 6px; }
     .form-input {
         width: 100%;
         padding: 12px 14px;
@@ -314,136 +262,51 @@
         background: var(--cream);
         transition: all 0.2s;
     }
-    .form-input:focus {
-        outline: none;
-        border-color: var(--gray-500);
-        background: var(--white);
-    }
-    .input-with-unit {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        max-width: 200px;
-    }
+    .form-input:focus { outline: none; border-color: var(--gray-500); background: var(--white); }
+    .input-with-unit { display: flex; align-items: center; gap: 8px; max-width: 200px; }
     .input-with-unit input { flex: 1; text-align: right; }
-    .input-unit {
-        font-size: 14px;
-        font-weight: 500;
-        color: var(--gray-600);
-        min-width: 30px;
-    }
-    .range-info {
-        display: flex;
-        justify-content: space-between;
-        font-size: 10px;
-        color: var(--gray-400);
-        margin-top: 4px;
-        max-width: 200px;
-    }
+    .input-unit { font-size: 14px; font-weight: 500; color: var(--gray-600); min-width: 30px; }
+    .range-info { display: flex; justify-content: space-between; font-size: 10px; color: var(--gray-400); margin-top: 4px; max-width: 200px; }
 
-    /* Canvas プレビュー */
-    .visual-preview {
-        background: var(--beige);
-        border-radius: var(--radius);
-        padding: 20px;
-        margin-top: 20px;
-        text-align: center;
-    }
-    .visual-preview-title {
-        font-size: 12px;
-        font-weight: 600;
-        color: var(--gray-500);
-        margin-bottom: 16px;
-    }
-    #diagramCanvas {
-        display: block;
-        margin: 0 auto;
-        background: var(--white);
-        border-radius: var(--radius);
-        border: 1px solid var(--gray-200);
-    }
-    .legend {
-        display: flex;
-        justify-content: center;
-        gap: 20px;
-        margin-top: 12px;
-        font-size: 12px;
-        color: var(--gray-600);
-    }
-    .legend-item {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-    }
-    .legend-color {
-        width: 16px;
-        height: 16px;
-        border-radius: 3px;
-    }
-    .legend-color.detect {
-        background: rgba(34,197,94,0.3);
-        border: 1px solid var(--green);
-    }
-    .legend-color.exclude {
-        background: rgba(168,162,158,0.3);
-        border: 1px solid var(--gray-400);
-    }
-    .area-display {
-        text-align: center;
-        margin-top: 16px;
-        padding: 14px;
-        background: var(--green-light);
-        border-radius: var(--radius);
-    }
-    .area-label {
-        font-size: 12px;
-        color: var(--gray-600);
-        margin-bottom: 4px;
-    }
-    .area-value {
-        font-size: 20px;
-        font-weight: 700;
-        color: var(--green-dark);
-    }
-    .explanation-box {
-        margin-top: 16px;
-        padding: 14px 16px;
-        background: var(--blue-light);
-        border-radius: var(--radius);
-        font-size: 13px;
-        color: var(--gray-700);
-        line-height: 1.7;
-    }
+    .visual-preview { background: var(--beige); border-radius: var(--radius); padding: 20px; margin-top: 20px; text-align: center; }
+    .visual-preview-title { font-size: 12px; font-weight: 600; color: var(--gray-500); margin-bottom: 16px; }
+    #diagramCanvas { display: block; margin: 0 auto; background: var(--white); border-radius: var(--radius); border: 1px solid var(--gray-200); }
+    .legend { display: flex; justify-content: center; gap: 20px; margin-top: 12px; font-size: 12px; color: var(--gray-600); }
+    .legend-item { display: flex; align-items: center; gap: 6px; }
+    .legend-color { width: 16px; height: 16px; border-radius: 3px; }
+    .legend-color.detect { background: rgba(34,197,94,0.3); border: 1px solid var(--green); }
+    .legend-color.exclude { background: rgba(168,162,158,0.3); border: 1px solid var(--gray-400); }
+    .area-display { text-align: center; margin-top: 16px; padding: 14px; background: var(--green-light); border-radius: var(--radius); }
+    .area-label { font-size: 12px; color: var(--gray-600); margin-bottom: 4px; }
+    .area-value { font-size: 20px; font-weight: 700; color: var(--green-dark); }
+    .explanation-box { margin-top: 16px; padding: 14px 16px; background: var(--blue-light); border-radius: var(--radius); font-size: 13px; color: var(--gray-700); line-height: 1.7; }
     .explanation-box strong { color: var(--gray-800); }
 
-    /* Premium プロモ */
-    .premium-promo {
-        background: linear-gradient(135deg, #667eea, #764ba2);
-        border-radius: var(--radius-lg);
-        padding: 24px;
-        color: var(--white);
-        text-align: center;
-        margin-top: 20px;
+    /* 電話番号入力モーダル */
+    .phone-modal-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.5);
+        z-index: 1000;
+        align-items: center;
+        justify-content: center;
     }
-    .premium-promo h3 { font-size: 18px; font-weight: 500; margin-bottom: 8px; }
-    .premium-promo p { font-size: 14px; opacity: 0.9; margin-bottom: 16px; }
-    .premium-promo-btn {
-        display: inline-block;
-        padding: 12px 24px;
-        font-size: 14px;
-        font-weight: 500;
-        color: #667eea;
+    .phone-modal-overlay.open { display: flex; }
+    .phone-modal {
         background: var(--white);
-        border: none;
-        border-radius: var(--radius);
-        cursor: pointer;
-        transition: all 0.2s;
-        text-decoration: none;
+        border-radius: var(--radius-lg);
+        padding: 28px 24px;
+        width: 90%;
+        max-width: 400px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.2);
     }
-    .premium-promo-btn:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-    }
+    .phone-modal-title { font-size: 16px; font-weight: 700; color: var(--gray-800); margin-bottom: 20px; }
+    .phone-modal-hint { font-size: 12px; color: var(--gray-500); margin-bottom: 6px; }
+    .phone-modal-actions { display: flex; gap: 12px; margin-top: 20px; }
+    .btn-cancel { flex: 1; padding: 12px; font-size: 14px; font-family: inherit; background: var(--beige); color: var(--gray-700); border: 1px solid var(--gray-300); border-radius: var(--radius); cursor: pointer; }
+    .btn-save { flex: 1; padding: 12px; font-size: 14px; font-weight: 600; font-family: inherit; background: var(--gray-800); color: var(--white); border: none; border-radius: var(--radius); cursor: pointer; }
+    .btn-save:hover { background: var(--gray-700); }
 
     @media (max-width: 480px) {
         .input-with-unit { max-width: 100%; }
@@ -480,34 +343,42 @@
         </div>
 
         <div class="setting-item">
-            <div class="setting-icon">🔔</div>
-            <div class="setting-content">
-                <p class="setting-label">Webプッシュ通知</p>
-                <p class="setting-value">{{ $notif->webpush_enabled ? 'このブラウザで有効' : '無効' }}</p>
-            </div>
-            <div class="setting-action">
-                <button class="toggle {{ $notif->webpush_enabled ? 'active' : '' }}" id="togglePush" onclick="toggleNotif('webpush_enabled', this)"></button>
-            </div>
-        </div>
-
-        {{-- TODO: Phase2で有効化
-        <div class="setting-item locked">
             <div class="setting-icon">💬</div>
             <div class="setting-content">
                 <p class="setting-label">SMS通知<span class="premium-badge">Premium</span></p>
-                <p class="setting-value">未設定</p>
+                <p class="setting-value">
+                    @if($notif->sms_phone_1)
+                        {{ $notif->sms_phone_1 }}
+                        <a class="edit-link" onclick="openPhoneModal('sms')">編集</a>
+                    @else
+                        <span style="color:var(--gray-400);">未設定</span>
+                        <a class="edit-link" onclick="openPhoneModal('sms')">設定する</a>
+                    @endif
+                </p>
             </div>
-            <div class="setting-action"><span class="lock-icon">🔒</span></div>
+            <div class="setting-action">
+                <button class="toggle {{ $notif->sms_enabled ? 'active' : '' }}" id="toggleSms" onclick="toggleNotif('sms_enabled', this)"></button>
+            </div>
         </div>
-        <div class="setting-item locked">
+
+        <div class="setting-item">
             <div class="setting-icon">📞</div>
             <div class="setting-content">
-                <p class="setting-label">電話通知<span class="premium-badge">Premium</span></p>
-                <p class="setting-value">未設定</p>
+                <p class="setting-label">電話通知（AIコール）<span class="premium-badge">Premium</span></p>
+                <p class="setting-value">
+                    @if($notif->voice_phone_1)
+                        {{ $notif->voice_phone_1 }}
+                        <a class="edit-link" onclick="openPhoneModal('voice')">編集</a>
+                    @else
+                        <span style="color:var(--gray-400);">未設定</span>
+                        <a class="edit-link" onclick="openPhoneModal('voice')">設定する</a>
+                    @endif
+                </p>
             </div>
-            <div class="setting-action"><span class="lock-icon">🔒</span></div>
+            <div class="setting-action">
+                <button class="toggle {{ $notif->voice_enabled ? 'active' : '' }}" id="toggleVoice" onclick="toggleNotif('voice_enabled', this)"></button>
+            </div>
         </div>
-        --}}
 
         {{-- テスト通知 --}}
         <div class="test-notify-section">
@@ -589,38 +460,22 @@
         </div>
     </section>
 
-    {{-- お支払い・プラン --}}
-    {{-- TODO: Phase2で有効化
-    <section class="section">
-        <h2 class="section-title"><span>💳</span>お支払い・プラン</h2>
-        <div class="setting-item" style="cursor:pointer;" onclick="location.href='/plan'">
-            <div class="setting-icon">👑</div>
-            <div class="setting-content">
-                <p class="setting-label">現在のプラン</p>
-                <p class="setting-value">無料プラン</p>
-            </div>
-            <div class="setting-action"><span style="color:var(--gray-400);">→</span></div>
-        </div>
-        <div class="setting-item" style="cursor:pointer;" onclick="location.href='/payment-history'">
-            <div class="setting-icon">📋</div>
-            <div class="setting-content">
-                <p class="setting-label">お支払い履歴</p>
-                <p class="setting-value">過去の決済・領収書を確認</p>
-            </div>
-            <div class="setting-action"><span style="color:var(--gray-400);">→</span></div>
-        </div>
-    </section>
-    --}}
+</div>
 
-    {{-- Premiumプロモ --}}
-    {{-- TODO: Phase2で有効化
-    <div class="premium-promo">
-        <h3>🌟 Premiumプランで安心を強化</h3>
-        <p>SMS・電話通知、毎日の安否レポートが利用可能に</p>
-        <a href="/plan" class="premium-promo-btn">¥500/月 で始める</a>
+{{-- 電話番号入力モーダル --}}
+<div class="phone-modal-overlay" id="phoneModalOverlay" onclick="closePhoneModal(event)">
+    <div class="phone-modal">
+        <p class="phone-modal-title" id="phoneModalTitle">SMS通知先を設定</p>
+        <p class="phone-modal-hint">電話番号1（必須）</p>
+        <input type="tel" class="form-input" id="phoneInput1" placeholder="+819012345678" style="margin-bottom:12px;">
+        <p class="phone-modal-hint">電話番号2（任意）</p>
+        <input type="tel" class="form-input" id="phoneInput2" placeholder="+819012345678">
+        <p style="font-size:11px;color:var(--gray-400);margin-top:8px;">国際形式（+81から始まる形式）で入力してください</p>
+        <div class="phone-modal-actions">
+            <button class="btn-cancel" onclick="closePhoneModal()">キャンセル</button>
+            <button class="btn-save" onclick="savePhone()">保存</button>
+        </div>
     </div>
-    --}}
-
 </div>
 @endsection
 
@@ -718,6 +573,45 @@ function saveHeight() {
     }
 }
 
+// ==== 電話番号モーダル ====
+let currentPhoneType = 'sms';
+
+function openPhoneModal(type) {
+    currentPhoneType = type;
+    const title = type === 'sms' ? 'SMS通知先を設定' : '電話通知先を設定';
+    document.getElementById('phoneModalTitle').textContent = title;
+    document.getElementById('phoneInput1').value = '';
+    document.getElementById('phoneInput2').value = '';
+    document.getElementById('phoneModalOverlay').classList.add('open');
+}
+
+function closePhoneModal(event) {
+    if (!event || event.target === document.getElementById('phoneModalOverlay')) {
+        document.getElementById('phoneModalOverlay').classList.remove('open');
+    }
+}
+
+function savePhone() {
+    const phone1 = document.getElementById('phoneInput1').value.trim();
+    const phone2 = document.getElementById('phoneInput2').value.trim();
+
+    const field1 = currentPhoneType === 'sms' ? 'sms_phone_1' : 'voice_phone_1';
+    const field2 = currentPhoneType === 'sms' ? 'sms_phone_2' : 'voice_phone_2';
+
+    fetch('/settings/notification', {
+        method: 'POST',
+        headers: headers,
+        body: JSON.stringify({ [field1]: phone1, [field2]: phone2 })
+    })
+    .then(r => r.json())
+    .then(() => {
+        closePhoneModal();
+        showToast('保存しました');
+        setTimeout(() => location.reload(), 800);
+    })
+    .catch(() => showToast('保存に失敗しました'));
+}
+
 // ==== Canvas 設置シミュレーション ====
 const canvas = document.getElementById('diagramCanvas');
 const ctx = canvas ? canvas.getContext('2d') : null;
@@ -735,11 +629,9 @@ function updateDiagram() {
     const scale = (floorY - 35) / 250;
     ctx.clearRect(0, 0, W, H);
 
-    // 床
     ctx.fillStyle = '#a8a29e';
     ctx.fillRect(20, floorY, W - 40, 3);
 
-    // ドア枠
     const doorTop = floorY - h * scale;
     ctx.strokeStyle = '#78716c';
     ctx.lineWidth = 4;
@@ -752,15 +644,12 @@ function updateDiagram() {
 
     const boundaryY = floorY - exH * scale;
 
-    // 検知エリア
     ctx.fillStyle = 'rgba(34, 197, 94, 0.15)';
     ctx.fillRect(doorX + 2, doorTop + 2, doorW - 4, boundaryY - doorTop - 2);
 
-    // 除外エリア
     ctx.fillStyle = 'rgba(168, 162, 158, 0.2)';
     ctx.fillRect(doorX + 2, boundaryY, doorW - 4, floorY - boundaryY);
 
-    // センサー
     const sX = doorX + doorW / 2;
     ctx.fillStyle = '#fff';
     ctx.strokeStyle = '#57534e';
@@ -779,7 +668,6 @@ function updateDiagram() {
     ctx.arc(sX, doorTop + 3, 2, 0, Math.PI * 2);
     ctx.fill();
 
-    // ビーム
     const sY = doorTop + 6;
     const beamH = boundaryY - sY;
     const spread = beamH * 0.15;
@@ -796,7 +684,6 @@ function updateDiagram() {
     ctx.closePath();
     ctx.fill();
 
-    // 境界線
     ctx.setLineDash([5, 4]);
     ctx.strokeStyle = '#22c55e';
     ctx.lineWidth = 2;
@@ -806,10 +693,8 @@ function updateDiagram() {
     ctx.stroke();
     ctx.setLineDash([]);
 
-    // 猫
     drawCat(ctx, sX - 12, floorY - 25 * scale, 25 * scale, '#57534e');
 
-    // ラベル
     ctx.font = '10px "Noto Sans JP", sans-serif';
     ctx.fillStyle = '#57534e';
     drawDim(ctx, doorX - 22, floorY, doorTop, h + 'cm');
@@ -837,12 +722,10 @@ function drawCat(ctx, x, y, h, c) {
     ctx.beginPath();
     ctx.ellipse(bCX, bY, bL / 2, bH / 2, 0, 0, Math.PI * 2);
     ctx.fill();
-
     ctx.beginPath();
     ctx.arc(hX, hY, hR, 0, Math.PI * 2);
     ctx.fill();
 
-    // 耳
     ctx.beginPath();
     ctx.moveTo(hX - hR * 0.7, hY - hR * 0.2);
     ctx.lineTo(hX - hR * 0.35, hY - hR * 1.3);
@@ -854,7 +737,6 @@ function drawCat(ctx, x, y, h, c) {
     ctx.lineTo(hX + hR * 0.7, hY - hR * 0.2);
     ctx.fill();
 
-    // 目
     ctx.fillStyle = '#fff';
     ctx.beginPath();
     ctx.ellipse(hX - hR * 0.3, eyeY, hR * 0.12, hR * 0.15, 0, 0, Math.PI * 2);
@@ -863,7 +745,6 @@ function drawCat(ctx, x, y, h, c) {
     ctx.ellipse(hX + hR * 0.3, eyeY, hR * 0.12, hR * 0.15, 0, 0, Math.PI * 2);
     ctx.fill();
 
-    // 口
     ctx.strokeStyle = '#fff';
     ctx.lineWidth = Math.max(1, h * 0.02);
     ctx.lineCap = 'round';
@@ -874,7 +755,6 @@ function drawCat(ctx, x, y, h, c) {
     ctx.arc(hX + hR * 0.15, hY + hR * 0.35, hR * 0.15, Math.PI, 0, true);
     ctx.stroke();
 
-    // 足
     ctx.fillStyle = c;
     const lW = h * 0.1;
     ctx.fillRect(x + bL * 0.2 - lW / 2, bY + bH / 4, lW, lH);
@@ -882,7 +762,6 @@ function drawCat(ctx, x, y, h, c) {
     ctx.fillRect(x + bL * 0.6 - lW / 2, bY + bH / 4, lW, lH);
     ctx.fillRect(x + bL * 0.8 - lW / 2, bY + bH / 4, lW, lH);
 
-    // しっぽ
     ctx.strokeStyle = c;
     ctx.lineWidth = h * 0.08;
     ctx.lineCap = 'round';
@@ -918,7 +797,6 @@ function drawDim(ctx, x, y1, y2, label) {
     ctx.restore();
 }
 
-// 初回描画
 if (document.getElementById('petSettings') && !document.getElementById('petSettings').classList.contains('hidden')) {
     updateDiagram();
 }
