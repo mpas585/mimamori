@@ -1,12 +1,10 @@
-﻿@extends('layouts.partner')
+@extends('layouts.partner')
 
-@section('title', 'チE��イス管琁E)
+@section('title', 'デバイス管理')
 
 @section('styles')
 <style>
-<style>
-<style>
-    /* ===== 契紁E��報 ===== */
+    /* ===== 契約情報 ===== */
     .contract-info { display: flex; gap: 20px; margin-bottom: 16px; flex-wrap: wrap; }
     .contract-item { background: var(--white); border-radius: var(--radius-lg); padding: 16px 20px; box-shadow: var(--shadow-sm); border: 1px solid var(--gray-200); flex: 1; min-width: 200px; }
     .contract-label { font-size: 12px; color: var(--gray-500); margin-bottom: 4px; }
@@ -214,35 +212,33 @@
     @media (max-width: 768px) { .status-grid { grid-template-columns: repeat(3, 1fr); } .toolbar { flex-direction: column; align-items: stretch; } .search-box { width: 100%; } .contract-info { flex-direction: column; } }
     @media (max-width: 480px) { .status-grid { grid-template-columns: repeat(2, 1fr); } }
 </style>
-</style>
-</style>
 @endsection
 
 @section('content')
     @if(isset($organization))
         <div class="contract-info">
             <div class="contract-item">
-                <div class="contract-label">契紁E�Eラン</div>
-                <div class="contract-value">ビジネスプラン�E�E{ $organization->device_limit ?? 0 }}台�E�E/div>
+                <div class="contract-label">契約プラン</div>
+                <div class="contract-value">ビジネスプラン（{{ $organization->device_limit ?? 0 }}台）</div>
             </div>
             <div class="contract-item">
                 <div class="contract-label">有効期限</div>
                 <div class="contract-value">{{ $organization->expires_at ? \Carbon\Carbon::parse($organization->expires_at)->format('Y/m/d') : '-' }}</div>
-                <div class="contract-note">ご契紁E��関するお問ぁE��わせは管琁E��社まで</div>
+                <div class="contract-note">ご契約に関するお問い合わせは管理会社まで</div>
             </div>
         </div>
     @endif
 
     @if(($stats['alert'] ?? 0) > 0)
         <div class="alert-banner warning">
-            <span>🔴 <strong>{{ $stats['alert'] }}件</strong>のチE��イスで24時間以上検知がありません�E�要確認！E/span>
-            <button class="alert-banner-btn" onclick="filterByStatus('alert')">確認すめE/button>
+            <span>🔴 <strong>{{ $stats['alert'] }}件</strong>のデバイスで24時間以上検知がありません（要確認）</span>
+            <button class="alert-banner-btn" onclick="filterByStatus('alert')">確認する</button>
         </div>
     @endif
     @if(($stats['offline'] ?? 0) > 0)
         <div class="alert-banner offline">
-            <span>⚫ <strong>{{ $stats['offline'] }}件</strong>のチE��イスぁE8時間以上通信してぁE��せん�E�電波障害また�E電池刁E��の可能性�E�E/span>
-            <button class="alert-banner-btn" onclick="filterByStatus('offline')">確認すめE/button>
+            <span>⚫ <strong>{{ $stats['offline'] }}件</strong>のデバイスが48時間以上通信していません（電波障害または電池切れの可能性）</span>
+            <button class="alert-banner-btn" onclick="filterByStatus('offline')">確認する</button>
         </div>
     @endif
 
@@ -253,15 +249,15 @@
         </div>
         <div class="status-card {{ request('status') === 'warning' ? 'active' : '' }}" onclick="filterByStatus('warning')">
             <div class="status-value yellow">{{ $stats['warning'] ?? 0 }}</div>
-            <div class="status-label"><span class="status-dot yellow"></span> 注愁E/div>
+            <div class="status-label"><span class="status-dot yellow"></span> 注意</div>
         </div>
         <div class="status-card {{ request('status') === 'alert' ? 'active' : '' }}" onclick="filterByStatus('alert')">
             <div class="status-value red">{{ $stats['alert'] ?? 0 }}</div>
-            <div class="status-label"><span class="status-dot red"></span> 警呁E/div>
+            <div class="status-label"><span class="status-dot red"></span> 警告</div>
         </div>
         <div class="status-card {{ request('status') === 'offline' ? 'active' : '' }}" onclick="filterByStatus('offline')">
             <div class="status-value gray">{{ $stats['offline'] ?? 0 }}</div>
-            <div class="status-label"><span class="status-dot gray"></span> 離緁E/div>
+            <div class="status-label"><span class="status-dot gray"></span> 離線</div>
         </div>
         <div class="status-card {{ request('status') === 'vacant' ? 'active' : '' }}" onclick="filterByStatus('vacant')">
             <div class="status-value light">{{ $stats['vacant'] ?? 0 }}</div>
@@ -270,7 +266,7 @@
     </div>
 
     <div class="status-legend">
-        <span>正常: 検知あり</span><span>注愁E 電池低丁E未検知気味</span><span>警呁E 長時間未検知</span><span>離緁E 通信途絶</span><span>空室: チE��イス未割彁E/span>
+        <span>正常: 検知あり</span><span>注意: 電池低下/未検知気味</span><span>警告: 長時間未検知</span><span>離線: 通信途絶</span><span>空室: デバイス未割当</span>
     </div>
 
     <div class="toolbar">
@@ -281,28 +277,28 @@
                     <input type="text" name="search" placeholder="部屋番号・名前で検索..." value="{{ request('search') }}">
                 </div>
                 <select name="status" class="filter-select">
-                    <option value="">すべてのスチE�Eタス</option>
+                    <option value="">すべてのステータス</option>
                     <option value="normal" {{ request('status') === 'normal' ? 'selected' : '' }}>🟢 正常のみ</option>
-                    <option value="warning" {{ request('status') === 'warning' ? 'selected' : '' }}>🟡 注意�Eみ</option>
-                    <option value="alert" {{ request('status') === 'alert' ? 'selected' : '' }}>🔴 警告�Eみ</option>
-                    <option value="offline" {{ request('status') === 'offline' ? 'selected' : '' }}>⚫ 離線�Eみ</option>
+                    <option value="warning" {{ request('status') === 'warning' ? 'selected' : '' }}>🟡 注意のみ</option>
+                    <option value="alert" {{ request('status') === 'alert' ? 'selected' : '' }}>🔴 警告のみ</option>
+                    <option value="offline" {{ request('status') === 'offline' ? 'selected' : '' }}>⚫ 離線のみ</option>
                     <option value="vacant" {{ request('status') === 'vacant' ? 'selected' : '' }}>⚪ 空室のみ</option>
                 </select>
                 <select name="watch" class="filter-select">
-                    <option value="">すべての外�Eモード状慁E/option>
-                    <option value="off" {{ request('watch') === 'off' ? 'selected' : '' }}>外�EモードOFF�E�通常�E�E/option>
-                    <option value="on" {{ request('watch') === 'on' ? 'selected' : '' }}>外�EモードON�E�外�E中�E�E/option>
-                    <option value="timer" {{ request('watch') === 'timer' ? 'selected' : '' }}>🚶 外�Eスケジュール設定中</option>
+                    <option value="">すべての外出モード状態</option>
+                    <option value="off" {{ request('watch') === 'off' ? 'selected' : '' }}>外出モードOFF（通常）</option>
+                    <option value="on" {{ request('watch') === 'on' ? 'selected' : '' }}>外出モードON（外出中）</option>
+                    <option value="timer" {{ request('watch') === 'timer' ? 'selected' : '' }}>🚶 外出スケジュール設定中</option>
                 </select>
                 <button type="submit" class="btn btn-sm btn-secondary">絞り込み</button>
             </form>
             <span class="toolbar-count">登録: <strong>{{ $devices->total() ?? 0 }}</strong> / {{ $organization->device_limit ?? 100 }}台</span>
         </div>
         <div class="toolbar-right">
-            <button class="toolbar-btn" onclick="showNotificationModal()">🔔 通知設宁E/button>
-            <button class="toolbar-btn" onclick="showTimerListModal()">🚶 外�Eスケジュール一覧</button>
-            <button class="toolbar-btn" onclick="showAddDeviceModal()">チE��イス新規お申込み</button>
-            <a href="{{ route('partner.org.csv') }}" class="toolbar-btn">📥 CSV出劁E/a>
+            <button class="toolbar-btn" onclick="showNotificationModal()">🔔 通知設定</button>
+            <button class="toolbar-btn" onclick="showTimerListModal()">🚶 外出スケジュール一覧</button>
+            <button class="toolbar-btn" onclick="showAddDeviceModal()">デバイス新規お申込み</button>
+            <a href="{{ route('partner.org.csv') }}" class="toolbar-btn">📥 CSV出力</a>
         </div>
     </div>
 
@@ -311,7 +307,7 @@
             <table>
                 <thead>
                     <tr>
-                        <th>状慁E/th><th>部屁E/ 名前</th><th>チE��イスID</th><th>外�EモーチE/th><th>最終検知</th><th>電池</th><th>電波</th><th>操佁E/th>
+                        <th>状態</th><th>部屋 / 名前</th><th>デバイスID</th><th>外出モード</th><th>最終検知</th><th>電池</th><th>電波</th><th>操作</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -328,17 +324,17 @@
                             $signalLabel = '-';
                             if ($rssi !== null) {
                                 if ($rssi > -70) $signalLabel = '良好';
-                                elseif ($rssi > -85) $signalLabel = '普送E;
-                                else $signalLabel = '弱ぁE;
+                                elseif ($rssi > -85) $signalLabel = '普通';
+                                else $signalLabel = '弱い';
                             }
                         @endphp
                         <tr id="row-{{ $device->device_id }}">
                             <td>
                                 @switch($displayStatus)
                                     @case('normal') <span class="device-status normal">正常</span> @break
-                                    @case('warning') <span class="device-status warning">注愁E/span> @break
-                                    @case('alert') <span class="device-status alert">警呁E/span><button class="clear-alert-btn" onclick="confirmClearAlert('{{ $device->device_id }}', '{{ $roomNumber }}', '{{ $tenantName }}')">✁E解除</button> @break
-                                    @case('offline') <span class="device-status offline">離緁E/span> @break
+                                    @case('warning') <span class="device-status warning">注意</span> @break
+                                    @case('alert') <span class="device-status alert">警告</span><button class="clear-alert-btn" onclick="confirmClearAlert('{{ $device->device_id }}', '{{ $roomNumber }}', '{{ $tenantName }}')">✕ 解除</button> @break
+                                    @case('offline') <span class="device-status offline">離線</span> @break
                                     @case('vacant') <span class="device-status vacant">空室</span> @break
                                     @default <span class="device-status offline">-</span>
                                 @endswitch
@@ -370,7 +366,7 @@
                             </td>
                         </tr>
                     @empty
-                        <tr><td colspan="8" style="text-align:center;color:var(--gray-400);padding:40px;">チE��イスがありません</td></tr>
+                        <tr><td colspan="8" style="text-align:center;color:var(--gray-400);padding:40px;">デバイスがありません</td></tr>
                     @endforelse
                 </tbody>
             </table>
@@ -390,28 +386,28 @@
         @endif
     </div>
 
-    {{-- モーダル: チE��イス新規お申込み�E�EスチE��プ！E--}}
+    {{-- モーダル: デバイス新規お申込み（4ステップ） --}}
     <div id="addDeviceModal" class="modal-overlay" onclick="if(event.target===this)hideModal('addDeviceModal')">
         <div class="modal">
             <div class="modal-header">
-                <h3>チE��イス新規お申込み</h3>
-                <button class="modal-close" onclick="hideModal('addDeviceModal')">ÁE/button>
+                <h3>デバイス新規お申込み</h3>
+                <button class="modal-close" onclick="hideModal('addDeviceModal')">×</button>
             </div>
             <div class="bulk-step-bar">
                 <div class="bulk-step active" id="bulk-step-ind-1"><div class="bulk-step-num">1</div><span>台数</span></div>
                 <div class="bulk-step-line"></div>
                 <div class="bulk-step" id="bulk-step-ind-2"><div class="bulk-step-num">2</div><span>オプション</span></div>
                 <div class="bulk-step-line"></div>
-                <div class="bulk-step" id="bulk-step-ind-3"><div class="bulk-step-num">3</div><span>配送�E</span></div>
+                <div class="bulk-step" id="bulk-step-ind-3"><div class="bulk-step-num">3</div><span>配送先</span></div>
                 <div class="bulk-step-line"></div>
-                <div class="bulk-step" id="bulk-step-ind-4"><div class="bulk-step-num">4</div><span>確認�E決渁E/span></div>
+                <div class="bulk-step" id="bulk-step-ind-4"><div class="bulk-step-num">4</div><span>確認・決済</span></div>
             </div>
             <div id="bulk-panel-1" class="bulk-panel active modal-body">
-                <p class="bulk-section-label">追加する台数を選択してください�E�E、E00台�E�E/p>
+                <p class="bulk-section-label">追加する台数を選択してください（1〜300台）</p>
                 <div class="bulk-qty-row">
-                    <button type="button" class="bulk-qty-btn" id="bulk-qty-minus">∁E/button>
+                    <button type="button" class="bulk-qty-btn" id="bulk-qty-minus">−</button>
                     <input type="number" class="bulk-qty-input" id="bulk-qty-input" value="10" min="1" max="300">
-                    <button type="button" class="bulk-qty-btn" id="bulk-qty-plus">�E�E/button>
+                    <button type="button" class="bulk-qty-btn" id="bulk-qty-plus">＋</button>
                 </div>
                 <div class="bulk-qty-presets">
                     <button type="button" class="bulk-qty-preset" data-val="10">10台</button>
@@ -421,51 +417,51 @@
                     <button type="button" class="bulk-qty-preset" data-val="200">200台</button>
                     <button type="button" class="bulk-qty-preset" data-val="300">300台</button>
                 </div>
-                <p class="bulk-qty-note">生�EされたデバイスIDとPINは一覧CSVでダウンロードできまぁE/p>
+                <p class="bulk-qty-note">生成されたデバイスIDとPINは一覧CSVでダウンロードできます</p>
             </div>
             <div id="bulk-panel-2" class="bulk-panel modal-body">
-                <p class="bulk-section-label">オプションを選択してください�E�褁E��可�E�E/p>
+                <p class="bulk-section-label">オプションを選択してください（複数可）</p>
                 <div class="bulk-opt-card" id="bulk-opt-ai" onclick="bulkToggleOpt('ai')">
-                    <div class="bulk-opt-header"><div class="bulk-opt-check" id="bulk-opt-ai-check">✁E/div><span class="bulk-opt-name">AIコール</span><span class="bulk-opt-badge">Phase 3</span><span class="bulk-opt-price">+¥300 / 台 / 朁E/span></div>
-                    <p class="bulk-opt-desc">異常検知時にAIが�E動音声でご家族に電話通知します、E/p>
+                    <div class="bulk-opt-header"><div class="bulk-opt-check" id="bulk-opt-ai-check">✓</div><span class="bulk-opt-name">AIコール</span><span class="bulk-opt-badge">Phase 3</span><span class="bulk-opt-price">+¥300 / 台 / 月</span></div>
+                    <p class="bulk-opt-desc">異常検知時にAIが自動音声でご家族に電話通知します。</p>
                 </div>
                 <div class="bulk-opt-card" id="bulk-opt-sms" onclick="bulkToggleOpt('sms')">
-                    <div class="bulk-opt-header"><div class="bulk-opt-check" id="bulk-opt-sms-check">✁E/div><span class="bulk-opt-name">SMS通知</span><span class="bulk-opt-price">+¥100 / 台 / 朁E/span></div>
-                    <p class="bulk-opt-desc">アラート時にSMSで緊急連絡先へ通知します、E/p>
+                    <div class="bulk-opt-header"><div class="bulk-opt-check" id="bulk-opt-sms-check">✓</div><span class="bulk-opt-name">SMS通知</span><span class="bulk-opt-price">+¥100 / 台 / 月</span></div>
+                    <p class="bulk-opt-desc">アラート時にSMSで緊急連絡先へ通知します。</p>
                 </div>
             </div>
             <div id="bulk-panel-3" class="bulk-panel modal-body">
-                <p class="bulk-section-label">チE��イスの配送�Eをご入力ください</p>
-                <div class="bulk-form-group"><label>お名剁Espan class="bulk-form-required">*</span></label><input type="text" class="bulk-form-input" id="bulk-delivery-name" placeholder="山田 太郁E></div>
+                <p class="bulk-section-label">デバイスの配送先をご入力ください</p>
+                <div class="bulk-form-group"><label>お名前<span class="bulk-form-required">*</span></label><input type="text" class="bulk-form-input" id="bulk-delivery-name" placeholder="山田 太郎"></div>
                 <div class="bulk-form-group"><label>郵便番号<span class="bulk-form-required">*</span></label><input type="text" class="bulk-form-input" id="bulk-delivery-postal" placeholder="000-0000" maxlength="8"></div>
-                <div class="bulk-form-group"><label>住所<span class="bulk-form-required">*</span></label><input type="text" class="bulk-form-input" id="bulk-delivery-address" placeholder="東京都十E��田区、E��E1-2-3"></div>
+                <div class="bulk-form-group"><label>住所<span class="bulk-form-required">*</span></label><input type="text" class="bulk-form-input" id="bulk-delivery-address" placeholder="東京都千代田区〇〇 1-2-3"></div>
                 <div class="bulk-form-group"><label>電話番号<span class="bulk-form-required">*</span></label><input type="tel" class="bulk-form-input" id="bulk-delivery-phone" placeholder="090-0000-0000"></div>
             </div>
             <div id="bulk-panel-4" class="bulk-panel modal-body">
                 <div class="bulk-summary-card">
                     <div class="bulk-summary-row"><span class="bulk-summary-label">追加台数</span><span class="bulk-summary-value" id="bulk-sum-qty">10台</span></div>
-                    <div class="bulk-summary-row"><span class="bulk-summary-label">基本料��</span><span class="bulk-summary-value">¥700 / 台 / 朁E/span></div>
-                    <div class="bulk-summary-row" id="bulk-sum-ai-row" style="display:none;"><span class="bulk-summary-label">AIコール</span><span class="bulk-summary-value">+¥300 / 台 / 朁E/span></div>
-                    <div class="bulk-summary-row" id="bulk-sum-sms-row" style="display:none;"><span class="bulk-summary-label">SMS通知</span><span class="bulk-summary-value">+¥100 / 台 / 朁E/span></div>
-                    <div class="bulk-summary-subtotal"><span class="bulk-summary-label">小計（税抜�E�E/span><span class="bulk-summary-value" id="bulk-sum-subtotal">¥7,000 / 朁E/span></div>
-                    <div class="bulk-summary-tax"><span class="bulk-summary-label">消費税！E0%�E�E/span><span class="bulk-summary-value" id="bulk-sum-tax">¥700 / 朁E/span></div>
-                    <div class="bulk-summary-total"><span class="bulk-summary-total-label">月額合計（税込�E�E/span><span class="bulk-summary-total-value" id="bulk-sum-total">¥7,700 / 朁E/span></div>
+                    <div class="bulk-summary-row"><span class="bulk-summary-label">基本料金</span><span class="bulk-summary-value">¥700 / 台 / 月</span></div>
+                    <div class="bulk-summary-row" id="bulk-sum-ai-row" style="display:none;"><span class="bulk-summary-label">AIコール</span><span class="bulk-summary-value">+¥300 / 台 / 月</span></div>
+                    <div class="bulk-summary-row" id="bulk-sum-sms-row" style="display:none;"><span class="bulk-summary-label">SMS通知</span><span class="bulk-summary-value">+¥100 / 台 / 月</span></div>
+                    <div class="bulk-summary-subtotal"><span class="bulk-summary-label">小計（税抜）</span><span class="bulk-summary-value" id="bulk-sum-subtotal">¥7,000 / 月</span></div>
+                    <div class="bulk-summary-tax"><span class="bulk-summary-label">消費税（10%）</span><span class="bulk-summary-value" id="bulk-sum-tax">¥700 / 月</span></div>
+                    <div class="bulk-summary-total"><span class="bulk-summary-total-label">月額合計（税込）</span><span class="bulk-summary-total-value" id="bulk-sum-total">¥7,700 / 月</span></div>
                 </div>
-                <p class="bulk-summary-note">※ 24ヶ月最低契紁E��解紁E��は¥8,400の違紁E��が発生します、Ebr>※「決済へ進む」を押すとチE��イスが生成され、IDとPINのCSVが�E動でダウンロードされます、E/p>
-                <div class="bulk-loading" id="bulk-loading">チE��イスを生成中です。しばらくお征E��ください...</div>
+                <p class="bulk-summary-note">※ 24ヶ月最低契約。解約時は¥8,400の違約金が発生します。<br>※「決済へ進む」を押すとデバイスが生成され、IDとPINのCSVが自動でダウンロードされます。</p>
+                <div class="bulk-loading" id="bulk-loading">デバイスを生成中です。しばらくお待ちください...</div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" id="bulk-btn-back" style="display:none;" onclick="bulkPrevStep()">戻めE/button>
-                <button type="button" class="btn btn-primary" id="bulk-btn-next" onclick="bulkNextStep()">次へ ↁE/button>
+                <button type="button" class="btn btn-secondary" id="bulk-btn-back" style="display:none;" onclick="bulkPrevStep()">戻る</button>
+                <button type="button" class="btn btn-primary" id="bulk-btn-next" onclick="bulkNextStep()">次へ →</button>
             </div>
         </div>
     </div>
 
-    {{-- モーダル: チE��イス削除 --}}
+    {{-- モーダル: デバイス削除 --}}
     <div id="deleteModal" class="modal-overlay" onclick="if(event.target===this)hideModal('deleteModal')">
-        <div class="modal"><div class="modal-header"><h3>⚠�E�EチE��イス削除</h3><button class="modal-close" onclick="hideModal('deleteModal')">ÁE/button></div>
+        <div class="modal"><div class="modal-header"><h3>⚠️ デバイス削除</h3><button class="modal-close" onclick="hideModal('deleteModal')">×</button></div>
             <form id="deleteForm" method="POST" action="">@csrf
-                <div class="modal-body"><p>チE��イス <strong id="deleteDeviceId" class="mono">-</strong> を絁E��から削除しますか�E�E/p><p style="color:var(--gray-500);font-size:13px;margin-top:8px;">チE��イスの登録チE�Eタは残りますが、絁E��との紐付けが解除されます、E/p></div>
+                <div class="modal-body"><p>デバイス <strong id="deleteDeviceId" class="mono">-</strong> を組織から削除しますか？</p><p style="color:var(--gray-500);font-size:13px;margin-top:8px;">デバイスの登録データは残りますが、組織との紐付けが解除されます。</p></div>
                 <div class="modal-footer"><button type="button" class="btn btn-secondary" onclick="hideModal('deleteModal')">キャンセル</button><button type="submit" class="btn btn-danger">削除する</button></div>
             </form>
         </div>
@@ -473,29 +469,29 @@
 
     {{-- モーダル: 警告解除 --}}
     <div id="clearAlertModal" class="modal-overlay" onclick="if(event.target===this)hideModal('clearAlertModal')">
-        <div class="modal"><div class="modal-header"><h3>⚠�E�E警告解除</h3><button class="modal-close" onclick="hideModal('clearAlertModal')">ÁE/button></div>
-            <div class="modal-body"><p id="clearAlertTarget" style="margin-bottom:8px;"></p><p>こ�EチE��イスの警告を解除しますか�E�E/p><p style="color:var(--gray-500);font-size:13px;margin-top:8px;">スチE�Eタスが�E期状態！E�E�に戻り、検知ログもクリアされます、Ebr>退去・長期不在等でチE��イスを�E期化する場合にご利用ください、E/p></div>
+        <div class="modal"><div class="modal-header"><h3>⚠️ 警告解除</h3><button class="modal-close" onclick="hideModal('clearAlertModal')">×</button></div>
+            <div class="modal-body"><p id="clearAlertTarget" style="margin-bottom:8px;"></p><p>このデバイスの警告を解除しますか？</p><p style="color:var(--gray-500);font-size:13px;margin-top:8px;">ステータスが初期状態（-）に戻り、検知ログもクリアされます。<br>退去・長期不在等でデバイスを初期化する場合にご利用ください。</p></div>
             <div class="modal-footer"><button class="btn btn-secondary" onclick="hideModal('clearAlertModal')">キャンセル</button><button class="btn btn-danger" onclick="executeClearAlert()">警告を解除する</button></div>
         </div>
     </div>
 
-    {{-- モーダル: チE��イス詳細 --}}
+    {{-- モーダル: デバイス詳細 --}}
     <div id="detailModal" class="modal-overlay" onclick="if(event.target===this)hideModal('detailModal')">
-        <div class="modal" style="max-width:560px;"><div class="modal-header"><h3>📋 チE��イス詳細</h3><button class="modal-close" onclick="hideModal('detailModal')">ÁE/button></div>
+        <div class="modal" style="max-width:560px;"><div class="modal-header"><h3>📋 デバイス詳細</h3><button class="modal-close" onclick="hideModal('detailModal')">×</button></div>
             <div class="modal-body">
-                <div class="detail-status-row"><div class="detail-status-badge normal" id="detailStatusBadge">-</div><button class="detail-clear-alert-btn" id="detailClearAlertBtn" style="display:none;" onclick="confirmClearAlertFromDetail()">✁E警告解除</button></div>
+                <div class="detail-status-row"><div class="detail-status-badge normal" id="detailStatusBadge">-</div><button class="detail-clear-alert-btn" id="detailClearAlertBtn" style="display:none;" onclick="confirmClearAlertFromDetail()">✕ 警告解除</button></div>
                 <div class="detail-section"><div class="detail-grid">
-                    <div class="detail-item"><p class="detail-item-label">チE��イスID</p><p class="detail-item-value mono" id="detailDeviceId">-</p></div>
+                    <div class="detail-item"><p class="detail-item-label">デバイスID</p><p class="detail-item-value mono" id="detailDeviceId">-</p></div>
                     <div class="detail-item"><p class="detail-item-label">最終検知</p><p class="detail-item-value" id="detailLastDetected">-</p></div>
                     <div class="detail-item"><p class="detail-item-label">部屋番号</p><input type="text" class="detail-form-input" id="detailRoomInput" placeholder="101"></div>
-                    <div class="detail-item"><p class="detail-item-label">入屁E��E��</p><input type="text" class="detail-form-input" id="detailTenantInput" placeholder="山田 太郁E></div>
+                    <div class="detail-item"><p class="detail-item-label">入居者名</p><input type="text" class="detail-form-input" id="detailTenantInput" placeholder="山田 太郎"></div>
                 </div></div>
-                <div class="detail-section"><div class="detail-section-title">📊 チE��イス状慁E/div><div class="detail-grid">
+                <div class="detail-section"><div class="detail-section-title">📊 デバイス状態</div><div class="detail-grid">
                     <div class="detail-item"><p class="detail-item-label">電池残量</p><p class="detail-item-value" id="detailBattery">-</p></div>
                     <div class="detail-item"><p class="detail-item-label">電波強度</p><p class="detail-item-value" id="detailSignal">-</p></div>
                 </div></div>
-                <div class="detail-section"><div class="detail-section-title">⚙︁E外�Eモード設宁E/div><div class="detail-grid">
-                    <div class="detail-item"><p class="detail-item-label">アラート時閁E/p>
+                <div class="detail-section"><div class="detail-section-title">⚙️ 外出モード設定</div><div class="detail-grid">
+                    <div class="detail-item"><p class="detail-item-label">アラート時間</p>
                         <select class="detail-form-input" id="detailAlertHoursInput">
                             <option value="12">12時間</option><option value="24">24時間</option><option value="36">36時間</option><option value="48">48時間</option><option value="72">72時間</option>
                         </select>
@@ -503,24 +499,25 @@
                     <div class="detail-item"><p class="detail-item-label">設置高さ</p>
                         <div style="display:flex;align-items:center;gap:4px;"><input type="number" class="detail-form-input" id="detailHeightInput" min="100" max="300" style="width:70px;"><span style="font-size:12px;color:var(--gray-500);">cm</span></div>
                     </div>
-                    <div class="detail-item"><p class="detail-item-label">ペット除夁E/p>
+                    <div class="detail-item"><p class="detail-item-label">ペット除外</p>
                         <select class="detail-form-input" id="detailPetExclusionInput"><option value="0">OFF</option><option value="1">ON</option></select>
                     </div>
-                    <div class="detail-item"><p class="detail-item-label">外�EモーチE/p><p class="detail-item-value" id="detailAwayMode">-</p></div>
+                    <div class="detail-item"><p class="detail-item-label">外出モード</p><p class="detail-item-value" id="detailAwayMode">-</p></div>
                 </div></div>
-                <div class="detail-section"><div class="detail-section-title">📝 登録惁E��</div><div class="detail-grid">
+                <div class="detail-section"><div class="detail-section-title">📝 登録情報</div><div class="detail-grid">
                     <div class="detail-item"><p class="detail-item-label">登録日</p><p class="detail-item-value" id="detailRegistered">-</p></div>
-                    <div class="detail-item"><p class="detail-item-label">メモ</p><input type="text" class="detail-form-input" id="detailMemoInput" placeholder="メモを�E劁E.." maxlength="200"></div>
+                    <div class="detail-item"><p class="detail-item-label">メモ</p><input type="text" class="detail-form-input" id="detailMemoInput" placeholder="メモを入力..." maxlength="200"></div>
                 </div></div>
                 <div class="detail-section"><div class="detail-section-title">🔔 通知サービス</div>
                     <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
                         <label class="watch-toggle"><input type="checkbox" id="detailNotifyEnabled" checked onchange="toggleNotifyService(this.checked)"><span class="watch-slider"></span></label>
                         <span id="detailNotifyLabel" style="font-size:13px;color:var(--gray-700);">有効</span>
                     </div>
-                    <p class="detail-notify-note" style="margin-bottom:16px;">※ご契紁E��、E��月�E停止機�Eはご利用になれません、E/p>
-                    {{-- プレミアム未契紁E�E注愁E--}}
+                    <p class="detail-notify-note" style="margin-bottom:16px;">※ご契約後〇ヶ月は停止機能はご利用になれません。</p>
+                    {{-- プレミアム未契約の注意 --}}
                     <div id="detailPremiumNote" style="display:none;padding:10px 12px;background:var(--yellow-light);border-radius:var(--radius);margin-bottom:12px;font-size:12px;color:#a16207;">
-                        ⚠�E�ESMS・電話通知はプレミアム契紁E��忁E��です。管琁E��E��お問ぁE��わせください、E                    </div>
+                        ⚠️ SMS・電話通知はプレミアム契約が必要です。管理者にお問い合わせください。
+                    </div>
                     {{-- SMS通知 --}}
                     <div style="border:1px solid var(--gray-200);border-radius:var(--radius);padding:14px;margin-bottom:10px;">
                         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
@@ -528,64 +525,64 @@
                             <label class="watch-toggle"><input type="checkbox" id="detailSmsEnabled" onchange="saveDetailNotification()"><span class="watch-slider"></span></label>
                         </div>
                         <input type="tel" class="detail-form-input" id="detailSmsPhone1" placeholder="09012345678" style="margin-bottom:6px;" onblur="saveDetailNotification()">
-                        <input type="tel" class="detail-form-input" id="detailSmsPhone2" placeholder="09012345678�E�任意！E onblur="saveDetailNotification()">
+                        <input type="tel" class="detail-form-input" id="detailSmsPhone2" placeholder="09012345678（任意）" onblur="saveDetailNotification()">
                     </div>
                     {{-- 電話通知 --}}
                     <div style="border:1px solid var(--gray-200);border-radius:var(--radius);padding:14px;">
                         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-                            <p style="font-size:13px;font-weight:600;color:var(--gray-700);">📞 電話通知�E�EIコール�E�E/p>
+                            <p style="font-size:13px;font-weight:600;color:var(--gray-700);">📞 電話通知（AIコール）</p>
                             <label class="watch-toggle"><input type="checkbox" id="detailVoiceEnabled" onchange="saveDetailNotification()"><span class="watch-slider"></span></label>
                         </div>
                         <input type="tel" class="detail-form-input" id="detailVoicePhone1" placeholder="09012345678" style="margin-bottom:6px;" onblur="saveDetailNotification()">
-                        <input type="tel" class="detail-form-input" id="detailVoicePhone2" placeholder="09012345678�E�任意！E onblur="saveDetailNotification()">
+                        <input type="tel" class="detail-form-input" id="detailVoicePhone2" placeholder="09012345678（任意）" onblur="saveDetailNotification()">
                     </div>
                 </div>
-                <div class="detail-section"><div class="detail-section-title">🚶 外�Eスケジュール</div><div id="detailScheduleList"></div><button class="detail-schedule-add" onclick="openScheduleAddFromDetail()">�E�E外�Eスケジュール追加</button></div>
+                <div class="detail-section"><div class="detail-section-title">🚶 外出スケジュール</div><div id="detailScheduleList"></div><button class="detail-schedule-add" onclick="openScheduleAddFromDetail()">＋ 外出スケジュール追加</button></div>
             </div>
             <div class="modal-footer" style="justify-content:space-between;">
-                <button type="button" class="cancel-link" onclick="showCancelFlow()">解紁E/button>
+                <button type="button" class="cancel-link" onclick="showCancelFlow()">解約</button>
                 <div style="display:flex;gap:8px;">
-                    <button class="btn btn-secondary" onclick="hideModal('detailModal')">閉じめE/button>
-                    <button class="btn btn-primary" onclick="saveDetailChanges()">保孁E/button>
+                    <button class="btn btn-secondary" onclick="hideModal('detailModal')">閉じる</button>
+                    <button class="btn btn-primary" onclick="saveDetailChanges()">保存</button>
                 </div>
             </div>
         </div>
     </div>
 
-    {{-- モーダル: チE��イス編雁E��後方互換�E�E--}}
+    {{-- モーダル: デバイス編集（後方互換） --}}
     <div id="editModal" class="modal-overlay" onclick="if(event.target===this)hideModal('editModal')">
-        <div class="modal"><div class="modal-header"><h3>✏︁EチE��イス編雁E/h3><button class="modal-close" onclick="hideModal('editModal')">ÁE/button></div>
+        <div class="modal"><div class="modal-header"><h3>✏️ デバイス編集</h3><button class="modal-close" onclick="hideModal('editModal')">×</button></div>
             <form id="editForm" method="POST" action="">@csrf @method('PUT')
                 <div class="modal-body">
-                    <div class="form-group"><label class="form-label">チE��イスID</label><input type="text" class="form-input" id="editDeviceId" disabled style="background:var(--gray-100);"></div>
+                    <div class="form-group"><label class="form-label">デバイスID</label><input type="text" class="form-input" id="editDeviceId" disabled style="background:var(--gray-100);"></div>
                     <div class="form-group"><label class="form-label">部屋番号</label><input type="text" class="form-input" name="room_number" id="editRoomNumber" placeholder="101"></div>
-                    <div class="form-group"><label class="form-label">入屁E��E��</label><input type="text" class="form-input" name="tenant_name" id="editTenantName"></div>
+                    <div class="form-group"><label class="form-label">入居者名</label><input type="text" class="form-input" name="tenant_name" id="editTenantName"></div>
                     <div class="form-group"><label class="form-label">メモ</label><input type="text" class="form-input" name="memo" id="editMemo"></div>
                 </div>
-                <div class="modal-footer"><button type="button" class="btn btn-secondary" onclick="hideModal('editModal')">キャンセル</button><button type="submit" class="btn btn-primary">保孁E/button></div>
+                <div class="modal-footer"><button type="button" class="btn btn-secondary" onclick="hideModal('editModal')">キャンセル</button><button type="submit" class="btn btn-primary">保存</button></div>
             </form>
         </div>
     </div>
 
-    {{-- モーダル: 外�EモードON確誁E--}}
+    {{-- モーダル: 外出モードON確認 --}}
     <div id="watchOffModal" class="modal-overlay" onclick="if(event.target===this)hideModal('watchOffModal')">
-        <div class="modal"><div class="modal-header"><h3>🚶 外�EモードをONにしますか�E�E/h3><button class="modal-close" onclick="hideModal('watchOffModal')">ÁE/button></div>
-            <div class="modal-body"><p><strong>⚠�E�E注愁E</strong> 外�EモードをONにすると、このチE��イスの未検知アラートが送信されなくなります、E/p><p style="color:var(--gray-500);font-size:13px;margin-top:8px;">外�E・旁E��などで一時的に通知を止めたぁE��合にご利用ください、E/p></div>
-            <div class="modal-footer"><button class="btn btn-secondary" onclick="cancelAwayModeOn()">キャンセル</button><button class="btn btn-danger" onclick="executeAwayModeOn()">外�EモードをONにする</button></div>
+        <div class="modal"><div class="modal-header"><h3>🚶 外出モードをONにしますか？</h3><button class="modal-close" onclick="hideModal('watchOffModal')">×</button></div>
+            <div class="modal-body"><p><strong>⚠️ 注意:</strong> 外出モードをONにすると、このデバイスの未検知アラートが送信されなくなります。</p><p style="color:var(--gray-500);font-size:13px;margin-top:8px;">外出・旅行などで一時的に通知を止めたい場合にご利用ください。</p></div>
+            <div class="modal-footer"><button class="btn btn-secondary" onclick="cancelAwayModeOn()">キャンセル</button><button class="btn btn-danger" onclick="executeAwayModeOn()">外出モードをONにする</button></div>
         </div>
     </div>
 
-    {{-- モーダル: タイマ�E一覧 --}}
+    {{-- モーダル: タイマー一覧 --}}
     <div id="timerListModal" class="modal-overlay" onclick="if(event.target===this)hideModal('timerListModal')">
-        <div class="modal" style="max-width:620px;"><div class="modal-header"><h3>🚶 外�Eスケジュール一覧</h3><button class="modal-close" onclick="hideModal('timerListModal')">ÁE/button></div>
+        <div class="modal" style="max-width:620px;"><div class="modal-header"><h3>🚶 外出スケジュール一覧</h3><button class="modal-close" onclick="hideModal('timerListModal')">×</button></div>
             <div class="modal-body" id="timerListBody"><div class="timer-list-loading">読み込み中...</div></div>
-            <div class="modal-footer"><button class="btn btn-secondary" onclick="hideModal('timerListModal')">閉じめE/button></div>
+            <div class="modal-footer"><button class="btn btn-secondary" onclick="hideModal('timerListModal')">閉じる</button></div>
         </div>
     </div>
 
     {{-- モーダル: スケジュール追加 --}}
     <div id="scheduleAddModal" class="modal-overlay" onclick="if(event.target===this)hideScheduleAddModal()">
-        <div class="modal" style="max-width:480px;"><div class="modal-header"><h3>🚶 外�Eスケジュール追加</h3><button class="modal-close" onclick="hideScheduleAddModal()">ÁE/button></div>
+        <div class="modal" style="max-width:480px;"><div class="modal-header"><h3>🚶 外出スケジュール追加</h3><button class="modal-close" onclick="hideScheduleAddModal()">×</button></div>
             <div class="modal-body">
                 <div class="schedule-device-label" id="scheduleDeviceLabel">対象: <strong>-</strong></div>
                 <div class="schedule-type-tabs">
@@ -593,27 +590,27 @@
                     <button class="schedule-type-tab" id="tabRecurring" onclick="switchScheduleType('recurring')">🔁 定期</button>
                 </div>
                 <div id="oneshotForm">
-                    <div class="schedule-form-group"><label>開始日晁E/label><input type="datetime-local" id="schedStartAt"></div>
-                    <div class="schedule-form-group"><label>終亁E��時（空欁E��手動復帰�E�E/label><input type="datetime-local" id="schedEndAt"></div>
+                    <div class="schedule-form-group"><label>開始日時</label><input type="datetime-local" id="schedStartAt"></div>
+                    <div class="schedule-form-group"><label>終了日時（空欄＝手動復帰）</label><input type="datetime-local" id="schedEndAt"></div>
                 </div>
                 <div id="recurringForm" style="display:none;">
                     <div class="schedule-form-group"><label>曜日</label>
                         <div class="schedule-days" id="scheduleDays">
                             <button type="button" class="schedule-day-btn" data-day="0" onclick="toggleDay(this)">日</button>
-                            <button type="button" class="schedule-day-btn" data-day="1" onclick="toggleDay(this)">朁E/button>
+                            <button type="button" class="schedule-day-btn" data-day="1" onclick="toggleDay(this)">月</button>
                             <button type="button" class="schedule-day-btn" data-day="2" onclick="toggleDay(this)">火</button>
                             <button type="button" class="schedule-day-btn" data-day="3" onclick="toggleDay(this)">水</button>
                             <button type="button" class="schedule-day-btn" data-day="4" onclick="toggleDay(this)">木</button>
-                            <button type="button" class="schedule-day-btn" data-day="5" onclick="toggleDay(this)">釁E/button>
-                            <button type="button" class="schedule-day-btn" data-day="6" onclick="toggleDay(this)">圁E/button>
+                            <button type="button" class="schedule-day-btn" data-day="5" onclick="toggleDay(this)">金</button>
+                            <button type="button" class="schedule-day-btn" data-day="6" onclick="toggleDay(this)">土</button>
                         </div>
                     </div>
                     <div class="schedule-form-group"><label>時間帯</label>
-                        <div class="schedule-time-row"><input type="time" id="schedStartTime"><span>、E/span><input type="time" id="schedEndTime"></div>
-                        <label class="schedule-nextday-check"><input type="checkbox" id="schedNextDay"> 翌日にまたがめE/label>
+                        <div class="schedule-time-row"><input type="time" id="schedStartTime"><span>〜</span><input type="time" id="schedEndTime"></div>
+                        <label class="schedule-nextday-check"><input type="checkbox" id="schedNextDay"> 翌日にまたがる</label>
                     </div>
                 </div>
-                <div class="schedule-form-group"><label>メモ�E�任意！E/label><input type="text" id="schedMemo" placeholder="侁E チE��サービス" maxlength="200"></div>
+                <div class="schedule-form-group"><label>メモ（任意）</label><input type="text" id="schedMemo" placeholder="例: デイサービス" maxlength="200"></div>
             </div>
             <div class="modal-footer"><button class="btn btn-secondary" onclick="hideScheduleAddModal()">キャンセル</button><button class="btn btn-primary" onclick="submitSchedule()">追加</button></div>
         </div>
@@ -621,40 +618,40 @@
 
     {{-- モーダル: スケジュール削除 --}}
     <div id="scheduleDeleteModal" class="modal-overlay" onclick="if(event.target===this)hideModal('scheduleDeleteModal')">
-        <div class="modal"><div class="modal-header"><h3>⚠�E�E外�Eスケジュール削除</h3><button class="modal-close" onclick="hideModal('scheduleDeleteModal')">ÁE/button></div>
-            <div class="modal-body"><p>こ�E外�Eスケジュールを削除しますか�E�E/p><p id="scheduleDeleteDetail" style="color:var(--gray-500);font-size:13px;margin-top:8px;"></p></div>
+        <div class="modal"><div class="modal-header"><h3>⚠️ 外出スケジュール削除</h3><button class="modal-close" onclick="hideModal('scheduleDeleteModal')">×</button></div>
+            <div class="modal-body"><p>この外出スケジュールを削除しますか？</p><p id="scheduleDeleteDetail" style="color:var(--gray-500);font-size:13px;margin-top:8px;"></p></div>
             <div class="modal-footer"><button class="btn btn-secondary" onclick="hideModal('scheduleDeleteModal')">キャンセル</button><button class="btn btn-danger" onclick="executeDeleteSchedule()">削除する</button></div>
         </div>
     </div>
 
-    {{-- モーダル: 解紁E�E端末返却案�E --}}
+    {{-- モーダル: 解約・端末返却案内 --}}
     <div id="cancelFlowModal" class="modal-overlay" onclick="if(event.target===this)hideModal('cancelFlowModal')">
         <div class="modal" style="max-width:520px;">
-            <div class="modal-header"><h3>📦 解紁E�E端末返却のご案�E</h3><button class="modal-close" onclick="hideModal('cancelFlowModal')">ÁE/button></div>
+            <div class="modal-header"><h3>📦 解約・端末返却のご案内</h3><button class="modal-close" onclick="hideModal('cancelFlowModal')">×</button></div>
             <div class="modal-body">
                 <div style="background:var(--yellow-light);border-left:3px solid var(--yellow);padding:12px 14px;border-radius:var(--radius);margin-bottom:16px;">
-                    <p style="font-size:13px;font-weight:600;color:#a16207;margin-bottom:4px;">⚠�E�E解紁E��にご確認ください</p>
-                    <p style="font-size:12px;color:#a16207;line-height:1.6;">ご契紁E��めEstrong>、E��月以冁E/strong>の解紁E�E、E台あためEstrong>¥8,400の違紁E��</strong>が発生します、E/p>
+                    <p style="font-size:13px;font-weight:600;color:#a16207;margin-bottom:4px;">⚠️ 解約前にご確認ください</p>
+                    <p style="font-size:12px;color:#a16207;line-height:1.6;">ご契約から<strong>〇ヶ月以内</strong>の解約は、1台あたり<strong>¥8,400の違約金</strong>が発生します。</p>
                 </div>
                 <div class="detail-section">
-                    <div class="detail-section-title">📋 解紁E�E返却の流れ</div>
+                    <div class="detail-section-title">📋 解約・返却の流れ</div>
                     <div style="font-size:13px;color:var(--gray-700);line-height:1.8;">
-                        <p style="margin-bottom:6px;"><strong>① 解紁E��諁E/strong></p>
-                        <p style="color:var(--gray-500);font-size:12px;margin-bottom:12px;">下記�E「解紁E��申請する」�Eタン、また�Eお問ぁE��わせフォームより解紁E�Eご意思をお知らせください、E/p>
-                        <p style="margin-bottom:6px;"><strong>② 端末の返送E/strong></p>
-                        <p style="color:var(--gray-500);font-size:12px;margin-bottom:12px;">端末めEstrong>レターパックライト等�E郵送E/strong>にてご返送ください。送料はお客様�Eご負拁E��なります、E/p>
-                        <p style="margin-bottom:6px;"><strong>③ 返送確認�E解紁E��亁E/strong></p>
-                        <p style="color:var(--gray-500);font-size:12px;margin-bottom:4px;">弊社にて返送を確認後、解紁E�E琁E��行います、Estrong>返送確認ができなぁE��合�E端末代金を請求させてぁE��だく場合があります、E/strong></p>
+                        <p style="margin-bottom:6px;"><strong>① 解約申請</strong></p>
+                        <p style="color:var(--gray-500);font-size:12px;margin-bottom:12px;">下記の「解約を申請する」ボタン、またはお問い合わせフォームより解約のご意思をお知らせください。</p>
+                        <p style="margin-bottom:6px;"><strong>② 端末の返送</strong></p>
+                        <p style="color:var(--gray-500);font-size:12px;margin-bottom:12px;">端末を<strong>レターパックライト等の郵送</strong>にてご返送ください。送料はお客様のご負担となります。</p>
+                        <p style="margin-bottom:6px;"><strong>③ 返送確認・解約完了</strong></p>
+                        <p style="color:var(--gray-500);font-size:12px;margin-bottom:4px;">弊社にて返送を確認後、解約処理を行います。<strong>返送確認ができない場合は端末代金を請求させていただく場合があります。</strong></p>
                     </div>
                 </div>
                 <div style="background:var(--beige);border-radius:var(--radius);padding:12px 14px;font-size:12px;color:var(--gray-600);line-height:1.8;">
-                    <strong>返送�E�E�E/strong>拁E��老E��りご案�EぁE��しまぁEbr>
-                    <strong>お問ぁE��わせ�E�E/strong>管琁E��E��でご連絡ください
+                    <strong>返送先：</strong>担当者よりご案内いたします<br>
+                    <strong>お問い合わせ：</strong>管理者までご連絡ください
                 </div>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-secondary" onclick="hideModal('cancelFlowModal')">閉じめE/button>
-                <a href="mailto:support@example.com" class="btn btn-danger" style="text-decoration:none;">解紁E��申請すめE/a>
+                <button class="btn btn-secondary" onclick="hideModal('cancelFlowModal')">閉じる</button>
+                <a href="mailto:support@example.com" class="btn btn-danger" style="text-decoration:none;">解約を申請する</a>
             </div>
         </div>
     </div>
@@ -672,7 +669,7 @@ function showToast(msg, type) { const t = document.getElementById('toast'); t.te
 function escapeHtml(s) { if (!s) return ''; const d = document.createElement('div'); d.appendChild(document.createTextNode(s)); return d.innerHTML; }
 function filterByStatus(s) { const u = new URL(window.location); u.searchParams.get('status') === s ? u.searchParams.delete('status') : u.searchParams.set('status', s); window.location = u; }
 
-// ===== チE��イス新規お申込み�E�EスチE��プ！E=====
+// ===== デバイス新規お申込み（4ステップ） =====
 var bulkStep = 1;
 var bulkOpts = { ai: false, sms: false };
 
@@ -697,8 +694,8 @@ function bulkUpdateStepUI() {
     document.getElementById('bulk-btn-back').style.display = bulkStep > 1 ? '' : 'none';
     var btn = document.getElementById('bulk-btn-next');
     if (bulkStep === 4) { btn.textContent = '決済へ進む'; }
-    else if (bulkStep === 3) { btn.textContent = '確認へ ↁE; }
-    else { btn.textContent = '次へ ↁE; }
+    else if (bulkStep === 3) { btn.textContent = '確認へ →'; }
+    else { btn.textContent = '次へ →'; }
     btn.disabled = false;
 }
 
@@ -713,17 +710,17 @@ function bulkUpdateSummary() {
     document.getElementById('bulk-sum-qty').textContent = q + '台';
     document.getElementById('bulk-sum-ai-row').style.display = bulkOpts.ai ? '' : 'none';
     document.getElementById('bulk-sum-sms-row').style.display = bulkOpts.sms ? '' : 'none';
-    document.getElementById('bulk-sum-subtotal').textContent = '¥' + subtotal.toLocaleString() + ' / 朁E;
-    document.getElementById('bulk-sum-tax').textContent = '¥' + tax.toLocaleString() + ' / 朁E;
-    document.getElementById('bulk-sum-total').textContent = '¥' + total.toLocaleString() + ' / 朁E;
+    document.getElementById('bulk-sum-subtotal').textContent = '¥' + subtotal.toLocaleString() + ' / 月';
+    document.getElementById('bulk-sum-tax').textContent = '¥' + tax.toLocaleString() + ' / 月';
+    document.getElementById('bulk-sum-total').textContent = '¥' + total.toLocaleString() + ' / 月';
 }
 
 function bulkNextStep() {
     if (bulkStep === 3) {
         if (!document.getElementById('bulk-delivery-name').value.trim()) { showToast('お名前を入力してください', 'error'); return; }
-        if (!document.getElementById('bulk-delivery-postal').value.trim()) { showToast('郵便番号を�E力してください', 'error'); return; }
-        if (!document.getElementById('bulk-delivery-address').value.trim()) { showToast('住所を�E力してください', 'error'); return; }
-        if (!document.getElementById('bulk-delivery-phone').value.trim()) { showToast('電話番号を�E力してください', 'error'); return; }
+        if (!document.getElementById('bulk-delivery-postal').value.trim()) { showToast('郵便番号を入力してください', 'error'); return; }
+        if (!document.getElementById('bulk-delivery-address').value.trim()) { showToast('住所を入力してください', 'error'); return; }
+        if (!document.getElementById('bulk-delivery-phone').value.trim()) { showToast('電話番号を入力してください', 'error'); return; }
     }
     if (bulkStep < 4) { bulkStep++; bulkUpdateStepUI(); if (bulkStep === 4) bulkUpdateSummary(); }
     else { bulkExecute(); }
@@ -734,7 +731,7 @@ function bulkToggleOpt(key) { bulkOpts[key] = !bulkOpts[key]; document.getElemen
 
 async function bulkExecute() {
     var btn = document.getElementById('bulk-btn-next');
-    btn.disabled = true; btn.textContent = '処琁E��...';
+    btn.disabled = true; btn.textContent = '処理中...';
     document.getElementById('bulk-loading').classList.add('show');
     try {
         var res = await fetch('{{ route("partner.org.devices.bulk-checkout") }}', {
@@ -743,13 +740,13 @@ async function bulkExecute() {
             body: JSON.stringify({ count: bulkGetQty(), opt_ai: bulkOpts.ai, opt_sms: bulkOpts.sms, delivery_name: document.getElementById('bulk-delivery-name').value, delivery_postal: document.getElementById('bulk-delivery-postal').value, delivery_address: document.getElementById('bulk-delivery-address').value, delivery_phone: document.getElementById('bulk-delivery-phone').value })
         });
         var data = await res.json();
-        if (res.ok && data.success) { bulkDownloadCsv(data.issued); hideModal('addDeviceModal'); showToast(data.count + '台のチE��イスを追加しました', 'success'); setTimeout(function() { location.reload(); }, 1000); }
+        if (res.ok && data.success) { bulkDownloadCsv(data.issued); hideModal('addDeviceModal'); showToast(data.count + '台のデバイスを追加しました', 'success'); setTimeout(function() { location.reload(); }, 1000); }
         else { showToast(data.message || '追加に失敗しました', 'error'); btn.disabled = false; btn.textContent = '決済へ進む'; document.getElementById('bulk-loading').classList.remove('show'); }
     } catch (e) { console.error(e); showToast('通信エラーが発生しました', 'error'); btn.disabled = false; btn.textContent = '決済へ進む'; document.getElementById('bulk-loading').classList.remove('show'); }
 }
 
 function bulkDownloadCsv(issued) {
-    var bom = '\uFEFF'; var rows = ['チE��イスID,PIN'];
+    var bom = '\uFEFF'; var rows = ['デバイスID,PIN'];
     issued.forEach(function(d) { rows.push(d.device_id + ',' + d.pin); });
     var csv = bom + rows.join('\r\n');
     var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
@@ -765,14 +762,14 @@ document.querySelectorAll('.bulk-qty-preset').forEach(function(btn) { btn.addEve
 function bulkSyncPresets() { var v = parseInt(document.getElementById('bulk-qty-input').value) || 0; document.querySelectorAll('.bulk-qty-preset').forEach(function(b) { b.classList.toggle('active', parseInt(b.dataset.val) === v); }); }
 bulkSyncPresets();
 
-// ===== チE��イス削除 =====
+// ===== デバイス削除 =====
 function confirmDelete(deviceId) { document.getElementById('deleteDeviceId').textContent = deviceId; document.getElementById('deleteForm').action = '/partner/org/devices/' + deviceId + '/remove'; showModal('deleteModal'); }
 
 // ===== 警告解除 =====
 let clearAlertDeviceId = null;
 function confirmClearAlert(deviceId, roomNumber, tenantName) {
     clearAlertDeviceId = deviceId;
-    var label = (roomNumber ? roomNumber + ' ' : '') + (tenantName ? tenantName + ' ' : '') + '�E�E + deviceId + '�E�E;
+    var label = (roomNumber ? roomNumber + ' ' : '') + (tenantName ? tenantName + ' ' : '') + '（' + deviceId + '）';
     document.getElementById('clearAlertTarget').innerHTML = '対象: <strong class="mono">' + escapeHtml(label) + '</strong>';
     showModal('clearAlertModal');
 }
@@ -784,7 +781,7 @@ function executeClearAlert() {
     .catch(() => showToast('通信エラー', 'error'));
 }
 
-// ===== 外�EモーチE=====
+// ===== 外出モード =====
 let pendingToggleDevice = null, pendingToggleCheckbox = null;
 function toggleAwayMode(deviceId, checked, checkbox) {
     if (checked) { pendingToggleDevice = deviceId; pendingToggleCheckbox = checkbox; checkbox.checked = false; showModal('watchOffModal'); return; }
@@ -798,24 +795,24 @@ function sendToggleAwayMode(deviceId, awayMode) {
     .catch(() => showToast('通信エラー', 'error'));
 }
 
-// ===== チE��イス詳細 =====
+// ===== デバイス詳細 =====
 let currentDetailDeviceId = null;
 function showDeviceDetail(deviceId) {
     currentDetailDeviceId = deviceId;
     fetch('/partner/org/devices/' + deviceId + '/detail', { headers: { 'Accept': 'application/json' } })
     .then(r => r.json()).then(data => {
         const badge = document.getElementById('detailStatusBadge');
-        const labels = { normal: '正常稼働中', warning: '注愁E, alert: '未検知警呁E, offline: '通信途絶' };
+        const labels = { normal: '正常稼働中', warning: '注意', alert: '未検知警告', offline: '通信途絶' };
         badge.textContent = labels[data.status] || data.status;
         badge.className = 'detail-status-badge ' + (data.status || 'offline');
         document.getElementById('detailClearAlertBtn').style.display = data.status === 'alert' ? 'inline-flex' : 'none';
         document.getElementById('detailDeviceId').textContent = data.device_id;
         document.getElementById('detailLastDetected').textContent = data.last_human_detected || '-';
         var rssiLabel = '-';
-        if (data.rssi !== null && data.rssi !== undefined) rssiLabel = data.rssi > -70 ? '良好 (' + data.rssi + 'dBm)' : data.rssi > -85 ? '普送E(' + data.rssi + 'dBm)' : '弱ぁE(' + data.rssi + 'dBm)';
+        if (data.rssi !== null && data.rssi !== undefined) rssiLabel = data.rssi > -70 ? '良好 (' + data.rssi + 'dBm)' : data.rssi > -85 ? '普通 (' + data.rssi + 'dBm)' : '弱い (' + data.rssi + 'dBm)';
         document.getElementById('detailBattery').textContent = data.battery_pct !== null && data.battery_pct !== undefined ? data.battery_pct + '%' : '-';
         document.getElementById('detailSignal').textContent = rssiLabel;
-        var awayText = data.away_mode ? 'ON�E�外�E中�E�E : 'OFF'; if (data.away_until) awayText += '�E�、E + data.away_until + '�E�E;
+        var awayText = data.away_mode ? 'ON（外出中）' : 'OFF'; if (data.away_until) awayText += '（〜' + data.away_until + '）';
         document.getElementById('detailAwayMode').textContent = awayText;
         document.getElementById('detailRegistered').textContent = data.registered_at || '-';
         document.getElementById('detailRoomInput').value = data.room_number || '';
@@ -833,7 +830,6 @@ function showDeviceDetail(deviceId) {
         document.getElementById('detailVoiceEnabled').checked = data.voice_enabled || false;
         document.getElementById('detailVoicePhone1').value = data.voice_phone_1 || '';
         document.getElementById('detailVoicePhone2').value = data.voice_phone_2 || '';
-        // premium_enabledによるinput制御
         var isPremium = data.premium_enabled || false;
         ['detailSmsEnabled','detailSmsPhone1','detailSmsPhone2','detailVoiceEnabled','detailVoicePhone1','detailVoicePhone2'].forEach(function(id) {
             var el = document.getElementById(id);
@@ -841,7 +837,6 @@ function showDeviceDetail(deviceId) {
             el.style.opacity = isPremium ? '' : '0.4';
             el.style.cursor = isPremium ? '' : 'not-allowed';
         });
-        // 非�Eレミアムの場合�Eヒントを表示
         var premiumNote = document.getElementById('detailPremiumNote');
         if (premiumNote) premiumNote.style.display = isPremium ? 'none' : '';
         renderDetailSchedules(data.schedules || [], data.device_id);
@@ -883,13 +878,13 @@ function showCancelFlow() { showModal('cancelFlowModal'); }
 
 function renderDetailSchedules(schedules, deviceId) {
     var c = document.getElementById('detailScheduleList');
-    if (!schedules || !schedules.length) { c.innerHTML = '<div class="detail-schedule-empty">外�EスケジュールなぁE/div>'; return; }
+    if (!schedules || !schedules.length) { c.innerHTML = '<div class="detail-schedule-empty">外出スケジュールなし</div>'; return; }
     var html = '<div class="detail-schedule-list">';
     schedules.forEach(s => {
         html += '<div class="detail-schedule-item">';
-        if (s.type === 'oneshot') { html += '<div class="detail-schedule-icon oneshot">📅</div><div class="detail-schedule-info"><p class="detail-schedule-main">' + formatTimerDateTime(s.start_at) + ' 、E' + (s.end_at ? formatTimerDateTime(s.end_at) : '手動復帰') + '</p><p class="detail-schedule-sub">' + (s.memo ? escapeHtml(s.memo) : '単発') + '</p></div>'; }
-        else { html += '<div class="detail-schedule-icon recurring">🔁</div><div class="detail-schedule-info"><p class="detail-schedule-main">毎週 ' + escapeHtml(s.days_label) + ' ' + s.start_time + '、E + (s.next_day ? '翁E : '') + s.end_time + '</p><p class="detail-schedule-sub">' + (s.memo ? escapeHtml(s.memo) : '定期') + '</p></div>'; }
-        html += '<button class="detail-schedule-del" onclick="confirmDeleteSchedule(\'' + escapeHtml(deviceId) + '\',' + s.id + ',\'' + escapeHtml(s.type === 'oneshot' ? formatTimerDateTime(s.start_at) : s.days_label) + '\')">ÁE/button></div>';
+        if (s.type === 'oneshot') { html += '<div class="detail-schedule-icon oneshot">📅</div><div class="detail-schedule-info"><p class="detail-schedule-main">' + formatTimerDateTime(s.start_at) + ' 〜 ' + (s.end_at ? formatTimerDateTime(s.end_at) : '手動復帰') + '</p><p class="detail-schedule-sub">' + (s.memo ? escapeHtml(s.memo) : '単発') + '</p></div>'; }
+        else { html += '<div class="detail-schedule-icon recurring">🔁</div><div class="detail-schedule-info"><p class="detail-schedule-main">毎週 ' + escapeHtml(s.days_label) + ' ' + s.start_time + '〜' + (s.next_day ? '翌' : '') + s.end_time + '</p><p class="detail-schedule-sub">' + (s.memo ? escapeHtml(s.memo) : '定期') + '</p></div>'; }
+        html += '<button class="detail-schedule-del" onclick="confirmDeleteSchedule(\'' + escapeHtml(deviceId) + '\',' + s.id + ',\'' + escapeHtml(s.type === 'oneshot' ? formatTimerDateTime(s.start_at) : s.days_label) + '\')">×</button></div>';
     });
     c.innerHTML = html + '</div>';
 }
@@ -903,28 +898,28 @@ async function loadTimerList() {
     body.innerHTML = '<div class="timer-list-loading">読み込み中...</div>';
     try {
         const res = await fetch('{{ route("partner.org.timers") }}', { headers: { 'Accept': 'application/json' } });
-        if (!res.ok) { body.innerHTML = '<div class="timer-list-empty">チE�Eタの取得に失敗しました</div>'; return; }
+        if (!res.ok) { body.innerHTML = '<div class="timer-list-empty">データの取得に失敗しました</div>'; return; }
         const data = await res.json();
-        if (!data.length) { body.innerHTML = '<div class="timer-list-empty">外�Eスケジュールが設定されてぁE��チE��イスはありません</div>'; return; }
+        if (!data.length) { body.innerHTML = '<div class="timer-list-empty">外出スケジュールが設定されているデバイスはありません</div>'; return; }
         let awayCount = 0, oneshotCount = 0, recurringCount = 0;
         data.forEach(d => { if (d.away_mode) awayCount++; d.schedules.forEach(s => { if (s.type === 'oneshot') oneshotCount++; else recurringCount++; }); });
-        let html = '<div class="timer-summary"><div class="timer-summary-item"><div class="timer-summary-value">' + data.length + '</div><div class="timer-summary-label">対象チE��イス</div></div><div class="timer-summary-item"><div class="timer-summary-value">' + awayCount + '</div><div class="timer-summary-label">外�Eモード中</div></div><div class="timer-summary-item"><div class="timer-summary-value">' + oneshotCount + '</div><div class="timer-summary-label">単発予宁E/div></div><div class="timer-summary-item"><div class="timer-summary-value">' + recurringCount + '</div><div class="timer-summary-label">定期スケジュール</div></div></div>';
+        let html = '<div class="timer-summary"><div class="timer-summary-item"><div class="timer-summary-value">' + data.length + '</div><div class="timer-summary-label">対象デバイス</div></div><div class="timer-summary-item"><div class="timer-summary-value">' + awayCount + '</div><div class="timer-summary-label">外出モード中</div></div><div class="timer-summary-item"><div class="timer-summary-value">' + oneshotCount + '</div><div class="timer-summary-label">単発予定</div></div><div class="timer-summary-item"><div class="timer-summary-value">' + recurringCount + '</div><div class="timer-summary-label">定期スケジュール</div></div></div>';
         data.forEach(d => {
             html += '<div class="timer-device-group"><div class="timer-device-header"><div class="timer-device-info">';
             if (d.room_number) html += '<span class="timer-device-room">' + escapeHtml(d.room_number) + '</span>';
             if (d.tenant_name) html += '<span class="timer-device-name">' + escapeHtml(d.tenant_name) + '</span>';
             html += '<span class="timer-device-id">' + escapeHtml(d.device_id) + '</span></div>';
-            if (d.away_mode) { html += '<span class="timer-away-badge">⏸ 見守りOFF'; if (d.away_until) html += '�E�、E + formatTimerDateTime(d.away_until) + '�E�E; html += '</span>'; }
+            if (d.away_mode) { html += '<span class="timer-away-badge">⏸ 見守りOFF'; if (d.away_until) html += '（〜' + formatTimerDateTime(d.away_until) + '）'; html += '</span>'; }
             html += '</div>';
             if (d.schedules.length) {
                 d.schedules.forEach(s => {
                     html += '<div class="timer-schedule-item">';
-                    if (s.type === 'oneshot') { html += '<div class="timer-schedule-icon oneshot">📅</div><div class="timer-schedule-info"><p class="timer-schedule-main">' + formatTimerDateTime(s.start_at) + ' 、E' + (s.end_at ? formatTimerDateTime(s.end_at) : '手動復帰') + '</p><p class="timer-schedule-sub">' + (s.memo ? escapeHtml(s.memo) : '�E�メモなし！E) + '</p></div><span class="timer-schedule-type oneshot">単発</span>'; }
-                    else { html += '<div class="timer-schedule-icon recurring">🔁</div><div class="timer-schedule-info"><p class="timer-schedule-main">毎週 ' + escapeHtml(s.days_label) + ' ' + s.start_time + '、E + (s.next_day ? '翁E : '') + s.end_time + '</p><p class="timer-schedule-sub">' + (s.memo ? escapeHtml(s.memo) : '�E�メモなし！E) + '</p></div><span class="timer-schedule-type recurring">定期</span>'; }
-                    html += '<button class="timer-delete-btn" onclick="confirmDeleteSchedule(\'' + escapeHtml(d.device_id) + '\',' + s.id + ',\'' + escapeHtml(s.type === 'oneshot' ? formatTimerDateTime(s.start_at) : s.days_label) + '\')">ÁE/button></div>';
+                    if (s.type === 'oneshot') { html += '<div class="timer-schedule-icon oneshot">📅</div><div class="timer-schedule-info"><p class="timer-schedule-main">' + formatTimerDateTime(s.start_at) + ' 〜 ' + (s.end_at ? formatTimerDateTime(s.end_at) : '手動復帰') + '</p><p class="timer-schedule-sub">' + (s.memo ? escapeHtml(s.memo) : '（メモなし）') + '</p></div><span class="timer-schedule-type oneshot">単発</span>'; }
+                    else { html += '<div class="timer-schedule-icon recurring">🔁</div><div class="timer-schedule-info"><p class="timer-schedule-main">毎週 ' + escapeHtml(s.days_label) + ' ' + s.start_time + '〜' + (s.next_day ? '翌' : '') + s.end_time + '</p><p class="timer-schedule-sub">' + (s.memo ? escapeHtml(s.memo) : '（メモなし）') + '</p></div><span class="timer-schedule-type recurring">定期</span>'; }
+                    html += '<button class="timer-delete-btn" onclick="confirmDeleteSchedule(\'' + escapeHtml(d.device_id) + '\',' + s.id + ',\'' + escapeHtml(s.type === 'oneshot' ? formatTimerDateTime(s.start_at) : s.days_label) + '\')">×</button></div>';
                 });
-            } else if (d.away_mode) { html += '<div class="timer-schedule-item"><div class="timer-schedule-icon oneshot">🚶</div><div class="timer-schedule-info"><p class="timer-schedule-main">手動で外�Eモード中</p><p class="timer-schedule-sub">外�Eスケジュール設定なぁE/p></div></div>'; }
-            html += '<button class="timer-add-btn" onclick="scheduleAddOrigin=\'timerlist\';openScheduleAddModal(\'' + escapeHtml(d.device_id) + '\',\'' + escapeHtml(d.room_number || '') + '\',\'' + escapeHtml(d.tenant_name || '') + '\')">�E�E外�Eスケジュール追加</button></div>';
+            } else if (d.away_mode) { html += '<div class="timer-schedule-item"><div class="timer-schedule-icon oneshot">🚶</div><div class="timer-schedule-info"><p class="timer-schedule-main">手動で外出モード中</p><p class="timer-schedule-sub">外出スケジュール設定なし</p></div></div>'; }
+            html += '<button class="timer-add-btn" onclick="scheduleAddOrigin=\'timerlist\';openScheduleAddModal(\'' + escapeHtml(d.device_id) + '\',\'' + escapeHtml(d.room_number || '') + '\',\'' + escapeHtml(d.tenant_name || '') + '\')">＋ 外出スケジュール追加</button></div>';
         });
         body.innerHTML = html;
     } catch (e) { console.error(e); body.innerHTML = '<div class="timer-list-empty">通信エラーが発生しました</div>'; }
@@ -941,7 +936,7 @@ let scheduleTargetDeviceId = null, scheduleType = 'oneshot';
 function openScheduleAddModal(deviceId, roomNumber, tenantName) {
     scheduleTargetDeviceId = deviceId; scheduleType = 'oneshot';
     var label = (roomNumber ? roomNumber : '') + (tenantName ? (roomNumber ? ' ' : '') + tenantName : '');
-    label = (label ? label + '�E�E : '') + deviceId + (label ? '�E�E : '');
+    label = (label ? label + '（' : '') + deviceId + (label ? '）' : '');
     document.getElementById('scheduleDeviceLabel').innerHTML = '対象: <strong>' + escapeHtml(label) + '</strong>';
     ['schedStartAt','schedEndAt','schedStartTime','schedEndTime','schedMemo'].forEach(id => document.getElementById(id).value = '');
     document.getElementById('schedNextDay').checked = false;
@@ -967,15 +962,15 @@ async function submitSchedule() {
         payload.start_at = startAt; var endAt = document.getElementById('schedEndAt').value; if (endAt) payload.end_at = endAt;
     } else {
         var days = []; document.querySelectorAll('.schedule-day-btn.active').forEach(b => days.push(parseInt(b.dataset.day)));
-        if (!days.length) { showToast('曜日めEつ以上選択してください', 'error'); return; }
+        if (!days.length) { showToast('曜日を1つ以上選択してください', 'error'); return; }
         var st = document.getElementById('schedStartTime').value, et = document.getElementById('schedEndTime').value;
-        if (!st || !et) { showToast('開始時間と終亁E��間を入力してください', 'error'); return; }
+        if (!st || !et) { showToast('開始時間と終了時間を入力してください', 'error'); return; }
         payload.days_of_week = days; payload.start_time = st; payload.end_time = et; payload.next_day = document.getElementById('schedNextDay').checked;
     }
     try {
         var res = await fetch('/partner/org/devices/' + scheduleTargetDeviceId + '/schedules', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' }, body: JSON.stringify(payload) });
         var data = await res.json();
-        if (res.ok && data.success) { showToast('外�Eスケジュールを追加しました', 'success'); hideScheduleAddModal(); if (scheduleAddOrigin === 'detail' && currentDetailDeviceId) showDeviceDetail(currentDetailDeviceId); loadTimerList(); }
+        if (res.ok && data.success) { showToast('外出スケジュールを追加しました', 'success'); hideScheduleAddModal(); if (scheduleAddOrigin === 'detail' && currentDetailDeviceId) showDeviceDetail(currentDetailDeviceId); loadTimerList(); }
         else showToast(data.message || (data.errors ? Object.values(data.errors).flat().join(', ') : '追加に失敗しました'), 'error');
     } catch (e) { console.error(e); showToast('通信エラーが発生しました', 'error'); }
 }
@@ -988,12 +983,12 @@ async function executeDeleteSchedule() {
     try {
         var res = await fetch('/partner/org/devices/' + deleteScheduleDeviceId + '/schedules/' + deleteScheduleId, { method: 'DELETE', headers: { 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' } });
         var data = await res.json();
-        if (res.ok && data.success) { showToast('外�Eスケジュールを削除しました', 'success'); hideModal('scheduleDeleteModal'); if (currentDetailDeviceId && document.getElementById('detailModal').classList.contains('show')) showDeviceDetail(currentDetailDeviceId); loadTimerList(); }
+        if (res.ok && data.success) { showToast('外出スケジュールを削除しました', 'success'); hideModal('scheduleDeleteModal'); if (currentDetailDeviceId && document.getElementById('detailModal').classList.contains('show')) showDeviceDetail(currentDetailDeviceId); loadTimerList(); }
         else showToast(data.message || '削除に失敗しました', 'error');
     } catch (e) { console.error(e); showToast('通信エラーが発生しました', 'error'); }
 }
 
-// ===== 通知設定モーダル�E�EMS対応済み�E�E=====
+// ===== 通知設定モーダル（SMS対応済み） =====
 function showNotificationModal() {
     fetch('{{ route("partner.org.notification") }}', { headers: { 'Accept': 'application/json' } })
     .then(r => r.json()).then(d => {
