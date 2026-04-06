@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Partner;
 
 use App\Http\Controllers\Controller;
 use App\Helpers\PhoneHelper;
+use App\Models\BillingContract;
+use App\Models\BillingLog;
 use App\Models\Device;
 use App\Models\DeviceSchedule;
 use App\Models\Organization;
@@ -12,6 +14,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class OrgAdminController extends Controller
@@ -286,9 +289,6 @@ class OrgAdminController extends Controller
         ]);
     }
 
-    /**
-     * デバイス個別プレミアムトグル（主に解除用途）
-     */
     public function toggleDevicePremium(Request $request, $deviceId)
     {
         $organization = $this->getOrganization();
@@ -535,17 +535,80 @@ class OrgAdminController extends Controller
         return response()->json(['success' => true, 'message' => '通知設定を更新しました']);
     }
 
+    // ============================================================
+    // デバイス新規お申込み（4ステップ → 決済）
+    // ============================================================
+
     public function bulkCheckout(Request $request)
     {
         $organization = $this->getOrganization();
 
         $request->validate([
-            'count'   => 'required|integer|min:1|max:300',
-            'opt_ai'  => 'nullable|boolean',
-            'opt_sms' => 'nullable|boolean',
+            'count'    => 'required|integer|min:1|max:300',
+            'opt_ai'   => 'nullable|boolean',
+            'opt_sms'  => 'nullable|boolean',
         ]);
 
         $count  = (int) $request->count;
+        $optAi  = (bool) ($request->opt_ai  ?? false);
+        $optSms = (bool) ($request->opt_sms ?? false);
+
+        // ── 料金計算（税抜単価）
+        $unitPrice = 700 + ($optAi ? 300 : 0) + ($optSms ? 100 : 0);
+        $subtotal  = $unitPrice * $count;
+        $tax       = (int) floor($subtotal * 0.1);
+        $total     = $subtotal + $tax;
+
+        // ── BillingContract（カード情報）取得
+        $contract = BillingContract::where('organization_id', $organization->id)
+            ->where('status', 'active')
+            ->first();
+
+        if (!$contract || !$contract->payjp_customer_id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'クレジットカードが登録されていません。管理者にお問い合わせください。',
+            ], 422);
+        }
+
+        // ── Pay.jp 課金
+        \Payjp\Payjp::setApiKey(config('services.payjp.secret_key'));
+
+        try {
+            $charge = \Payjp\Charge::create([
+                'amount'      => $total,
+                'currency'    => 'jpy',
+                'customer'    => $contract->payjp_customer_id,
+                'description' => "みまもりデバイス 追加料金 - {$organization->name} {$count}台"
+                               . ($optAi ? ' / AIコール' : '')
+                               . ($optSms ? ' / SMS' : ''),
+            ]);
+        } catch (\Exception $e) {
+            Log::error('bulkCheckout charge error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => '決済に失敗しました: ' . $e->getMessage(),
+            ], 500);
+        }
+
+        // ── 課金ログ
+        BillingLog::create([
+            'billing_contract_id'  => $contract->id,
+            'amount'               => $total,
+            'device_count'         => $count,
+            'premium_device_count' => 0,
+            'payjp_charge_id'      => $charge->id,
+            'status'               => 'success',
+            'billed_at'            => now(),
+        ]);
+
+        // ── BillingContract の台数・金額を更新（翌月分の自動課金に反映）
+        $contract->update([
+            'device_count' => $contract->device_count + $count,
+            'amount'       => $contract->calcAmount() + ($unitPrice * $count),
+        ]);
+
+        // ── デバイス発番
         $issued = [];
 
         for ($i = 0; $i < $count; $i++) {
@@ -557,6 +620,7 @@ class OrgAdminController extends Controller
                 'pin_hash'        => Hash::make($pin),
                 'status'          => 'inactive',
                 'organization_id' => $organization->id,
+                'premium_enabled' => $optAi || $optSms ? 1 : 0,
             ]);
 
             DB::table('notification_settings')->insert([
@@ -569,7 +633,13 @@ class OrgAdminController extends Controller
             $issued[] = ['device_id' => $deviceId, 'pin' => $pin];
         }
 
-        return response()->json(['success' => true, 'count' => $count, 'issued' => $issued, 'checkout_url' => null]);
+        return response()->json([
+            'success'    => true,
+            'count'      => $count,
+            'issued'     => $issued,
+            'amount'     => $total,
+            'charge_id'  => $charge->id,
+        ]);
     }
 
     private function generateDeviceId(): string
@@ -591,5 +661,3 @@ class OrgAdminController extends Controller
         return str_pad((string) random_int(0, 9999), 4, '0', STR_PAD_LEFT);
     }
 }
-
-
