@@ -92,6 +92,8 @@ Route::middleware(PartnerAuth::class)->prefix('partner')->group(function () {
     Route::get('/password-change', [PartnerPasswordController::class, 'showForm'])->name('partner.password-change');
     Route::post('/password-change', [PartnerPasswordController::class, 'update'])->name('partner.password-change.update');
     Route::post('/email-change', [PartnerPasswordController::class, 'updateEmail'])->name('partner.email-change');
+    Route::post('/account-card', [PartnerPasswordController::class, 'updateCard'])->name('partner.account-card');
+    Route::post('/account-delivery', [PartnerPasswordController::class, 'updateDelivery'])->name('partner.account-delivery');
 
     Route::get('/devices/{deviceId}/detail', [MasterController::class, 'deviceDetail'])->name('partner.devices.detail');
     Route::put('/devices/{deviceId}/assignment', [MasterController::class, 'updateDeviceAssignment'])->name('partner.devices.update-assignment');

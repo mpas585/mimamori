@@ -24,6 +24,10 @@ class Organization extends Model
         'notification_sms_2',
         'notification_sms_enabled',
         'premium_enabled',
+        'delivery_name',
+        'delivery_postal',
+        'delivery_address',
+        'delivery_phone',
     ];
 
     protected $casts = [
@@ -43,9 +47,6 @@ class Organization extends Model
         return $this->hasMany(OrgDeviceAssignment::class);
     }
 
-    /**
-     * 有効な通知メールアドレス一覧を取得
-     */
     public function getNotificationEmails(): array
     {
         if (!$this->notification_enabled) {
@@ -62,9 +63,6 @@ class Organization extends Model
         return $emails;
     }
 
-    /**
-     * 有効な通知SMS番号一覧を取得
-     */
     public function getNotificationSmsPhones(): array
     {
         if (!$this->notification_sms_enabled) {
@@ -81,5 +79,3 @@ class Organization extends Model
         return $phones;
     }
 }
-
-
