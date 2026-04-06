@@ -758,7 +758,7 @@ async function bulkExecute() {
             body: JSON.stringify({ count: bulkGetQty(), opt_ai: bulkOpts.ai, opt_sms: bulkOpts.sms, delivery_name: document.getElementById('bulk-delivery-name').value, delivery_postal: document.getElementById('bulk-delivery-postal').value, delivery_address: document.getElementById('bulk-delivery-address').value, delivery_phone: document.getElementById('bulk-delivery-phone').value })
         });
         var data = await res.json();
-        if (res.ok && data.success) { bulkDownloadCsv(data.issued); hideModal('addDeviceModal'); showToast(data.count + '台のデバイスを追加しました', 'success'); setTimeout(function() { location.reload(); }, 1000); }
+        if (res.ok && data.success) { hideModal('addDeviceModal'); showToast(data.count + '台のデバイスを追加しました', 'success'); setTimeout(function() { location.reload(); }, 1000); }
         else { showToast(data.message || '追加に失敗しました', 'error'); btn.disabled = false; btn.textContent = '決済へ進む'; document.getElementById('bulk-loading').classList.remove('show'); }
     } catch (e) { console.error(e); showToast('通信エラーが発生しました', 'error'); btn.disabled = false; btn.textContent = '決済へ進む'; document.getElementById('bulk-loading').classList.remove('show'); }
 }
