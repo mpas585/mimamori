@@ -448,6 +448,7 @@
                     <div class="bulk-summary-tax"><span class="bulk-summary-label">消費税（10%）</span><span class="bulk-summary-value" id="bulk-sum-tax">¥700 / 月</span></div>
                     <div class="bulk-summary-total"><span class="bulk-summary-total-label">月額合計（税込）</span><span class="bulk-summary-total-value" id="bulk-sum-total">¥7,700 / 月</span></div>
                 </div>
+                <div id="bulk-card-info" style="margin-bottom:14px;padding:12px 14px;background:var(--white);border:1px solid var(--gray-200);border-radius:var(--radius);font-size:13px;display:flex;align-items:center;justify-content:space-between;"><span style="color:var(--gray-500);">💳 お支払いカード</span><span id="bulk-card-display" style="font-weight:600;">読み込み中...</span></div>
                 <p class="bulk-summary-note">※ 24ヶ月最低契約。解約時は¥8,400の違約金が発生します。<br>※「決済へ進む」を押すとデバイスが生成され、IDとPINのCSVが自動でダウンロードされます。</p>
                 <div class="bulk-loading" id="bulk-loading">デバイスを生成中です。しばらくお待ちください...</div>
             </div>
@@ -707,7 +708,7 @@ function bulkUpdateStepUI() {
 
 function bulkGetQty() { var v = parseInt(document.getElementById('bulk-qty-input').value) || 1; if (v < 1) v = 1; if (v > 300) v = 300; return v; }
 
-function bulkUpdateSummary() {
+async function bulkUpdateSummary() {
     var q = bulkGetQty();
     var add = (bulkOpts.ai ? 300 : 0) + (bulkOpts.sms ? 100 : 0);
     var subtotal = (700 + add) * q;
@@ -719,16 +720,24 @@ function bulkUpdateSummary() {
     document.getElementById('bulk-sum-subtotal').textContent = '¥' + subtotal.toLocaleString() + ' / 月';
     document.getElementById('bulk-sum-tax').textContent = '¥' + tax.toLocaleString() + ' / 月';
     document.getElementById('bulk-sum-total').textContent = '¥' + total.toLocaleString() + ' / 月';
+    var cardDisplay = document.getElementById('bulk-card-display');
+    var nextBtn = document.getElementById('bulk-btn-next');
+    try {
+        var res = await fetch('/partner/org/card-info', { headers: { 'Accept': 'application/json' } });
+        var data = await res.json();
+        if (data.found) { cardDisplay.textContent = data.brand + ' **** ' + data.last4; cardDisplay.style.color = 'var(--gray-800)'; nextBtn.disabled = false; }
+        else { cardDisplay.innerHTML = '<span style="color:var(--red);">未登録 — <a href="/partner/billing" style="color:var(--red);text-decoration:underline;">カードを登録する</a></span>'; nextBtn.disabled = true; }
+    } catch(e) { cardDisplay.textContent = '取得できませんでした'; }
 }
 
-function bulkNextStep() {
+async function bulkNextStep() {
     if (bulkStep === 3) {
         if (!document.getElementById('bulk-delivery-name').value.trim()) { showToast('お名前を入力してください', 'error'); return; }
         if (!document.getElementById('bulk-delivery-postal').value.trim()) { showToast('郵便番号を入力してください', 'error'); return; }
         if (!document.getElementById('bulk-delivery-address').value.trim()) { showToast('住所を入力してください', 'error'); return; }
         if (!document.getElementById('bulk-delivery-phone').value.trim()) { showToast('電話番号を入力してください', 'error'); return; }
     }
-    if (bulkStep < 4) { bulkStep++; bulkUpdateStepUI(); if (bulkStep === 4) bulkUpdateSummary(); }
+    if (bulkStep < 4) { bulkStep++; bulkUpdateStepUI(); if (bulkStep === 4) await bulkUpdateSummary(); }
     else { bulkExecute(); }
 }
 
