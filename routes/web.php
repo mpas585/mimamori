@@ -15,8 +15,8 @@ use App\Http\Controllers\Partner\MasterController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\Partner\OrgAdminController;
 use App\Http\Middleware\PartnerAuth;
-use App\Http\Controllers\PlanController; // ★ 追加
-use App\Http\Controllers\BillingController; // ★ 追加
+use App\Http\Controllers\PlanController;
+use App\Http\Controllers\BillingController;
 
 // ============================================================
 // ユーザー画面
@@ -44,7 +44,6 @@ Route::get('/terms', function () { return view('terms'); })->name('terms');
 Route::get('/contact', [ContactController::class, 'index'])->name('contact');
 Route::post('/contact', [ContactController::class, 'send'])->middleware('throttle:5,1');
 
-// ★ Pay.jp Webhook（CSRF除外 → bootstrap/app.php の withMiddleware で除外すること）
 Route::post('/webhook/payjp', [PlanController::class, 'webhook'])->name('webhook.payjp');
 
 Route::middleware('auth')->group(function () {
@@ -66,7 +65,6 @@ Route::middleware('auth')->group(function () {
     Route::get('/logs', [LogController::class, 'index'])->name('logs');
     Route::apiResource('schedules', ScheduleController::class)->except(['show']);
 
-    // ★ プランページ
     Route::get('/plan', [PlanController::class, 'index'])->name('plan');
     Route::post('/plan/subscribe', [PlanController::class, 'subscribe'])->name('plan.subscribe');
     Route::post('/plan/cancel', [PlanController::class, 'cancel'])->name('plan.cancel');
@@ -84,6 +82,7 @@ Route::post('/partner/password-reset', [PartnerPasswordResetController::class, '
 Route::get('/partner/password-reset/{token}', [PartnerPasswordResetController::class, 'showResetForm'])->name('partner.password-reset.show');
 Route::post('/partner/password-reset/{token}', [PartnerPasswordResetController::class, 'reset']);
 
+// master・operator 共通
 Route::middleware(PartnerAuth::class)->prefix('partner')->group(function () {
     Route::get('/', [MasterController::class, 'index'])->name('partner.dashboard');
     Route::post('/issue', [MasterController::class, 'issueDevice'])->name('partner.issue');
@@ -111,16 +110,19 @@ Route::middleware(PartnerAuth::class)->prefix('partner')->group(function () {
     Route::put('/orgs/{id}', [MasterController::class, 'updateOrg'])->name('partner.orgs.update');
     Route::delete('/orgs/{id}', [MasterController::class, 'destroyOrg'])->name('partner.orgs.destroy');
     Route::post('/orgs/{orgId}/toggle-premium', [MasterController::class, 'toggleOrgPremium'])->name('partner.orgs.toggle-premium');
-    // ★ 課金管理
+});
+
+// ★ master 限定（課金管理）
+Route::middleware(PartnerAuth::class.':master')->prefix('partner')->group(function () {
     Route::get('/billing', [BillingController::class, 'index'])->name('partner.billing.index');
     Route::post('/billing', [BillingController::class, 'store'])->name('partner.billing.store');
     Route::put('/billing/{contract}', [BillingController::class, 'update'])->name('partner.billing.update');
     Route::post('/billing/{contract}/cancel', [BillingController::class, 'cancel'])->name('partner.billing.cancel');
     Route::post('/billing/{contract}/update-card', [BillingController::class, 'updateCard'])->name('partner.billing.update-card');
     Route::post('/billing/{contract}/charge-now', [BillingController::class, 'chargeNow'])->name('partner.billing.charge-now');
-
 });
 
+// operator 限定
 Route::middleware(PartnerAuth::class.':operator')->prefix('partner/org')->group(function () {
     Route::get('/', [OrgAdminController::class, 'index'])->name('partner.org.dashboard');
     Route::post('/devices/add', [OrgAdminController::class, 'addDevice'])->name('partner.org.devices.add');
