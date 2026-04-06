@@ -433,6 +433,7 @@
             </div>
             <div id="bulk-panel-3" class="bulk-panel modal-body">
                 <p class="bulk-section-label">デバイスの配送先をご入力ください</p>
+                <div id="bulk-preset-area" style="margin-bottom:12px;"></div>
                 <div class="bulk-form-group"><label>お名前<span class="bulk-form-required">*</span></label><input type="text" class="bulk-form-input" id="bulk-delivery-name" placeholder="山田 太郎"></div>
                 <div class="bulk-form-group"><label>郵便番号<span class="bulk-form-required">*</span></label><input type="text" class="bulk-form-input" id="bulk-delivery-postal" placeholder="000-0000" maxlength="8"></div>
                 <div class="bulk-form-group"><label>住所<span class="bulk-form-required">*</span></label><input type="text" class="bulk-form-input" id="bulk-delivery-address" placeholder="東京都千代田区〇〇 1-2-3"></div>
@@ -688,6 +689,8 @@ function showAddDeviceModal() {
     ['ai', 'sms'].forEach(function(k) { document.getElementById('bulk-opt-' + k).classList.remove('selected'); });
     ['bulk-delivery-name', 'bulk-delivery-postal', 'bulk-delivery-address', 'bulk-delivery-phone'].forEach(function(id) { document.getElementById(id).value = ''; });
     document.getElementById('bulk-loading').classList.remove('show');
+    var pa = document.getElementById('bulk-preset-area');
+    if (pa && deliveryPreset.name) { pa.innerHTML = '<button type="button" onclick="applyPreset()" style="width:100%;padding:10px 14px;font-size:13px;font-family:inherit;background:var(--beige);border:1px solid var(--gray-300);border-radius:var(--radius);cursor:pointer;text-align:left;color:var(--gray-700);">📦 前回の配送先を使用: ' + escapeHtml(deliveryPreset.name) + ' / ' + escapeHtml(deliveryPreset.postal) + '</button>'; } else if (pa) { pa.innerHTML = ''; }
     bulkUpdateStepUI();
     showModal('addDeviceModal');
 }
@@ -774,6 +777,10 @@ document.getElementById('bulk-qty-minus').addEventListener('click', function() {
 document.getElementById('bulk-qty-plus').addEventListener('click', function() { var inp = document.getElementById('bulk-qty-input'); inp.value = Math.min(300, (parseInt(inp.value) || 1) + 1); bulkSyncPresets(); });
 document.getElementById('bulk-qty-input').addEventListener('input', bulkSyncPresets);
 document.querySelectorAll('.bulk-qty-preset').forEach(function(btn) { btn.addEventListener('click', function() { document.getElementById('bulk-qty-input').value = this.dataset.val; bulkSyncPresets(); }); });
+// ===== 配送先プリセット =====
+var deliveryPreset = { name: '{{ $organization->delivery_name ?? "" }}', postal: '{{ $organization->delivery_postal ?? "" }}', address: '{{ $organization->delivery_address ?? "" }}', phone: '{{ $organization->delivery_phone ?? "" }}' };
+function applyPreset() { document.getElementById('bulk-delivery-name').value = deliveryPreset.name; document.getElementById('bulk-delivery-postal').value = deliveryPreset.postal; document.getElementById('bulk-delivery-address').value = deliveryPreset.address; document.getElementById('bulk-delivery-phone').value = deliveryPreset.phone; }
+
 function bulkSyncPresets() { var v = parseInt(document.getElementById('bulk-qty-input').value) || 0; document.querySelectorAll('.bulk-qty-preset').forEach(function(b) { b.classList.toggle('active', parseInt(b.dataset.val) === v); }); }
 bulkSyncPresets();
 
