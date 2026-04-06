@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use App\Models\Subscription;
+use App\Models\BillingContract;
+use App\Models\BillingLog;
 
 class PlanController extends Controller
 {
@@ -16,13 +18,25 @@ class PlanController extends Controller
     {
         $device = Auth::user();
         $subscription = $device->subscription;
+        $billingContract = BillingContract::where('organization_id', null)
+            ->whereHas('logs', function ($q) use ($device) {
+                // device_idで紐付けられないのでsubscriptionsのpayjp_customer_idと一致するものを探す
+            })
+            ->first();
 
-        return view('plan', compact('device', 'subscription'));
+        // subscriptionsのstripe_customer_idからBillingContractを取得
+        if ($subscription?->stripe_customer_id) {
+            $billingContract = BillingContract::where('payjp_customer_id', $subscription->stripe_customer_id)->first();
+        } else {
+            $billingContract = null;
+        }
+
+        return view('plan', compact('device', 'subscription', 'billingContract'));
     }
 
     // ============================================================
-    // プレミアム購読開始
-    // フロント: payjp.js でカードトークン取得 → POST
+    // プレミアム購読開始（B2C）
+    // 初月即時課金 → BillingContract作成 → 翌月以降はJobが実行
     // ============================================================
     public function subscribe(Request $request)
     {
@@ -40,35 +54,64 @@ class PlanController extends Controller
 
         try {
             $subscription = $device->subscription;
+            $amount = 500; // B2Cはプレミアムオプション¥500固定
 
             // Customer 作成 or 既存取得
-            if ($subscription && $subscription->stripe_customer_id) {
+            if ($subscription?->stripe_customer_id) {
                 $customer = \Payjp\Customer::retrieve($subscription->stripe_customer_id);
                 $customer->cards->create(['card' => $request->payjp_token]);
             } else {
                 $customer = \Payjp\Customer::create([
                     'card'        => $request->payjp_token,
-                    'description' => $device->device_id,
+                    'description' => 'みまもりデバイス - ' . $device->device_id,
                     'metadata'    => ['device_id' => $device->device_id],
                 ]);
             }
 
-            // Subscription 作成
-            $payjpSub = \Payjp\Subscription::create([
-                'customer' => $customer->id,
-                'plan'     => config('services.payjp.plan_id_monthly'),
+            // 初月即時課金
+            $charge = \Payjp\Charge::create([
+                'amount'      => $amount,
+                'currency'    => 'jpy',
+                'customer'    => $customer->id,
+                'description' => 'みまもりデバイス プレミアムプラン（初月）',
             ]);
 
-            // DB 更新
+            // BillingContract 作成（翌月以降の自動課金用）
+            $contract = BillingContract::updateOrCreate(
+                ['payjp_customer_id' => $customer->id],
+                [
+                    'organization_id'      => null,
+                    'device_count'         => 0,
+                    'premium_device_count' => 1,
+                    'unit_price'           => 1000,
+                    'premium_unit_price'   => 500,
+                    'amount'               => $amount,
+                    'status'               => 'active',
+                    'next_billing_date'    => now()->addMonth()->startOfMonth()->toDateString(),
+                ]
+            );
+
+            // 課金ログ
+            BillingLog::create([
+                'billing_contract_id'  => $contract->id,
+                'amount'               => $amount,
+                'device_count'         => 0,
+                'premium_device_count' => 1,
+                'payjp_charge_id'      => $charge->id,
+                'status'               => 'success',
+                'billed_at'            => now(),
+            ]);
+
+            // Subscriptions テーブル更新（プレミアム状態管理）
             Subscription::updateOrCreate(
                 ['device_id' => $device->id],
                 [
                     'plan'                   => 'premium',
                     'billing_cycle'          => 'monthly',
                     'stripe_customer_id'     => $customer->id,
-                    'stripe_subscription_id' => $payjpSub->id,
+                    'stripe_subscription_id' => null,
                     'current_period_start'   => now()->toDateString(),
-                    'current_period_end'     => now()->addMonth()->toDateString(),
+                    'current_period_end'     => now()->addMonth()->startOfMonth()->toDateString(),
                     'status'                 => 'active',
                     'canceled_at'            => null,
                 ]
@@ -76,19 +119,19 @@ class PlanController extends Controller
 
             $device->update(['premium_enabled' => true]);
 
-            return response()->json(['ok' => true, 'message' => 'プレミアムプランを開始しました']);
+            return response()->json([
+                'ok'      => true,
+                'message' => 'プレミアムプランを開始しました（¥500を課金しました）',
+            ]);
 
-        } catch (\Payjp\Error\Card $e) {
-            Log::error('Payjp card error: ' . $e->getMessage());
-            return response()->json(['ok' => false, 'message' => 'カードエラー: ' . $e->getMessage()], 422);
         } catch (\Exception $e) {
-            Log::error('Payjp subscribe error: ' . $e->getMessage());
-            return response()->json(['ok' => false, 'message' => '決済処理に失敗しました'], 500);
+            Log::error('PlanController subscribe error: ' . $e->getMessage());
+            return response()->json(['ok' => false, 'message' => '決済処理に失敗しました: ' . $e->getMessage()], 500);
         }
     }
 
     // ============================================================
-    // 解約（期間終了まで有効）
+    // 解約（当月末まで有効）
     // ============================================================
     public function cancel(Request $request)
     {
@@ -99,33 +142,41 @@ class PlanController extends Controller
             return response()->json(['ok' => false, 'message' => 'プレミアムプランではありません'], 422);
         }
 
-        \Payjp\Payjp::setApiKey(config('services.payjp.secret_key'));
-
         try {
-            if ($subscription->stripe_subscription_id) {
-                $payjpSub = \Payjp\Subscription::retrieve($subscription->stripe_subscription_id);
-                $payjpSub->cancel(['prorate' => false]);
+            // BillingContractをキャンセル
+            if ($subscription->stripe_customer_id) {
+                $contract = BillingContract::where('payjp_customer_id', $subscription->stripe_customer_id)->first();
+                $contract?->update([
+                    'status'      => 'canceled',
+                    'canceled_at' => now(),
+                ]);
             }
 
+            // Subscriptionをキャンセル（当月末まで有効）
             $subscription->update([
                 'status'      => 'canceled',
                 'canceled_at' => now(),
             ]);
 
+            // premium_enabled は current_period_end まで true のまま
+            // MonthlyBillingJob はキャンセル済みなのでスキップされる
+
+            $endDate = $subscription->current_period_end?->format('Y年n月j日') ?? '今月末';
+
             return response()->json([
                 'ok'      => true,
-                'message' => '解約しました。' . $subscription->current_period_end->format('Y年n月j日') . 'まで引き続きご利用いただけます。',
-                'end_date' => $subscription->current_period_end->format('Y年n月j日'),
+                'message' => '解約しました。' . $endDate . 'まで引き続きご利用いただけます。',
+                'end_date' => $endDate,
             ]);
 
         } catch (\Exception $e) {
-            Log::error('Payjp cancel error: ' . $e->getMessage());
+            Log::error('PlanController cancel error: ' . $e->getMessage());
             return response()->json(['ok' => false, 'message' => '解約処理に失敗しました'], 500);
         }
     }
 
     // ============================================================
-    // Pay.jp Webhook 受信
+    // Pay.jp Webhook 受信（charge.failed のみ対応）
     // ============================================================
     public function webhook(Request $request)
     {
@@ -146,66 +197,19 @@ class PlanController extends Controller
 
         Log::info('Payjp webhook: ' . $type);
 
-        switch ($type) {
-            case 'charge.succeeded':
-                $this->handleChargeSucceeded($event);
-                break;
-            case 'charge.failed':
-                $this->handleChargeFailed($event);
-                break;
-            case 'customer.subscription.updated':
-                $this->handleSubscriptionUpdated($event);
-                break;
-            case 'customer.subscription.deleted':
-                $this->handleSubscriptionDeleted($event);
-                break;
+        if ($type === 'charge.failed') {
+            $customerId = $event['data']['object']['customer'] ?? null;
+            if ($customerId) {
+                $contract = BillingContract::where('payjp_customer_id', $customerId)->first();
+                $contract?->update(['status' => 'past_due']);
+
+                $sub = Subscription::where('stripe_customer_id', $customerId)->first();
+                $sub?->update(['status' => 'past_due']);
+
+                Log::warning('Payjp charge failed for customer: ' . $customerId);
+            }
         }
 
         return response('OK', 200);
-    }
-
-    private function handleChargeSucceeded(array $event): void
-    {
-        $customerId = $event['data']['object']['customer'] ?? null;
-        if (!$customerId) return;
-        $sub = Subscription::where('stripe_customer_id', $customerId)->first();
-        if (!$sub) return;
-        $sub->update(['status' => 'active']);
-        $sub->device->update(['premium_enabled' => true]);
-    }
-
-    private function handleChargeFailed(array $event): void
-    {
-        $customerId = $event['data']['object']['customer'] ?? null;
-        if (!$customerId) return;
-        $sub = Subscription::where('stripe_customer_id', $customerId)->first();
-        if (!$sub) return;
-        $sub->update(['status' => 'past_due']);
-        Log::warning('Payjp charge failed for customer: ' . $customerId);
-    }
-
-    private function handleSubscriptionUpdated(array $event): void
-    {
-        $payjpSubId = $event['data']['object']['id'] ?? null;
-        if (!$payjpSubId) return;
-        $sub = Subscription::where('stripe_subscription_id', $payjpSubId)->first();
-        if (!$sub) return;
-        $periodEnd = isset($event['data']['object']['current_period_end'])
-            ? date('Y-m-d', $event['data']['object']['current_period_end'])
-            : null;
-        $sub->update([
-            'status'             => 'active',
-            'current_period_end' => $periodEnd ?? $sub->current_period_end,
-        ]);
-    }
-
-    private function handleSubscriptionDeleted(array $event): void
-    {
-        $payjpSubId = $event['data']['object']['id'] ?? null;
-        if (!$payjpSubId) return;
-        $sub = Subscription::where('stripe_subscription_id', $payjpSubId)->first();
-        if (!$sub) return;
-        $sub->update(['status' => 'canceled']);
-        $sub->device->update(['premium_enabled' => false]);
     }
 }

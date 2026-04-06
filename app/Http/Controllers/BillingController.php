@@ -5,13 +5,13 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use App\Models\BillingContract;
+use App\Models\BillingLog;
 use App\Models\Organization;
 
 class BillingController extends Controller
 {
     /**
-     * 課金管理画面（組織一覧）
-     * partner管理者向け
+     * 課金管理画面
      */
     public function index()
     {
@@ -23,7 +23,7 @@ class BillingController extends Controller
     }
 
     /**
-     * カード登録 + 契約作成
+     * カード登録 + 契約作成 + 初月即時課金
      */
     public function store(Request $request)
     {
@@ -41,12 +41,26 @@ class BillingController extends Controller
                 ? Organization::find($request->organization_id)?->name
                 : 'individual';
 
+            // Customer 作成
             $customer = \Payjp\Customer::create([
                 'card'        => $request->payjp_token,
                 'description' => 'みまもりデバイス - ' . $orgName,
                 'metadata'    => ['organization_id' => $request->organization_id ?? 'none'],
             ]);
 
+            // 金額計算
+            $amount = ($request->device_count * 1000)
+                    + ($request->premium_device_count * 500);
+
+            // 初月即時課金
+            $charge = \Payjp\Charge::create([
+                'amount'      => $amount,
+                'currency'    => 'jpy',
+                'customer'    => $customer->id,
+                'description' => "みまもりデバイス 月額利用料（初月）- {$orgName} 本体{$request->device_count}台 プレミアム{$request->premium_device_count}台",
+            ]);
+
+            // BillingContract 作成
             $contract = BillingContract::create([
                 'organization_id'      => $request->organization_id,
                 'payjp_customer_id'    => $customer->id,
@@ -54,17 +68,26 @@ class BillingController extends Controller
                 'premium_device_count' => $request->premium_device_count,
                 'unit_price'           => 1000,
                 'premium_unit_price'   => 500,
-                'amount'               => 0,
+                'amount'               => $amount,
                 'status'               => 'active',
                 'next_billing_date'    => now()->addMonth()->startOfMonth()->toDateString(),
             ]);
 
-            $contract->recalculate();
+            // 課金ログ
+            BillingLog::create([
+                'billing_contract_id'  => $contract->id,
+                'amount'               => $amount,
+                'device_count'         => $request->device_count,
+                'premium_device_count' => $request->premium_device_count,
+                'payjp_charge_id'      => $charge->id,
+                'status'               => 'success',
+                'billed_at'            => now(),
+            ]);
 
             return response()->json([
                 'ok'      => true,
-                'message' => '契約を登録しました',
-                'amount'  => $contract->amount,
+                'message' => '契約を登録しました（初月 ¥' . number_format($amount) . ' を課金しました）',
+                'amount'  => $amount,
             ]);
 
         } catch (\Exception $e) {
@@ -131,7 +154,7 @@ class BillingController extends Controller
     }
 
     /**
-     * 即時課金（テスト用）
+     * 即時課金（テスト・手動実行用）
      */
     public function chargeNow(BillingContract $contract)
     {
