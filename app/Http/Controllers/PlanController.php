@@ -28,7 +28,6 @@ class PlanController extends Controller
     {
         $request->validate([
             'payjp_token' => 'required|string',
-            'billing_cycle' => 'required|in:monthly,yearly',
         ]);
 
         $device = Auth::user();
@@ -45,7 +44,6 @@ class PlanController extends Controller
             // Customer 作成 or 既存取得
             if ($subscription && $subscription->stripe_customer_id) {
                 $customer = \Payjp\Customer::retrieve($subscription->stripe_customer_id);
-                // カード更新
                 $customer->cards->create(['card' => $request->payjp_token]);
             } else {
                 $customer = \Payjp\Customer::create([
@@ -55,32 +53,22 @@ class PlanController extends Controller
                 ]);
             }
 
-            // Plan ID を取得
-            $planId = $request->billing_cycle === 'yearly'
-                ? config('services.payjp.plan_id_yearly')
-                : config('services.payjp.plan_id_monthly');
-
             // Subscription 作成
             $payjpSub = \Payjp\Subscription::create([
                 'customer' => $customer->id,
-                'plan'     => $planId,
+                'plan'     => config('services.payjp.plan_id_monthly'),
             ]);
 
             // DB 更新
-            $periodStart = now();
-            $periodEnd   = $request->billing_cycle === 'yearly'
-                ? now()->addYear()
-                : now()->addMonth();
-
             Subscription::updateOrCreate(
                 ['device_id' => $device->id],
                 [
                     'plan'                   => 'premium',
-                    'billing_cycle'          => $request->billing_cycle,
+                    'billing_cycle'          => 'monthly',
                     'stripe_customer_id'     => $customer->id,
                     'stripe_subscription_id' => $payjpSub->id,
-                    'current_period_start'   => $periodStart->toDateString(),
-                    'current_period_end'     => $periodEnd->toDateString(),
+                    'current_period_start'   => now()->toDateString(),
+                    'current_period_end'     => now()->addMonth()->toDateString(),
                     'status'                 => 'active',
                     'canceled_at'            => null,
                 ]
@@ -122,11 +110,7 @@ class PlanController extends Controller
             $subscription->update([
                 'status'      => 'canceled',
                 'canceled_at' => now(),
-                // current_period_end はそのまま（期間終了まで有効）
             ]);
-
-            // premium_enabled は期間終了まで true のまま
-            // Webhook の customer.subscription.deleted で false にする
 
             return response()->json([
                 'ok'      => true,
@@ -142,7 +126,6 @@ class PlanController extends Controller
 
     // ============================================================
     // Pay.jp Webhook 受信
-    // routes/web.php で VerifyCsrfToken 除外必須
     // ============================================================
     public function webhook(Request $request)
     {
@@ -150,7 +133,6 @@ class PlanController extends Controller
         $sig     = $request->header('X-Payjp-Signature');
         $secret  = config('services.payjp.webhook_secret');
 
-        // 署名検証
         if ($secret) {
             $expected = hash_hmac('sha256', $payload, $secret);
             if (!hash_equals($expected, $sig ?? '')) {
@@ -165,22 +147,15 @@ class PlanController extends Controller
         Log::info('Payjp webhook: ' . $type);
 
         switch ($type) {
-            // 支払い成功
             case 'charge.succeeded':
                 $this->handleChargeSucceeded($event);
                 break;
-
-            // 支払い失敗
             case 'charge.failed':
                 $this->handleChargeFailed($event);
                 break;
-
-            // サブスクリプション更新（期間延長）
             case 'customer.subscription.updated':
                 $this->handleSubscriptionUpdated($event);
                 break;
-
-            // サブスクリプション削除（解約確定）
             case 'customer.subscription.deleted':
                 $this->handleSubscriptionDeleted($event);
                 break;
@@ -189,18 +164,12 @@ class PlanController extends Controller
         return response('OK', 200);
     }
 
-    // --------------------------------------------------------
-    // Webhook ハンドラ
-    // --------------------------------------------------------
-
     private function handleChargeSucceeded(array $event): void
     {
         $customerId = $event['data']['object']['customer'] ?? null;
         if (!$customerId) return;
-
         $sub = Subscription::where('stripe_customer_id', $customerId)->first();
         if (!$sub) return;
-
         $sub->update(['status' => 'active']);
         $sub->device->update(['premium_enabled' => true]);
     }
@@ -209,10 +178,8 @@ class PlanController extends Controller
     {
         $customerId = $event['data']['object']['customer'] ?? null;
         if (!$customerId) return;
-
         $sub = Subscription::where('stripe_customer_id', $customerId)->first();
         if (!$sub) return;
-
         $sub->update(['status' => 'past_due']);
         Log::warning('Payjp charge failed for customer: ' . $customerId);
     }
@@ -221,17 +188,14 @@ class PlanController extends Controller
     {
         $payjpSubId = $event['data']['object']['id'] ?? null;
         if (!$payjpSubId) return;
-
         $sub = Subscription::where('stripe_subscription_id', $payjpSubId)->first();
         if (!$sub) return;
-
         $periodEnd = isset($event['data']['object']['current_period_end'])
             ? date('Y-m-d', $event['data']['object']['current_period_end'])
             : null;
-
         $sub->update([
-            'status'               => 'active',
-            'current_period_end'   => $periodEnd ?? $sub->current_period_end,
+            'status'             => 'active',
+            'current_period_end' => $periodEnd ?? $sub->current_period_end,
         ]);
     }
 
@@ -239,10 +203,8 @@ class PlanController extends Controller
     {
         $payjpSubId = $event['data']['object']['id'] ?? null;
         if (!$payjpSubId) return;
-
         $sub = Subscription::where('stripe_subscription_id', $payjpSubId)->first();
         if (!$sub) return;
-
         $sub->update(['status' => 'canceled']);
         $sub->device->update(['premium_enabled' => false]);
     }

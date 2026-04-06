@@ -38,25 +38,19 @@
     }
     .section-title span { font-size: 18px; }
 
-    /* 現在のプランバナー */
     .plan-banner {
         border-radius: var(--radius-lg); padding: 24px;
         margin-bottom: 20px; text-align: center;
     }
-    .plan-banner.free {
-        background: var(--beige); border: 2px solid var(--gray-300);
-    }
+    .plan-banner.free { background: var(--beige); border: 2px solid var(--gray-300); }
     .plan-banner.premium {
         background: linear-gradient(135deg, #667eea15, #764ba215);
         border: 2px solid #667eea;
     }
-    .plan-banner.canceled {
-        background: #fff8f0; border: 2px solid #f59e0b;
-    }
+    .plan-banner.canceled { background: #fff8f0; border: 2px solid #f59e0b; }
     .plan-badge {
         display: inline-block; padding: 6px 16px;
-        font-size: 13px; font-weight: 700;
-        border-radius: 20px; margin-bottom: 12px;
+        font-size: 13px; font-weight: 700; border-radius: 20px; margin-bottom: 12px;
     }
     .plan-badge.free { background: var(--gray-200); color: var(--gray-600); }
     .plan-badge.premium { background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; }
@@ -69,34 +63,16 @@
         font-size: 13px; color: #92400e; font-weight: 500;
     }
 
-    /* プラン比較 */
-    .plan-compare { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
-    .plan-card {
-        border-radius: var(--radius-lg); padding: 20px;
-        border: 2px solid var(--gray-200); transition: all 0.2s;
-        cursor: pointer; position: relative; overflow: hidden;
+    .price-box {
+        background: var(--beige); border-radius: var(--radius-lg);
+        padding: 20px; margin-bottom: 20px; text-align: center;
+        border: 2px solid #667eea;
     }
-    .plan-card.selected { border-color: #667eea; }
-    .plan-card.current-plan { border-color: var(--green); cursor: default; }
-    .plan-card-check {
-        position: absolute; top: 12px; right: 12px;
-        width: 22px; height: 22px; border-radius: 50%;
-        background: var(--gray-200); display: flex;
-        align-items: center; justify-content: center;
-        font-size: 12px; transition: all 0.2s;
-    }
-    .plan-card.selected .plan-card-check { background: #667eea; color: #fff; }
-    .plan-card-name { font-size: 13px; font-weight: 600; color: var(--gray-500); margin-bottom: 4px; }
-    .plan-card-price { font-size: 28px; font-weight: 700; color: var(--gray-800); }
-    .plan-card-price span { font-size: 14px; font-weight: 500; color: var(--gray-500); }
-    .plan-card-note { font-size: 11px; color: var(--gray-500); margin-top: 4px; }
-    .plan-card-badge {
-        position: absolute; top: 12px; left: 12px;
-        padding: 3px 8px; background: #22c55e; color: #fff;
-        font-size: 10px; font-weight: 700; border-radius: 4px;
-    }
+    .price-box-label { font-size: 13px; font-weight: 600; color: var(--gray-500); margin-bottom: 6px; }
+    .price-box-price { font-size: 36px; font-weight: 700; color: var(--gray-800); }
+    .price-box-price span { font-size: 16px; font-weight: 500; color: var(--gray-500); }
+    .price-box-note { font-size: 12px; color: var(--gray-500); margin-top: 4px; }
 
-    /* プレミアム機能リスト */
     .feature-list { list-style: none; padding: 0; margin: 0; }
     .feature-list li {
         display: flex; align-items: flex-start; gap: 10px;
@@ -107,15 +83,11 @@
     .feature-list .check { color: #667eea; font-size: 16px; flex-shrink: 0; margin-top: 1px; }
     .feature-list .free-check { color: var(--green); font-size: 16px; flex-shrink: 0; margin-top: 1px; }
 
-    /* カード入力フォーム */
     .card-form { margin-top: 20px; }
     .form-label { display: block; font-size: 13px; font-weight: 600; color: var(--gray-700); margin-bottom: 8px; }
     .payjp-element {
-        padding: 14px 16px;
-        border: 1px solid var(--gray-300);
-        border-radius: var(--radius);
-        background: var(--cream);
-        min-height: 48px;
+        padding: 14px 16px; border: 1px solid var(--gray-300);
+        border-radius: var(--radius); background: var(--cream); min-height: 48px;
     }
     .payjp-element.focused { border-color: var(--gray-500); background: var(--white); }
 
@@ -151,24 +123,16 @@
 
     .secure-note {
         display: flex; align-items: center; gap: 6px;
-        font-size: 12px; color: var(--gray-500); margin-top: 10px;
-        justify-content: center;
+        font-size: 12px; color: var(--gray-500); margin-top: 10px; justify-content: center;
     }
     .error-msg {
         padding: 12px 16px; background: #fee2e2;
         border-radius: var(--radius); font-size: 13px; color: #991b1b;
         margin-top: 12px; display: none;
     }
-
-    /* 解約済み後の案内 */
     .info-box {
         padding: 14px 16px; background: var(--blue-light);
         border-radius: var(--radius); font-size: 13px; color: var(--gray-700); line-height: 1.7;
-    }
-
-    @media (max-width: 480px) {
-        .plan-compare { grid-template-columns: 1fr; gap: 12px; }
-        .plan-card-price { font-size: 24px; }
     }
 </style>
 @endsection
@@ -176,39 +140,30 @@
 @section('content')
 <div class="container">
 
-    {{-- 現在のプラン状態 --}}
     @php
         $isPremium = $device->premium_enabled;
         $isCanceled = $subscription && $subscription->status === 'canceled';
     @endphp
 
+    {{-- 現在のプランバナー --}}
     @if($isPremium && !$isCanceled)
-    {{-- ✅ プレミアム有効 --}}
     <div class="plan-banner premium">
         <span class="plan-badge premium">Premium</span>
         <p class="plan-name">プレミアムプラン</p>
-        <p class="plan-sub">
-            {{ $subscription?->billing_cycle === 'yearly' ? '年払い（¥3,000/年）' : '月払い（¥500/月）' }}
-        </p>
+        <p class="plan-sub">月払い（¥500/月）</p>
         @if($subscription?->current_period_end)
-        <p class="plan-sub" style="margin-top:6px;">
-            次回更新: {{ $subscription->current_period_end->format('Y年n月j日') }}
-        </p>
+        <p class="plan-sub" style="margin-top:6px;">次回更新: {{ $subscription->current_period_end->format('Y年n月j日') }}</p>
         @endif
     </div>
 
     @elseif($isCanceled)
-    {{-- ⚠️ 解約済み（期間内） --}}
     <div class="plan-banner canceled">
         <span class="plan-badge canceled">解約済み</span>
         <p class="plan-name">プレミアムプラン（解約済み）</p>
-        <p class="plan-end-date">
-            📅 {{ $subscription->current_period_end->format('Y年n月j日') }} まで引き続きご利用いただけます
-        </p>
+        <p class="plan-end-date">📅 {{ $subscription->current_period_end->format('Y年n月j日') }} まで引き続きご利用いただけます</p>
     </div>
 
     @else
-    {{-- 無料プラン --}}
     <div class="plan-banner free">
         <span class="plan-badge free">無料プラン</span>
         <p class="plan-name">無料プラン</p>
@@ -220,74 +175,39 @@
     <section class="section">
         <h2 class="section-title"><span>✨</span>プレミアム機能</h2>
         <ul class="feature-list">
-            <li>
-                <span class="free-check">✓</span>
-                <div><strong>メール通知</strong>（無料プランでも利用可）</div>
-            </li>
-            <li>
-                <span class="free-check">✓</span>
-                <div><strong>Webプッシュ通知</strong>（無料プランでも利用可）</div>
-            </li>
-            <li>
-                <span class="check">✦</span>
-                <div><strong>SMS通知</strong> — 電波があればどこでも受信できる確実な通知</div>
-            </li>
-            <li>
-                <span class="check">✦</span>
-                <div><strong>電話通知（AIコール）</strong> — 固定電話にも対応。最も確実な通知手段</div>
-            </li>
-            <li>
-                <span class="check">✦</span>
-                <div><strong>検知ログ1年保存</strong>（無料プランは90日）</div>
-            </li>
+            <li><span class="free-check">✓</span><div><strong>メール通知</strong>（無料プランでも利用可）</div></li>
+            <li><span class="free-check">✓</span><div><strong>Webプッシュ通知</strong>（無料プランでも利用可）</div></li>
+            <li><span class="check">✦</span><div><strong>SMS通知</strong> — 電波があればどこでも受信できる確実な通知</div></li>
+            <li><span class="check">✦</span><div><strong>電話通知（AIコール）</strong> — 固定電話にも対応。最も確実な通知手段</div></li>
+            <li><span class="check">✦</span><div><strong>検知ログ1年保存</strong>（無料プランは90日）</div></li>
         </ul>
     </section>
 
     @if(!$isPremium || $isCanceled)
-    {{-- プラン選択 + 購読フォーム（未加入 or 解約済みの場合） --}}
-    @if($isCanceled)
+    {{-- 購読フォーム --}}
     <section class="section">
-        <h2 class="section-title"><span>🔄</span>プレミアムを再開</h2>
-    @else
-    <section class="section">
-        <h2 class="section-title"><span>🚀</span>プレミアムにアップグレード</h2>
-    @endif
+        <h2 class="section-title"><span>{{ $isCanceled ? '🔄' : '🚀' }}</span>{{ $isCanceled ? 'プレミアムを再開' : 'プレミアムにアップグレード' }}</h2>
 
-        {{-- 料金選択 --}}
-        <div class="plan-compare">
-            <div class="plan-card selected" id="cardMonthly" onclick="selectCycle('monthly')">
-                <div class="plan-card-check">✓</div>
-                <p class="plan-card-name">月払い</p>
-                <p class="plan-card-price">¥500<span>/月</span></p>
-                <p class="plan-card-note">いつでも解約可能</p>
-            </div>
-            <div class="plan-card" id="cardYearly" onclick="selectCycle('yearly')">
-                <div class="plan-card-badge">2ヶ月分お得</div>
-                <div class="plan-card-check"></div>
-                <p class="plan-card-name">年払い</p>
-                <p class="plan-card-price">¥3,000<span>/年</span></p>
-                <p class="plan-card-note">¥250/月相当</p>
-            </div>
+        <div class="price-box">
+            <p class="price-box-label">プレミアムプラン</p>
+            <p class="price-box-price">¥500<span>/月</span></p>
+            <p class="price-box-note">いつでも解約可能</p>
         </div>
 
-        {{-- カード入力 --}}
         <div class="card-form">
             <label class="form-label">クレジットカード</label>
             <div id="payjp-card-element" class="payjp-element"></div>
-
             <div class="error-msg" id="card-error"></div>
-
             <button class="btn-primary" id="subscribeBtn" style="margin-top:16px;" onclick="startSubscribe()">
                 <span class="spinner"></span>
-                <span class="btn-text">プレミアムを開始する</span>
+                <span class="btn-text">月額¥500で開始する</span>
             </button>
-
             <p class="secure-note">🔒 カード情報はPay.jpで安全に処理されます。当サービスのサーバーには保存されません。</p>
         </div>
     </section>
 
     @else
-    {{-- プレミアム有効 → 解約ボタン --}}
+    {{-- 解約ボタン --}}
     <section class="section">
         <h2 class="section-title"><span>⚙️</span>プランの管理</h2>
         <div class="info-box" style="margin-bottom:16px;">
@@ -310,10 +230,8 @@ const headers = {
     'Accept': 'application/json',
 };
 
-let selectedCycle = 'monthly';
 let payjp, elements, cardElement;
 
-// payjp.js 初期化（購読フォームが表示される場合のみ）
 @if(!$isPremium || ($subscription && $subscription->status === 'canceled'))
 window.addEventListener('load', function() {
     payjp = Payjp('{{ config("services.payjp.public_key") }}');
@@ -335,26 +253,14 @@ window.addEventListener('load', function() {
 });
 @endif
 
-// 支払いサイクル選択
-function selectCycle(cycle) {
-    selectedCycle = cycle;
-    document.getElementById('cardMonthly').classList.toggle('selected', cycle === 'monthly');
-    document.getElementById('cardYearly').classList.toggle('selected', cycle === 'yearly');
-    document.getElementById('cardMonthly').querySelector('.plan-card-check').textContent = cycle === 'monthly' ? '✓' : '';
-    document.getElementById('cardYearly').querySelector('.plan-card-check').textContent = cycle === 'yearly' ? '✓' : '';
-}
-
-// 購読開始
 async function startSubscribe() {
     const btn = document.getElementById('subscribeBtn');
     const errEl = document.getElementById('card-error');
     errEl.style.display = 'none';
-
     btn.classList.add('loading');
     btn.disabled = true;
 
     try {
-        // トークン取得
         const result = await payjp.createToken(cardElement);
         if (result.error) {
             errEl.textContent = result.error.message;
@@ -364,14 +270,10 @@ async function startSubscribe() {
             return;
         }
 
-        // バックエンドへ
         const res = await fetch('/plan/subscribe', {
             method: 'POST',
             headers: headers,
-            body: JSON.stringify({
-                payjp_token: result.id,
-                billing_cycle: selectedCycle,
-            }),
+            body: JSON.stringify({ payjp_token: result.id }),
         });
         const data = await res.json();
 
@@ -392,7 +294,6 @@ async function startSubscribe() {
     }
 }
 
-// 解約
 async function cancelPlan() {
     if (!confirm('プレミアムプランを解約しますか？\n期間終了日まで引き続きご利用いただけます。')) return;
 
@@ -401,11 +302,8 @@ async function cancelPlan() {
         headers: headers,
     });
     const data = await res.json();
-
     showToast(data.message || (data.ok ? '解約しました' : '解約に失敗しました'));
-    if (data.ok) {
-        setTimeout(() => location.reload(), 1500);
-    }
+    if (data.ok) setTimeout(() => location.reload(), 1500);
 }
 </script>
 @endsection
