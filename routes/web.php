@@ -141,4 +141,5 @@ Route::middleware(PartnerAuth::class.':operator')->prefix('partner/org')->group(
 
     Route::get('/notification', [OrgAdminController::class, 'getNotification'])->name('partner.org.notification');
     Route::post('/notification', [OrgAdminController::class, 'updateNotification'])->name('partner.org.notification.update');
+    Route::get('/card-info', [OrgAdminController::class, 'getCardInfo'])->name('partner.org.card-info'); // ★ 追加
 });

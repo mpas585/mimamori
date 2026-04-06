@@ -536,6 +536,43 @@ class OrgAdminController extends Controller
     }
 
     // ============================================================
+    // 登録カード情報取得（ステップ4の確認画面で表示）
+    // ============================================================
+
+    public function getCardInfo()
+    {
+        $organization = $this->getOrganization();
+
+        $contract = BillingContract::where('organization_id', $organization->id)
+            ->where('status', 'active')
+            ->first();
+
+        if (!$contract || !$contract->payjp_customer_id) {
+            return response()->json(['found' => false]);
+        }
+
+        try {
+            \Payjp\Payjp::setApiKey(config('services.payjp.secret_key'));
+            $customer = \Payjp\Customer::retrieve($contract->payjp_customer_id);
+            $card     = $customer->cards->data[0] ?? null;
+
+            if (!$card) {
+                return response()->json(['found' => false]);
+            }
+
+            return response()->json([
+                'found' => true,
+                'brand' => $card->brand,
+                'last4' => $card->last4,
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('getCardInfo error: ' . $e->getMessage());
+            return response()->json(['found' => false]);
+        }
+    }
+
+    // ============================================================
     // デバイス新規お申込み（4ステップ → 決済）
     // ============================================================
 
