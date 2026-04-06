@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\DeviceLoginController;
@@ -15,6 +15,7 @@ use App\Http\Controllers\Partner\MasterController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\Partner\OrgAdminController;
 use App\Http\Middleware\PartnerAuth;
+use App\Http\Controllers\PlanController; // ★ 追加
 
 // ============================================================
 // ユーザー画面
@@ -42,6 +43,9 @@ Route::get('/terms', function () { return view('terms'); })->name('terms');
 Route::get('/contact', [ContactController::class, 'index'])->name('contact');
 Route::post('/contact', [ContactController::class, 'send'])->middleware('throttle:5,1');
 
+// ★ Pay.jp Webhook（CSRF除外 → bootstrap/app.php の withMiddleware で除外すること）
+Route::post('/webhook/payjp', [PlanController::class, 'webhook'])->name('webhook.payjp');
+
 Route::middleware('auth')->group(function () {
     Route::get('/', function () { return redirect('/mypage'); });
     Route::get('/mypage', [MypageController::class, 'index'])->name('mypage');
@@ -60,6 +64,11 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/logs', [LogController::class, 'index'])->name('logs');
     Route::apiResource('schedules', ScheduleController::class)->except(['show']);
+
+    // ★ プランページ
+    Route::get('/plan', [PlanController::class, 'index'])->name('plan');
+    Route::post('/plan/subscribe', [PlanController::class, 'subscribe'])->name('plan.subscribe');
+    Route::post('/plan/cancel', [PlanController::class, 'cancel'])->name('plan.cancel');
 });
 
 // ============================================================
@@ -84,7 +93,6 @@ Route::middleware(PartnerAuth::class)->prefix('partner')->group(function () {
     Route::post('/password-change', [PartnerPasswordController::class, 'update'])->name('partner.password-change.update');
     Route::post('/email-change', [PartnerPasswordController::class, 'updateEmail'])->name('partner.email-change');
 
-    // デバイス操作（マスター用）
     Route::get('/devices/{deviceId}/detail', [MasterController::class, 'deviceDetail'])->name('partner.devices.detail');
     Route::put('/devices/{deviceId}/assignment', [MasterController::class, 'updateDeviceAssignment'])->name('partner.devices.update-assignment');
     Route::post('/devices/{deviceId}/notification', [MasterController::class, 'updateDeviceNotification'])->name('partner.devices.update-notification');
@@ -94,12 +102,10 @@ Route::middleware(PartnerAuth::class)->prefix('partner')->group(function () {
     Route::post('/devices/{deviceId}/schedules', [MasterController::class, 'storeDeviceSchedule'])->name('partner.devices.schedules.store');
     Route::delete('/devices/{deviceId}/schedules/{scheduleId}', [MasterController::class, 'destroyDeviceSchedule'])->name('partner.devices.schedules.destroy');
 
-    // 管理者アカウント管理
     Route::post('/admin-users', [MasterController::class, 'storeAdminUser'])->name('partner.admin-users.store');
     Route::put('/admin-users/{id}', [MasterController::class, 'updateAdminUser'])->name('partner.admin-users.update');
     Route::delete('/admin-users/{id}', [MasterController::class, 'destroyAdminUser'])->name('partner.admin-users.destroy');
 
-    // 組織管理
     Route::post('/orgs', [MasterController::class, 'storeOrg'])->name('partner.orgs.store');
     Route::put('/orgs/{id}', [MasterController::class, 'updateOrg'])->name('partner.orgs.update');
     Route::delete('/orgs/{id}', [MasterController::class, 'destroyOrg'])->name('partner.orgs.destroy');
@@ -125,5 +131,3 @@ Route::middleware(PartnerAuth::class.':operator')->prefix('partner/org')->group(
     Route::get('/notification', [OrgAdminController::class, 'getNotification'])->name('partner.org.notification');
     Route::post('/notification', [OrgAdminController::class, 'updateNotification'])->name('partner.org.notification.update');
 });
-
-

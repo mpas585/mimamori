@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 
 namespace App\Http\Controllers;
 
@@ -66,6 +66,21 @@ class SettingsController extends Controller
     {
         $device = Auth::user();
         $notif = $device->notificationSetting ?? NotificationSetting::create(['device_id' => $device->id]);
+
+        // ★ プレミアムガード
+        $premiumFields = ['sms_enabled', 'sms_phone_1', 'sms_phone_2', 'voice_enabled', 'voice_phone_1', 'voice_phone_2'];
+        $hasPremiumField = collect($premiumFields)->some(fn($f) => $request->has($f));
+
+        if ($hasPremiumField && !$device->premium_enabled) {
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'ok'      => false,
+                    'message' => 'プレミアムプランが必要です',
+                    'upgrade' => true,
+                ], 403);
+            }
+            return redirect('/plan')->with('error', 'SMS・電話通知はプレミアムプランで利用できます');
+        }
 
         $rules = [];
         $data = [];
@@ -140,7 +155,8 @@ class SettingsController extends Controller
             }
         }
 
-        if ($notif && $notif->sms_enabled && $notif->sms_phone_1) {
+        // ★ プレミアムの場合のみSMS送信
+        if ($device->premium_enabled && $notif && $notif->sms_enabled && $notif->sms_phone_1) {
             try {
                 $twilio = new TwilioClient(config('services.twilio.sid'), config('services.twilio.token'));
                 $name = $device->nickname ?: $device->device_id;
@@ -172,5 +188,3 @@ class SettingsController extends Controller
         return redirect('/settings')->with('success', $message);
     }
 }
-
-
