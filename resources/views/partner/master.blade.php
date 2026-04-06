@@ -411,6 +411,11 @@
                 <div class="detail-grid">
                     <div class="detail-item"><p class="detail-item-label">登録日</p><p class="detail-item-value" id="masterDetailRegistered">-</p></div>
                     <div class="detail-item"><p class="detail-item-label">メモ</p><input type="text" class="detail-form-input" id="masterDetailMemo" placeholder="メモを追加..." maxlength="200"></div>
+                    <div class="detail-item" style="grid-column: span 2;">
+                        <p class="detail-item-label">💳 決済開始日</p>
+                        <input type="date" class="detail-form-input" id="masterDetailBillingStartDate" style="max-width:180px;">
+                        <p style="font-size:11px;color:var(--gray-500);margin-top:4px;">※ デフォルトは翌月1日。この日付から pay.jp の定期課金が開始されます。カード登録後にマスターが設定してください。</p>
+                    </div>
                 </div>
             </div>
             <div class="modal-section">
@@ -736,6 +741,12 @@ async function showDeviceDetail(deviceId) {
         document.getElementById('masterDetailRegistered').textContent = d.registered_at || '-';
         document.getElementById('masterDetailMemo').value = d.memo || '';
 
+        // 決済開始日（デフォルト：翌月1日）
+        const now = new Date();
+        const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+        const defaultBillingDate = nextMonth.toISOString().split('T')[0];
+        document.getElementById('masterDetailBillingStartDate').value = d.billing_start_date || defaultBillingDate;
+
         // プレミアムトグル
         const isPremium = d.premium_enabled || false;
         document.getElementById('masterDetailPremiumToggle').checked = isPremium;
@@ -811,6 +822,7 @@ async function masterSaveAssignment() {
         alert_threshold_hours: parseInt(document.getElementById('masterDetailAlertHours').value) || 24,
         install_height_cm: parseInt(document.getElementById('masterDetailHeight').value) || 200,
         pet_exclusion_enabled: document.getElementById('masterDetailPetExclusion').value === '1' ? 1 : 0,
+        billing_start_date: document.getElementById('masterDetailBillingStartDate').value || null,
     };
     try {
         const res = await fetch('/partner/devices/' + masterCurrentDeviceId + '/assignment', {
@@ -1008,5 +1020,3 @@ async function toggleOrgPremium(orgId, enabled, checkbox) {
 }
 </script>
 @endsection
-
-
