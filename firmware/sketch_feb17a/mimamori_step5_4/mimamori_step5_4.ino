@@ -1,5 +1,5 @@
 /*
- * みまもりトーフ - Step5: センサー + SIM7080G Cat-M通信
+ * みまもりデバイス - Step5: センサー + SIM7080G Cat-M通信
  * 
  * 配線:
  *   AM312 PIR: OUT → D0 (GPIO2) / VCC → 3.3V / GND → GND
@@ -419,7 +419,7 @@ void setup() {
   ledOff();
   
   Serial.println("================================");
-  Serial.println("  みまもりトーフ Step5");
+  Serial.println("  みまもりデバイス Step5");
   Serial.println("  センサー + Cat-M通信");
   Serial.println("================================\n");
   
@@ -446,7 +446,7 @@ void setup() {
   // 接続成功 → 緑LED 3秒点灯
   ledGreen();
   Serial.println("\n================================");
-  Serial.println("  みまもりトーフ 起動完了！");
+  Serial.println("  みまもりデバイス 起動完了！");
   Serial.println("================================\n");
   delay(3000);
   ledOff();

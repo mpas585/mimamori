@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 
 namespace App\Mail;
 
@@ -31,5 +31,3 @@ class AdminPasswordResetMail extends Mailable
         );
     }
 }
-
-
