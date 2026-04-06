@@ -48,16 +48,16 @@ class BillingController extends Controller
                 'metadata'    => ['organization_id' => $request->organization_id ?? 'none'],
             ]);
 
-            // 金額計算
-            $amount = ($request->device_count * 1000)
-                    + ($request->premium_device_count * 500);
+            // 金額計算（ベース¥700/台 + AIコール¥300/台）
+            $amount = ($request->device_count * 700)
+                    + ($request->premium_device_count * 300);
 
             // 初月即時課金
             $charge = \Payjp\Charge::create([
                 'amount'      => $amount,
                 'currency'    => 'jpy',
                 'customer'    => $customer->id,
-                'description' => "みまもりデバイス 月額利用料（初月）- {$orgName} 本体{$request->device_count}台 プレミアム{$request->premium_device_count}台",
+                'description' => "みまもりデバイス 月額利用料（初月）- {$orgName} 本体{$request->device_count}台 AIコール{$request->premium_device_count}台",
             ]);
 
             // BillingContract 作成
@@ -66,8 +66,8 @@ class BillingController extends Controller
                 'payjp_customer_id'    => $customer->id,
                 'device_count'         => $request->device_count,
                 'premium_device_count' => $request->premium_device_count,
-                'unit_price'           => 1000,
-                'premium_unit_price'   => 500,
+                'unit_price'           => 700,
+                'premium_unit_price'   => 300,
                 'amount'               => $amount,
                 'status'               => 'active',
                 'next_billing_date'    => now()->addMonth()->startOfMonth()->toDateString(),

@@ -88,18 +88,18 @@
         </div>
         <div class="form-row">
             <div class="form-group">
-                <label class="form-label">本体台数</label>
+                <label class="form-label">本体台数（¥700 / 台 / 月）</label>
                 <input type="number" class="form-input" id="deviceCount" value="1" min="1" max="999" oninput="updatePreview()">
             </div>
             <div class="form-group">
-                <label class="form-label">プレミアム台数</label>
+                <label class="form-label">AIコール台数（+¥300 / 台 / 月）</label>
                 <input type="number" class="form-input" id="premiumCount" value="0" min="0" max="999" oninput="updatePreview()">
             </div>
         </div>
         <div class="amount-preview">
-            <p class="amount-preview-label">月額請求額（税込）</p>
-            <p class="amount-preview-value" id="amountPreview">¥1,000</p>
-            <p style="font-size:12px;color:var(--gray-500);margin-top:4px;" id="amountBreakdown">本体1台 × ¥1,000</p>
+            <p class="amount-preview-label">月額請求額</p>
+            <p class="amount-preview-value" id="amountPreview">¥700</p>
+            <p style="font-size:12px;color:var(--gray-500);margin-top:4px;" id="amountBreakdown">本体1台 × ¥700</p>
         </div>
         <div class="form-group">
             <label class="form-label">クレジットカード</label>
@@ -119,7 +119,7 @@
         <table class="contracts-table">
             <thead>
                 <tr>
-                    <th>ID</th><th>組織</th><th>本体台数</th><th>プレミアム台数</th><th>月額</th><th>次回課金</th><th>ステータス</th><th>最終課金</th><th>操作</th>
+                    <th>ID</th><th>組織</th><th>本体台数</th><th>AIコール台数</th><th>月額</th><th>次回課金</th><th>ステータス</th><th>最終課金</th><th>操作</th>
                 </tr>
             </thead>
             <tbody>
@@ -198,10 +198,10 @@ window.addEventListener('load', function() {
 function updatePreview() {
     const dc = parseInt(document.getElementById('deviceCount').value) || 0;
     const pc = parseInt(document.getElementById('premiumCount').value) || 0;
-    const amount = (dc * 1000) + (pc * 500);
+    const amount = (dc * 700) + (pc * 300);
     document.getElementById('amountPreview').textContent = '¥' + amount.toLocaleString();
-    let breakdown = `本体${dc}台 × ¥1,000`;
-    if (pc > 0) breakdown += ` + プレミアム${pc}台 × ¥500`;
+    let breakdown = `本体${dc}台 × ¥700`;
+    if (pc > 0) breakdown += ` + AIコール${pc}台 × ¥300`;
     document.getElementById('amountBreakdown').textContent = breakdown;
 }
 
@@ -286,7 +286,6 @@ function openCardModal(id) {
     document.getElementById('cardSaveBtn').textContent = '保存する';
     document.getElementById('cardModalOverlay').classList.add('open');
 
-    // カード入力フィールドを再生成
     if (changeCardElement) changeCardElement.unmount();
     changeCardElement = elements.create('card', {
         style: { base: { color:'#3d3935', fontFamily:'"Noto Sans JP",sans-serif', fontSize:'15px', '::placeholder':{color:'#a8a29e'} } },
