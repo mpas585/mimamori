@@ -1,4 +1,4 @@
-﻿    /**
+    /**
      * 組織の通知設定を更新
      */
     public function updateNotification(Request $request)

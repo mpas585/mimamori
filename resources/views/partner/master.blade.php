@@ -1,4 +1,4 @@
-﻿@extends('layouts.partner')
+@extends('layouts.partner')
 
 @section('title', 'ダッシュボード - 管理画面')
 
