@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 namespace App\Http\Controllers\Auth;
 
@@ -257,3 +257,5 @@ class PinResetController extends Controller
         return substr($local, 0, 2) . '***@' . $domain;
     }
 }
+
+

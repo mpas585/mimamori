@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 namespace App\Mail;
 
@@ -42,3 +42,5 @@ class DeviceAlertMail extends Mailable
         );
     }
 }
+
+

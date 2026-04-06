@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 namespace App\Models;
 
@@ -54,3 +54,5 @@ class PartnerUser extends Authenticatable
         return $this->belongsTo(Organization::class);
     }
 }
+
+

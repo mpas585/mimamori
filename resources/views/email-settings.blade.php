@@ -1,4 +1,4 @@
-@extends('layouts.app')
+﻿@extends('layouts.app')
 
 @section('title', 'メールアドレス設定 - みまもりデバイス')
 
@@ -259,3 +259,5 @@ function confirmDelete() {
 }
 </script>
 @endsection
+
+

@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 namespace App\Helpers;
 
@@ -52,3 +52,5 @@ class PhoneHelper
         return $phone;
     }
 }
+
+

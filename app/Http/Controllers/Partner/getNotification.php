@@ -1,4 +1,4 @@
-    /**
+﻿    /**
      * 組織の通知設定を取得（JSON）
      */
     public function getNotification()
@@ -15,3 +15,5 @@
             'notification_sms_enabled' => (bool) $organization->notification_sms_enabled,
         ]);
     }
+
+

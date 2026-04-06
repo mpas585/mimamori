@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 namespace App\Models;
 
@@ -33,3 +33,5 @@ class Subscription extends Model
         return $this->belongsTo(Device::class);
     }
 }
+
+

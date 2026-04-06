@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 namespace App\Http\Controllers\Api;
 
@@ -119,3 +119,5 @@ class DeviceReportController extends Controller
         ], 201);
     }
 }
+
+

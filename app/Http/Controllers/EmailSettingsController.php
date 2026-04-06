@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 namespace App\Http\Controllers;
 
@@ -175,3 +175,5 @@ class EmailSettingsController extends Controller
         return substr($local, 0, 2) . '***@' . $domain;
     }
 }
+
+

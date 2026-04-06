@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>管理者ログイン - みまもりトーフ</title>
+    <title>管理者ログイン - みまもりデバイス</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
@@ -135,7 +135,7 @@
 <body>
     <div class="login-wrap">
         <div class="logo">
-            <div class="logo-text">🧈 みまもりトーフ</div>
+            <div class="logo-text">🧈 みまもりデバイス</div>
             <span class="logo-badge">ADMIN</span>
         </div>
 
@@ -175,7 +175,9 @@
             <p class="notice">※連続してログインに失敗すると一定時間操作できなくなります</p>
         </div>
 
-        <p class="copyright">&copy; {{ date('Y') }} みまもりトーフ</p>
+        <p class="copyright">&copy; {{ date('Y') }} みまもりデバイス</p>
     </div>
 </body>
 </html>
+
+

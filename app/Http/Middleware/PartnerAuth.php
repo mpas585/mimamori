@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 namespace App\Http\Middleware;
 
@@ -33,3 +33,5 @@ class PartnerAuth
         return $next($request);
     }
 }
+
+

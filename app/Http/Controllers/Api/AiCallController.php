@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 namespace App\Http\Controllers\Api;
 
@@ -278,3 +278,5 @@ class AiCallController extends Controller
         }
     }
 }
+
+

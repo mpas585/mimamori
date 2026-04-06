@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 namespace App\Http\Controllers\Admin;
 
@@ -569,3 +569,5 @@ class OrgAdminController extends Controller
         return response()->json(['success' => true, 'message' => 'スケジュールを削除しました']);
     }
 }
+
+

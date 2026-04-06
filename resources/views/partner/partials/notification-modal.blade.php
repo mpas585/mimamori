@@ -1,4 +1,4 @@
-{{-- ===== モーダル: 組織通知設定 ===== --}}
+﻿{{-- ===== モーダル: 組織通知設定 ===== --}}
 <div id="notificationModal" class="modal-overlay" onclick="if(event.target===this)hideModal('notificationModal')">
     <div class="modal" style="max-width:520px;">
         <div class="modal-header">
@@ -73,3 +73,5 @@
         </div>
     </div>
 </div>
+
+

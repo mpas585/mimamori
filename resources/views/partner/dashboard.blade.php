@@ -1,4 +1,4 @@
-@extends('layouts.partner')
+﻿@extends('layouts.partner')
 
 @section('title', 'デバイス管理')
 
@@ -1078,3 +1078,5 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 @endsection
+
+

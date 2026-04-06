@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 namespace App\Models;
 
@@ -39,3 +39,5 @@ class NotificationSetting extends Model
         return $this->belongsTo(Device::class);
     }
 }
+
+

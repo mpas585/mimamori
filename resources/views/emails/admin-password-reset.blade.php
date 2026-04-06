@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
@@ -11,7 +11,7 @@
             {{-- ヘッダー --}}
             <div style="text-align:center; margin-bottom:28px; padding-bottom:20px; border-bottom:2px solid #e7e5e4;">
                 <span style="font-size:24px;">🧈</span>
-                <span style="font-size:18px; font-weight:500; color:#292524; margin-left:8px;">みまもりトーフ</span>
+                <span style="font-size:18px; font-weight:500; color:#292524; margin-left:8px;">みまもりデバイス</span>
             </div>
 
             {{-- 本文 --}}
@@ -47,7 +47,7 @@
             <div style="border-top:1px solid #e7e5e4; padding-top:16px; text-align:center;">
                 <p style="font-size:11px; color:#a8a29e;">
                     このメールは自動送信されています。返信はできません。<br>
-                    &copy; {{ date('Y') }} みまもりトーフ
+                    &copy; {{ date('Y') }} みまもりデバイス
                 </p>
             </div>
 
@@ -55,3 +55,5 @@
     </div>
 </body>
 </html>
+
+

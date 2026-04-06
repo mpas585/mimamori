@@ -1,4 +1,4 @@
-@extends('layouts.partner')
+﻿@extends('layouts.partner')
 
 @section('title', 'アカウント設定')
 
@@ -366,3 +366,5 @@ document.getElementById('emailForm').addEventListener('submit', function(e) {
 });
 </script>
 @endsection
+
+

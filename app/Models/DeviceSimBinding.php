@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 namespace App\Models;
 
@@ -30,3 +30,5 @@ class DeviceSimBinding extends Model
         return $this->belongsTo(Device::class);
     }
 }
+
+

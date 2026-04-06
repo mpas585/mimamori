@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 namespace App\Http\Controllers\Admin;
 
@@ -55,3 +55,5 @@ class AdminLoginController extends Controller
         return redirect('/admin/login');
     }
 }
+
+

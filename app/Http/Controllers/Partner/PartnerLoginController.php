@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 namespace App\Http\Controllers\Partner;
 
@@ -55,3 +55,5 @@ class PartnerLoginController extends Controller
         return redirect('/partner/login');
     }
 }
+
+

@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 namespace App\Http\Controllers;
 
@@ -75,3 +75,5 @@ class ScheduleController extends Controller
         return response()->json(['ok' => true]);
     }
 }
+
+

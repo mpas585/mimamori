@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>パスワード再設定 - みまもりトーフ</title>
+    <title>パスワード再設定 - みまもりデバイス</title>
     <style>
         body { margin: 0; padding: 0; background: #f5f0e8; font-family: 'Helvetica Neue', Arial, sans-serif; }
         .wrapper { max-width: 560px; margin: 40px auto; background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
@@ -26,7 +26,7 @@
 <body>
     <div class="wrapper">
         <div class="header">
-            <p class="header-title">🧈 みまもりトーフ</p>
+            <p class="header-title">🧈 みまもりデバイス</p>
             <p class="header-sub">PARTNER ADMIN</p>
         </div>
 
@@ -54,10 +54,12 @@
 
         <div class="footer">
             <p>
-                みまもりトーフ 管理システム<br>
+                みまもりデバイス 管理システム<br>
                 このメールは自動送信されています。返信はできません。
             </p>
         </div>
     </div>
 </body>
 </html>
+
+

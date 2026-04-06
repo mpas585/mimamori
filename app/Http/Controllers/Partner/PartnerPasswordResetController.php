@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 namespace App\Http\Controllers\Partner;
 
@@ -132,3 +132,5 @@ class PartnerPasswordResetController extends Controller
             ->with('success', 'パスワードを変更しました。新しいパスワードでログインしてください。');
     }
 }
+
+

@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 namespace App\Models;
 
@@ -34,3 +34,5 @@ class AiCallLog extends Model
         return $this->belongsTo(Device::class);
     }
 }
+
+

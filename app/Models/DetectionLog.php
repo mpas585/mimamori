@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 namespace App\Models;
 
@@ -40,3 +40,5 @@ class DetectionLog extends Model
         return $this->belongsTo(Device::class);
     }
 }
+
+

@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 namespace App\Console\Commands;
 
@@ -72,3 +72,5 @@ class MakeAiCall extends Command
         return Command::SUCCESS;
     }
 }
+
+

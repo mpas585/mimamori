@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 namespace App\Http\Controllers;
 
@@ -71,3 +71,5 @@ class ContactController extends Controller
         return redirect('/contact')->with('contact_success', true);
     }
 }
+
+

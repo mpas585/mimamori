@@ -1,4 +1,4 @@
-@extends('layouts.partner')
+﻿@extends('layouts.partner')
 
 @section('title', 'ダッシュボード - 管理画面')
 
@@ -1008,3 +1008,5 @@ async function toggleOrgPremium(orgId, enabled, checkbox) {
 }
 </script>
 @endsection
+
+

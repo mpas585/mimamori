@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 namespace App\Http\Controllers\Admin;
 
@@ -132,3 +132,5 @@ class AdminPasswordResetController extends Controller
             ->with('success', 'パスワードを変更しました。新しいパスワードでログインしてください。');
     }
 }
+
+

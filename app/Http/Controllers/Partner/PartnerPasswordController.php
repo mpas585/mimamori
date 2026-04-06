@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 namespace App\Http\Controllers\Partner;
 
@@ -89,3 +89,5 @@ class PartnerPasswordController extends Controller
         return back()->with('success', 'メールアドレスを変更しました');
     }
 }
+
+

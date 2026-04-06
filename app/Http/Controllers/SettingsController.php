@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 namespace App\Http\Controllers;
 
@@ -172,3 +172,5 @@ class SettingsController extends Controller
         return redirect('/settings')->with('success', $message);
     }
 }
+
+

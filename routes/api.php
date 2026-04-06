@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 use App\Http\Controllers\Api\DeviceReportController;
 use App\Http\Controllers\Api\AiCallController;
@@ -11,3 +11,5 @@ Route::get('/ai-call/twiml', [AiCallController::class, 'twiml']);
 Route::post('/ai-call/twiml', [AiCallController::class, 'twiml']);
 Route::post('/ai-call/status-webhook', [AiCallController::class, 'statusWebhook']);
 Route::post('/ai-call/recording-webhook', [AiCallController::class, 'recordingWebhook']);
+
+

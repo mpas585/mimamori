@@ -1,4 +1,4 @@
-@extends('layouts.app')
+﻿@extends('layouts.app')
 
 @section('title', 'ログイン - みまもりデバイス')
 
@@ -295,3 +295,5 @@ document.getElementById('pin').addEventListener('input', function() {
 });
 </script>
 @endsection
+
+

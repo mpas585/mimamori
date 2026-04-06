@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 namespace App\Http\Controllers\Admin;
 
@@ -89,3 +89,5 @@ class AdminPasswordController extends Controller
         return back()->with('success', 'メールアドレスを変更しました');
     }
 }
+
+

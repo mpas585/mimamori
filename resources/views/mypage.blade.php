@@ -1,4 +1,4 @@
-@extends('layouts.app')
+﻿@extends('layouts.app')
 
 @section('title', 'マイページ - みまもりデバイス')
 
@@ -1215,3 +1215,5 @@
     });
 </script>
 @endsection
+
+

@@ -1,4 +1,4 @@
-    /**
+﻿    /**
      * 組織の通知設定を更新
      */
     public function updateNotification(Request $request)
@@ -34,3 +34,5 @@
 
         return back()->with('success', '通知設定を更新しました');
     }
+
+

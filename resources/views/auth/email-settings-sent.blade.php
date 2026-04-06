@@ -1,4 +1,4 @@
-@extends('layouts.app')
+﻿@extends('layouts.app')
 
 @section('title', '確認メール送信完了 - みまもりデバイス')
 
@@ -156,3 +156,5 @@
     </div>
 </div>
 @endsection
+
+

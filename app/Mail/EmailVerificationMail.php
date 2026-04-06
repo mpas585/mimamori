@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 namespace App\Mail;
 
@@ -37,3 +37,5 @@ class EmailVerificationMail extends Mailable
         );
     }
 }
+
+

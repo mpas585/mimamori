@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\DeviceLoginController;
@@ -123,3 +123,5 @@ Route::middleware(PartnerAuth::class.':operator')->prefix('partner/org')->group(
     Route::get('/notification', [OrgAdminController::class, 'getNotification'])->name('partner.org.notification');
     Route::post('/notification', [OrgAdminController::class, 'updateNotification'])->name('partner.org.notification.update');
 });
+
+

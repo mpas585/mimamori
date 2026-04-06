@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 namespace App\Console\Commands;
 
@@ -423,3 +423,5 @@ class CheckUndetectedDevices extends Command
         return '';
     }
 }
+
+

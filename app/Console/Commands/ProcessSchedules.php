@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 namespace App\Console\Commands;
 
@@ -99,3 +99,5 @@ class ProcessSchedules extends Command
         return false;
     }
 }
+
+

@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 namespace App\Mail;
 
@@ -20,7 +20,7 @@ class PartnerPasswordResetMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: '【みまもりトーフ】パスワード再設定',
+            subject: '【みまもりデバイス】パスワード再設定',
         );
     }
 
@@ -31,3 +31,5 @@ class PartnerPasswordResetMail extends Mailable
         );
     }
 }
+
+

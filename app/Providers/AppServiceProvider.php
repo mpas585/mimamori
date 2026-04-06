@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 namespace App\Providers;
 
@@ -22,3 +22,5 @@ class AppServiceProvider extends ServiceProvider
         //
     }
 }
+
+

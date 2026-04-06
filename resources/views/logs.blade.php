@@ -1,4 +1,4 @@
-@extends('layouts.app')
+﻿@extends('layouts.app')
 
 @section('title', '検知ログ - みまもりデバイス')
 
@@ -361,3 +361,5 @@
 @endif
 
 @endsection
+
+

@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>新しいパスワード設定 - みまもりトーフ</title>
+    <title>新しいパスワード設定 - みまもりデバイス</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
@@ -47,7 +47,7 @@
 <body>
     <div class="wrap">
         <div class="logo">
-            <div class="logo-text">🧈 みまもりトーフ</div>
+            <div class="logo-text">🧈 みまもりデバイス</div>
             <span class="logo-badge">ADMIN</span>
         </div>
 
@@ -82,7 +82,9 @@
             </div>
         </div>
 
-        <p class="copyright">&copy; {{ date('Y') }} みまもりトーフ</p>
+        <p class="copyright">&copy; {{ date('Y') }} みまもりデバイス</p>
     </div>
 </body>
 </html>
+
+

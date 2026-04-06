@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 namespace App\Models;
 
@@ -106,3 +106,5 @@ class Device extends Authenticatable
         return $this->hasMany(DeviceSchedule::class);
     }
 }
+
+

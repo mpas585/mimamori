@@ -1,4 +1,4 @@
-@extends('layouts.app')
+﻿@extends('layouts.app')
 
 @section('title', '確認メール送信完了 - みまもりデバイス')
 
@@ -101,3 +101,5 @@
     <a href="/settings" class="btn-back">設定に戻る</a>
 </section>
 @endsection
+
+

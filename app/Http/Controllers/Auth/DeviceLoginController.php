@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 namespace App\Http\Controllers\Auth;
 
@@ -69,3 +69,5 @@ class DeviceLoginController extends Controller
         return redirect('/login');
     }
 }
+
+

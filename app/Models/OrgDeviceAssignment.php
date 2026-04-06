@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 namespace App\Models;
 
@@ -36,3 +36,5 @@ class OrgDeviceAssignment extends Model
         return $this->belongsTo(Device::class);
     }
 }
+
+

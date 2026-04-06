@@ -1,4 +1,4 @@
-@extends('layouts.app')
+﻿@extends('layouts.app')
 
 @section('title', 'お問い合わせ - みまもりデバイス')
 
@@ -531,3 +531,5 @@
     @endif
 </script>
 @endsection
+
+
