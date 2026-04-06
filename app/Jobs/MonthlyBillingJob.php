@@ -10,6 +10,7 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 use App\Models\BillingContract;
 use App\Models\BillingLog;
+use App\Models\Device;
 
 class MonthlyBillingJob implements ShouldQueue
 {
@@ -38,10 +39,19 @@ class MonthlyBillingJob implements ShouldQueue
             return;
         }
 
-        $amount = $contract->calcAmount();
+        // billing_start_at が設定済み かつ 今日以前のデバイスのみ課金対象
+        $baseQuery = Device::where('organization_id', $contract->organization_id)
+            ->whereNotNull('billing_start_at')
+            ->where('billing_start_at', '<=', now()->toDateString());
+
+        $activeDeviceCount  = (clone $baseQuery)->count();
+        $activePremiumCount = (clone $baseQuery)->where('premium_enabled', 1)->count();
+
+        $amount = ($activeDeviceCount  * $contract->unit_price)
+                + ($activePremiumCount * $contract->premium_unit_price);
 
         if ($amount <= 0) {
-            Log::info("MonthlyBillingJob: contract {$this->contractId} amount is 0, skip");
+            Log::info("MonthlyBillingJob: contract {$this->contractId} amount is 0 (no active devices), skip");
             return;
         }
 
@@ -52,33 +62,35 @@ class MonthlyBillingJob implements ShouldQueue
                 'amount'      => $amount,
                 'currency'    => 'jpy',
                 'customer'    => $contract->payjp_customer_id,
-                'description' => "みまもりトーフ 月額利用料 ({$contract->device_count}台 / プレミアム{$contract->premium_device_count}台)",
+                'description' => "みまもりトーフ 月額利用料 ({$activeDeviceCount}台 / プレミアム{$activePremiumCount}台)",
             ]);
 
             BillingLog::create([
                 'billing_contract_id'  => $contract->id,
                 'amount'               => $amount,
-                'device_count'         => $contract->device_count,
-                'premium_device_count' => $contract->premium_device_count,
+                'device_count'         => $activeDeviceCount,
+                'premium_device_count' => $activePremiumCount,
                 'payjp_charge_id'      => $charge->id,
                 'status'               => 'success',
                 'billed_at'            => now(),
             ]);
 
             $contract->update([
-                'amount'            => $amount,
-                'status'            => 'active',
-                'next_billing_date' => now()->addMonth()->startOfMonth()->toDateString(),
+                'device_count'         => $activeDeviceCount,
+                'premium_device_count' => $activePremiumCount,
+                'amount'               => $amount,
+                'status'               => 'active',
+                'next_billing_date'    => now()->addMonth()->startOfMonth()->toDateString(),
             ]);
 
-            Log::info("MonthlyBillingJob: contract {$this->contractId} charged ¥{$amount} (charge: {$charge->id})");
+            Log::info("MonthlyBillingJob: contract {$this->contractId} charged ¥{$amount} ({$activeDeviceCount} devices / charge: {$charge->id})");
 
         } catch (\Exception $e) {
             BillingLog::create([
                 'billing_contract_id'  => $contract->id,
                 'amount'               => $amount,
-                'device_count'         => $contract->device_count,
-                'premium_device_count' => $contract->premium_device_count,
+                'device_count'         => $activeDeviceCount,
+                'premium_device_count' => $activePremiumCount,
                 'payjp_charge_id'      => null,
                 'status'               => 'failed',
                 'error_message'        => $e->getMessage(),
