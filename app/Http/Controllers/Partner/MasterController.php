@@ -154,6 +154,7 @@ class MasterController extends Controller
             'away_until'             => $device->away_until ? $device->away_until->format('Y/m/d H:i') : null,
             'memo'                   => $device->location_memo,
             'registered_at'          => $device->created_at->format('Y/m/d'),
+            'billing_start_date'     => $device->billing_start_date ? $device->billing_start_date->format('Y-m-d') : null,
             'schedules'              => $schedules,
             'sms_enabled'            => $notif ? (bool) $notif->sms_enabled   : false,
             'sms_phone_1'            => $notif && $notif->sms_phone_1 ? preg_replace('/^\+81/', '0', $notif->sms_phone_1) : null,
@@ -194,6 +195,7 @@ class MasterController extends Controller
             'alert_threshold_hours' => 'nullable|integer|in:12,24,36,48,72',
             'install_height_cm'     => 'nullable|integer|min:100|max:300',
             'pet_exclusion_enabled' => 'nullable|boolean',
+            'billing_start_date'    => 'nullable|date',
         ]);
 
         if ($device->organization_id) {
@@ -208,6 +210,7 @@ class MasterController extends Controller
             'alert_threshold_hours' => $request->alert_threshold_hours ?? $device->alert_threshold_hours,
             'install_height_cm'     => $request->install_height_cm     ?? $device->install_height_cm,
             'pet_exclusion_enabled' => $request->has('pet_exclusion_enabled') ? (int) $request->pet_exclusion_enabled : $device->pet_exclusion_enabled,
+            'billing_start_date'    => $request->billing_start_date    ?? $device->billing_start_date,
         ]);
 
         return response()->json(['success' => true, 'message' => '更新しました']);
@@ -527,5 +530,3 @@ class MasterController extends Controller
         return str_pad((string) random_int(0, 9999), 4, '0', STR_PAD_LEFT);
     }
 }
-
-

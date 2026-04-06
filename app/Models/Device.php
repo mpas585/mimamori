@@ -29,6 +29,7 @@ class Device extends Authenticatable
         'away_until',
         'organization_id',
         'premium_enabled',
+        'billing_start_date',
         'activated_at',
         'warranty_expires_at',
     ];
@@ -45,6 +46,7 @@ class Device extends Authenticatable
             'activated_at'           => 'datetime',
             'away_until'             => 'datetime',
             'warranty_expires_at'    => 'date',
+            'billing_start_date'     => 'date',
             'pet_exclusion_enabled'  => 'boolean',
             'away_mode'              => 'boolean',
             'premium_enabled'        => 'boolean',
@@ -106,5 +108,3 @@ class Device extends Authenticatable
         return $this->hasMany(DeviceSchedule::class);
     }
 }
-
-
