@@ -37,14 +37,13 @@ class BillingController extends Controller
         \Payjp\Payjp::setApiKey(config('services.payjp.secret_key'));
 
         try {
-            // Customer 作成
             $orgName = $request->organization_id
                 ? Organization::find($request->organization_id)?->name
                 : 'individual';
 
             $customer = \Payjp\Customer::create([
                 'card'        => $request->payjp_token,
-                'description' => $orgName,
+                'description' => 'みまもりデバイス - ' . $orgName,
                 'metadata'    => ['organization_id' => $request->organization_id ?? 'none'],
             ]);
 

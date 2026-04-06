@@ -40,17 +40,19 @@
     .btn-primary{width:100%;padding:14px;font-size:14px;font-weight:700;font-family:inherit;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;border:none;border-radius:var(--radius);cursor:pointer;transition:all 0.2s;}
     .btn-primary:hover{opacity:0.9;}
     .btn-primary:disabled{opacity:0.6;cursor:not-allowed;}
-    .btn-sm{padding:8px 14px;font-size:13px;font-weight:600;font-family:inherit;border-radius:var(--radius);cursor:pointer;border:none;transition:all 0.2s;}
+    .btn-sm{padding:7px 12px;font-size:12px;font-weight:600;font-family:inherit;border-radius:var(--radius);cursor:pointer;border:none;transition:all 0.2s;white-space:nowrap;}
     .btn-outline{background:var(--white);color:var(--gray-600);border:1px solid var(--gray-300);}
     .btn-outline:hover{background:var(--gray-100);}
     .btn-danger{background:#fee2e2;color:#991b1b;}
     .btn-danger:hover{background:#fecaca;}
     .btn-success{background:#dcfce7;color:#166534;}
     .btn-success:hover{background:#bbf7d0;}
+    .btn-save{background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe;}
+    .btn-save:hover{background:#dbeafe;}
 
     .contracts-table{width:100%;border-collapse:collapse;font-size:14px;}
     .contracts-table th{text-align:left;padding:10px 12px;font-size:12px;font-weight:600;color:var(--gray-500);border-bottom:2px solid var(--gray-200);white-space:nowrap;}
-    .contracts-table td{padding:14px 12px;border-bottom:1px solid var(--gray-100);vertical-align:middle;}
+    .contracts-table td{padding:12px;border-bottom:1px solid var(--gray-100);vertical-align:middle;}
     .contracts-table tr:last-child td{border-bottom:none;}
 
     .status-badge{display:inline-block;padding:3px 10px;border-radius:10px;font-size:11px;font-weight:700;}
@@ -61,6 +63,11 @@
     .log-mini{font-size:11px;color:var(--gray-500);}
     .log-mini.success{color:#166534;}
     .log-mini.failed{color:#991b1b;}
+
+    .count-input{width:65px;padding:6px 8px;font-size:13px;font-family:inherit;border:1px solid var(--gray-300);border-radius:var(--radius);background:var(--cream);text-align:center;}
+    .count-input:focus{outline:none;border-color:var(--gray-500);background:var(--white);}
+
+    .ops-cell{display:flex;gap:6px;flex-wrap:wrap;align-items:center;}
 
     .error-msg{padding:12px 16px;background:#fee2e2;border-radius:var(--radius);font-size:13px;color:#991b1b;margin-top:12px;display:none;}
 
@@ -127,8 +134,8 @@
                 <tr>
                     <th>ID</th>
                     <th>組織</th>
-                    <th>台数</th>
-                    <th>プレミアム</th>
+                    <th>本体台数</th>
+                    <th>プレミアム台数</th>
                     <th>月額</th>
                     <th>次回課金</th>
                     <th>ステータス</th>
@@ -142,14 +149,14 @@
                 <td style="font-family:monospace;color:var(--gray-500);">#{{ $contract->id }}</td>
                 <td>{{ $contract->organization?->name ?? '-' }}</td>
                 <td>
-                    <input type="number" class="form-input" style="width:70px;padding:6px 8px;font-size:13px;"
+                    <input type="number" class="count-input"
                         value="{{ $contract->device_count }}" min="1" max="999"
-                        id="dc-{{ $contract->id }}" onchange="updateCount({{ $contract->id }})">
+                        id="dc-{{ $contract->id }}">
                 </td>
                 <td>
-                    <input type="number" class="form-input" style="width:70px;padding:6px 8px;font-size:13px;"
+                    <input type="number" class="count-input"
                         value="{{ $contract->premium_device_count }}" min="0" max="999"
-                        id="pc-{{ $contract->id }}" onchange="updateCount({{ $contract->id }})">
+                        id="pc-{{ $contract->id }}">
                 </td>
                 <td style="font-weight:700;">
                     ¥<span id="amt-{{ $contract->id }}">{{ number_format($contract->amount) }}</span>
@@ -166,8 +173,9 @@
                     @endif
                 </td>
                 <td>
-                    <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                    <div class="ops-cell">
                         @if($contract->status === 'active')
+                        <button class="btn-sm btn-save" onclick="updateCount({{ $contract->id }})">台数を保存</button>
                         <button class="btn-sm btn-success" onclick="chargeNow({{ $contract->id }})">即時課金</button>
                         <button class="btn-sm btn-danger" onclick="cancelContract({{ $contract->id }})">解約</button>
                         @endif
@@ -205,7 +213,7 @@ window.addEventListener('load', function() {
     cardElement.on('blur',  () => document.getElementById('payjp-card-element').classList.remove('focused'));
 });
 
-// 金額プレビュー更新
+// 金額プレビュー更新（新規登録フォーム）
 function updatePreview() {
     const dc = parseInt(document.getElementById('deviceCount').value) || 0;
     const pc = parseInt(document.getElementById('premiumCount').value) || 0;
@@ -263,7 +271,7 @@ async function registerContract() {
     }
 }
 
-// 台数変更
+// 台数保存
 async function updateCount(id) {
     const dc = parseInt(document.getElementById(`dc-${id}`).value);
     const pc = parseInt(document.getElementById(`pc-${id}`).value);
@@ -276,7 +284,9 @@ async function updateCount(id) {
     const data = await res.json();
     if (data.ok) {
         document.getElementById(`amt-${id}`).textContent = data.amount.toLocaleString();
-        showToast('台数を更新しました');
+        showToast('台数を保存しました');
+    } else {
+        showToast('保存に失敗しました');
     }
 }
 
