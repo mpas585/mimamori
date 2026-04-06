@@ -33,6 +33,11 @@ return [
         'key' => env('OPENAI_API_KEY'),
     ],
 
+    'payjp' => [
+        'public_key'      => env('PAYJP_PUBLIC_KEY'),
+        'secret_key'      => env('PAYJP_SECRET_KEY'),
+        'plan_id_monthly' => env('PAYJP_PLAN_ID_MONTHLY'),
+        'webhook_secret'  => env('PAYJP_WEBHOOK_SECRET'),
+    ],
+
 ];
-
-
