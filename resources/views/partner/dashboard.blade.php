@@ -4,12 +4,7 @@
 
 @section('styles')
 <style>
-    /* ===== 契約情報 ===== */
-    .contract-info { display: flex; gap: 20px; margin-bottom: 16px; flex-wrap: wrap; }
-    .contract-item { background: var(--white); border-radius: var(--radius-lg); padding: 16px 20px; box-shadow: var(--shadow-sm); border: 1px solid var(--gray-200); flex: 1; min-width: 200px; }
-    .contract-label { font-size: 12px; color: var(--gray-500); margin-bottom: 4px; }
-    .contract-value { font-size: 16px; font-weight: 700; color: var(--gray-800); }
-    .contract-note { font-size: 11px; color: var(--gray-400); margin-top: 4px; }
+
     .status-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 20px; }
     .status-card { background: var(--white); border-radius: var(--radius-lg); padding: 16px; text-align: center; box-shadow: var(--shadow-sm); border: 1px solid var(--gray-200); cursor: pointer; transition: all 0.2s; }
     .status-card:hover { box-shadow: var(--shadow); transform: translateY(-1px); }
@@ -216,19 +211,7 @@
 @endsection
 
 @section('content')
-    @if(isset($organization))
-        <div class="contract-info">
-            <div class="contract-item">
-                <div class="contract-label">契約プラン</div>
-                <div class="contract-value">ビジネスプラン（{{ $organization->device_limit ?? 0 }}台）</div>
-            </div>
-            <div class="contract-item">
-                <div class="contract-label">有効期限</div>
-                <div class="contract-value">{{ $organization->expires_at ? \Carbon\Carbon::parse($organization->expires_at)->format('Y/m/d') : '-' }}</div>
-                <div class="contract-note">ご契約に関するお問い合わせは管理会社まで</div>
-            </div>
-        </div>
-    @endif
+
 
     @if(($stats['alert'] ?? 0) > 0)
         <div class="alert-banner warning">
