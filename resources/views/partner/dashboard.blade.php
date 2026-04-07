@@ -1040,7 +1040,9 @@ function saveDetailNotification() {
     };
     fetch('/partner/org/devices/' + currentDetailDeviceId + '/notification', {
         method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' }, body: JSON.stringify(payload)
-    }).then(r => r.json()).then(d => { if (d.success) showToast('通知設定を保存しました', 'success'); })
+    }).then(r => r.json()).then(d => {
+        if (d.success) { showToast('通知設定を保存しました', 'success'); hideModal('subscriptionModal'); }
+    })
     .catch(() => showToast('保存に失敗しました', 'error'));
 }
 
