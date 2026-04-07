@@ -430,7 +430,7 @@
             <div id="bulk-panel-4" class="bulk-panel modal-body">
                 <div class="bulk-summary-card">
                     <div class="bulk-summary-row"><span class="bulk-summary-label">追加台数</span><span class="bulk-summary-value" id="bulk-sum-qty">10台</span></div>
-                    <div class="bulk-summary-row"><span class="bulk-summary-label">基本料金</span><span class="bulk-summary-value">¥700 / 台 / 月</span></div>
+                    <div class="bulk-summary-row"><span class="bulk-summary-label">基本料金</span><span class="bulk-summary-value">¥1,000 / 台 / 月</span></div>
                     <div class="bulk-summary-row" id="bulk-sum-ai-row" style="display:none;"><span class="bulk-summary-label">AIコール</span><span class="bulk-summary-value">+¥300 / 台 / 月</span></div>
                     <div class="bulk-summary-row" id="bulk-sum-sms-row" style="display:none;"><span class="bulk-summary-label">SMS通知</span><span class="bulk-summary-value">+¥100 / 台 / 月</span></div>
                     <div class="bulk-summary-subtotal"><span class="bulk-summary-label">小計（税抜）</span><span class="bulk-summary-value" id="bulk-sum-subtotal">¥7,000 / 月</span></div>
@@ -752,7 +752,7 @@ function bulkGetQty() { var v = parseInt(document.getElementById('bulk-qty-input
 async function bulkUpdateSummary() {
     var q = bulkGetQty();
     var add = (bulkOpts.ai ? 300 : 0) + (bulkOpts.sms ? 100 : 0);
-    var subtotal = (700 + add) * q;
+    var subtotal = (1000 + add) * q;
     var tax = Math.floor(subtotal * 0.1);
     var total = subtotal + tax;
     document.getElementById('bulk-sum-qty').textContent = q + '台';
