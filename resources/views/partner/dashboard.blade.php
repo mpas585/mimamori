@@ -635,13 +635,33 @@
             <div class="modal-header"><h3 id="optionConfirmTitle">オプション申し込み確認</h3><button class="modal-close" onclick="hideModal('optionConfirmModal')">×</button></div>
             <div class="modal-body">
                 <p id="optionConfirmBody" style="font-size:14px;color:var(--gray-700);margin-bottom:12px;"></p>
-                <div style="background:var(--beige);border-radius:var(--radius);padding:12px 14px;font-size:13px;color:var(--gray-600);">
+                <div style="background:var(--beige);border-radius:var(--radius);padding:12px 14px;font-size:13px;color:var(--gray-600);margin-bottom:10px;">
                     翌月1日より月額に加算されます。当月分は無料です。
+                </div>
+                <div style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--gray-700);">
+                    <span>💳 お支払いカード：</span><span id="optionConfirmCard" style="font-weight:600;"></span>
                 </div>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-secondary" onclick="hideModal('optionConfirmModal')">キャンセル</button>
                 <button class="btn btn-primary" id="optionConfirmBtn">申し込む</button>
+            </div>
+        </div>
+    </div>
+
+    {{-- モーダル: オプション解約確認 --}}
+    <div id="optionCancelModal" class="modal-overlay" onclick="if(event.target===this)hideModal('optionCancelModal')">
+        <div class="modal" style="max-width:440px;">
+            <div class="modal-header"><h3 id="optionCancelTitle">解約確認</h3><button class="modal-close" onclick="hideModal('optionCancelModal')">×</button></div>
+            <div class="modal-body">
+                <p id="optionCancelBody" style="font-size:14px;color:var(--gray-700);margin-bottom:12px;"></p>
+                <div style="background:var(--yellow-light);border-radius:var(--radius);padding:12px 14px;font-size:13px;color:#a16207;">
+                    解約後は翌月1日より月額から除外されます。
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="hideModal('optionCancelModal')">戻る</button>
+                <button class="btn btn-danger" id="optionCancelBtn">解約する</button>
             </div>
         </div>
     </div>
@@ -874,7 +894,7 @@ function renderSmsAction(enabled) {
     if (!area) return;
     if (enabled) {
         area.innerHTML = '<span style="font-size:12px;font-weight:600;color:#2e7d32;background:#e8f5e9;padding:3px 10px;border-radius:10px;margin-right:8px;">契約中 ✓</span>'
-            + '<button style="font-size:11px;color:var(--gray-400);background:none;border:none;text-decoration:underline;cursor:pointer;font-family:inherit;padding:0;" onclick="toggleSmsOption(false)">解約する</button>';
+            + '<button style="font-size:11px;color:var(--gray-400);background:none;border:none;text-decoration:underline;cursor:pointer;font-family:inherit;padding:0;" onclick="showOptionCancel(\'sms\')">解約する</button>';
         inputs.style.display = '';
     } else {
         area.innerHTML = '<button class="btn btn-sm btn-primary" style="font-size:12px;padding:5px 14px;" onclick="showOptionConfirm(\'sms\')">申し込む</button>';
@@ -906,7 +926,7 @@ function renderVoiceAction(enabled) {
     if (!area) return;
     if (enabled) {
         area.innerHTML = '<span style="font-size:12px;font-weight:600;color:#2e7d32;background:#e8f5e9;padding:3px 10px;border-radius:10px;margin-right:8px;">契約中 ✓</span>'
-            + '<button style="font-size:11px;color:var(--gray-400);background:none;border:none;text-decoration:underline;cursor:pointer;font-family:inherit;padding:0;" onclick="toggleVoiceOption(false)">解約する</button>';
+            + '<button style="font-size:11px;color:var(--gray-400);background:none;border:none;text-decoration:underline;cursor:pointer;font-family:inherit;padding:0;" onclick="showOptionCancel(\'voice\')">解約する</button>';
         inputs.style.display = '';
     } else {
         area.innerHTML = '<button class="btn btn-sm btn-primary" style="font-size:12px;padding:5px 14px;" onclick="showOptionConfirm(\'voice\')">申し込む</button>';
@@ -931,13 +951,28 @@ async function toggleVoiceOption(enabled) {
     } catch(e) { showToast('通信エラー', 'error'); }
 }
 
-// ===== オプション申込み確認モーダル =====
-function showOptionConfirm(type) {
+// ===== オプション申込み確認モーダル（カードチェック付き） =====
+async function showOptionConfirm(type) {
     var isVoice = type === 'voice';
+    // カード登録確認
+    var cardDisplay = '確認中...';
+    try {
+        var res = await fetch('/partner/org/card-info', { headers: { 'Accept': 'application/json' } });
+        var data = await res.json();
+        if (!data.found) {
+            showToast('クレジットカードが登録されていません。管理者にお問い合わせください。', 'error');
+            return;
+        }
+        cardDisplay = data.brand + ' **** ' + data.last4;
+    } catch(e) {
+        showToast('カード情報の取得に失敗しました', 'error');
+        return;
+    }
     document.getElementById('optionConfirmTitle').textContent = isVoice ? '📞 AIコール申し込み確認' : '💬 SMS通知申し込み確認';
     document.getElementById('optionConfirmBody').textContent = isVoice
         ? 'AIコール（電話通知）を申し込みます。月額 +¥300/台 が翌月より加算されます。'
         : 'SMS通知を申し込みます。月額 +¥100/台 が翌月より加算されます。';
+    document.getElementById('optionConfirmCard').textContent = cardDisplay;
     var btn = document.getElementById('optionConfirmBtn');
     btn.onclick = function() {
         hideModal('optionConfirmModal');
@@ -945,6 +980,22 @@ function showOptionConfirm(type) {
         else toggleSmsOption(true);
     };
     showModal('optionConfirmModal');
+}
+
+// ===== オプション解約確認モーダル =====
+function showOptionCancel(type) {
+    var isVoice = type === 'voice';
+    document.getElementById('optionCancelTitle').textContent = isVoice ? '📞 AIコール解約確認' : '💬 SMS通知解約確認';
+    document.getElementById('optionCancelBody').textContent = isVoice
+        ? 'AIコール（電話通知）を解約します。翌月1日より月額から除外されます。'
+        : 'SMS通知を解約します。翌月1日より月額から除外されます。';
+    var btn = document.getElementById('optionCancelBtn');
+    btn.onclick = function() {
+        hideModal('optionCancelModal');
+        if (isVoice) toggleVoiceOption(false);
+        else toggleSmsOption(false);
+    };
+    showModal('optionCancelModal');
 }
 
 async function saveDetailChanges() {
