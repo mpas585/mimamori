@@ -367,7 +367,12 @@
                             </td>
                         </tr>
                     @empty
-                        <tr><td colspan="8" style="text-align:center;color:var(--gray-400);padding:40px;">デバイスがありません</td></tr>
+                        <tr>
+                        <td colspan="8" style="text-align:center;color:var(--gray-400);padding:40px 12px;">
+                            デバイスがありません。デバイス追加を行ってください。<br>
+                            <button class="btn btn-sm btn-primary" style="margin-top:10px;" onclick="showAddDeviceModal()">＋ デバイスを追加する</button>
+                        </td>
+                    </tr>
                     @endforelse
                 </tbody>
             </table>
