@@ -627,8 +627,8 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-secondary" onclick="hideModal('subscriptionModal')">閉じる</button>
-                <button class="btn btn-primary" onclick="saveDetailNotification(); hideModal('subscriptionModal')">保存</button>
+                <button class="btn btn-secondary" onclick="hideModal('subscriptionModal'); showDeviceDetail(currentDetailDeviceId)">閉じる</button>
+                <button class="btn btn-primary" onclick="saveDetailNotification(); hideModal('subscriptionModal'); showDeviceDetail(currentDetailDeviceId)">保存</button>
             </div>
         </div>
     </div>
@@ -854,6 +854,7 @@ let currentDetailVoicePhone1 = '', currentDetailVoicePhone2 = '';
 
 function showSubscriptionModal() {
     if (!currentDetailDeviceId) return;
+    hideModal('detailModal');
     document.getElementById('subModalDeviceId').textContent = currentDetailDeviceId;
     document.getElementById('detailSmsPhone1').value = currentDetailSmsPhone1;
     document.getElementById('detailSmsPhone2').value = currentDetailSmsPhone2;
