@@ -20,7 +20,7 @@ class DeviceReportController extends Controller
         // バリデーション
         $validated = $request->validate([
             'device_id'       => 'nullable|string|max:10',
-            'sim_id'          => 'nullable|string|max:5',
+            'sim_id'          => 'nullable|string|max:22',
             'period_start'    => 'required|date',
             'period_end'      => 'required|date',
             'detection_count' => 'required|integer|min:0',

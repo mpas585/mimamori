@@ -200,13 +200,13 @@ class MasterController extends Controller
             'sim_id'                => [
                 'nullable',
                 'string',
-                'size:5',
-                'regex:/^[A-Za-z0-9]+$/',
+                'max:22',
+                'regex:/^[0-9]+$/',
                 Rule::unique('devices', 'sim_id')->ignore($device->id),
             ],
         ], [
-            'sim_id.size'   => 'SIM IDは半角英数字5桁で入力してください',
-            'sim_id.regex'  => 'SIM IDは半角英数字のみ使用できます',
+            'sim_id.max'    => 'SIM IDは22桁以内で入力してください',
+            'sim_id.regex'  => 'SIM IDは数字のみ使用できます',
             'sim_id.unique' => 'このSIM IDは既に別のデバイスに登録されています',
         ]);
 
@@ -223,7 +223,7 @@ class MasterController extends Controller
             'install_height_cm'     => $request->install_height_cm     ?? $device->install_height_cm,
             'pet_exclusion_enabled' => $request->has('pet_exclusion_enabled') ? (int) $request->pet_exclusion_enabled : $device->pet_exclusion_enabled,
             'billing_start_date'    => $request->billing_start_date    ?? $device->billing_start_date,
-            'sim_id'                => $request->filled('sim_id') ? strtoupper($request->sim_id) : null,
+            'sim_id'                => $request->filled('sim_id') ? $request->sim_id : null,
         ]);
 
         return response()->json(['success' => true, 'message' => '更新しました']);

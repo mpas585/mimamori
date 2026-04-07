@@ -410,9 +410,9 @@
                 <div class="modal-section-title">📝 登録情報</div>
                 <div class="detail-grid">
                     <div class="detail-item" style="grid-column: span 2;">
-                        <p class="detail-item-label">📡 SIM ID</p>
-                        <input type="text" class="detail-form-input" id="masterDetailSimId" placeholder="例：AB12X" maxlength="5" style="text-transform:uppercase;font-family:monospace;letter-spacing:2px;">
-                        <p style="font-size:11px;color:var(--gray-500);margin-top:4px;">半角英数字5桁。デバイスからのJSONに含まれるSIM IDと品番を紐づけます。</p>
+                        <p class="detail-item-label">📡 SIM ID（ICCID）</p>
+                        <input type="text" class="detail-form-input" id="masterDetailSimId" placeholder="例：89882806660000123456" maxlength="22" style="font-family:monospace;letter-spacing:1px;" inputmode="numeric">
+                        <p style="font-size:11px;color:var(--gray-500);margin-top:4px;">SIMカード裏面または1NCE管理画面のICCID（数字のみ・最大22桁）。デバイスからのJSONに含まれるSIM IDと品番を紐づけます。</p>
                     </div>
                     <div class="detail-item"><p class="detail-item-label">登録日</p><p class="detail-item-value" id="masterDetailRegistered">-</p></div>
                     <div class="detail-item"><p class="detail-item-label">メモ</p><input type="text" class="detail-form-input" id="masterDetailMemo" placeholder="メモを追加..." maxlength="200"></div>
@@ -830,7 +830,7 @@ async function masterSaveAssignment() {
         install_height_cm: parseInt(document.getElementById('masterDetailHeight').value) || 200,
         pet_exclusion_enabled: document.getElementById('masterDetailPetExclusion').value === '1' ? 1 : 0,
         billing_start_date: document.getElementById('masterDetailBillingStartDate').value || null,
-        sim_id: document.getElementById('masterDetailSimId').value.toUpperCase() || null,
+        sim_id: document.getElementById('masterDetailSimId').value || null,
     };
     try {
         const res = await fetch('/partner/devices/' + masterCurrentDeviceId + '/assignment', {
