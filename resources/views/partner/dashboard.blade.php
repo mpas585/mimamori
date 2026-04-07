@@ -629,6 +629,23 @@
         </div>
     </div>
 
+    {{-- モーダル: オプション申込み確認 --}}
+    <div id="optionConfirmModal" class="modal-overlay" onclick="if(event.target===this)hideModal('optionConfirmModal')">
+        <div class="modal" style="max-width:440px;">
+            <div class="modal-header"><h3 id="optionConfirmTitle">オプション申し込み確認</h3><button class="modal-close" onclick="hideModal('optionConfirmModal')">×</button></div>
+            <div class="modal-body">
+                <p id="optionConfirmBody" style="font-size:14px;color:var(--gray-700);margin-bottom:12px;"></p>
+                <div style="background:var(--beige);border-radius:var(--radius);padding:12px 14px;font-size:13px;color:var(--gray-600);">
+                    翌月1日より月額に加算されます。当月分は無料です。
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="hideModal('optionConfirmModal')">キャンセル</button>
+                <button class="btn btn-primary" id="optionConfirmBtn">申し込む</button>
+            </div>
+        </div>
+    </div>
+
     {{-- モーダル: 解約・端末返却案内 --}}
     <div id="cancelFlowModal" class="modal-overlay" onclick="if(event.target===this)hideModal('cancelFlowModal')">
         <div class="modal" style="max-width:520px;">
@@ -860,7 +877,7 @@ function renderSmsAction(enabled) {
             + '<button style="font-size:11px;color:var(--gray-400);background:none;border:none;text-decoration:underline;cursor:pointer;font-family:inherit;padding:0;" onclick="toggleSmsOption(false)">解約する</button>';
         inputs.style.display = '';
     } else {
-        area.innerHTML = '<button class="btn btn-sm btn-primary" style="font-size:12px;padding:5px 14px;" onclick="toggleSmsOption(true)">申し込む</button>';
+        area.innerHTML = '<button class="btn btn-sm btn-primary" style="font-size:12px;padding:5px 14px;" onclick="showOptionConfirm(\'sms\')">申し込む</button>';
         inputs.style.display = 'none';
     }
 }
@@ -892,7 +909,7 @@ function renderVoiceAction(enabled) {
             + '<button style="font-size:11px;color:var(--gray-400);background:none;border:none;text-decoration:underline;cursor:pointer;font-family:inherit;padding:0;" onclick="toggleVoiceOption(false)">解約する</button>';
         inputs.style.display = '';
     } else {
-        area.innerHTML = '<button class="btn btn-sm btn-primary" style="font-size:12px;padding:5px 14px;" onclick="toggleVoiceOption(true)">申し込む</button>';
+        area.innerHTML = '<button class="btn btn-sm btn-primary" style="font-size:12px;padding:5px 14px;" onclick="showOptionConfirm(\'voice\')">申し込む</button>';
         inputs.style.display = 'none';
     }
 }
@@ -912,6 +929,22 @@ async function toggleVoiceOption(enabled) {
             showToast(enabled ? 'AIコールを申し込みました' : 'AIコールを解約しました', 'success');
         } else { showToast(data.message || 'エラーが発生しました', 'error'); }
     } catch(e) { showToast('通信エラー', 'error'); }
+}
+
+// ===== オプション申込み確認モーダル =====
+function showOptionConfirm(type) {
+    var isVoice = type === 'voice';
+    document.getElementById('optionConfirmTitle').textContent = isVoice ? '📞 AIコール申し込み確認' : '💬 SMS通知申し込み確認';
+    document.getElementById('optionConfirmBody').textContent = isVoice
+        ? 'AIコール（電話通知）を申し込みます。月額 +¥300/台 が翌月より加算されます。'
+        : 'SMS通知を申し込みます。月額 +¥100/台 が翌月より加算されます。';
+    var btn = document.getElementById('optionConfirmBtn');
+    btn.onclick = function() {
+        hideModal('optionConfirmModal');
+        if (isVoice) toggleVoiceOption(true);
+        else toggleSmsOption(true);
+    };
+    showModal('optionConfirmModal');
 }
 
 async function saveDetailChanges() {
