@@ -107,8 +107,8 @@ class CheckUndetectedDevices extends Command
             return;
         }
 
-        // AIコール：プレミアム契約済み かつ voice_enabled かつ アラート時のみ発信
-        if ($device->premium_enabled && $notif->voice_enabled && !empty($notif->voice_phone_1) && $type === 'alert') {
+        // AIコール：voice_enabled かつ アラート時のみ発信
+        if ($notif->voice_enabled && !empty($notif->voice_phone_1) && $type === 'alert') {
             $this->makeAiCall($device, $notif->voice_phone_1);
             $this->info("  AI CALL: {$notif->voice_phone_1}");
             return;
@@ -127,8 +127,8 @@ class CheckUndetectedDevices extends Command
             }
         }
 
-        // SMS通知：プレミアム契約済み かつ sms_enabled の場合のみ送信
-        if ($device->premium_enabled && $notif->sms_enabled) {
+        // SMS通知：sms_enabled の場合のみ送信
+        if ($notif->sms_enabled) {
             $smsBody = $this->buildSmsBody($device, $type);
             foreach (['sms_phone_1', 'sms_phone_2'] as $field) {
                 if (empty($notif->$field)) {

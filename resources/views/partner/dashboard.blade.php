@@ -517,32 +517,29 @@
                         <span id="detailNotifyLabel" style="font-size:13px;color:var(--gray-700);">有効</span>
                     </div>
                     <p class="detail-notify-note" style="margin-bottom:16px;">※ご契約後〇ヶ月は停止機能はご利用になれません。</p>
-                    {{-- プレミアム契約/解約 --}}
-                    <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:var(--beige);border-radius:var(--radius);margin-bottom:12px;border:1px solid var(--gray-200);">
-                        <p style="font-size:13px;font-weight:600;color:var(--gray-700);">⭐ プレミアム（SMS/電話通知）</p>
-                        <div id="detailPremiumActionArea"></div>
-                    </div>
-                    {{-- プレミアム未契約の注意 --}}
-                    <div id="detailPremiumNote" style="display:none;padding:10px 12px;background:var(--yellow-light);border-radius:var(--radius);margin-bottom:12px;font-size:12px;color:#a16207;">
-                        ⚠️ SMS・電話通知はプレミアム契約が必要です。
-                    </div>
-                    {{-- SMS通知 --}}
+
+                    {{-- SMS通知（個別申込） --}}
                     <div style="border:1px solid var(--gray-200);border-radius:var(--radius);padding:14px;margin-bottom:10px;">
                         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
                             <p style="font-size:13px;font-weight:600;color:var(--gray-700);">💬 SMS通知</p>
-                            <label class="watch-toggle"><input type="checkbox" id="detailSmsEnabled" onchange="saveDetailNotification()"><span class="watch-slider"></span></label>
+                            <div id="detailSmsActionArea"></div>
                         </div>
-                        <input type="tel" class="detail-form-input" id="detailSmsPhone1" placeholder="09012345678" style="margin-bottom:6px;" onblur="saveDetailNotification()">
-                        <input type="tel" class="detail-form-input" id="detailSmsPhone2" placeholder="09012345678（任意）" onblur="saveDetailNotification()">
+                        <div id="detailSmsInputs">
+                            <input type="tel" class="detail-form-input" id="detailSmsPhone1" placeholder="09012345678" style="margin-bottom:6px;" onblur="saveDetailNotification()">
+                            <input type="tel" class="detail-form-input" id="detailSmsPhone2" placeholder="09012345678（任意）" onblur="saveDetailNotification()">
+                        </div>
                     </div>
-                    {{-- 電話通知 --}}
+
+                    {{-- 電話通知（個別申込） --}}
                     <div style="border:1px solid var(--gray-200);border-radius:var(--radius);padding:14px;">
                         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
                             <p style="font-size:13px;font-weight:600;color:var(--gray-700);">📞 電話通知（AIコール）</p>
-                            <label class="watch-toggle"><input type="checkbox" id="detailVoiceEnabled" onchange="saveDetailNotification()"><span class="watch-slider"></span></label>
+                            <div id="detailVoiceActionArea"></div>
                         </div>
-                        <input type="tel" class="detail-form-input" id="detailVoicePhone1" placeholder="09012345678" style="margin-bottom:6px;" onblur="saveDetailNotification()">
-                        <input type="tel" class="detail-form-input" id="detailVoicePhone2" placeholder="09012345678（任意）" onblur="saveDetailNotification()">
+                        <div id="detailVoiceInputs">
+                            <input type="tel" class="detail-form-input" id="detailVoicePhone1" placeholder="09012345678" style="margin-bottom:6px;" onblur="saveDetailNotification()">
+                            <input type="tel" class="detail-form-input" id="detailVoicePhone2" placeholder="09012345678（任意）" onblur="saveDetailNotification()">
+                        </div>
                     </div>
                 </div>
                 <div class="detail-section"><div class="detail-section-title">🚶 外出スケジュール</div><div id="detailScheduleList"></div><button class="detail-schedule-add" onclick="openScheduleAddFromDetail()">＋ 外出スケジュール追加</button></div>
@@ -763,26 +760,17 @@ async function bulkExecute() {
     } catch (e) { console.error(e); showToast('通信エラーが発生しました', 'error'); btn.disabled = false; btn.textContent = '決済へ進む'; document.getElementById('bulk-loading').classList.remove('show'); }
 }
 
-function bulkDownloadCsv(issued) {
-    var bom = '\uFEFF'; var rows = ['デバイスID,PIN'];
-    issued.forEach(function(d) { rows.push(d.device_id + ',' + d.pin); });
-    var csv = bom + rows.join('\r\n');
-    var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    var url = URL.createObjectURL(blob);
-    var a = document.createElement('a'); a.href = url; a.download = 'devices_' + new Date().toISOString().slice(0, 10) + '.csv';
-    document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
-}
-
-document.getElementById('bulk-qty-minus').addEventListener('click', function() { var inp = document.getElementById('bulk-qty-input'); inp.value = Math.max(1, (parseInt(inp.value) || 1) - 1); bulkSyncPresets(); });
-document.getElementById('bulk-qty-plus').addEventListener('click', function() { var inp = document.getElementById('bulk-qty-input'); inp.value = Math.min(300, (parseInt(inp.value) || 1) + 1); bulkSyncPresets(); });
-document.getElementById('bulk-qty-input').addEventListener('input', bulkSyncPresets);
-document.querySelectorAll('.bulk-qty-preset').forEach(function(btn) { btn.addEventListener('click', function() { document.getElementById('bulk-qty-input').value = this.dataset.val; bulkSyncPresets(); }); });
 // ===== 配送先プリセット =====
 var deliveryPreset = { name: '{{ $organization->delivery_name ?? "" }}', postal: '{{ $organization->delivery_postal ?? "" }}', address: '{{ $organization->delivery_address ?? "" }}', phone: '{{ $organization->delivery_phone ?? "" }}' };
 function applyPreset() { document.getElementById('bulk-delivery-name').value = deliveryPreset.name; document.getElementById('bulk-delivery-postal').value = deliveryPreset.postal; document.getElementById('bulk-delivery-address').value = deliveryPreset.address; document.getElementById('bulk-delivery-phone').value = deliveryPreset.phone; }
 
 function bulkSyncPresets() { var v = parseInt(document.getElementById('bulk-qty-input').value) || 0; document.querySelectorAll('.bulk-qty-preset').forEach(function(b) { b.classList.toggle('active', parseInt(b.dataset.val) === v); }); }
 bulkSyncPresets();
+
+document.getElementById('bulk-qty-minus').addEventListener('click', function() { var inp = document.getElementById('bulk-qty-input'); inp.value = Math.max(1, (parseInt(inp.value) || 1) - 1); bulkSyncPresets(); });
+document.getElementById('bulk-qty-plus').addEventListener('click', function() { var inp = document.getElementById('bulk-qty-input'); inp.value = Math.min(300, (parseInt(inp.value) || 1) + 1); bulkSyncPresets(); });
+document.getElementById('bulk-qty-input').addEventListener('input', bulkSyncPresets);
+document.querySelectorAll('.bulk-qty-preset').forEach(function(btn) { btn.addEventListener('click', function() { document.getElementById('bulk-qty-input').value = this.dataset.val; bulkSyncPresets(); }); });
 
 // ===== デバイス削除 =====
 function confirmDelete(deviceId) { document.getElementById('deleteDeviceId').textContent = deviceId; document.getElementById('deleteForm').action = '/partner/org/devices/' + deviceId + '/remove'; showModal('deleteModal'); }
@@ -846,25 +834,84 @@ function showDeviceDetail(deviceId) {
         var notifyEnabled = data.notification_service_enabled !== false;
         document.getElementById('detailNotifyEnabled').checked = notifyEnabled;
         document.getElementById('detailNotifyLabel').textContent = notifyEnabled ? '有効' : '停止中';
-        document.getElementById('detailSmsEnabled').checked = data.sms_enabled || false;
+
+        // SMS・AIコール個別レンダリング
+        var smsEnabled = data.sms_enabled || false;
+        var voiceEnabled = data.voice_enabled || false;
         document.getElementById('detailSmsPhone1').value = data.sms_phone_1 || '';
         document.getElementById('detailSmsPhone2').value = data.sms_phone_2 || '';
-        document.getElementById('detailVoiceEnabled').checked = data.voice_enabled || false;
         document.getElementById('detailVoicePhone1').value = data.voice_phone_1 || '';
         document.getElementById('detailVoicePhone2').value = data.voice_phone_2 || '';
-        var isPremium = data.premium_enabled || false;
-        ['detailSmsEnabled','detailSmsPhone1','detailSmsPhone2','detailVoiceEnabled','detailVoicePhone1','detailVoicePhone2'].forEach(function(id) {
-            var el = document.getElementById(id);
-            el.disabled = !isPremium;
-            el.style.opacity = isPremium ? '' : '0.4';
-            el.style.cursor = isPremium ? '' : 'not-allowed';
-        });
-        var premiumNote = document.getElementById('detailPremiumNote');
-        if (premiumNote) premiumNote.style.display = isPremium ? 'none' : '';
-        renderDetailPremiumAction(isPremium);
+        renderSmsAction(smsEnabled);
+        renderVoiceAction(voiceEnabled);
+
         renderDetailSchedules(data.schedules || [], data.device_id);
         showModal('detailModal');
     }).catch(() => showToast('詳細の取得に失敗しました', 'error'));
+}
+
+// ===== SMS個別申込/解約 =====
+function renderSmsAction(enabled) {
+    var area = document.getElementById('detailSmsActionArea');
+    var inputs = document.getElementById('detailSmsInputs');
+    if (!area) return;
+    if (enabled) {
+        area.innerHTML = '<span style="font-size:12px;font-weight:600;color:#2e7d32;background:#e8f5e9;padding:3px 10px;border-radius:10px;margin-right:8px;">契約中 ✓</span>'
+            + '<button style="font-size:11px;color:var(--gray-400);background:none;border:none;text-decoration:underline;cursor:pointer;font-family:inherit;padding:0;" onclick="toggleSmsOption(false)">解約する</button>';
+        inputs.style.display = '';
+    } else {
+        area.innerHTML = '<button class="btn btn-sm btn-primary" style="font-size:12px;padding:5px 14px;" onclick="toggleSmsOption(true)">申し込む</button>';
+        inputs.style.display = 'none';
+    }
+}
+
+async function toggleSmsOption(enabled) {
+    if (!currentDetailDeviceId) return;
+    var payload = { sms_enabled: enabled ? 1 : 0 };
+    if (!enabled) { payload.sms_phone_1 = null; payload.sms_phone_2 = null; }
+    try {
+        var res = await fetch('/partner/org/devices/' + currentDetailDeviceId + '/notification', {
+            method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        var data = await res.json();
+        if (data.success) {
+            renderSmsAction(enabled);
+            showToast(enabled ? 'SMS通知を申し込みました' : 'SMS通知を解約しました', 'success');
+        } else { showToast(data.message || 'エラーが発生しました', 'error'); }
+    } catch(e) { showToast('通信エラー', 'error'); }
+}
+
+// ===== AIコール個別申込/解約 =====
+function renderVoiceAction(enabled) {
+    var area = document.getElementById('detailVoiceActionArea');
+    var inputs = document.getElementById('detailVoiceInputs');
+    if (!area) return;
+    if (enabled) {
+        area.innerHTML = '<span style="font-size:12px;font-weight:600;color:#2e7d32;background:#e8f5e9;padding:3px 10px;border-radius:10px;margin-right:8px;">契約中 ✓</span>'
+            + '<button style="font-size:11px;color:var(--gray-400);background:none;border:none;text-decoration:underline;cursor:pointer;font-family:inherit;padding:0;" onclick="toggleVoiceOption(false)">解約する</button>';
+        inputs.style.display = '';
+    } else {
+        area.innerHTML = '<button class="btn btn-sm btn-primary" style="font-size:12px;padding:5px 14px;" onclick="toggleVoiceOption(true)">申し込む</button>';
+        inputs.style.display = 'none';
+    }
+}
+
+async function toggleVoiceOption(enabled) {
+    if (!currentDetailDeviceId) return;
+    var payload = { voice_enabled: enabled ? 1 : 0 };
+    if (!enabled) { payload.voice_phone_1 = null; payload.voice_phone_2 = null; }
+    try {
+        var res = await fetch('/partner/org/devices/' + currentDetailDeviceId + '/notification', {
+            method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        var data = await res.json();
+        if (data.success) {
+            renderVoiceAction(enabled);
+            showToast(enabled ? 'AIコールを申し込みました' : 'AIコールを解約しました', 'success');
+        } else { showToast(data.message || 'エラーが発生しました', 'error'); }
+    } catch(e) { showToast('通信エラー', 'error'); }
 }
 
 async function saveDetailChanges() {
@@ -880,63 +927,20 @@ async function saveDetailChanges() {
 
 function toggleNotifyService(enabled) { document.getElementById('detailNotifyLabel').textContent = enabled ? '有効' : '停止中'; showToast(enabled ? '通知サービスを有効にしました' : '通知サービスを停止しました', 'success'); }
 
-// ===== プレミアム契約/解約 =====
-function renderDetailPremiumAction(isPremium) {
-    var area = document.getElementById('detailPremiumActionArea');
-    if (!area) return;
-    if (isPremium) {
-        area.innerHTML = '<span style="font-size:12px;font-weight:600;color:#2e7d32;background:#e8f5e9;padding:3px 10px;border-radius:10px;margin-right:10px;">契約中 ✓</span>'
-            + '<button style="font-size:11px;color:var(--gray-400);background:none;border:none;text-decoration:underline;cursor:pointer;font-family:inherit;padding:0;" onclick="toggleDetailPremium(false)">解約する</button>';
-    } else {
-        area.innerHTML = '<button class="btn btn-sm btn-primary" style="font-size:12px;padding:5px 14px;" onclick="toggleDetailPremium(true)">プレミアムを申し込む</button>';
-    }
-}
-
-async function toggleDetailPremium(enabled) {
-    if (!currentDetailDeviceId) return;
-    try {
-        var res = await fetch('/partner/org/devices/' + currentDetailDeviceId + '/toggle-premium', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' },
-            body: JSON.stringify({ premium_enabled: enabled ? 1 : 0 })
-        });
-        var data = await res.json();
-        if (data.success) {
-            renderDetailPremiumAction(enabled);
-            ['detailSmsEnabled','detailSmsPhone1','detailSmsPhone2','detailVoiceEnabled','detailVoicePhone1','detailVoicePhone2'].forEach(function(id) {
-                var el = document.getElementById(id);
-                el.disabled = !enabled;
-                el.style.opacity = enabled ? '' : '0.4';
-                el.style.cursor = enabled ? '' : 'not-allowed';
-            });
-            document.getElementById('detailPremiumNote').style.display = enabled ? 'none' : '';
-            showToast(enabled ? 'プレミアムを申し込みました' : 'プレミアムを解約しました', 'success');
-        } else {
-            showToast(data.message || 'エラーが発生しました', 'error');
-        }
-    } catch(e) {
-        showToast('通信エラーが発生しました', 'error');
-    }
-}
-
 function saveDetailNotification() {
     if (!currentDetailDeviceId) return;
     var payload = {
-        sms_enabled: document.getElementById('detailSmsEnabled').checked ? 1 : 0,
         sms_phone_1: document.getElementById('detailSmsPhone1').value || null,
         sms_phone_2: document.getElementById('detailSmsPhone2').value || null,
-        voice_enabled: document.getElementById('detailVoiceEnabled').checked ? 1 : 0,
         voice_phone_1: document.getElementById('detailVoicePhone1').value || null,
         voice_phone_2: document.getElementById('detailVoicePhone2').value || null,
     };
     fetch('/partner/org/devices/' + currentDetailDeviceId + '/notification', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' },
-        body: JSON.stringify(payload)
-    })
-    .then(r => r.json()).then(d => { if (d.success) showToast('通知設定を保存しました', 'success'); })
+        method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' }, body: JSON.stringify(payload)
+    }).then(r => r.json()).then(d => { if (d.success) showToast('通知設定を保存しました', 'success'); })
     .catch(() => showToast('保存に失敗しました', 'error'));
 }
+
 function showCancelFlow() { showModal('cancelFlowModal'); }
 
 function renderDetailSchedules(schedules, deviceId) {
@@ -1051,7 +1055,7 @@ async function executeDeleteSchedule() {
     } catch (e) { console.error(e); showToast('通信エラーが発生しました', 'error'); }
 }
 
-// ===== 通知設定モーダル（SMS対応済み） =====
+// ===== 通知設定モーダル =====
 function showNotificationModal() {
     fetch('{{ route("partner.org.notification") }}', { headers: { 'Accept': 'application/json' } })
     .then(r => r.json()).then(d => {
@@ -1078,15 +1082,11 @@ function saveOrgNotification() {
         notification_sms_enabled: document.getElementById('orgNotifSmsEnabled').checked ? 1 : 0,
     };
     fetch('{{ route("partner.org.notification.update") }}', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' },
-        body: JSON.stringify(payload)
-    })
-    .then(r => r.json()).then(d => {
+        method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' }, body: JSON.stringify(payload)
+    }).then(r => r.json()).then(d => {
         if (d.success) { showToast(d.message, 'success'); hideModal('notificationModal'); }
         else showToast(d.message || '保存に失敗しました', 'error');
-    })
-    .catch(() => showToast('通信エラーが発生しました', 'error'));
+    }).catch(() => showToast('通信エラーが発生しました', 'error'));
 }
 
 document.addEventListener('DOMContentLoaded', function() {
