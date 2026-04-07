@@ -53,8 +53,8 @@ class BillingController extends Controller
                 'metadata'    => ['organization_id' => $request->organization_id ?? 'none'],
             ]);
 
-            // 金額計算（ベース¥700/台 + AIコール¥300/台）
-            $amount = ($request->device_count * 700)
+            // 金額計算（ベース¥1000/台 + AIコール¥300/台）
+            $amount = ($request->device_count * 1000)
                     + ($request->premium_device_count * 300);
 
             // 3Dセキュア付き初月即時課金
@@ -74,7 +74,7 @@ class BillingController extends Controller
                     'organization_id'   => $request->organization_id,
                     'payjp_customer_id' => $customer->id,
                     'device_count'      => $request->device_count,
-                    'unit_price'        => 700,
+                    'unit_price'        => 1000,
                     'amount'            => $amount,
                     'status'            => 'pending',
                     'next_billing_date' => now()->addMonth()->startOfMonth()->toDateString(),
@@ -162,7 +162,7 @@ class BillingController extends Controller
             'organization_id'   => $organizationId,
             'payjp_customer_id' => $customerId,
             'device_count'      => $deviceCount,
-            'unit_price'        => 700,
+            'unit_price'        => 1000,
             'amount'            => $amount,
             'status'            => 'active',
             'next_billing_date' => now()->addMonth()->startOfMonth()->toDateString(),
