@@ -163,25 +163,6 @@ class MasterController extends Controller
             'voice_enabled'          => $notif ? (bool) $notif->voice_enabled : false,
             'voice_phone_1'          => $notif && $notif->voice_phone_1 ? preg_replace('/^\+81/', '0', $notif->voice_phone_1) : null,
             'voice_phone_2'          => $notif && $notif->voice_phone_2 ? preg_replace('/^\+81/', '0', $notif->voice_phone_2) : null,
-            'premium_enabled'        => (bool) ($device->premium_enabled ?? false),
-        ]);
-    }
-
-    /**
-     * デバイス個別プレミアムトグル（マスター用）
-     */
-    public function toggleDevicePremium(Request $request, string $deviceId)
-    {
-        $device = Device::where('device_id', $deviceId)->firstOrFail();
-
-        $request->validate(['premium_enabled' => 'required|boolean']);
-
-        $device->update(['premium_enabled' => (bool) $request->premium_enabled]);
-
-        return response()->json([
-            'success'         => true,
-            'premium_enabled' => (bool) $device->premium_enabled,
-            'message'         => $device->premium_enabled ? 'プレミアムを有効にしました' : 'プレミアムを無効にしました',
         ]);
     }
 
@@ -289,6 +270,17 @@ class MasterController extends Controller
         $device->detectionLogs()->delete();
 
         return response()->json(['success' => true, 'message' => "デバイス {$deviceId} の警告を解除しました"]);
+    }
+
+    /**
+     * デバイス論理削除（マスター専用）
+     */
+    public function destroyDevice(string $deviceId)
+    {
+        $device = Device::where('device_id', $deviceId)->firstOrFail();
+        $device->delete();
+
+        return response()->json(['success' => true, 'message' => "デバイス {$deviceId} を削除しました"]);
     }
 
     public function storeDeviceSchedule(Request $request, string $deviceId)

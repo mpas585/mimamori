@@ -6,10 +6,13 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
 class Device extends Authenticatable
 {
+    use SoftDeletes;
+
     protected $fillable = [
         'device_id',
         'pin_hash',
@@ -47,6 +50,7 @@ class Device extends Authenticatable
             'away_until'             => 'datetime',
             'warranty_expires_at'    => 'date',
             'billing_start_date'     => 'date',
+            'deleted_at'             => 'datetime',
             'pet_exclusion_enabled'  => 'boolean',
             'away_mode'              => 'boolean',
             'premium_enabled'        => 'boolean',
