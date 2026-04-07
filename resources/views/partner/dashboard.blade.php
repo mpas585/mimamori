@@ -511,36 +511,16 @@
                     <div class="detail-item"><p class="detail-item-label">登録日</p><p class="detail-item-value" id="detailRegistered">-</p></div>
                     <div class="detail-item"><p class="detail-item-label">メモ</p><input type="text" class="detail-form-input" id="detailMemoInput" placeholder="メモを入力..." maxlength="200"></div>
                 </div></div>
-                <div class="detail-section"><div class="detail-section-title">🔔 通知サービス</div>
-                    <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+                <div class="detail-section">
+                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+                        <div class="detail-section-title" style="margin-bottom:0;">🔔 端末サブスクリプション</div>
+                        <button class="btn btn-sm btn-secondary" onclick="showSubscriptionModal()">📋 契約プラン</button>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:12px;">
                         <label class="watch-toggle"><input type="checkbox" id="detailNotifyEnabled" checked onchange="toggleNotifyService(this.checked)"><span class="watch-slider"></span></label>
                         <span id="detailNotifyLabel" style="font-size:13px;color:var(--gray-700);">有効</span>
                     </div>
-                    <p class="detail-notify-note" style="margin-bottom:16px;">※ご契約後〇ヶ月は停止機能はご利用になれません。</p>
-
-                    {{-- SMS通知（個別申込） --}}
-                    <div style="border:1px solid var(--gray-200);border-radius:var(--radius);padding:14px;margin-bottom:10px;">
-                        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-                            <p style="font-size:13px;font-weight:600;color:var(--gray-700);">💬 SMS通知</p>
-                            <div id="detailSmsActionArea"></div>
-                        </div>
-                        <div id="detailSmsInputs">
-                            <input type="tel" class="detail-form-input" id="detailSmsPhone1" placeholder="09012345678" style="margin-bottom:6px;" onblur="saveDetailNotification()">
-                            <input type="tel" class="detail-form-input" id="detailSmsPhone2" placeholder="09012345678（任意）" onblur="saveDetailNotification()">
-                        </div>
-                    </div>
-
-                    {{-- 電話通知（個別申込） --}}
-                    <div style="border:1px solid var(--gray-200);border-radius:var(--radius);padding:14px;">
-                        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-                            <p style="font-size:13px;font-weight:600;color:var(--gray-700);">📞 電話通知（AIコール）</p>
-                            <div id="detailVoiceActionArea"></div>
-                        </div>
-                        <div id="detailVoiceInputs">
-                            <input type="tel" class="detail-form-input" id="detailVoicePhone1" placeholder="09012345678" style="margin-bottom:6px;" onblur="saveDetailNotification()">
-                            <input type="tel" class="detail-form-input" id="detailVoicePhone2" placeholder="09012345678（任意）" onblur="saveDetailNotification()">
-                        </div>
-                    </div>
+                    <p class="detail-notify-note" style="margin-top:8px;">※ご契約後〇ヶ月は停止機能はご利用になれません。</p>
                 </div>
                 <div class="detail-section"><div class="detail-section-title">🚶 外出スケジュール</div><div id="detailScheduleList"></div><button class="detail-schedule-add" onclick="openScheduleAddFromDetail()">＋ 外出スケジュール追加</button></div>
             </div>
@@ -626,6 +606,43 @@
         <div class="modal"><div class="modal-header"><h3>⚠️ 外出スケジュール削除</h3><button class="modal-close" onclick="hideModal('scheduleDeleteModal')">×</button></div>
             <div class="modal-body"><p>この外出スケジュールを削除しますか？</p><p id="scheduleDeleteDetail" style="color:var(--gray-500);font-size:13px;margin-top:8px;"></p></div>
             <div class="modal-footer"><button class="btn btn-secondary" onclick="hideModal('scheduleDeleteModal')">キャンセル</button><button class="btn btn-danger" onclick="executeDeleteSchedule()">削除する</button></div>
+        </div>
+    </div>
+
+    {{-- モーダル: 契約プラン --}}
+    <div id="subscriptionModal" class="modal-overlay" onclick="if(event.target===this)hideModal('subscriptionModal')">
+        <div class="modal" style="max-width:500px;">
+            <div class="modal-header"><h3>📋 契約プラン</h3><button class="modal-close" onclick="hideModal('subscriptionModal')">×</button></div>
+            <div class="modal-body">
+                <div style="font-size:12px;color:var(--gray-500);margin-bottom:16px;">対象デバイス：<span id="subModalDeviceId" class="mono" style="font-size:12px;"></span></div>
+
+                {{-- SMS通知 --}}
+                <div style="border:1px solid var(--gray-200);border-radius:var(--radius);padding:14px;margin-bottom:10px;">
+                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+                        <p style="font-size:13px;font-weight:600;color:var(--gray-700);">💬 SMS通知 <span style="font-size:11px;font-weight:400;color:var(--gray-500);">+¥100/台/月</span></p>
+                        <div id="detailSmsActionArea"></div>
+                    </div>
+                    <div id="detailSmsInputs">
+                        <input type="tel" class="detail-form-input" id="detailSmsPhone1" placeholder="09012345678" style="margin-bottom:6px;" onblur="saveDetailNotification()">
+                        <input type="tel" class="detail-form-input" id="detailSmsPhone2" placeholder="09012345678（任意）" onblur="saveDetailNotification()">
+                    </div>
+                </div>
+
+                {{-- AIコール --}}
+                <div style="border:1px solid var(--gray-200);border-radius:var(--radius);padding:14px;">
+                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+                        <p style="font-size:13px;font-weight:600;color:var(--gray-700);">📞 電話通知（AIコール）<span style="font-size:11px;font-weight:400;color:var(--gray-500);">+¥300/台/月</span></p>
+                        <div id="detailVoiceActionArea"></div>
+                    </div>
+                    <div id="detailVoiceInputs">
+                        <input type="tel" class="detail-form-input" id="detailVoicePhone1" placeholder="09012345678" style="margin-bottom:6px;" onblur="saveDetailNotification()">
+                        <input type="tel" class="detail-form-input" id="detailVoicePhone2" placeholder="09012345678（任意）" onblur="saveDetailNotification()">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="hideModal('subscriptionModal')">閉じる</button>
+            </div>
         </div>
     </div>
 
@@ -844,6 +861,21 @@ function sendToggleAwayMode(deviceId, awayMode) {
 
 // ===== デバイス詳細 =====
 let currentDetailDeviceId = null;
+let currentDetailSmsEnabled = false, currentDetailVoiceEnabled = false;
+let currentDetailSmsPhone1 = '', currentDetailSmsPhone2 = '';
+let currentDetailVoicePhone1 = '', currentDetailVoicePhone2 = '';
+
+function showSubscriptionModal() {
+    if (!currentDetailDeviceId) return;
+    document.getElementById('subModalDeviceId').textContent = currentDetailDeviceId;
+    document.getElementById('detailSmsPhone1').value = currentDetailSmsPhone1;
+    document.getElementById('detailSmsPhone2').value = currentDetailSmsPhone2;
+    document.getElementById('detailVoicePhone1').value = currentDetailVoicePhone1;
+    document.getElementById('detailVoicePhone2').value = currentDetailVoicePhone2;
+    renderSmsAction(currentDetailSmsEnabled);
+    renderVoiceAction(currentDetailVoiceEnabled);
+    showModal('subscriptionModal');
+}
 function showDeviceDetail(deviceId) {
     currentDetailDeviceId = deviceId;
     fetch('/partner/org/devices/' + deviceId + '/detail', { headers: { 'Accept': 'application/json' } })
@@ -872,15 +904,13 @@ function showDeviceDetail(deviceId) {
         document.getElementById('detailNotifyEnabled').checked = notifyEnabled;
         document.getElementById('detailNotifyLabel').textContent = notifyEnabled ? '有効' : '停止中';
 
-        // SMS・AIコール個別レンダリング
-        var smsEnabled = data.sms_enabled || false;
-        var voiceEnabled = data.voice_enabled || false;
-        document.getElementById('detailSmsPhone1').value = data.sms_phone_1 || '';
-        document.getElementById('detailSmsPhone2').value = data.sms_phone_2 || '';
-        document.getElementById('detailVoicePhone1').value = data.voice_phone_1 || '';
-        document.getElementById('detailVoicePhone2').value = data.voice_phone_2 || '';
-        renderSmsAction(smsEnabled);
-        renderVoiceAction(voiceEnabled);
+        // SMS・AIコール状態をキャッシュ（契約プランモーダルで使用）
+        currentDetailSmsEnabled = data.sms_enabled || false;
+        currentDetailVoiceEnabled = data.voice_enabled || false;
+        currentDetailSmsPhone1 = data.sms_phone_1 || '';
+        currentDetailSmsPhone2 = data.sms_phone_2 || '';
+        currentDetailVoicePhone1 = data.voice_phone_1 || '';
+        currentDetailVoicePhone2 = data.voice_phone_2 || '';
 
         renderDetailSchedules(data.schedules || [], data.device_id);
         showModal('detailModal');
@@ -913,6 +943,7 @@ async function toggleSmsOption(enabled) {
         });
         var data = await res.json();
         if (data.success) {
+            currentDetailSmsEnabled = enabled;
             renderSmsAction(enabled);
             showToast(enabled ? 'SMS通知を申し込みました' : 'SMS通知を解約しました', 'success');
         } else { showToast(data.message || 'エラーが発生しました', 'error'); }
@@ -945,6 +976,7 @@ async function toggleVoiceOption(enabled) {
         });
         var data = await res.json();
         if (data.success) {
+            currentDetailVoiceEnabled = enabled;
             renderVoiceAction(enabled);
             showToast(enabled ? 'AIコールを申し込みました' : 'AIコールを解約しました', 'success');
         } else { showToast(data.message || 'エラーが発生しました', 'error'); }
