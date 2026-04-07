@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class OrgAdminController extends Controller
@@ -581,9 +582,13 @@ class OrgAdminController extends Controller
         $organization = $this->getOrganization();
 
         $request->validate([
-            'count'    => 'required|integer|min:1|max:300',
-            'opt_ai'   => 'nullable|boolean',
-            'opt_sms'  => 'nullable|boolean',
+            'count'            => 'required|integer|min:1|max:300',
+            'opt_ai'           => 'nullable|boolean',
+            'opt_sms'          => 'nullable|boolean',
+            'delivery_name'    => 'nullable|string|max:100',
+            'delivery_postal'  => 'nullable|string|max:10',
+            'delivery_address' => 'nullable|string|max:255',
+            'delivery_phone'   => 'nullable|string|max:20',
         ]);
 
         $count  = (int) $request->count;
@@ -591,7 +596,7 @@ class OrgAdminController extends Controller
         $optSms = (bool) ($request->opt_sms ?? false);
 
         // ── 料金計算（税抜単価）
-        $unitPrice = 700 + ($optAi ? 300 : 0) + ($optSms ? 100 : 0);
+        $unitPrice = 1000 + ($optAi ? 300 : 0) + ($optSms ? 100 : 0);
         $subtotal  = $unitPrice * $count;
         $tax       = (int) floor($subtotal * 0.1);
         $total     = $subtotal + $tax;
@@ -670,6 +675,55 @@ class OrgAdminController extends Controller
             $issued[] = ['device_id' => $deviceId, 'pin' => $pin];
         }
 
+        // ── 運営への通知メール
+        $adminEmail = config('services.admin.notification_email');
+        if ($adminEmail) {
+            try {
+                $admin        = Auth::guard('partner')->user();
+                $deliveryName    = $request->delivery_name    ?? '-';
+                $deliveryPostal  = $request->delivery_postal  ?? '-';
+                $deliveryAddress = $request->delivery_address ?? '-';
+                $deliveryPhone   = $request->delivery_phone   ?? '-';
+
+                $deviceList = implode("\n", array_map(
+                    fn($item) => "  " . $item['device_id'] . " / PIN: " . $item['pin'],
+                    $issued
+                ));
+
+                $body = <<<TEXT
+【みまもりトーフ】デバイス追加申込みがありました
+
+■ 申込み情報
+組織名　　: {$organization->name}
+担当者　　: {$admin->name}（{$admin->email}）
+申込日時　: {$organization->created_at->format('Y/m/d H:i')}
+申込台数　: {$count}台
+オプション: AIコール＝{$this->boolLabel($optAi)} / SMS＝{$this->boolLabel($optSms)}
+月額合計　: ¥{$total}（税込）
+
+■ 配送先
+お名前　　: {$deliveryName}
+郵便番号　: {$deliveryPostal}
+住所　　　: {$deliveryAddress}
+電話番号　: {$deliveryPhone}
+
+■ 発番デバイス一覧（{$count}台）
+{$deviceList}
+
+※ SIMをデバイスに登録後、発送をお願いします。
+TEXT;
+
+                Mail::raw($body, function ($message) use ($adminEmail, $organization, $count) {
+                    $message->to($adminEmail)
+                            ->subject("[みまもりトーフ] デバイス追加申込み：{$organization->name} {$count}台");
+                });
+
+            } catch (\Exception $e) {
+                Log::error('bulkCheckout admin mail error: ' . $e->getMessage());
+                // メール失敗でも処理は継続
+            }
+        }
+
         return response()->json([
             'success'    => true,
             'count'      => $count,
@@ -677,6 +731,11 @@ class OrgAdminController extends Controller
             'amount'     => $total,
             'charge_id'  => $charge->id,
         ]);
+    }
+
+    private function boolLabel(bool $value): string
+    {
+        return $value ? 'あり' : 'なし';
     }
 
     private function generateDeviceId(): string

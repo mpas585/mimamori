@@ -40,4 +40,8 @@ return [
         'webhook_secret'  => env('PAYJP_WEBHOOK_SECRET'),
     ],
 
+    'admin' => [
+        'notification_email' => env('ADMIN_NOTIFICATION_EMAIL'),
+    ],
+
 ];
