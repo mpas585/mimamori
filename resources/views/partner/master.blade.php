@@ -250,7 +250,7 @@
                         <td style="font-size:12px;">{{ $device->rssi ? $device->rssi . 'dBm' : '-' }}</td>
                         <td style="font-size:12px;">{{ $device->last_received_at ? $device->last_received_at->format('m/d H:i') : '-' }}</td>
                         <td style="font-size:12px;">{{ $device->last_human_detected_at ? $device->last_human_detected_at->format('m/d H:i') : '-' }}</td>
-                        <td><button class="action-btn" onclick="showDeviceDetail('{{ $device->device_id }}')">詳細</button></td>
+                        <td><button class="action-btn" onclick="showDeviceDetail('{{ $device->device_id }}')">詳細</button><button class="action-btn danger" onclick="confirmDeleteDevice('{{ $device->device_id }}')">削除</button></td>
                     </tr>
                 @empty
                     <tr>
@@ -962,6 +962,17 @@ async function masterExecuteDeleteSchedule() {
         if (res.ok && data.success) { showToast('スケジュールを削除しました', 'success'); hideModal('masterScheduleDeleteModal'); showDeviceDetail(masterCurrentDeviceId); }
         else showToast(data.message || '削除に失敗しました', 'error');
     } catch(e) { showToast('通信エラーが発生しました', 'error'); }
+}
+
+// ===== デバイス削除 =====
+function confirmDeleteDevice(deviceId) {
+    if (!confirm('デバイス ' + deviceId + ' を削除しますか？\nこの操作は取り消せません。')) return;
+    fetch('/partner/devices/' + deviceId, {
+        method: 'DELETE', headers: { 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' }
+    }).then(r => r.json()).then(d => {
+        if (d.success) { showToast(d.message, 'success'); setTimeout(() => location.reload(), 800); }
+        else showToast(d.message || '削除に失敗しました', 'error');
+    }).catch(() => showToast('通信エラー', 'error'));
 }
 
 // ===== 管理者アカウント =====
