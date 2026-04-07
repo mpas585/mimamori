@@ -68,6 +68,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/plan', [PlanController::class, 'index'])->name('plan');
     Route::post('/plan/subscribe', [PlanController::class, 'subscribe'])->name('plan.subscribe');
     Route::post('/plan/cancel', [PlanController::class, 'cancel'])->name('plan.cancel');
+    Route::get('/plan/tds-complete', [PlanController::class, 'tdsComplete'])->name('plan.tds-complete');
 });
 
 // ============================================================
@@ -100,7 +101,7 @@ Route::middleware(PartnerAuth::class)->prefix('partner')->group(function () {
     Route::post('/devices/{deviceId}/notification', [MasterController::class, 'updateDeviceNotification'])->name('partner.devices.update-notification');
     Route::post('/devices/{deviceId}/toggle-watch', [MasterController::class, 'toggleDeviceWatch'])->name('partner.devices.toggle-watch');
     Route::post('/devices/{deviceId}/clear-alert', [MasterController::class, 'clearDeviceAlert'])->name('partner.devices.clear-alert');
-    Route::delete('/devices/{deviceId}', [MasterController::class, 'destroyDevice'])->name('partner.devices.destroy');
+    Route::post('/devices/{deviceId}/toggle-premium', [MasterController::class, 'toggleDevicePremium'])->name('partner.devices.toggle-premium');
     Route::post('/devices/{deviceId}/schedules', [MasterController::class, 'storeDeviceSchedule'])->name('partner.devices.schedules.store');
     Route::delete('/devices/{deviceId}/schedules/{scheduleId}', [MasterController::class, 'destroyDeviceSchedule'])->name('partner.devices.schedules.destroy');
 

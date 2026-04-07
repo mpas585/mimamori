@@ -134,6 +134,16 @@
         padding: 14px 16px; background: var(--blue-light);
         border-radius: var(--radius); font-size: 13px; color: var(--gray-700); line-height: 1.7;
     }
+    .flash-success {
+        padding: 14px 16px; background: #d1fae5; border: 1px solid #6ee7b7;
+        border-radius: var(--radius); font-size: 13px; color: #065f46;
+        margin-bottom: 16px; font-weight: 500;
+    }
+    .flash-error {
+        padding: 14px 16px; background: #fee2e2; border: 1px solid #fca5a5;
+        border-radius: var(--radius); font-size: 13px; color: #991b1b;
+        margin-bottom: 16px; font-weight: 500;
+    }
 </style>
 @endsection
 
@@ -144,6 +154,14 @@
         $isPremium = $device->premium_enabled;
         $isCanceled = $subscription && $subscription->status === 'canceled';
     @endphp
+
+    {{-- フラッシュメッセージ（3DSコールバック後） --}}
+    @if(session('success'))
+    <div class="flash-success">✓ {{ session('success') }}</div>
+    @endif
+    @if(session('error'))
+    <div class="flash-error">⚠️ {{ session('error') }}</div>
+    @endif
 
     {{-- 現在のプランバナー --}}
     @if($isPremium && !$isCanceled)
@@ -280,6 +298,9 @@ async function startSubscribe() {
         if (data.ok) {
             showToast(data.message);
             setTimeout(() => location.reload(), 1200);
+        } else if (data.tds && data.redirect_to) {
+            // 3Dセキュア認証が必要 → pay.jpの認証画面へリダイレクト
+            window.location.href = data.redirect_to;
         } else {
             errEl.textContent = data.message || '購読処理に失敗しました';
             errEl.style.display = 'block';
