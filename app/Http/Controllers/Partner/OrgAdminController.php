@@ -533,6 +533,11 @@ class OrgAdminController extends Controller
 
         if (!empty($data)) $notif->update($data);
 
+        // SMS or AIコールの有効/無効に応じてpremium_enabledを同期
+        $smsOn   = $notif->fresh()->sms_enabled;
+        $voiceOn = $notif->fresh()->voice_enabled;
+        $device->update(['premium_enabled' => ($smsOn || $voiceOn) ? true : false]);
+
         return response()->json(['success' => true, 'message' => '通知設定を更新しました']);
     }
 
