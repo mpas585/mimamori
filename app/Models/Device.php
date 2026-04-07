@@ -35,6 +35,7 @@ class Device extends Authenticatable
         'billing_start_date',
         'activated_at',
         'warranty_expires_at',
+        'sim_id',
     ];
 
     protected $hidden = [

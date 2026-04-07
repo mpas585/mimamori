@@ -346,7 +346,6 @@
                             <td class="{{ $rssi !== null && $rssi < -85 ? 'signal-weak' : '' }}" style="font-size:12px;">{{ $signalLabel }}</td>
                             <td>
                                 <button class="action-btn" onclick="showDeviceDetail('{{ $device->device_id }}')">詳細</button>
-                                <button class="action-btn danger" onclick="confirmDelete('{{ $device->device_id }}')">削除</button>
                             </td>
                         </tr>
                     @empty
