@@ -319,14 +319,11 @@
         </div>
         <table class="org-table">
             <thead>
-                <tr><th>組織名</th><th>担当者</th><th>連絡先</th><th>デバイス数</th><th>台数上限</th><th>契約期限</th><th>プレミアム</th><th>通知</th><th>操作</th></tr>
+                <tr><th>組織名</th><th>担当者</th><th>連絡先</th><th>デバイス数</th><th>配送先住所</th><th>通知</th><th>操作</th></tr>
             </thead>
             <tbody>
                 @forelse($organizations as $org)
                     @php
-                        $expiresAt = $org->expires_at;
-                        $isExpired = $expiresAt && $expiresAt->isPast();
-                        $isExpiringSoon = $expiresAt && !$isExpired && $expiresAt->diffInDays(now()) <= 30;
                         $hasEmail = $org->notification_email_1 || $org->notification_email_2 || $org->notification_email_3;
                         $hasSms = $org->notification_sms_1 || $org->notification_sms_2;
                     @endphp
@@ -334,17 +331,9 @@
                         <td style="font-weight:500;">{{ $org->name }}</td>
                         <td style="font-size:12px;">{{ $org->contact_name ?: '-' }}</td>
                         <td style="font-size:12px;">{{ $org->contact_email }}</td>
-                        <td style="font-size:13px;"><span style="{{ $org->devices_count >= ($org->device_limit ?? 100) ? 'color:var(--red);font-weight:600;' : '' }}">{{ $org->devices_count }}台</span></td>
-                        <td style="font-size:13px;">{{ $org->device_limit ?? 100 }}台</td>
-                        <td style="font-size:12px;">
-                            @if($expiresAt)
-                                <span class="{{ $isExpired || $isExpiringSoon ? 'expires-warn' : 'expires-ok' }}">{{ $expiresAt->format('Y/m/d') }}@if($isExpired) ⚠️期限切れ @elseif($isExpiringSoon) ⚠️あと{{ $expiresAt->diffInDays(now()) }}日 @endif</span>
-                            @else <span style="color:var(--gray-400);">-</span> @endif
-                        </td>
-                        <td>
-                            <label class="watch-toggle"><input type="checkbox" {{ $org->premium_enabled ? 'checked' : '' }} onchange="toggleOrgPremium({{ $org->id }}, this.checked, this)"><span class="watch-slider"></span></label>
-                            <span class="org-premium-label-{{ $org->id }}" style="font-size:12px;color:var(--gray-500);margin-left:8px;">{{ $org->premium_enabled ? '有効' : '無効' }}</span>
-                        </td>
+                        <td style="font-size:13px;">{{ $org->devices_count }}台</td>
+                        <td style="font-size:12px;color:var(--gray-600);">{{ $org->delivery_address ?: '-' }}</td>
+
                         <td>
                             <div class="org-notify-icons">
                                 @if($hasEmail) <span title="メール" style="{{ $org->notification_enabled ? '' : 'opacity:0.4;' }}">📧</span> @endif
@@ -358,7 +347,7 @@
                         </td>
                     </tr>
                 @empty
-                    <tr><td colspan="9" class="empty-row">組織がありません</td></tr>
+                    <tr><td colspan="7" class="empty-row">組織がありません</td></tr>
                 @endforelse
             </tbody>
         </table>
