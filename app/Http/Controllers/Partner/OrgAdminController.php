@@ -675,8 +675,9 @@ class OrgAdminController extends Controller
             $issued[] = ['device_id' => $deviceId, 'pin' => $pin];
         }
 
-        // ── 運営への通知メール
-        $adminEmail = config('services.admin.notification_email');
+        // ── 運営への通知メール（masterユーザーのメールアドレス宛）
+        $masterUser = \App\Models\PartnerUser::where('role', 'master')->first();
+        $adminEmail = $masterUser?->email;
         if ($adminEmail) {
             try {
                 $admin        = Auth::guard('partner')->user();
