@@ -104,6 +104,7 @@ Route::middleware(PartnerAuth::class)->prefix('partner')->group(function () {
     Route::post('/devices/{deviceId}/toggle-premium', [MasterController::class, 'toggleDevicePremium'])->name('partner.devices.toggle-premium');
     Route::post('/devices/{deviceId}/schedules', [MasterController::class, 'storeDeviceSchedule'])->name('partner.devices.schedules.store');
     Route::delete('/devices/{deviceId}/schedules/{scheduleId}', [MasterController::class, 'destroyDeviceSchedule'])->name('partner.devices.schedules.destroy');
+    Route::delete('/devices/{deviceId}', [MasterController::class, 'destroyDevice'])->name('partner.devices.destroy');
 
     Route::post('/admin-users', [MasterController::class, 'storeAdminUser'])->name('partner.admin-users.store');
     Route::put('/admin-users/{id}', [MasterController::class, 'updateAdminUser'])->name('partner.admin-users.update');
