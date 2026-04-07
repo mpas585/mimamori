@@ -12,9 +12,7 @@ class BillingContract extends Model
         'organization_id',
         'payjp_customer_id',
         'device_count',
-        'premium_device_count',
         'unit_price',
-        'premium_unit_price',
         'amount',
         'status',
         'next_billing_date',
@@ -37,22 +35,43 @@ class BillingContract extends Model
     }
 
     /**
-     * 請求額を計算して amount カラムを更新する
+     * 請求額を計算してamountカラムを更新する
+     * ※ MonthlyBillingJobの課金前に呼び出す
      */
     public function recalculate(): void
     {
-        $amount = ($this->device_count * $this->unit_price)
-                + ($this->premium_device_count * $this->premium_unit_price);
-
-        $this->update(['amount' => $amount]);
+        $this->update(['amount' => $this->calcAmount()]);
     }
 
     /**
-     * 金額計算（保存なし）
+     * 今月の請求額を計算する（DBの申込み状況から動的に算出）
+     *
+     * 内訳：
+     *   基本料金    = 契約台数 × ¥700
+     *   SMS料金     = SMS申込み台数 × ¥100
+     *   AIコール料金 = AIコール申込み台数 × ¥300
      */
     public function calcAmount(): int
     {
-        return ($this->device_count * $this->unit_price)
-             + ($this->premium_device_count * $this->premium_unit_price);
+        // 基本料金
+        $基本料金合計 = $this->device_count * $this->unit_price;
+
+        if (!$this->organization_id) {
+            return $基本料金合計;
+        }
+
+        // この組織でSMS通知を申し込んでいるデバイス台数
+        $SMS申込み台数 = Device::where('organization_id', $this->organization_id)
+            ->whereHas('notificationSetting', fn($q) => $q->where('sms_enabled', true))
+            ->count();
+
+        // この組織でAIコールを申し込んでいるデバイス台数
+        $AIコール申込み台数 = Device::where('organization_id', $this->organization_id)
+            ->whereHas('notificationSetting', fn($q) => $q->where('voice_enabled', true))
+            ->count();
+
+        return $基本料金合計
+            + ($SMS申込み台数 * 100)
+            + ($AIコール申込み台数 * 300);
     }
 }
