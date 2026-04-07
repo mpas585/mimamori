@@ -18,11 +18,6 @@ class PlanController extends Controller
     {
         $device = Auth::user();
         $subscription = $device->subscription;
-        $billingContract = BillingContract::where('organization_id', null)
-            ->whereHas('logs', function ($q) use ($device) {
-                // device_idで紐付けられないのでsubscriptionsのpayjp_customer_idと一致するものを探す
-            })
-            ->first();
 
         // subscriptionsのstripe_customer_idからBillingContractを取得
         if ($subscription?->stripe_customer_id) {
@@ -203,6 +198,7 @@ class PlanController extends Controller
                 $contract = BillingContract::where('payjp_customer_id', $customerId)->first();
                 $contract?->update(['status' => 'past_due']);
 
+                // stripe_customer_idカラムにpay.jpのcustomer_idを格納している
                 $sub = Subscription::where('stripe_customer_id', $customerId)->first();
                 $sub?->update(['status' => 'past_due']);
 
