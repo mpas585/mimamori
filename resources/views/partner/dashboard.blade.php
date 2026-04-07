@@ -609,8 +609,8 @@
                         <div id="detailSmsActionArea"></div>
                     </div>
                     <div id="detailSmsInputs">
-                        <input type="tel" class="detail-form-input" id="detailSmsPhone1" placeholder="09012345678" style="margin-bottom:6px;" onblur="saveDetailNotification()">
-                        <input type="tel" class="detail-form-input" id="detailSmsPhone2" placeholder="09012345678（任意）" onblur="saveDetailNotification()">
+                        <input type="tel" class="detail-form-input" id="detailSmsPhone1" placeholder="09012345678" style="margin-bottom:6px;">
+                        <input type="tel" class="detail-form-input" id="detailSmsPhone2" placeholder="09012345678（任意）">
                     </div>
                 </div>
 
@@ -621,8 +621,8 @@
                         <div id="detailVoiceActionArea"></div>
                     </div>
                     <div id="detailVoiceInputs">
-                        <input type="tel" class="detail-form-input" id="detailVoicePhone1" placeholder="09012345678" style="margin-bottom:6px;" onblur="saveDetailNotification()">
-                        <input type="tel" class="detail-form-input" id="detailVoicePhone2" placeholder="09012345678（任意）" onblur="saveDetailNotification()">
+                        <input type="tel" class="detail-form-input" id="detailVoicePhone1" placeholder="09012345678" style="margin-bottom:6px;">
+                        <input type="tel" class="detail-form-input" id="detailVoicePhone2" placeholder="09012345678（任意）">
                     </div>
                 </div>
             </div>
