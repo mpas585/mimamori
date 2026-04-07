@@ -493,6 +493,7 @@
                         <button class="btn btn-sm btn-secondary" onclick="showSubscriptionModal()">📋 契約プラン</button>
                     </div>
                 </div>
+                <div class="detail-section"><div class="detail-grid">
                     <div class="detail-item"><p class="detail-item-label">デバイスID</p><p class="detail-item-value mono" id="detailDeviceId">-</p></div>
                     <div class="detail-item"><p class="detail-item-label">最終検知</p><p class="detail-item-value" id="detailLastDetected">-</p></div>
                     <div class="detail-item"><p class="detail-item-label">部屋番号</p><input type="text" class="detail-form-input" id="detailRoomInput" placeholder="101"></div>
@@ -520,7 +521,6 @@
                     <div class="detail-item"><p class="detail-item-label">登録日</p><p class="detail-item-value" id="detailRegistered">-</p></div>
                     <div class="detail-item"><p class="detail-item-label">メモ</p><input type="text" class="detail-form-input" id="detailMemoInput" placeholder="メモを入力..." maxlength="200"></div>
                 </div></div>
-                <div class="detail-section"><div class="detail-grid">
                 <div class="detail-section"><div class="detail-section-title">🚶 外出スケジュール</div><div id="detailScheduleList"></div><button class="detail-schedule-add" onclick="openScheduleAddFromDetail()">＋ 外出スケジュール追加</button></div>
             </div>
             <div class="modal-footer" style="justify-content:space-between;">
