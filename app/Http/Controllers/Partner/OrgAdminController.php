@@ -651,8 +651,9 @@ class OrgAdminController extends Controller
 
         // ── BillingContract の台数・金額を更新（翌月分の自動課金に反映）
         $contract->update([
-            'device_count' => $contract->device_count + $count,
-            'amount'       => $contract->calcAmount() + ($unitPrice * $count),
+            'device_count'         => $contract->device_count + $count,
+            'premium_device_count' => $contract->premium_device_count + (($optAi || $optSms) ? $count : 0),
+            'amount'               => $contract->calcAmount() + ($unitPrice * $count),
         ]);
 
         // ── デバイス発番
@@ -673,6 +674,8 @@ class OrgAdminController extends Controller
             DB::table('notification_settings')->insert([
                 'device_id'     => $device->id,
                 'email_enabled' => 1,
+                'sms_enabled'   => $optSms ? 1 : 0,
+                'voice_enabled' => $optAi  ? 1 : 0,
                 'created_at'    => now(),
                 'updated_at'    => now(),
             ]);
