@@ -628,6 +628,7 @@
             </div>
             <div class="modal-footer">
                 <button class="btn btn-secondary" onclick="hideModal('subscriptionModal')">閉じる</button>
+                <button class="btn btn-primary" onclick="saveDetailNotification()">保存</button>
             </div>
         </div>
     </div>
