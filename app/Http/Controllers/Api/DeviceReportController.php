@@ -19,7 +19,8 @@ class DeviceReportController extends Controller
     {
         // バリデーション
         $validated = $request->validate([
-            'device_id'       => 'required|string|max:10',
+            'device_id'       => 'nullable|string|max:10',
+            'sim_id'          => 'nullable|string|max:5',
             'period_start'    => 'required|date',
             'period_end'      => 'required|date',
             'detection_count' => 'required|integer|min:0',
@@ -31,19 +32,32 @@ class DeviceReportController extends Controller
             'iccid'           => 'nullable|string|max:22',
         ]);
 
-        // デバイス検索
-        $device = Device::where('device_id', $validated['device_id'])->first();
+        // sim_id または device_id でデバイスを検索
+        $device = null;
 
-        if (!$device) {
-            Log::warning('Unknown device report', ['device_id' => $validated['device_id']]);
-            return response()->json(['error' => 'device_not_found'], 404);
+        if (!empty($validated['sim_id'])) {
+            // sim_id 優先で検索
+            $device = Device::where('sim_id', strtoupper($validated['sim_id']))->first();
+            if (!$device) {
+                Log::warning('Unknown device report by sim_id', ['sim_id' => $validated['sim_id']]);
+                return response()->json(['error' => 'device_not_found'], 404);
+            }
+        } elseif (!empty($validated['device_id'])) {
+            // 後方互換: device_id で検索
+            $device = Device::where('device_id', $validated['device_id'])->first();
+            if (!$device) {
+                Log::warning('Unknown device report', ['device_id' => $validated['device_id']]);
+                return response()->json(['error' => 'device_not_found'], 404);
+            }
+        } else {
+            return response()->json(['error' => 'device_id or sim_id is required'], 422);
         }
 
         // ICCID検証（送信された場合）
         if (!empty($validated['iccid'] ?? null) && $device->simBinding) {
             if ($device->simBinding->iccid !== $validated['iccid']) {
                 Log::alert('ICCID mismatch', [
-                    'device_id' => $validated['device_id'],
+                    'device_id' => $device->device_id,
                     'expected'  => $device->simBinding->iccid,
                     'received'  => $validated['iccid'],
                 ]);
@@ -119,5 +133,3 @@ class DeviceReportController extends Controller
         ], 201);
     }
 }
-
-
