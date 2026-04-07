@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use App\Models\BillingContract;
 use App\Models\BillingLog;
@@ -23,7 +24,7 @@ class BillingController extends Controller
     }
 
     /**
-     * カード登録 + 契約作成 + 初月即時課金
+     * カード登録 + 契約作成 + 初月即時課金（3Dセキュア対応）
      */
     public function store(Request $request)
     {
@@ -41,9 +42,13 @@ class BillingController extends Controller
                 ? Organization::find($request->organization_id)?->name
                 : 'individual';
 
-            // Customer 作成
+            // ログイン中のパートナーユーザーのメアドを取得
+            $email = Auth::guard('partner')->user()?->email ?? null;
+
+            // Customer 作成（メアド付き）
             $customer = \Payjp\Customer::create([
                 'card'        => $request->payjp_token,
+                'email'       => $email,
                 'description' => 'みまもりデバイス - ' . $orgName,
                 'metadata'    => ['organization_id' => $request->organization_id ?? 'none'],
             ]);
@@ -52,48 +57,132 @@ class BillingController extends Controller
             $amount = ($request->device_count * 700)
                     + ($request->premium_device_count * 300);
 
-            // 初月即時課金
+            // 3Dセキュア付き初月即時課金
             $charge = \Payjp\Charge::create([
-                'amount'      => $amount,
-                'currency'    => 'jpy',
-                'customer'    => $customer->id,
-                'description' => "みまもりデバイス 月額利用料（初月）- {$orgName} 本体{$request->device_count}台 AIコール{$request->premium_device_count}台",
+                'amount'         => $amount,
+                'currency'       => 'jpy',
+                'customer'       => $customer->id,
+                'description'    => "みまもりデバイス 月額利用料（初月）- {$orgName} 本体{$request->device_count}台 AIコール{$request->premium_device_count}台",
+                'three_d_secure' => true,
+                'tds_finish_url' => route('partner.billing.tds-complete', ['customer' => $customer->id]),
             ]);
 
-            // BillingContract 作成
-            $contract = BillingContract::create([
-                'organization_id'      => $request->organization_id,
-                'payjp_customer_id'    => $customer->id,
-                'device_count'         => $request->device_count,
-                'premium_device_count' => $request->premium_device_count,
-                'unit_price'           => 700,
-                'premium_unit_price'   => 300,
-                'amount'               => $amount,
-                'status'               => 'active',
-                'next_billing_date'    => now()->addMonth()->startOfMonth()->toDateString(),
-            ]);
+            // 3Dセキュア認証が必要な場合 → クライアントにリダイレクト先を返す
+            if (isset($charge->three_d_secure_status) && $charge->three_d_secure_status === 'unverified') {
+                // BillingContractを一時保存（未確定状態）
+                BillingContract::create([
+                    'organization_id'   => $request->organization_id,
+                    'payjp_customer_id' => $customer->id,
+                    'device_count'      => $request->device_count,
+                    'unit_price'        => 700,
+                    'amount'            => $amount,
+                    'status'            => 'pending',
+                    'next_billing_date' => now()->addMonth()->startOfMonth()->toDateString(),
+                    'payjp_charge_id'   => $charge->id,
+                ]);
 
-            // 課金ログ
-            BillingLog::create([
-                'billing_contract_id'  => $contract->id,
-                'amount'               => $amount,
-                'device_count'         => $request->device_count,
-                'premium_device_count' => $request->premium_device_count,
-                'payjp_charge_id'      => $charge->id,
-                'status'               => 'success',
-                'billed_at'            => now(),
-            ]);
+                return response()->json([
+                    'ok'          => false,
+                    'tds'         => true,
+                    'redirect_to' => $charge->redirect_to,
+                ]);
+            }
 
-            return response()->json([
-                'ok'      => true,
-                'message' => '契約を登録しました（初月 ¥' . number_format($amount) . ' を課金しました）',
-                'amount'  => $amount,
-            ]);
+            // 3DS不要 or 認証済み → 通常完了
+            return $this->completeContract(
+                $customer->id, $charge,
+                $request->organization_id, $request->device_count, $amount
+            );
 
         } catch (\Exception $e) {
             Log::error('BillingController store error: ' . $e->getMessage());
             return response()->json(['ok' => false, 'message' => '登録に失敗しました: ' . $e->getMessage()], 500);
         }
+    }
+
+    /**
+     * 3Dセキュア認証完了コールバック
+     */
+    public function tdsComplete(Request $request)
+    {
+        $customerId = $request->input('customer');
+        if (!$customerId) {
+            return redirect('/partner/billing')->with('error', '3Dセキュア認証に失敗しました');
+        }
+
+        \Payjp\Payjp::setApiKey(config('services.payjp.secret_key'));
+
+        try {
+            // 未確定のBillingContractを取得
+            $contract = BillingContract::where('payjp_customer_id', $customerId)
+                ->where('status', 'pending')
+                ->latest()
+                ->first();
+
+            if (!$contract || !$contract->payjp_charge_id) {
+                return redirect('/partner/billing')->with('error', '契約情報が見つかりません');
+            }
+
+            // Chargeを取得して3DS完了を確認
+            $charge = \Payjp\Charge::retrieve($contract->payjp_charge_id);
+
+            if ($charge->three_d_secure_status !== 'verified') {
+                $contract->delete();
+                return redirect('/partner/billing')->with('error', '3Dセキュア認証が完了していません');
+            }
+
+            // 契約を確定
+            $contract->update(['status' => 'active', 'payjp_charge_id' => null]);
+
+            BillingLog::create([
+                'billing_contract_id'  => $contract->id,
+                'amount'               => $contract->amount,
+                'device_count'         => $contract->device_count,
+                'premium_device_count' => 0,
+                'payjp_charge_id'      => $charge->id,
+                'status'               => 'success',
+                'billed_at'            => now(),
+            ]);
+
+            return redirect('/partner/billing')
+                ->with('success', '契約を登録しました（初月 ¥' . number_format($contract->amount) . ' を課金しました）');
+
+        } catch (\Exception $e) {
+            Log::error('BillingController tdsComplete error: ' . $e->getMessage());
+            return redirect('/partner/billing')->with('error', '3Dセキュア処理に失敗しました');
+        }
+    }
+
+    /**
+     * 契約完了処理（3DS不要の場合）
+     */
+    private function completeContract($customerId, $charge, $organizationId, $deviceCount, $amount)
+    {
+        $contract = BillingContract::create([
+            'organization_id'   => $organizationId,
+            'payjp_customer_id' => $customerId,
+            'device_count'      => $deviceCount,
+            'unit_price'        => 700,
+            'amount'            => $amount,
+            'status'            => 'active',
+            'next_billing_date' => now()->addMonth()->startOfMonth()->toDateString(),
+        ]);
+
+        BillingLog::create([
+            'billing_contract_id'  => $contract->id,
+            'amount'               => $amount,
+            'device_count'         => $deviceCount,
+            'premium_device_count' => 0,
+            'payjp_charge_id'      => $charge->id,
+            'status'               => 'success',
+            'billed_at'            => now(),
+        ]);
+
+        return response()->json([
+            'ok'      => true,
+            'message' => '契約を登録しました（初月 ¥' . number_format($amount) . ' を課金しました）',
+            'amount'  => $amount,
+        ]);
     }
 
     /**

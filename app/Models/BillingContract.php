@@ -11,6 +11,7 @@ class BillingContract extends Model
     protected $fillable = [
         'organization_id',
         'payjp_customer_id',
+        'payjp_charge_id',
         'device_count',
         'unit_price',
         'amount',

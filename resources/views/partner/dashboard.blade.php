@@ -483,7 +483,16 @@
         <div class="modal" style="max-width:560px;"><div class="modal-header"><h3>📋 デバイス詳細</h3><button class="modal-close" onclick="hideModal('detailModal')">×</button></div>
             <div class="modal-body">
                 <div class="detail-status-row"><div class="detail-status-badge normal" id="detailStatusBadge">-</div><button class="detail-clear-alert-btn" id="detailClearAlertBtn" style="display:none;" onclick="confirmClearAlertFromDetail()">✕ 警告解除</button></div>
-                <div class="detail-section"><div class="detail-grid">
+                <div class="detail-section" style="margin-bottom:16px;">
+                    <div style="display:flex;align-items:center;justify-content:space-between;">
+                        <div style="display:flex;align-items:center;gap:12px;">
+                            <label class="watch-toggle"><input type="checkbox" id="detailNotifyEnabled" checked onchange="toggleNotifyService(this.checked)"><span class="watch-slider"></span></label>
+                            <span style="font-size:13px;font-weight:600;color:var(--gray-700);">🔔 端末サブスクリプション</span>
+                            <span id="detailNotifyLabel" style="font-size:12px;color:var(--gray-500);">有効</span>
+                        </div>
+                        <button class="btn btn-sm btn-secondary" onclick="showSubscriptionModal()">📋 契約プラン</button>
+                    </div>
+                </div>
                     <div class="detail-item"><p class="detail-item-label">デバイスID</p><p class="detail-item-value mono" id="detailDeviceId">-</p></div>
                     <div class="detail-item"><p class="detail-item-label">最終検知</p><p class="detail-item-value" id="detailLastDetected">-</p></div>
                     <div class="detail-item"><p class="detail-item-label">部屋番号</p><input type="text" class="detail-form-input" id="detailRoomInput" placeholder="101"></div>
@@ -511,17 +520,7 @@
                     <div class="detail-item"><p class="detail-item-label">登録日</p><p class="detail-item-value" id="detailRegistered">-</p></div>
                     <div class="detail-item"><p class="detail-item-label">メモ</p><input type="text" class="detail-form-input" id="detailMemoInput" placeholder="メモを入力..." maxlength="200"></div>
                 </div></div>
-                <div class="detail-section">
-                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
-                        <div class="detail-section-title" style="margin-bottom:0;">🔔 端末サブスクリプション</div>
-                        <button class="btn btn-sm btn-secondary" onclick="showSubscriptionModal()">📋 契約プラン</button>
-                    </div>
-                    <div style="display:flex;align-items:center;gap:12px;">
-                        <label class="watch-toggle"><input type="checkbox" id="detailNotifyEnabled" checked onchange="toggleNotifyService(this.checked)"><span class="watch-slider"></span></label>
-                        <span id="detailNotifyLabel" style="font-size:13px;color:var(--gray-700);">有効</span>
-                    </div>
-                    <p class="detail-notify-note" style="margin-top:8px;">※ご契約後〇ヶ月は停止機能はご利用になれません。</p>
-                </div>
+                <div class="detail-section"><div class="detail-grid">
                 <div class="detail-section"><div class="detail-section-title">🚶 外出スケジュール</div><div id="detailScheduleList"></div><button class="detail-schedule-add" onclick="openScheduleAddFromDetail()">＋ 外出スケジュール追加</button></div>
             </div>
             <div class="modal-footer" style="justify-content:space-between;">

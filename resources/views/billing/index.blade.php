@@ -234,6 +234,9 @@ async function registerContract() {
         if (data.ok) {
             showToast(data.message + `（月額 ¥${data.amount.toLocaleString()}）`);
             setTimeout(() => location.reload(), 1500);
+        } else if (data.tds && data.redirect_to) {
+            // 3Dセキュア認証へリダイレクト
+            window.location.href = data.redirect_to;
         } else {
             errEl.textContent = data.message;
             errEl.style.display = 'block';

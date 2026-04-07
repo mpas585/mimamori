@@ -118,6 +118,7 @@ Route::middleware(PartnerAuth::class)->prefix('partner')->group(function () {
 Route::middleware(PartnerAuth::class.':master')->prefix('partner')->group(function () {
     Route::get('/billing', [BillingController::class, 'index'])->name('partner.billing.index');
     Route::post('/billing', [BillingController::class, 'store'])->name('partner.billing.store');
+    Route::get('/billing/tds-complete', [BillingController::class, 'tdsComplete'])->name('partner.billing.tds-complete');
     Route::put('/billing/{contract}', [BillingController::class, 'update'])->name('partner.billing.update');
     Route::post('/billing/{contract}/cancel', [BillingController::class, 'cancel'])->name('partner.billing.cancel');
     Route::post('/billing/{contract}/update-card', [BillingController::class, 'updateCard'])->name('partner.billing.update-card');
@@ -143,5 +144,5 @@ Route::middleware(PartnerAuth::class.':operator')->prefix('partner/org')->group(
 
     Route::get('/notification', [OrgAdminController::class, 'getNotification'])->name('partner.org.notification');
     Route::post('/notification', [OrgAdminController::class, 'updateNotification'])->name('partner.org.notification.update');
-    Route::get('/card-info', [OrgAdminController::class, 'getCardInfo'])->name('partner.org.card-info'); // ★ 追加
+    Route::get('/card-info', [OrgAdminController::class, 'getCardInfo'])->name('partner.org.card-info');
 });
