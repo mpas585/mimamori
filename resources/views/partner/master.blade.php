@@ -1032,7 +1032,7 @@ function confirmDeleteAdmin(id, name) {
 }
 
 // ===== 組織管理 =====
-function showAddOrgModal() { document.getElementById('addOrgModal').classList.add('show'); }
+function showAddOrgModal() { generatePassword('addOrgPartnerPassword'); document.getElementById('addOrgModal').classList.add('show'); }
 function hideAddOrgModal() { document.getElementById('addOrgModal').classList.remove('show'); }
 function showEditOrgModal(data) {
     document.getElementById('editOrgForm').action = '/partner/orgs/' + data.id;
