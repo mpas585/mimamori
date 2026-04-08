@@ -268,6 +268,26 @@ class OrgAdminController extends Controller
             'voice_phone_1'              => $notif && $notif->voice_phone_1 ? preg_replace('/^\+81/', '0', $notif->voice_phone_1) : null,
             'voice_phone_2'              => $notif && $notif->voice_phone_2 ? preg_replace('/^\+81/', '0', $notif->voice_phone_2) : null,
             'premium_enabled'            => (bool) ($device->premium_enabled ?? false),
+            'notification_service_enabled' => (bool) ($device->notification_service_enabled ?? true),
+        ]);
+    }
+
+    public function toggleNotifyService(Request $request, $deviceId)
+    {
+        $organization = $this->getOrganization();
+
+        $device = Device::where('device_id', $deviceId)
+            ->where('organization_id', $organization->id)
+            ->firstOrFail();
+
+        $request->validate(['enabled' => 'required|boolean']);
+
+        $device->update(['notification_service_enabled' => (bool) $request->enabled]);
+
+        return response()->json([
+            'success' => true,
+            'enabled' => (bool) $device->notification_service_enabled,
+            'message' => $device->notification_service_enabled ? '通知サービスを有効にしました' : '通知サービスを停止しました',
         ]);
     }
 

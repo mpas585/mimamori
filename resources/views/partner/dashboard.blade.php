@@ -1072,7 +1072,24 @@ async function saveDetailChanges() {
     } catch(e) { console.error(e); showToast('通信エラーが発生しました', 'error'); }
 }
 
-function toggleNotifyService(enabled) { document.getElementById('detailNotifyLabel').textContent = enabled ? '有効' : '停止中'; showToast(enabled ? '通知サービスを有効にしました' : '通知サービスを停止しました', 'success'); }
+function toggleNotifyService(enabled) {
+    document.getElementById('detailNotifyLabel').textContent = enabled ? '有効' : '停止中';
+    fetch('/partner/org/devices/' + currentDetailDeviceId + '/toggle-notify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' },
+        body: JSON.stringify({ enabled: enabled ? 1 : 0 })
+    }).then(r => r.json()).then(d => {
+        if (d.success) {
+            showToast(d.message, 'success');
+            var row = document.getElementById('row-' + currentDetailDeviceId);
+            if (row) { enabled ? row.classList.remove('row-inactive') : row.classList.add('row-inactive'); }
+        } else {
+            showToast(d.message || 'エラー', 'error');
+            document.getElementById('detailNotifyEnabled').checked = !enabled;
+            document.getElementById('detailNotifyLabel').textContent = !enabled ? '有効' : '停止中';
+        }
+    }).catch(() => showToast('通信エラー', 'error'));
+}
 
 function saveDetailNotification() {
     if (!currentDetailDeviceId) return;
