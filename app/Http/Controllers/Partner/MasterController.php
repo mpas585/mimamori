@@ -53,9 +53,12 @@ class MasterController extends Controller
             }
         }
 
-        $devices      = $query->orderBy('created_at', 'desc')->paginate(20);
-        $adminUsers   = PartnerUser::orderBy('role', 'asc')->orderBy('created_at', 'desc')->get();
-        $organizations = Organization::withCount('devices')->orderBy('created_at', 'desc')->get();
+        $devices       = $query->orderBy('created_at', 'desc')->paginate(20);
+        // masterアカウントのみ
+        $adminUsers    = PartnerUser::where('role', 'master')->orderBy('created_at', 'desc')->get();
+        $organizations = Organization::withCount('devices')
+            ->with(['partnerUsers' => function ($q) { $q->where('role', 'operator'); }])
+            ->orderBy('created_at', 'desc')->get();
 
         return view('partner.master', compact('stats', 'devices', 'adminUsers', 'organizations'));
     }
@@ -272,9 +275,6 @@ class MasterController extends Controller
         return response()->json(['success' => true, 'message' => "デバイス {$deviceId} の警告を解除しました"]);
     }
 
-    /**
-     * デバイス論理削除（マスター専用）
-     */
     public function destroyDevice(string $deviceId)
     {
         $device = Device::where('device_id', $deviceId)->firstOrFail();
@@ -322,7 +322,7 @@ class MasterController extends Controller
     }
 
     // ============================================================
-    // 管理者アカウント管理
+    // 管理者アカウント管理（masterのみ）
     // ============================================================
 
     public function storeAdminUser(Request $request)
@@ -402,19 +402,38 @@ class MasterController extends Controller
     public function storeOrg(Request $request)
     {
         $request->validate([
-            'name'          => 'required|string|max:200',
-            'contact_name'  => 'nullable|string|max:100',
-            'contact_email' => 'required|email|max:255',
-            'contact_phone' => 'nullable|string|max:20',
-            'address'       => 'nullable|string|max:500',
-            'notes'         => 'nullable|string|max:1000',
-            'device_limit'  => 'nullable|integer|min:1|max:9999',
-            'expires_at'    => 'nullable|date',
+            'name'             => 'required|string|max:200',
+            'contact_name'     => 'nullable|string|max:100',
+            'contact_email'    => 'required|email|max:255',
+            'contact_phone'    => 'nullable|string|max:20',
+            'address'          => 'nullable|string|max:500',
+            'notes'            => 'nullable|string|max:1000',
+            'device_limit'     => 'nullable|integer|min:1|max:9999',
+            'expires_at'       => 'nullable|date',
+            // パートナーアカウント（任意）
+            'partner_name'     => 'nullable|string|max:100',
+            'partner_email'    => 'nullable|email|max:255|unique:partner_users,email',
+            'partner_password' => 'nullable|string|min:8|max:100',
         ], [
             'name.required'          => '組織名を入力してください',
             'contact_email.required' => '連絡先メールを入力してください',
             'contact_email.email'    => '正しいメールアドレスを入力してください',
+            'partner_email.unique'   => 'このメールアドレスは既に使用されています',
+            'partner_password.min'   => 'パスワードは8文字以上にしてください',
         ]);
+
+        // パートナー情報がどれか入力されていたら3項目すべて必須
+        if ($request->filled('partner_name') || $request->filled('partner_email') || $request->filled('partner_password')) {
+            $request->validate([
+                'partner_name'     => 'required|string|max:100',
+                'partner_email'    => 'required|email|max:255|unique:partner_users,email',
+                'partner_password' => 'required|string|min:8|max:100',
+            ], [
+                'partner_name.required'     => 'パートナー名を入力してください',
+                'partner_email.required'    => 'パートナーメールを入力してください',
+                'partner_password.required' => 'パスワードを入力してください',
+            ]);
+        }
 
         $org = Organization::create([
             'name'            => $request->name,
@@ -427,6 +446,17 @@ class MasterController extends Controller
             'expires_at'      => $request->expires_at ?: null,
             'premium_enabled' => false,
         ]);
+
+        // パートナーアカウント作成（任意）
+        if ($request->filled('partner_email')) {
+            PartnerUser::create([
+                'name'            => $request->partner_name,
+                'email'           => $request->partner_email,
+                'password_hash'   => Hash::make($request->partner_password),
+                'role'            => 'operator',
+                'organization_id' => $org->id,
+            ]);
+        }
 
         return redirect('/partner?tab=orgs')->with('success', '組織「' . $org->name . '」を作成しました');
     }
@@ -488,9 +518,6 @@ class MasterController extends Controller
         return redirect('/partner?tab=orgs')->with('success', '組織「' . $name . '」を削除しました');
     }
 
-    /**
-     * 組織プレミアムトグル → 組織内全デバイスを一括更新
-     */
     public function toggleOrgPremium(Request $request, int $orgId)
     {
         $org = Organization::findOrFail($orgId);
@@ -499,10 +526,8 @@ class MasterController extends Controller
 
         $enabled = (bool) $request->premium_enabled;
 
-        // 組織フラグ更新
         $org->update(['premium_enabled' => $enabled]);
 
-        // 組織内全デバイスを一括更新
         Device::where('organization_id', $orgId)->update(['premium_enabled' => $enabled ? 1 : 0]);
 
         return response()->json([
@@ -510,6 +535,85 @@ class MasterController extends Controller
             'premium_enabled' => $org->premium_enabled,
             'message'         => $enabled ? '組織内全デバイスのプレミアムを有効にしました' : '組織内全デバイスのプレミアムを無効にしました',
         ]);
+    }
+
+    // ============================================================
+    // パートナーアカウント管理（組織管理タブから、Ajax）
+    // ============================================================
+
+    public function orgUsers(int $orgId)
+    {
+        $org = Organization::findOrFail($orgId);
+        $users = PartnerUser::where('organization_id', $orgId)
+            ->where('role', 'operator')
+            ->orderBy('created_at', 'desc')
+            ->get(['id', 'name', 'email', 'last_login_at', 'created_at']);
+
+        return response()->json([
+            'org_name' => $org->name,
+            'users'    => $users,
+        ]);
+    }
+
+    public function storeOrgUser(Request $request, int $orgId)
+    {
+        Organization::findOrFail($orgId);
+
+        $request->validate([
+            'name'     => 'required|string|max:100',
+            'email'    => 'required|email|max:255|unique:partner_users,email',
+            'password' => 'required|string|min:8|max:100',
+        ], [
+            'name.required'     => '名前を入力してください',
+            'email.required'    => 'メールアドレスを入力してください',
+            'email.unique'      => 'このメールアドレスは既に使用されています',
+            'password.required' => 'パスワードを入力してください',
+            'password.min'      => 'パスワードは8文字以上にしてください',
+        ]);
+
+        $user = PartnerUser::create([
+            'name'            => $request->name,
+            'email'           => $request->email,
+            'password_hash'   => Hash::make($request->password),
+            'role'            => 'operator',
+            'organization_id' => $orgId,
+        ]);
+
+        return response()->json(['success' => true, 'message' => 'アカウント「' . $user->name . '」を作成しました', 'user' => $user->only(['id', 'name', 'email', 'created_at'])]);
+    }
+
+    public function updateOrgUser(Request $request, int $orgId, int $userId)
+    {
+        $user = PartnerUser::where('id', $userId)->where('organization_id', $orgId)->where('role', 'operator')->firstOrFail();
+
+        $request->validate([
+            'name'     => 'required|string|max:100',
+            'email'    => ['required', 'email', 'max:255', Rule::unique('partner_users', 'email')->ignore($user->id)],
+            'password' => 'nullable|string|min:8|max:100',
+        ], [
+            'name.required'  => '名前を入力してください',
+            'email.required' => 'メールアドレスを入力してください',
+            'email.unique'   => 'このメールアドレスは既に使用されています',
+            'password.min'   => 'パスワードは8文字以上にしてください',
+        ]);
+
+        $user->name  = $request->name;
+        $user->email = $request->email;
+        if ($request->filled('password')) {
+            $user->password_hash = Hash::make($request->password);
+        }
+        $user->save();
+
+        return response()->json(['success' => true, 'message' => 'アカウント「' . $user->name . '」を更新しました']);
+    }
+
+    public function destroyOrgUser(int $orgId, int $userId)
+    {
+        $user = PartnerUser::where('id', $userId)->where('organization_id', $orgId)->where('role', 'operator')->firstOrFail();
+        $name = $user->name;
+        $user->delete();
+
+        return response()->json(['success' => true, 'message' => 'アカウント「' . $name . '」を削除しました']);
     }
 
     // ============================================================
@@ -533,5 +637,30 @@ class MasterController extends Controller
     private function generatePin(): string
     {
         return str_pad((string) random_int(0, 9999), 4, '0', STR_PAD_LEFT);
+    }
+
+    public function toggleNotifyService(Request $request, string $deviceId)
+    {
+        $device = Device::where('device_id', $deviceId)->firstOrFail();
+        $request->validate(['enabled' => 'required|boolean']);
+        $device->update(['notification_service_enabled' => (bool) $request->enabled]);
+
+        return response()->json([
+            'success' => true,
+            'message' => $request->enabled ? '通知サービスを有効にしました' : '通知サービスを停止しました',
+        ]);
+    }
+
+    public function toggleDevicePremium(Request $request, string $deviceId)
+    {
+        $device = Device::where('device_id', $deviceId)->firstOrFail();
+        $request->validate(['premium_enabled' => 'required|boolean']);
+        $device->update(['premium_enabled' => (bool) $request->premium_enabled]);
+
+        return response()->json([
+            'success'         => true,
+            'premium_enabled' => (bool) $device->premium_enabled,
+            'message'         => $request->premium_enabled ? 'プレミアムを有効にしました' : 'プレミアムを無効にしました',
+        ]);
     }
 }

@@ -89,6 +89,11 @@
     .expires-warn { color: #c62828; font-weight: 600; }
     .expires-ok { color: #2e7d32; }
     .org-notify-icons { display: flex; gap: 6px; align-items: center; font-size: 11px; }
+    /* パートナーアカウント */
+    .partner-account-cell { font-size: 12px; }
+    .partner-account-name { font-weight: 500; color: var(--gray-700); }
+    .partner-account-email { color: var(--gray-500); font-size: 11px; }
+    .partner-account-count { display: inline-block; padding: 1px 8px; border-radius: 10px; font-size: 11px; font-weight: 600; background: var(--blue-light, #dbeafe); color: #2563eb; }
     /* デバイス詳細モーダル */
     .modal-section { margin-bottom: 20px; }
     .modal-section-title { font-size: 13px; font-weight: 700; color: var(--gray-600); margin-bottom: 10px; padding-bottom: 6px; border-bottom: 1px solid var(--gray-200); }
@@ -145,6 +150,12 @@
     .toast.show { transform: translateY(0); opacity: 1; }
     .toast.success { background: #2e7d32; }
     .toast.error { background: var(--red); }
+    /* パートナーアカウント管理モーダル内テーブル */
+    .partner-user-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .partner-user-table th { text-align: left; padding: 8px 10px; border-bottom: 2px solid #e0d8cc; font-weight: 500; color: #8b7e6a; font-size: 11px; white-space: nowrap; }
+    .partner-user-table td { padding: 8px 10px; border-bottom: 1px solid #f0ebe1; vertical-align: middle; }
+    .partner-user-table tr:hover td { background: #faf8f4; }
+    .modal-section-divider { border: none; border-top: 1px solid var(--gray-200); margin: 20px 0; }
 </style>
 @endsection
 
@@ -288,7 +299,7 @@
     </div>
 </div>
 
-{{-- ===== 管理者アカウントタブ ===== --}}
+{{-- ===== 管理者アカウントタブ（masterのみ） ===== --}}
 <div id="tab-admins" class="tab-content">
     <div class="card">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
@@ -297,7 +308,7 @@
         </div>
         <table class="admin-table">
             <thead>
-                <tr><th>ID</th><th>名前</th><th>メールアドレス</th><th>権限</th><th>所属組織</th><th>最終ログイン</th><th>作成日</th><th>操作</th></tr>
+                <tr><th>ID</th><th>名前</th><th>メールアドレス</th><th>最終ログイン</th><th>作成日</th><th>操作</th></tr>
             </thead>
             <tbody>
                 @forelse($adminUsers as $admin)
@@ -305,19 +316,17 @@
                         <td style="font-size:12px;color:#999;">{{ $admin->id }}</td>
                         <td style="font-weight:500;">{{ $admin->name }}</td>
                         <td style="font-size:13px;">{{ $admin->email }}</td>
-                        <td><span class="role-badge {{ $admin->role === 'master' ? 'role-master' : 'role-operator' }}">{{ $admin->role === 'master' ? 'マスター' : 'オペレーター' }}</span></td>
-                        <td style="font-size:12px;color:var(--gray-600);">{{ $admin->organization ? $admin->organization->name : '-' }}</td>
                         <td style="font-size:12px;color:#888;">{{ $admin->last_login_at ? \Carbon\Carbon::parse($admin->last_login_at)->format('Y/m/d H:i') : '未ログイン' }}</td>
                         <td style="font-size:12px;color:#888;">{{ $admin->created_at->format('Y/m/d') }}</td>
                         <td>
-                            <button class="action-btn" onclick="showEditAdminModal({{ json_encode(['id' => $admin->id, 'name' => $admin->name, 'email' => $admin->email, 'role' => $admin->role, 'organization_id' => $admin->organization_id]) }})">編集</button>
+                            <button class="action-btn" onclick="showEditAdminModal({{ json_encode(['id' => $admin->id, 'name' => $admin->name, 'email' => $admin->email]) }})">編集</button>
                             @if($admin->id !== Auth::guard('partner')->id())
                                 <button class="action-btn danger" onclick="confirmDeleteAdmin({{ $admin->id }}, '{{ $admin->name }}')">削除</button>
                             @endif
                         </td>
                     </tr>
                 @empty
-                    <tr><td colspan="8" class="empty-row">管理者アカウントがありません</td></tr>
+                    <tr><td colspan="6" class="empty-row">管理者アカウントがありません</td></tr>
                 @endforelse
             </tbody>
         </table>
@@ -333,20 +342,29 @@
         </div>
         <table class="org-table">
             <thead>
-                <tr><th>組織名</th><th>担当者</th><th>連絡先</th><th>デバイス数</th><th>住所</th><th>通知</th><th>操作</th></tr>
+                <tr><th>組織名</th><th>担当者</th><th>連絡先</th><th>デバイス数</th><th>パートナーアカウント</th><th>通知</th><th>操作</th></tr>
             </thead>
             <tbody>
                 @forelse($organizations as $org)
                     @php
                         $hasEmail = $org->notification_email_1 || $org->notification_email_2 || $org->notification_email_3;
                         $hasSms = $org->notification_sms_1 || $org->notification_sms_2;
+                        $partnerUsers = $org->partnerUsers ?? collect();
                     @endphp
                     <tr>
                         <td style="font-weight:500;">{{ $org->name }}</td>
                         <td style="font-size:12px;">{{ $org->contact_name ?: '-' }}</td>
                         <td style="font-size:12px;">{{ $org->contact_email }}</td>
                         <td style="font-size:13px;">{{ $org->devices_count }}台</td>
-                        <td style="font-size:12px;color:var(--gray-600);">{{ $org->delivery_address ?: '-' }}</td>
+                        <td class="partner-account-cell">
+                            @if($partnerUsers->count() > 0)
+                                @foreach($partnerUsers as $pu)
+                                    <div><span class="partner-account-name">{{ $pu->name }}</span><br><span class="partner-account-email">{{ $pu->email }}</span></div>
+                                @endforeach
+                            @else
+                                <span style="color:var(--gray-400);font-size:11px;">未設定</span>
+                            @endif
+                        </td>
                         <td>
                             <div class="org-notify-icons">
                                 @if($hasEmail) <span title="メール" style="{{ $org->notification_enabled ? '' : 'opacity:0.4;' }}">✉</span> @endif
@@ -356,6 +374,7 @@
                         </td>
                         <td>
                             <button class="action-btn" onclick="showEditOrgModal({{ json_encode(['id'=>$org->id,'name'=>$org->name,'contact_name'=>$org->contact_name,'contact_email'=>$org->contact_email,'contact_phone'=>$org->contact_phone,'address'=>$org->address,'notes'=>$org->notes,'device_limit'=>$org->device_limit??100,'expires_at'=>$org->expires_at?$org->expires_at->format('Y-m-d'):'','notification_email_1'=>$org->notification_email_1,'notification_email_2'=>$org->notification_email_2,'notification_email_3'=>$org->notification_email_3,'notification_sms_1'=>$org->notification_sms_1,'notification_sms_2'=>$org->notification_sms_2]) }})">編集</button>
+                            <button class="action-btn" onclick="showOrgAccountsModal({{ $org->id }}, '{{ addslashes($org->name) }}')">アカウント</button>
                             @if($org->devices_count === 0) <button class="action-btn danger" onclick="confirmDeleteOrg({{ $org->id }}, '{{ $org->name }}')">削除</button> @endif
                         </td>
                     </tr>
@@ -531,30 +550,16 @@
     </div>
 </div>
 
-{{-- ===== 管理者追加モーダル ===== --}}
+{{-- ===== 管理者追加モーダル（masterのみ） ===== --}}
 <div id="addAdminModal" class="modal-overlay" onclick="if(event.target===this)hideAddAdminModal()">
     <div class="modal" style="max-width:500px;">
         <div class="modal-header"><h3>管理者アカウント追加</h3><button class="modal-close" onclick="hideAddAdminModal()">✕</button></div>
         <form method="POST" action="{{ route('partner.admin-users.store') }}">
             @csrf
+            <input type="hidden" name="role" value="master">
             <div class="modal-body">
                 <div class="form-group"><label class="form-label">名前 *</label><input type="text" name="name" class="form-input" placeholder="例: 山田 太郎" required></div>
                 <div class="form-group"><label class="form-label">メールアドレス *</label><input type="email" name="email" class="form-input" placeholder="admin@example.com" required><p class="form-hint">このメールアドレスでログインします</p></div>
-                <div class="form-group">
-                    <label class="form-label">権限 *</label>
-                    <select name="role" class="form-input" id="addAdminRole" onchange="toggleOrgSelect('addAdminOrgRow', this.value)">
-                        <option value="operator">オペレーター（組織管理のみ）</option>
-                        <option value="master">マスター（全権限）</option>
-                    </select>
-                    <p class="form-hint">オペレーター: 担当組織のみ / マスター: 全デバイス</p>
-                </div>
-                <div class="form-group" id="addAdminOrgRow">
-                    <label class="form-label">所属組織</label>
-                    <select name="organization_id" class="form-input">
-                        <option value="">なし</option>
-                        @foreach($organizations as $org) <option value="{{ $org->id }}">{{ $org->name }}</option> @endforeach
-                    </select>
-                </div>
                 <div class="form-group">
                     <label class="form-label">初期パスワード *</label>
                     <div class="password-field">
@@ -569,29 +574,16 @@
     </div>
 </div>
 
-{{-- ===== 管理者編集モーダル ===== --}}
+{{-- ===== 管理者編集モーダル（masterのみ） ===== --}}
 <div id="editAdminModal" class="modal-overlay" onclick="if(event.target===this)hideEditAdminModal()">
     <div class="modal" style="max-width:500px;">
         <div class="modal-header"><h3>管理者アカウント編集</h3><button class="modal-close" onclick="hideEditAdminModal()">✕</button></div>
         <form method="POST" id="editAdminForm" action="">
             @csrf @method('PUT')
+            <input type="hidden" name="role" value="master">
             <div class="modal-body">
                 <div class="form-group"><label class="form-label">名前 *</label><input type="text" name="name" id="editAdminName" class="form-input" required></div>
                 <div class="form-group"><label class="form-label">メールアドレス *</label><input type="email" name="email" id="editAdminEmail" class="form-input" required></div>
-                <div class="form-group">
-                    <label class="form-label">権限 *</label>
-                    <select name="role" id="editAdminRole" class="form-input" onchange="toggleOrgSelect('editAdminOrgRow', this.value)">
-                        <option value="operator">オペレーター</option>
-                        <option value="master">マスター</option>
-                    </select>
-                </div>
-                <div class="form-group" id="editAdminOrgRow">
-                    <label class="form-label">所属組織</label>
-                    <select name="organization_id" id="editAdminOrg" class="form-input">
-                        <option value="">なし</option>
-                        @foreach($organizations as $org) <option value="{{ $org->id }}">{{ $org->name }}</option> @endforeach
-                    </select>
-                </div>
                 <div class="form-group">
                     <label class="form-label">新しいパスワード</label>
                     <div class="password-field">
@@ -607,7 +599,7 @@
 
 <form id="deleteAdminForm" method="POST" action="" style="display:none;">@csrf @method('DELETE')</form>
 
-{{-- ===== 組織追加モーダル ===== --}}
+{{-- ===== 組織追加モーダル（パートナーアカウント作成セクション付き） ===== --}}
 <div id="addOrgModal" class="modal-overlay" onclick="if(event.target===this)hideAddOrgModal()">
     <div class="modal" style="max-width:560px;">
         <div class="modal-header"><h3>組織追加</h3><button class="modal-close" onclick="hideAddOrgModal()">✕</button></div>
@@ -631,6 +623,21 @@
                     <div class="form-row-2">
                         <div class="form-group"><label class="form-label">台数上限</label><input type="number" name="device_limit" class="form-input" value="100" min="1" max="9999"><p class="form-hint">登録可能なデバイス台数</p></div>
                         <div class="form-group"><label class="form-label">契約期限</label><input type="date" name="expires_at" class="form-input"><p class="form-hint">未入力で無期限</p></div>
+                    </div>
+                </div>
+                <div class="modal-section">
+                    <div class="modal-section-title">パートナーアカウント <span style="font-size:11px;font-weight:400;color:var(--gray-400);">（任意）</span></div>
+                    <p style="font-size:12px;color:var(--gray-500);margin-bottom:12px;">この組織を管理するパートナーアカウントを同時に作成できます。</p>
+                    <div class="form-group"><label class="form-label">名前</label><input type="text" name="partner_name" class="form-input" placeholder="例: 田中 一郎"></div>
+                    <div class="form-row-2">
+                        <div class="form-group"><label class="form-label">メールアドレス</label><input type="email" name="partner_email" class="form-input" placeholder="partner@example.com"></div>
+                        <div class="form-group">
+                            <label class="form-label">パスワード</label>
+                            <div class="password-field">
+                                <input type="text" name="partner_password" id="addOrgPartnerPassword" class="form-input">
+                                <button type="button" class="password-generate-btn" onclick="generatePassword('addOrgPartnerPassword')">生成</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -683,6 +690,57 @@
 
 <form id="deleteOrgForm" method="POST" action="" style="display:none;">@csrf @method('DELETE')</form>
 
+{{-- ===== 組織パートナーアカウント管理モーダル ===== --}}
+<div id="orgAccountsModal" class="modal-overlay" onclick="if(event.target===this)hideModal('orgAccountsModal')">
+    <div class="modal" style="max-width:560px;">
+        <div class="modal-header"><h3>👤 パートナーアカウント管理</h3><button class="modal-close" onclick="hideModal('orgAccountsModal')">✕</button></div>
+        <div class="modal-body">
+            <div style="font-size:13px;color:var(--gray-600);margin-bottom:16px;">組織: <strong id="orgAccountsOrgName"></strong></div>
+            <div id="orgAccountsTable"><p style="text-align:center;color:var(--gray-400);padding:20px;">読み込み中...</p></div>
+            <hr class="modal-section-divider">
+            <div class="modal-section-title" style="margin-bottom:12px;">＋ アカウント追加</div>
+            <div class="form-group"><label class="form-label">名前 *</label><input type="text" id="orgNewUserName" class="form-input" placeholder="例: 田中 一郎"></div>
+            <div class="form-group"><label class="form-label">メールアドレス *</label><input type="email" id="orgNewUserEmail" class="form-input" placeholder="partner@example.com"></div>
+            <div class="form-group">
+                <label class="form-label">パスワード *</label>
+                <div class="password-field">
+                    <input type="text" id="orgNewUserPassword" class="form-input">
+                    <button type="button" class="password-generate-btn" onclick="generatePassword('orgNewUserPassword')">生成</button>
+                </div>
+            </div>
+            <div id="orgAccountsAddError" style="display:none;color:#c62828;font-size:12px;margin-top:4px;"></div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="hideModal('orgAccountsModal')">閉じる</button>
+            <button class="btn btn-primary" onclick="submitOrgNewUser()">追加</button>
+        </div>
+    </div>
+</div>
+
+{{-- ===== 組織パートナーアカウント編集モーダル ===== --}}
+<div id="orgEditUserModal" class="modal-overlay" onclick="if(event.target===this)hideModal('orgEditUserModal')">
+    <div class="modal" style="max-width:460px;">
+        <div class="modal-header"><h3>パートナーアカウント編集</h3><button class="modal-close" onclick="hideModal('orgEditUserModal')">✕</button></div>
+        <div class="modal-body">
+            <input type="hidden" id="orgEditUserId">
+            <div class="form-group"><label class="form-label">名前 *</label><input type="text" id="orgEditUserName" class="form-input"></div>
+            <div class="form-group"><label class="form-label">メールアドレス *</label><input type="email" id="orgEditUserEmail" class="form-input"></div>
+            <div class="form-group">
+                <label class="form-label">新しいパスワード</label>
+                <div class="password-field">
+                    <input type="text" id="orgEditUserPassword" class="form-input" placeholder="変更しない場合は空欄">
+                    <button type="button" class="password-generate-btn" onclick="generatePassword('orgEditUserPassword')">生成</button>
+                </div>
+            </div>
+            <div id="orgEditUserError" style="display:none;color:#c62828;font-size:12px;margin-top:4px;"></div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="hideModal('orgEditUserModal')">キャンセル</button>
+            <button class="btn btn-primary" onclick="submitOrgEditUser()">保存</button>
+        </div>
+    </div>
+</div>
+
 <div id="toast" class="toast"></div>
 
 @endsection
@@ -693,6 +751,7 @@ const csrfToken = '{{ csrf_token() }}';
 let masterCurrentDeviceId = null;
 let masterScheduleType = 'oneshot';
 let masterDeleteScheduleId = null;
+let orgAccountsCurrentOrgId = null;
 
 function showModal(id) { document.getElementById(id).classList.add('show'); }
 function hideModal(id) { document.getElementById(id).classList.remove('show'); }
@@ -969,21 +1028,14 @@ function confirmDeleteDevice(deviceId) {
     }).catch(() => showToast('通信エラー', 'error'));
 }
 
-// ===== 管理者アカウント =====
-function toggleOrgSelect(rowId, role) {
-    const row = document.getElementById(rowId);
-    if (row) row.style.display = role === 'operator' ? '' : 'none';
-}
-function showAddAdminModal() { generatePassword('addAdminPassword'); toggleOrgSelect('addAdminOrgRow', 'operator'); document.getElementById('addAdminModal').classList.add('show'); }
+// ===== 管理者アカウント（masterのみ） =====
+function showAddAdminModal() { generatePassword('addAdminPassword'); document.getElementById('addAdminModal').classList.add('show'); }
 function hideAddAdminModal() { document.getElementById('addAdminModal').classList.remove('show'); }
 function showEditAdminModal(data) {
     document.getElementById('editAdminForm').action = '/partner/admin-users/' + data.id;
     document.getElementById('editAdminName').value = data.name;
     document.getElementById('editAdminEmail').value = data.email;
-    document.getElementById('editAdminRole').value = data.role;
-    document.getElementById('editAdminOrg').value = data.organization_id || '';
     document.getElementById('editAdminPassword').value = '';
-    toggleOrgSelect('editAdminOrgRow', data.role);
     document.getElementById('editAdminModal').classList.add('show');
 }
 function hideEditAdminModal() { document.getElementById('editAdminModal').classList.remove('show'); }
@@ -1018,6 +1070,131 @@ function confirmDeleteOrg(id, name) {
     if (confirm(name + ' を削除しますか？\nこの操作は取り消せません。')) {
         const form = document.getElementById('deleteOrgForm'); form.action = '/partner/orgs/' + id; form.submit();
     }
+}
+
+// ===== 組織パートナーアカウント管理 =====
+async function showOrgAccountsModal(orgId, orgName) {
+    orgAccountsCurrentOrgId = orgId;
+    document.getElementById('orgAccountsOrgName').textContent = orgName;
+    document.getElementById('orgNewUserName').value = '';
+    document.getElementById('orgNewUserEmail').value = '';
+    document.getElementById('orgNewUserPassword').value = '';
+    document.getElementById('orgAccountsAddError').style.display = 'none';
+    generatePassword('orgNewUserPassword');
+    showModal('orgAccountsModal');
+    await loadOrgUsers();
+}
+
+async function loadOrgUsers() {
+    const container = document.getElementById('orgAccountsTable');
+    container.innerHTML = '<p style="text-align:center;color:var(--gray-400);padding:20px;">読み込み中...</p>';
+    try {
+        const res = await fetch('/partner/orgs/' + orgAccountsCurrentOrgId + '/users', { headers: { 'Accept': 'application/json' } });
+        const data = await res.json();
+        if (!data.users || data.users.length === 0) {
+            container.innerHTML = '<p style="text-align:center;color:var(--gray-400);padding:16px;font-size:13px;">アカウントがありません</p>';
+            return;
+        }
+        let html = '<table class="partner-user-table"><thead><tr><th>名前</th><th>メールアドレス</th><th>最終ログイン</th><th>操作</th></tr></thead><tbody>';
+        data.users.forEach(u => {
+            const lastLogin = u.last_login_at ? u.last_login_at.replace('T', ' ').substring(0, 16) : '未ログイン';
+            html += '<tr>'
+                + '<td style="font-weight:500;">' + escapeHtml(u.name) + '</td>'
+                + '<td style="font-size:12px;">' + escapeHtml(u.email) + '</td>'
+                + '<td style="font-size:11px;color:var(--gray-500);">' + escapeHtml(lastLogin) + '</td>'
+                + '<td><button class="action-btn" onclick="showOrgEditUserModal(' + u.id + ', ' + JSON.stringify(u.name) + ', ' + JSON.stringify(u.email) + ')">編集</button>'
+                + '<button class="action-btn danger" onclick="confirmDeleteOrgUser(' + u.id + ', ' + JSON.stringify(u.name) + ')">削除</button></td>'
+                + '</tr>';
+        });
+        html += '</tbody></table>';
+        container.innerHTML = html;
+    } catch(e) {
+        container.innerHTML = '<p style="text-align:center;color:#c62828;padding:16px;font-size:13px;">読み込みに失敗しました</p>';
+    }
+}
+
+async function submitOrgNewUser() {
+    const name = document.getElementById('orgNewUserName').value.trim();
+    const email = document.getElementById('orgNewUserEmail').value.trim();
+    const password = document.getElementById('orgNewUserPassword').value;
+    const errEl = document.getElementById('orgAccountsAddError');
+    errEl.style.display = 'none';
+
+    if (!name || !email || !password) { errEl.textContent = '名前・メール・パスワードを入力してください'; errEl.style.display = 'block'; return; }
+
+    try {
+        const res = await fetch('/partner/orgs/' + orgAccountsCurrentOrgId + '/users', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' },
+            body: JSON.stringify({ name, email, password })
+        });
+        const data = await res.json();
+        if (res.ok && data.success) {
+            showToast(data.message, 'success');
+            document.getElementById('orgNewUserName').value = '';
+            document.getElementById('orgNewUserEmail').value = '';
+            document.getElementById('orgNewUserPassword').value = '';
+            generatePassword('orgNewUserPassword');
+            await loadOrgUsers();
+            setTimeout(() => location.reload(), 1500);
+        } else {
+            errEl.textContent = data.message || 'エラーが発生しました';
+            errEl.style.display = 'block';
+        }
+    } catch(e) { errEl.textContent = '通信エラーが発生しました'; errEl.style.display = 'block'; }
+}
+
+function showOrgEditUserModal(userId, name, email) {
+    document.getElementById('orgEditUserId').value = userId;
+    document.getElementById('orgEditUserName').value = name;
+    document.getElementById('orgEditUserEmail').value = email;
+    document.getElementById('orgEditUserPassword').value = '';
+    document.getElementById('orgEditUserError').style.display = 'none';
+    showModal('orgEditUserModal');
+}
+
+async function submitOrgEditUser() {
+    const userId = document.getElementById('orgEditUserId').value;
+    const name = document.getElementById('orgEditUserName').value.trim();
+    const email = document.getElementById('orgEditUserEmail').value.trim();
+    const password = document.getElementById('orgEditUserPassword').value;
+    const errEl = document.getElementById('orgEditUserError');
+    errEl.style.display = 'none';
+
+    if (!name || !email) { errEl.textContent = '名前・メールを入力してください'; errEl.style.display = 'block'; return; }
+
+    const payload = { name, email };
+    if (password) payload.password = password;
+
+    try {
+        const res = await fetch('/partner/orgs/' + orgAccountsCurrentOrgId + '/users/' + userId, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (res.ok && data.success) {
+            showToast(data.message, 'success');
+            hideModal('orgEditUserModal');
+            await loadOrgUsers();
+            setTimeout(() => location.reload(), 1500);
+        } else {
+            errEl.textContent = data.message || 'エラーが発生しました';
+            errEl.style.display = 'block';
+        }
+    } catch(e) { errEl.textContent = '通信エラーが発生しました'; errEl.style.display = 'block'; }
+}
+
+async function confirmDeleteOrgUser(userId, name) {
+    if (!confirm(name + ' を削除しますか？')) return;
+    try {
+        const res = await fetch('/partner/orgs/' + orgAccountsCurrentOrgId + '/users/' + userId, {
+            method: 'DELETE', headers: { 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' }
+        });
+        const data = await res.json();
+        if (res.ok && data.success) { showToast(data.message, 'success'); await loadOrgUsers(); setTimeout(() => location.reload(), 1500); }
+        else showToast(data.message || '削除に失敗しました', 'error');
+    } catch(e) { showToast('通信エラー', 'error'); }
 }
 </script>
 @endsection

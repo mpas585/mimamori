@@ -47,6 +47,11 @@ class Organization extends Model
         return $this->hasMany(OrgDeviceAssignment::class);
     }
 
+    public function partnerUsers(): HasMany
+    {
+        return $this->hasMany(PartnerUser::class);
+    }
+
     public function getNotificationEmails(): array
     {
         if (!$this->notification_enabled) {

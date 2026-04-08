@@ -115,6 +115,12 @@ Route::middleware(PartnerAuth::class)->prefix('partner')->group(function () {
     Route::put('/orgs/{id}', [MasterController::class, 'updateOrg'])->name('partner.orgs.update');
     Route::delete('/orgs/{id}', [MasterController::class, 'destroyOrg'])->name('partner.orgs.destroy');
     Route::post('/orgs/{orgId}/toggle-premium', [MasterController::class, 'toggleOrgPremium'])->name('partner.orgs.toggle-premium');
+
+    // 組織のパートナーアカウント管理
+    Route::get('/orgs/{orgId}/users', [MasterController::class, 'orgUsers'])->name('partner.orgs.users');
+    Route::post('/orgs/{orgId}/users', [MasterController::class, 'storeOrgUser'])->name('partner.orgs.users.store');
+    Route::put('/orgs/{orgId}/users/{userId}', [MasterController::class, 'updateOrgUser'])->name('partner.orgs.users.update');
+    Route::delete('/orgs/{orgId}/users/{userId}', [MasterController::class, 'destroyOrgUser'])->name('partner.orgs.users.destroy');
 });
 
 // ★ master 限定（課金管理）
