@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
+use App\Models\BillingLog;
 
 class MasterController extends Controller
 {
@@ -60,7 +61,8 @@ class MasterController extends Controller
             ->with(['partnerUsers' => function ($q) { $q->where('role', 'operator'); }])
             ->orderBy('created_at', 'desc')->get();
 
-        return view('partner.master', compact('stats', 'devices', 'adminUsers', 'organizations'));
+        $salesData = $this->buildSalesData();
+        return view('partner.master', compact('stats', 'devices', 'adminUsers', 'organizations', 'salesData'));
     }
 
     // ============================================================
