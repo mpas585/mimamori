@@ -333,7 +333,7 @@
                             </td>
                             <td class="mono">{{ $device->device_id }}</td>
                             <td>
-                                @if(!$isVacant)
+                                @if($assignment)
                                     <label class="watch-toggle away">
                                         <input type="checkbox" {{ $device->away_mode ? 'checked' : '' }} onchange="toggleAwayMode('{{ $device->device_id }}', this.checked, this)">
                                         <span class="watch-slider"></span>
