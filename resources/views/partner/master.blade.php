@@ -47,6 +47,8 @@
     .battery-cell { font-size: 12px; }
     .battery-low { color: #c62828 !important; font-weight: 600 !important; }
     .signal-weak { color: #e65100 !important; font-weight: 600 !important; }
+    tr.row-inactive td.signal-weak { color: #e65100 !important; font-weight: 600 !important; }
+    tr.row-inactive td.battery-low { color: #c62828 !important; font-weight: 600 !important; }
     .row-inactive td { color: var(--gray-400) !important; }
     .row-inactive .mono { color: var(--gray-400) !important; }
     .row-inactive .status-badge { opacity: 0.45; }
