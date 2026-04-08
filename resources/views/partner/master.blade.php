@@ -176,7 +176,7 @@
 <div class="tab-bar">
     <button class="tab active" onclick="switchTab('devices', this)">デバイス管理</button>
     <button class="tab" onclick="switchTab('admins', this)">管理者アカウント</button>
-    <button class="tab" onclick="switchTab('orgs', this)">組織管理</button>
+    <button class="tab" onclick="switchTab('orgs', this)">パートナー管理</button>
 </div>
 
 {{-- ===== デバイス管理タブ ===== --}}
@@ -337,8 +337,8 @@
 <div id="tab-orgs" class="tab-content">
     <div class="card">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
-            <div style="font-size:15px;font-weight:600;color:#5a5245;">組織一覧</div>
-            <button class="btn btn-sm btn-primary" onclick="showAddOrgModal()">＋ 組織追加</button>
+            <div style="font-size:15px;font-weight:600;color:#5a5245;">パートナー一覧</div>
+            <button class="btn btn-sm btn-primary" onclick="showAddOrgModal()">＋ パートナー登録</button>
         </div>
         <table class="org-table">
             <thead>
@@ -602,7 +602,7 @@
 {{-- ===== 組織追加モーダル（パートナーアカウント作成セクション付き） ===== --}}
 <div id="addOrgModal" class="modal-overlay" onclick="if(event.target===this)hideAddOrgModal()">
     <div class="modal" style="max-width:560px;">
-        <div class="modal-header"><h3>組織追加</h3><button class="modal-close" onclick="hideAddOrgModal()">✕</button></div>
+        <div class="modal-header"><h3>パートナー登録</h3><button class="modal-close" onclick="hideAddOrgModal()">✕</button></div>
         <form method="POST" action="{{ route('partner.orgs.store') }}">
             @csrf
             <div class="modal-body">
@@ -650,7 +650,7 @@
 {{-- ===== 組織編集モーダル ===== --}}
 <div id="editOrgModal" class="modal-overlay" onclick="if(event.target===this)hideEditOrgModal()">
     <div class="modal" style="max-width:560px;">
-        <div class="modal-header"><h3>組織編集</h3><button class="modal-close" onclick="hideEditOrgModal()">✕</button></div>
+        <div class="modal-header"><h3>パートナー編集</h3><button class="modal-close" onclick="hideEditOrgModal()">✕</button></div>
         <form method="POST" id="editOrgForm" action="">
             @csrf @method('PUT')
             <div class="modal-body">
