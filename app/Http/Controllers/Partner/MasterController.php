@@ -404,7 +404,7 @@ class MasterController extends Controller
         $request->validate([
             'name'             => 'required|string|max:200',
             'contact_name'     => 'nullable|string|max:100',
-            'contact_email'    => 'required|email|max:255',
+            'contact_email'    => 'nullable|email|max:255',
             'contact_phone'    => 'nullable|string|max:20',
             'address'          => 'nullable|string|max:500',
             'notes'            => 'nullable|string|max:1000',
@@ -412,9 +412,7 @@ class MasterController extends Controller
             'partner_email'    => 'nullable|email|max:255|unique:admin_users,email',
             'partner_password' => 'nullable|string|min:8|max:100',
         ], [
-            'name.required'          => '組織名を入力してください',
-            'contact_email.required' => '連絡先メールを入力してください',
-            'contact_email.email'    => '正しいメールアドレスを入力してください',
+            'name.required'        => '組織名を入力してください',
             'partner_email.unique'   => 'このメールアドレスは既に使用されています',
             'partner_password.min'   => 'パスワードは8文字以上にしてください',
         ]);

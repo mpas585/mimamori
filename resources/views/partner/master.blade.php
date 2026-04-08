@@ -623,7 +623,7 @@
                     <div class="form-group"><label class="form-label">組織名 *</label><input type="text" name="name" class="form-input" required></div>
                     <div class="form-row-2">
                         <div class="form-group"><label class="form-label">担当者名</label><input type="text" name="contact_name" class="form-input"></div>
-                        <div class="form-group"><label class="form-label">連絡先メール *</label><input type="email" name="contact_email" class="form-input" required></div>
+                        <div class="form-group"><label class="form-label">連絡先メール</label><input type="email" name="contact_email" class="form-input"></div>
                     </div>
                     <div class="form-row-2">
                         <div class="form-group"><label class="form-label">連絡先電話番号</label><input type="text" name="contact_phone" class="form-input"></div>
