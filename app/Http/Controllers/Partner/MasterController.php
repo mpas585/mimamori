@@ -136,47 +136,33 @@ class MasterController extends Controller
         });
 
         return response()->json([
-            'device_id'                    => $device->device_id,
-            'sim_id'                       => $device->sim_id,
-            'status'                       => $device->status,
-            'organization_id'              => $device->organization_id,
-            'organization_name'            => $device->organization ? $device->organization->name : null,
-            'room_number'                  => $assignment ? $assignment->room_number : null,
-            'tenant_name'                  => $assignment ? $assignment->tenant_name : null,
-            'last_received_at'             => $device->last_received_at       ? $device->last_received_at->format('Y/m/d H:i')      : null,
-            'last_human_detected_at'       => $device->last_human_detected_at ? $device->last_human_detected_at->format('Y/m/d H:i') : null,
-            'battery_pct'                  => $device->battery_pct,
-            'battery_voltage'              => $device->battery_voltage,
-            'rssi_label'                   => $rssiLabel,
-            'alert_threshold_hours'        => $device->alert_threshold_hours,
-            'pet_exclusion_enabled'        => (bool) $device->pet_exclusion_enabled,
-            'install_height_cm'            => $device->install_height_cm,
-            'away_mode'                    => (bool) $device->away_mode,
-            'away_until'                   => $device->away_until ? $device->away_until->format('Y/m/d H:i') : null,
-            'memo'                         => $device->location_memo,
-            'registered_at'                => $device->created_at->format('Y/m/d'),
-            'billing_start_date'           => $device->billing_start_date ? $device->billing_start_date->format('Y-m-d') : null,
-            'notification_service_enabled' => (bool) ($device->notification_service_enabled ?? true),
-            'schedules'                    => $schedules,
-            'sms_enabled'                  => $notif ? (bool) $notif->sms_enabled   : false,
-            'sms_phone_1'                  => $notif && $notif->sms_phone_1 ? preg_replace('/^\+81/', '0', $notif->sms_phone_1) : null,
-            'sms_phone_2'                  => $notif && $notif->sms_phone_2 ? preg_replace('/^\+81/', '0', $notif->sms_phone_2) : null,
-            'voice_enabled'                => $notif ? (bool) $notif->voice_enabled : false,
-            'voice_phone_1'                => $notif && $notif->voice_phone_1 ? preg_replace('/^\+81/', '0', $notif->voice_phone_1) : null,
-            'voice_phone_2'                => $notif && $notif->voice_phone_2 ? preg_replace('/^\+81/', '0', $notif->voice_phone_2) : null,
-        ]);
-    }
-
-    public function toggleNotifyService(Request $request, string $deviceId)
-    {
-        $device = Device::where('device_id', $deviceId)->firstOrFail();
-        $request->validate(['enabled' => 'required|boolean']);
-        $device->update(['notification_service_enabled' => (bool) $request->enabled]);
-
-        return response()->json([
-            'success' => true,
-            'enabled' => (bool) $device->notification_service_enabled,
-            'message' => $device->notification_service_enabled ? '通知サービスを有効にしました' : '通知サービスを停止しました',
+            'device_id'              => $device->device_id,
+            'sim_id'                 => $device->sim_id,
+            'status'                 => $device->status,
+            'organization_id'        => $device->organization_id,
+            'organization_name'      => $device->organization ? $device->organization->name : null,
+            'room_number'            => $assignment ? $assignment->room_number : null,
+            'tenant_name'            => $assignment ? $assignment->tenant_name : null,
+            'last_received_at'       => $device->last_received_at       ? $device->last_received_at->format('Y/m/d H:i')      : null,
+            'last_human_detected_at' => $device->last_human_detected_at ? $device->last_human_detected_at->format('Y/m/d H:i') : null,
+            'battery_pct'            => $device->battery_pct,
+            'battery_voltage'        => $device->battery_voltage,
+            'rssi_label'             => $rssiLabel,
+            'alert_threshold_hours'  => $device->alert_threshold_hours,
+            'pet_exclusion_enabled'  => (bool) $device->pet_exclusion_enabled,
+            'install_height_cm'      => $device->install_height_cm,
+            'away_mode'              => (bool) $device->away_mode,
+            'away_until'             => $device->away_until ? $device->away_until->format('Y/m/d H:i') : null,
+            'memo'                   => $device->location_memo,
+            'registered_at'          => $device->created_at->format('Y/m/d'),
+            'billing_start_date'     => $device->billing_start_date ? $device->billing_start_date->format('Y-m-d') : null,
+            'schedules'              => $schedules,
+            'sms_enabled'            => $notif ? (bool) $notif->sms_enabled   : false,
+            'sms_phone_1'            => $notif && $notif->sms_phone_1 ? preg_replace('/^\+81/', '0', $notif->sms_phone_1) : null,
+            'sms_phone_2'            => $notif && $notif->sms_phone_2 ? preg_replace('/^\+81/', '0', $notif->sms_phone_2) : null,
+            'voice_enabled'          => $notif ? (bool) $notif->voice_enabled : false,
+            'voice_phone_1'          => $notif && $notif->voice_phone_1 ? preg_replace('/^\+81/', '0', $notif->voice_phone_1) : null,
+            'voice_phone_2'          => $notif && $notif->voice_phone_2 ? preg_replace('/^\+81/', '0', $notif->voice_phone_2) : null,
         ]);
     }
 
@@ -286,6 +272,9 @@ class MasterController extends Controller
         return response()->json(['success' => true, 'message' => "デバイス {$deviceId} の警告を解除しました"]);
     }
 
+    /**
+     * デバイス論理削除（マスター専用）
+     */
     public function destroyDevice(string $deviceId)
     {
         $device = Device::where('device_id', $deviceId)->firstOrFail();
@@ -332,19 +321,6 @@ class MasterController extends Controller
         return response()->json(['success' => true, 'message' => 'スケジュールを削除しました']);
     }
 
-    public function toggleDevicePremium(Request $request, string $deviceId)
-    {
-        $device = Device::where('device_id', $deviceId)->firstOrFail();
-        $request->validate(['premium_enabled' => 'required|boolean']);
-        $device->update(['premium_enabled' => (bool) $request->premium_enabled]);
-
-        return response()->json([
-            'success'         => true,
-            'premium_enabled' => (bool) $device->premium_enabled,
-            'message'         => $device->premium_enabled ? 'プレミアムを有効にしました' : 'プレミアムを無効にしました',
-        ]);
-    }
-
     // ============================================================
     // 管理者アカウント管理
     // ============================================================
@@ -353,7 +329,7 @@ class MasterController extends Controller
     {
         $request->validate([
             'name'     => 'required|string|max:100',
-            'email'    => 'required|email|max:255|unique:admin_users,email',
+            'email'    => 'required|email|max:255|unique:partner_users,email',
             'password' => 'required|string|min:8|max:100',
             'role'     => 'required|in:master,operator',
         ], [
@@ -381,7 +357,7 @@ class MasterController extends Controller
 
         $request->validate([
             'name'     => 'required|string|max:100',
-            'email'    => ['required', 'email', 'max:255', Rule::unique('admin_users', 'email')->ignore($admin->id)],
+            'email'    => ['required', 'email', 'max:255', Rule::unique('partner_users', 'email')->ignore($admin->id)],
             'password' => 'nullable|string|min:8|max:100',
             'role'     => 'required|in:master,operator',
         ], [
@@ -512,12 +488,21 @@ class MasterController extends Controller
         return redirect('/partner?tab=orgs')->with('success', '組織「' . $name . '」を削除しました');
     }
 
+    /**
+     * 組織プレミアムトグル → 組織内全デバイスを一括更新
+     */
     public function toggleOrgPremium(Request $request, int $orgId)
     {
         $org = Organization::findOrFail($orgId);
+
         $request->validate(['premium_enabled' => 'required|boolean']);
+
         $enabled = (bool) $request->premium_enabled;
+
+        // 組織フラグ更新
         $org->update(['premium_enabled' => $enabled]);
+
+        // 組織内全デバイスを一括更新
         Device::where('organization_id', $orgId)->update(['premium_enabled' => $enabled ? 1 : 0]);
 
         return response()->json([
@@ -534,12 +519,14 @@ class MasterController extends Controller
     private function generateDeviceId(): string
     {
         $chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+
         do {
             $id = '';
             for ($i = 0; $i < 6; $i++) {
                 $id .= $chars[random_int(0, strlen($chars) - 1)];
             }
         } while (Device::where('device_id', $id)->exists());
+
         return $id;
     }
 
