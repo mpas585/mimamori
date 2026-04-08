@@ -41,18 +41,7 @@ class OrgAdminController extends Controller
 
         if ($request->filled('status')) {
             $status = $request->status;
-            if ($status === 'vacant') {
-                $query->where(function ($q) {
-                    $q->whereDoesntHave('orgAssignment')
-                      ->orWhereHas('orgAssignment', function ($q2) {
-                          $q2->where(function ($q3) {
-                              $q3->whereNull('tenant_name')->orWhere('tenant_name', '');
-                          });
-                      });
-                });
-            } else {
-                $query->where('status', $status);
-            }
+            $query->where('status', $status);
         }
 
         if ($request->filled('watch')) {
@@ -93,14 +82,6 @@ class OrgAdminController extends Controller
             'warning' => (clone $allDevices)->where('status', 'warning')->count(),
             'alert'   => (clone $allDevices)->where('status', 'alert')->count(),
             'offline' => (clone $allDevices)->where('status', 'offline')->count(),
-            'vacant'  => (clone $allDevices)->where(function ($q) {
-                            $q->whereDoesntHave('orgAssignment')
-                              ->orWhereHas('orgAssignment', function ($q2) {
-                                  $q2->where(function ($q3) {
-                                      $q3->whereNull('tenant_name')->orWhere('tenant_name', '');
-                                  });
-                              });
-                         })->count(),
         ];
 
         return view('partner.dashboard', compact('organization', 'stats', 'devices'));
