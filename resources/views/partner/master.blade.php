@@ -606,6 +606,19 @@
         <form method="POST" action="{{ route('partner.orgs.store') }}">
             @csrf
             <div class="modal-body">
+                <div class="modal-section">
+                    <div class="modal-section-title">パートナーアカウント</div>
+                    <div class="form-row-2">
+                        <div class="form-group"><label class="form-label">メールアドレス *</label><input type="email" name="partner_email" class="form-input" placeholder="partner@example.com"></div>
+                        <div class="form-group">
+                            <label class="form-label">パスワード *</label>
+                            <div class="password-field">
+                                <input type="text" name="partner_password" id="addOrgPartnerPassword" class="form-input">
+                                <button type="button" class="password-generate-btn" onclick="generatePassword('addOrgPartnerPassword')">生成</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 <div class="modal-section"><div class="modal-section-title">基本情報</div>
                     <div class="form-group"><label class="form-label">組織名 *</label><input type="text" name="name" class="form-input" required></div>
                     <div class="form-row-2">
@@ -618,20 +631,6 @@
                     </div>
                     <div class="form-group"><label class="form-label">住所</label><input type="text" name="address" class="form-input"></div>
                     <div class="form-group"><label class="form-label">メモ</label><textarea name="notes" class="form-input" rows="2" style="resize:vertical;"></textarea></div>
-                </div>
-                <div class="modal-section">
-                    <div class="modal-section-title">パートナーアカウント <span style="font-size:11px;font-weight:400;color:var(--gray-400);">（任意）</span></div>
-                    <p style="font-size:12px;color:var(--gray-500);margin-bottom:12px;">この組織を管理するパートナーアカウントを同時に作成できます。</p>
-                    <div class="form-row-2">
-                        <div class="form-group"><label class="form-label">メールアドレス</label><input type="email" name="partner_email" class="form-input" placeholder="partner@example.com"></div>
-                        <div class="form-group">
-                            <label class="form-label">パスワード</label>
-                            <div class="password-field">
-                                <input type="text" name="partner_password" id="addOrgPartnerPassword" class="form-input">
-                                <button type="button" class="password-generate-btn" onclick="generatePassword('addOrgPartnerPassword')">生成</button>
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </div>
             <div class="modal-footer"><button type="button" class="btn btn-secondary" onclick="hideAddOrgModal()">キャンセル</button><button type="submit" class="btn btn-primary">作成</button></div>
