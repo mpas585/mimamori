@@ -243,14 +243,11 @@
             <div class="status-value gray">{{ $stats['offline'] ?? 0 }}</div>
             <div class="status-label"><span class="status-dot gray"></span> 離線</div>
         </div>
-        <div class="status-card {{ request('status') === 'vacant' ? 'active' : '' }}" onclick="filterByStatus('vacant')">
-            <div class="status-value light">{{ $stats['vacant'] ?? 0 }}</div>
-            <div class="status-label"><span class="status-dot light"></span> 空室</div>
-        </div>
+
     </div>
 
     <div class="status-legend">
-        <span>正常: 検知あり</span><span>注意: 電池低下/未検知気味</span><span>警告: 長時間未検知</span><span>離線: 通信途絶</span><span>空室: デバイス未割当</span>
+        <span>正常: 検知あり</span><span>注意: 電池低下/未検知気味</span><span>警告: 長時間未検知</span><span>離線: 通信途絶</span>
     </div>
 
     <div class="toolbar">
@@ -266,7 +263,6 @@
                     <option value="warning" {{ request('status') === 'warning' ? 'selected' : '' }}>🟡 注意のみ</option>
                     <option value="alert" {{ request('status') === 'alert' ? 'selected' : '' }}>🔴 警告のみ</option>
                     <option value="offline" {{ request('status') === 'offline' ? 'selected' : '' }}>⚫ 離線のみ</option>
-                    <option value="vacant" {{ request('status') === 'vacant' ? 'selected' : '' }}>⚪ 空室のみ</option>
                 </select>
                 <select name="watch" class="filter-select">
                     <option value="">すべての外出モード状態</option>
@@ -301,7 +297,7 @@
                             $roomNumber = $assignment ? $assignment->room_number : null;
                             $tenantName = $assignment ? $assignment->tenant_name : null;
                             $isVacant = !$assignment || !$tenantName;
-                            $displayStatus = $isVacant ? 'vacant' : $device->status;
+                            $displayStatus = $device->status;
                             $lastDetected = $device->last_human_detected_at;
                             $timeSince = $lastDetected ? $lastDetected->locale('ja')->diffForHumans() : null;
                             $rssi = $device->rssi;
@@ -319,7 +315,6 @@
                                     @case('warning') <span class="device-status warning">注意</span> @break
                                     @case('alert') <span class="device-status alert">警告</span><button class="clear-alert-btn" onclick="confirmClearAlert('{{ $device->device_id }}', '{{ $roomNumber }}', '{{ $tenantName }}')">✕ 解除</button> @break
                                     @case('offline') <span class="device-status offline">離線</span> @break
-                                    @case('vacant') <span class="device-status vacant">空室</span> @break
                                     @default <span class="device-status offline">-</span>
                                 @endswitch
                             </td>
