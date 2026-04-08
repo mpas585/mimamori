@@ -788,7 +788,19 @@ function masterShowSubscriptionModal() {
 
 function masterToggleNotifyService(enabled) {
     document.getElementById('masterDetailNotifyLabel').textContent = enabled ? '有効' : '停止中';
-    showToast(enabled ? '通知サービスを有効にしました' : '通知サービスを停止しました', 'success');
+    fetch('/partner/devices/' + masterCurrentDeviceId + '/toggle-notify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' },
+        body: JSON.stringify({ enabled: enabled ? 1 : 0 })
+    }).then(r => r.json()).then(d => {
+        if (d.success) {
+            showToast(d.message, 'success');
+        } else {
+            showToast(d.message || 'エラー', 'error');
+            document.getElementById('masterDetailNotifyEnabled').checked = !enabled;
+            document.getElementById('masterDetailNotifyLabel').textContent = !enabled ? '有効' : '停止中';
+        }
+    }).catch(() => showToast('通信エラー', 'error'));
 }
 
 async function masterSaveAssignment() {
