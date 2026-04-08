@@ -329,7 +329,7 @@ class MasterController extends Controller
     {
         $request->validate([
             'name'     => 'required|string|max:100',
-            'email'    => 'required|email|max:255|unique:partner_users,email',
+            'email'    => 'required|email|max:255|unique:admin_users,email',
             'password' => 'required|string|min:8|max:100',
             'role'     => 'required|in:master,operator',
         ], [
@@ -357,7 +357,7 @@ class MasterController extends Controller
 
         $request->validate([
             'name'     => 'required|string|max:100',
-            'email'    => ['required', 'email', 'max:255', Rule::unique('partner_users', 'email')->ignore($admin->id)],
+            'email'    => ['required', 'email', 'max:255', Rule::unique('admin_users', 'email')->ignore($admin->id)],
             'password' => 'nullable|string|min:8|max:100',
             'role'     => 'required|in:master,operator',
         ], [
@@ -412,7 +412,7 @@ class MasterController extends Controller
             'expires_at'       => 'nullable|date',
             // パートナーアカウント（任意）
             'partner_name'     => 'nullable|string|max:100',
-            'partner_email'    => 'nullable|email|max:255|unique:partner_users,email',
+            'partner_email'    => 'nullable|email|max:255|unique:admin_users,email',
             'partner_password' => 'nullable|string|min:8|max:100',
         ], [
             'name.required'          => '組織名を入力してください',
@@ -426,7 +426,7 @@ class MasterController extends Controller
         if ($request->filled('partner_name') || $request->filled('partner_email') || $request->filled('partner_password')) {
             $request->validate([
                 'partner_name'     => 'required|string|max:100',
-                'partner_email'    => 'required|email|max:255|unique:partner_users,email',
+                'partner_email'    => 'required|email|max:255|unique:admin_users,email',
                 'partner_password' => 'required|string|min:8|max:100',
             ], [
                 'partner_name.required'     => 'パートナー名を入力してください',
@@ -561,7 +561,7 @@ class MasterController extends Controller
 
         $request->validate([
             'name'     => 'required|string|max:100',
-            'email'    => 'required|email|max:255|unique:partner_users,email',
+            'email'    => 'required|email|max:255|unique:admin_users,email',
             'password' => 'required|string|min:8|max:100',
         ], [
             'name.required'     => '名前を入力してください',
@@ -588,7 +588,7 @@ class MasterController extends Controller
 
         $request->validate([
             'name'     => 'required|string|max:100',
-            'email'    => ['required', 'email', 'max:255', Rule::unique('partner_users', 'email')->ignore($user->id)],
+            'email'    => ['required', 'email', 'max:255', Rule::unique('admin_users', 'email')->ignore($user->id)],
             'password' => 'nullable|string|min:8|max:100',
         ], [
             'name.required'  => '名前を入力してください',
