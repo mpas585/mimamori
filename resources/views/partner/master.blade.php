@@ -102,6 +102,7 @@
     .detail-status-badge.inactive { background: #f5f5f5; color: #9e9e9e; }
     .detail-clear-alert-btn { display: inline-flex; align-items: center; gap: 4px; padding: 4px 12px; font-size: 12px; font-weight: 600; font-family: inherit; color: var(--red); background: var(--white); border: 1px solid var(--red-light); border-radius: 6px; cursor: pointer; transition: all 0.2s; margin-left: 10px; }
     .detail-clear-alert-btn:hover { background: var(--red-light); border-color: var(--red); }
+    .detail-notify-note { font-size: 11px; color: var(--gray-500); margin-top: 6px; line-height: 1.5; }
     .detail-schedule-list { border: 1px solid var(--gray-200); border-radius: var(--radius); overflow: hidden; margin-bottom: 10px; }
     .detail-schedule-item { display: flex; align-items: center; padding: 8px 12px; border-bottom: 1px solid var(--gray-100); font-size: 13px; }
     .detail-schedule-item:last-child { border-bottom: none; }
@@ -137,10 +138,6 @@
     .toast.show { transform: translateY(0); opacity: 1; }
     .toast.success { background: #2e7d32; }
     .toast.error { background: var(--red); }
-    .premium-toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; background: var(--beige); border-radius: var(--radius); margin-bottom: 14px; border: 1px solid var(--gray-200); }
-    .premium-toggle-info p:first-child { font-size: 13px; font-weight: 600; color: var(--gray-700); }
-    .premium-toggle-info p:last-child { font-size: 11px; color: var(--gray-500); margin-top: 2px; }
-    .premium-toggle-control { display: flex; align-items: center; gap: 8px; }
 </style>
 @endsection
 
@@ -333,7 +330,6 @@
                         <td style="font-size:12px;">{{ $org->contact_email }}</td>
                         <td style="font-size:13px;">{{ $org->devices_count }}台</td>
                         <td style="font-size:12px;color:var(--gray-600);">{{ $org->delivery_address ?: '-' }}</td>
-
                         <td>
                             <div class="org-notify-icons">
                                 @if($hasEmail) <span title="メール" style="{{ $org->notification_enabled ? '' : 'opacity:0.4;' }}">📧</span> @endif
@@ -354,15 +350,29 @@
     </div>
 </div>
 
-{{-- ===== デバイス詳細モーダル（編集可能） ===== --}}
+{{-- ===== デバイス詳細モーダル ===== --}}
 <div id="deviceDetailModal" class="modal-overlay" onclick="if(event.target===this)hideModal('deviceDetailModal')">
     <div class="modal" style="max-width:560px;">
         <div class="modal-header"><h3>📋 デバイス詳細</h3><button class="modal-close" onclick="hideModal('deviceDetailModal')">×</button></div>
         <div class="modal-body">
+            {{-- ステータス --}}
             <div class="detail-status-row">
                 <div class="detail-status-badge normal" id="masterDetailStatusBadge">-</div>
                 <button class="detail-clear-alert-btn" id="masterDetailClearAlertBtn" style="display:none;" onclick="masterClearAlert()">✕ 警告解除</button>
             </div>
+            {{-- 端末サブスクリプション --}}
+            <div class="modal-section" style="margin-bottom:16px;">
+                <div style="display:flex;align-items:center;justify-content:space-between;">
+                    <div style="display:flex;align-items:center;gap:12px;">
+                        <label class="watch-toggle"><input type="checkbox" id="masterDetailNotifyEnabled" checked onchange="masterToggleNotifyService(this.checked)"><span class="watch-slider"></span></label>
+                        <span style="font-size:13px;font-weight:600;color:var(--gray-700);">🔔 端末サブスクリプション</span>
+                        <span id="masterDetailNotifyLabel" style="font-size:12px;color:var(--gray-500);">有効</span>
+                    </div>
+                    <button class="btn btn-sm btn-secondary" onclick="masterShowSubscriptionModal()">📋 契約プラン</button>
+                </div>
+                <p class="detail-notify-note">※ご契約後〇ヶ月は停止機能はご利用になれません。</p>
+            </div>
+            {{-- デバイス基本情報 --}}
             <div class="modal-section">
                 <div class="detail-grid">
                     <div class="detail-item"><p class="detail-item-label">デバイスID</p><p class="detail-item-value mono" id="masterDetailDeviceId">-</p></div>
@@ -371,6 +381,7 @@
                     <div class="detail-item"><p class="detail-item-label">入居者名</p><input type="text" class="detail-form-input" id="masterDetailTenant" placeholder="山田 太郎"></div>
                 </div>
             </div>
+            {{-- センサー状態 --}}
             <div class="modal-section">
                 <div class="modal-section-title">📊 センサー状態</div>
                 <div class="detail-grid">
@@ -378,6 +389,7 @@
                     <div class="detail-item"><p class="detail-item-label">電波強度</p><p class="detail-item-value" id="masterDetailSignal">-</p></div>
                 </div>
             </div>
+            {{-- 設定 --}}
             <div class="modal-section">
                 <div class="modal-section-title">⚙️ 設定</div>
                 <div class="detail-grid">
@@ -400,6 +412,7 @@
                     </div>
                 </div>
             </div>
+            {{-- 登録情報 --}}
             <div class="modal-section">
                 <div class="modal-section-title">📝 登録情報</div>
                 <div class="detail-grid">
@@ -413,43 +426,11 @@
                     <div class="detail-item" style="grid-column: span 2;">
                         <p class="detail-item-label">💳 決済開始日</p>
                         <input type="date" class="detail-form-input" id="masterDetailBillingStartDate" style="max-width:180px;">
-                        <p style="font-size:11px;color:var(--gray-500);margin-top:4px;">※ デフォルトは翌月1日。この日付から pay.jp の定期課金が開始されます。カード登録後にマスターが設定してください。</p>
+                        <p style="font-size:11px;color:var(--gray-500);margin-top:4px;">※ デフォルトは翌月1日。この日付から pay.jp の定期課金が開始されます。</p>
                     </div>
                 </div>
             </div>
-            <div class="modal-section">
-                <div class="modal-section-title">🔔 通知設定</div>
-                {{-- プレミアムトグル（マスター専用） --}}
-                <div class="premium-toggle-row" id="masterPremiumToggleRow">
-                    <div class="premium-toggle-info">
-                        <p>⭐ プレミアム（SMS/電話通知）</p>
-                        <p id="masterPremiumOrgLabel">組織全体に適用されます</p>
-                    </div>
-                    <div class="premium-toggle-control">
-                        <label class="watch-toggle"><input type="checkbox" id="masterDetailPremiumToggle" onchange="masterTogglePremium(this.checked)"><span class="watch-slider"></span></label>
-                        <span id="masterDetailPremiumLabel" style="font-size:12px;color:var(--gray-500);">無効</span>
-                    </div>
-                </div>
-                <div id="masterDetailPremiumNote" style="display:none;padding:10px 12px;background:var(--yellow-light);border-radius:var(--radius);margin-bottom:12px;font-size:12px;color:#a16207;">
-                    ⚠️ SMS・電話通知はプレミアム契約が必要です。上のトグルで有効にしてください。
-                </div>
-                <div style="border:1px solid var(--gray-200);border-radius:var(--radius);padding:14px;margin-bottom:10px;">
-                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-                        <p style="font-size:13px;font-weight:600;color:var(--gray-700);">💬 SMS通知</p>
-                        <label class="watch-toggle"><input type="checkbox" id="masterDetailSmsEnabled" onchange="masterSaveNotification()"><span class="watch-slider"></span></label>
-                    </div>
-                    <input type="tel" class="detail-form-input" id="masterDetailSmsPhone1" placeholder="09012345678" style="margin-bottom:6px;" onblur="masterSaveNotification()">
-                    <input type="tel" class="detail-form-input" id="masterDetailSmsPhone2" placeholder="09012345678（任意）" onblur="masterSaveNotification()">
-                </div>
-                <div style="border:1px solid var(--gray-200);border-radius:var(--radius);padding:14px;">
-                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-                        <p style="font-size:13px;font-weight:600;color:var(--gray-700);">📞 電話通知（AIコール）</p>
-                        <label class="watch-toggle"><input type="checkbox" id="masterDetailVoiceEnabled" onchange="masterSaveNotification()"><span class="watch-slider"></span></label>
-                    </div>
-                    <input type="tel" class="detail-form-input" id="masterDetailVoicePhone1" placeholder="09012345678" style="margin-bottom:6px;" onblur="masterSaveNotification()">
-                    <input type="tel" class="detail-form-input" id="masterDetailVoicePhone2" placeholder="09012345678（任意）" onblur="masterSaveNotification()">
-                </div>
-            </div>
+            {{-- 外出スケジュール --}}
             <div class="modal-section">
                 <div class="modal-section-title">🚶 外出スケジュール</div>
                 <div id="masterDetailScheduleList"></div>
@@ -459,6 +440,38 @@
         <div class="modal-footer">
             <button class="btn btn-secondary" onclick="hideModal('deviceDetailModal')">閉じる</button>
             <button class="btn btn-primary" onclick="masterSaveAssignment()">保存</button>
+        </div>
+    </div>
+</div>
+
+{{-- ===== 契約プランモーダル（マスター） ===== --}}
+<div id="masterSubscriptionModal" class="modal-overlay" onclick="if(event.target===this)hideModal('masterSubscriptionModal')">
+    <div class="modal" style="max-width:500px;">
+        <div class="modal-header"><h3>📋 契約プラン</h3><button class="modal-close" onclick="hideModal('masterSubscriptionModal')">×</button></div>
+        <div class="modal-body">
+            <div style="font-size:12px;color:var(--gray-500);margin-bottom:16px;">対象デバイス：<span id="masterSubModalDeviceId" class="mono" style="font-size:12px;"></span></div>
+            {{-- SMS通知 --}}
+            <div style="border:1px solid var(--gray-200);border-radius:var(--radius);padding:14px;margin-bottom:10px;">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+                    <p style="font-size:13px;font-weight:600;color:var(--gray-700);">💬 SMS通知 <span style="font-size:11px;font-weight:400;color:var(--gray-500);">+¥100/台/月</span></p>
+                    <label class="watch-toggle"><input type="checkbox" id="masterDetailSmsEnabled"><span class="watch-slider"></span></label>
+                </div>
+                <input type="tel" class="detail-form-input" id="masterDetailSmsPhone1" placeholder="09012345678" style="margin-bottom:6px;">
+                <input type="tel" class="detail-form-input" id="masterDetailSmsPhone2" placeholder="09012345678（任意）">
+            </div>
+            {{-- AIコール --}}
+            <div style="border:1px solid var(--gray-200);border-radius:var(--radius);padding:14px;">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+                    <p style="font-size:13px;font-weight:600;color:var(--gray-700);">📞 電話通知（AIコール）<span style="font-size:11px;font-weight:400;color:var(--gray-500);">+¥300/台/月</span></p>
+                    <label class="watch-toggle"><input type="checkbox" id="masterDetailVoiceEnabled"><span class="watch-slider"></span></label>
+                </div>
+                <input type="tel" class="detail-form-input" id="masterDetailVoicePhone1" placeholder="09012345678" style="margin-bottom:6px;">
+                <input type="tel" class="detail-form-input" id="masterDetailVoicePhone2" placeholder="09012345678（任意）">
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="hideModal('masterSubscriptionModal'); showDeviceDetail(masterCurrentDeviceId)">閉じる</button>
+            <button class="btn btn-primary" onclick="masterSaveNotification(); hideModal('masterSubscriptionModal'); showDeviceDetail(masterCurrentDeviceId)">保存</button>
         </div>
     </div>
 </div>
@@ -670,7 +683,6 @@
 <script>
 const csrfToken = '{{ csrf_token() }}';
 let masterCurrentDeviceId = null;
-let masterCurrentOrgId = null;
 let masterScheduleType = 'oneshot';
 let masterDeleteScheduleId = null;
 
@@ -712,20 +724,22 @@ function generatePassword(inputId) {
 // ===== デバイス詳細 =====
 async function showDeviceDetail(deviceId) {
     masterCurrentDeviceId = deviceId;
-    masterCurrentOrgId = null;
     showModal('deviceDetailModal');
 
     try {
         const res = await fetch('/partner/devices/' + deviceId + '/detail', { headers: { 'Accept': 'application/json' } });
         const d = await res.json();
 
-        masterCurrentOrgId = d.organization_id || null;
-
         const statusLabels = { normal: '正常稼働中', warning: '注意', alert: '未検知警告', offline: '通信途絶', inactive: '未稼働' };
         const badge = document.getElementById('masterDetailStatusBadge');
         badge.textContent = statusLabels[d.status] || d.status;
         badge.className = 'detail-status-badge ' + (d.status || 'inactive');
         document.getElementById('masterDetailClearAlertBtn').style.display = d.status === 'alert' ? 'inline-flex' : 'none';
+
+        // 端末サブスクリプション
+        const notifyEnabled = d.notification_service_enabled !== false;
+        document.getElementById('masterDetailNotifyEnabled').checked = notifyEnabled;
+        document.getElementById('masterDetailNotifyLabel').textContent = notifyEnabled ? '有効' : '停止中';
 
         document.getElementById('masterDetailDeviceId').textContent = d.device_id;
         document.getElementById('masterDetailLastDetected').textContent = d.last_human_detected_at || '-';
@@ -747,27 +761,12 @@ async function showDeviceDetail(deviceId) {
         document.getElementById('masterDetailRegistered').textContent = d.registered_at || '-';
         document.getElementById('masterDetailMemo').value = d.memo || '';
 
-        // 決済開始日（デフォルト：翌月1日）
         const now = new Date();
         const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
         const defaultBillingDate = nextMonth.toISOString().split('T')[0];
         document.getElementById('masterDetailBillingStartDate').value = d.billing_start_date || defaultBillingDate;
 
-        // プレミアムトグル
-        const isPremium = d.premium_enabled || false;
-        document.getElementById('masterDetailPremiumToggle').checked = isPremium;
-        document.getElementById('masterDetailPremiumLabel').textContent = isPremium ? '有効' : '無効';
-        // 組織未割当の場合はトグルを無効化
-        const premiumToggle = document.getElementById('masterDetailPremiumToggle');
-        premiumToggle.disabled = !masterCurrentOrgId;
-        premiumToggle.style.opacity = masterCurrentOrgId ? '' : '0.4';
-        premiumToggle.style.cursor = masterCurrentOrgId ? '' : 'not-allowed';
-        const orgLabel = d.organization_name ? d.organization_name + ' 全体に適用' : '組織未割当（変更不可）';
-        document.getElementById('masterPremiumOrgLabel').textContent = orgLabel;
-
-        // SMS/電話のinput活性制御
-        masterApplyPremiumState(isPremium);
-
+        // SMS/電話キャッシュ
         document.getElementById('masterDetailSmsEnabled').checked = d.sms_enabled || false;
         document.getElementById('masterDetailSmsPhone1').value = d.sms_phone_1 || '';
         document.getElementById('masterDetailSmsPhone2').value = d.sms_phone_2 || '';
@@ -779,44 +778,17 @@ async function showDeviceDetail(deviceId) {
     } catch(e) { showToast('詳細の取得に失敗しました', 'error'); }
 }
 
-function masterApplyPremiumState(isPremium) {
-    document.getElementById('masterDetailPremiumNote').style.display = isPremium ? 'none' : '';
-    ['masterDetailSmsEnabled','masterDetailSmsPhone1','masterDetailSmsPhone2','masterDetailVoiceEnabled','masterDetailVoicePhone1','masterDetailVoicePhone2'].forEach(id => {
-        const el = document.getElementById(id);
-        el.disabled = !isPremium;
-        el.style.opacity = isPremium ? '' : '0.4';
-        el.style.cursor = isPremium ? '' : 'not-allowed';
-    });
+// ===== 契約プランモーダル =====
+function masterShowSubscriptionModal() {
+    if (!masterCurrentDeviceId) return;
+    hideModal('deviceDetailModal');
+    document.getElementById('masterSubModalDeviceId').textContent = masterCurrentDeviceId;
+    showModal('masterSubscriptionModal');
 }
 
-async function masterTogglePremium(enabled) {
-    if (!masterCurrentOrgId) {
-        showToast('組織に割り当てられていないデバイスです', 'error');
-        document.getElementById('masterDetailPremiumToggle').checked = !enabled;
-        return;
-    }
-    try {
-        const res = await fetch('/partner/orgs/' + masterCurrentOrgId + '/toggle-premium', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' },
-            body: JSON.stringify({ premium_enabled: enabled ? 1 : 0 })
-        });
-        const data = await res.json();
-        if (data.success) {
-            document.getElementById('masterDetailPremiumLabel').textContent = enabled ? '有効' : '無効';
-            masterApplyPremiumState(enabled);
-            // 組織タブのトグルも同期
-            const orgLabel = document.querySelector('.org-premium-label-' + masterCurrentOrgId);
-            if (orgLabel) orgLabel.textContent = enabled ? '有効' : '無効';
-            showToast(enabled ? 'プレミアムを有効にしました' : 'プレミアムを無効にしました', 'success');
-        } else {
-            document.getElementById('masterDetailPremiumToggle').checked = !enabled;
-            showToast('エラーが発生しました', 'error');
-        }
-    } catch(e) {
-        document.getElementById('masterDetailPremiumToggle').checked = !enabled;
-        showToast('通信エラーが発生しました', 'error');
-    }
+function masterToggleNotifyService(enabled) {
+    document.getElementById('masterDetailNotifyLabel').textContent = enabled ? '有効' : '停止中';
+    showToast(enabled ? '通知サービスを有効にしました' : '通知サービスを停止しました', 'success');
 }
 
 async function masterSaveAssignment() {
@@ -851,10 +823,14 @@ async function masterSaveNotification() {
         voice_phone_1: document.getElementById('masterDetailVoicePhone1').value || null,
         voice_phone_2: document.getElementById('masterDetailVoicePhone2').value || null,
     };
-    fetch('/partner/devices/' + masterCurrentDeviceId + '/notification', {
-        method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' }, body: JSON.stringify(payload)
-    }).then(r => r.json()).then(d => { if (d.success) showToast('通知設定を保存しました', 'success'); })
-    .catch(() => showToast('保存に失敗しました', 'error'));
+    try {
+        const res = await fetch('/partner/devices/' + masterCurrentDeviceId + '/notification', {
+            method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' }, body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (data.success) showToast('通知設定を保存しました', 'success');
+        else showToast(data.message || 'エラーが発生しました', 'error');
+    } catch(e) { showToast('通信エラー', 'error'); }
 }
 
 async function masterToggleAwayMode(checked) {
@@ -1024,17 +1000,6 @@ function confirmDeleteOrg(id, name) {
     if (confirm('「' + name + '」を削除しますか？\nこの操作は取り消せません。')) {
         const form = document.getElementById('deleteOrgForm'); form.action = '/partner/orgs/' + id; form.submit();
     }
-}
-
-async function toggleOrgPremium(orgId, enabled, checkbox) {
-    try {
-        const res = await fetch('/partner/orgs/' + orgId + '/toggle-premium', {
-            method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' }, body: JSON.stringify({ premium_enabled: enabled ? 1 : 0 })
-        });
-        const data = await res.json();
-        if (data.success) { const label = document.querySelector('.org-premium-label-' + orgId); if (label) label.textContent = enabled ? '有効' : '無効'; }
-        else checkbox.checked = !enabled;
-    } catch(e) { checkbox.checked = !enabled; }
 }
 </script>
 @endsection

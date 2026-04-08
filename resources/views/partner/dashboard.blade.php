@@ -72,6 +72,10 @@
     .action-btn:hover { background: var(--beige); }
     .action-btn.danger { color: var(--red); border-color: var(--red-light); }
     .action-btn.danger:hover { background: var(--red-light); }
+    .row-inactive td { color: var(--gray-400) !important; }
+    .row-inactive .mono { color: var(--gray-400) !important; }
+    .row-inactive .device-status, .row-inactive .watch-toggle, .row-inactive .action-btn { opacity: 0.45; pointer-events: none; }
+    .row-inactive .action-btn { pointer-events: auto; opacity: 1; }
     .pagination-bar { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; border-top: 2px solid var(--gray-200); background: var(--cream); font-size: 13px; }
     .pagination-info { color: var(--gray-600); font-weight: 500; }
     .pagination-buttons { display: flex; gap: 4px; }
@@ -272,7 +276,7 @@
                 </select>
                 <button type="submit" class="btn btn-sm btn-secondary">絞り込み</button>
             </form>
-            <span class="toolbar-count">登録: <strong>{{ $devices->total() ?? 0 }}</strong> / {{ $organization->device_limit ?? 100 }}台</span>
+            <span class="toolbar-count">登録: <strong>{{ $devices->total() ?? 0 }}</strong>台</span>
         </div>
         <div class="toolbar-right">
             <button class="toolbar-btn" onclick="showNotificationModal()">🔔 通知設定</button>
@@ -308,7 +312,7 @@
                                 else $signalLabel = '弱い';
                             }
                         @endphp
-                        <tr id="row-{{ $device->device_id }}">
+                        <tr id="row-{{ $device->device_id }}" {{ !$device->notification_service_enabled ? 'class="row-inactive"' : '' }}>
                             <td>
                                 @switch($displayStatus)
                                     @case('normal') <span class="device-status normal">正常</span> @break
