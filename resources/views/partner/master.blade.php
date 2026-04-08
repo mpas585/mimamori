@@ -156,6 +156,25 @@
     .partner-user-table td { padding: 8px 10px; border-bottom: 1px solid #f0ebe1; vertical-align: middle; }
     .partner-user-table tr:hover td { background: #faf8f4; }
     .modal-section-divider { border: none; border-top: 1px solid var(--gray-200); margin: 20px 0; }
+    /* 売上集計 */
+    .sales-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 20px; }
+    .sales-card { background: #fff; border-radius: 10px; padding: 18px 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+    .sales-card-label { font-size: 11px; color: #999; margin-bottom: 6px; }
+    .sales-card-value { font-size: 26px; font-weight: 700; color: #5a5245; }
+    .sales-card-sub { font-size: 11px; color: #aaa; margin-top: 4px; }
+    .sales-card-diff { font-size: 12px; font-weight: 600; margin-top: 4px; }
+    .sales-card-diff.up { color: #2e7d32; }
+    .sales-card-diff.down { color: #c62828; }
+    .sales-card-diff.flat { color: #888; }
+    .sales-trend-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .sales-trend-table th { text-align: left; padding: 8px 12px; border-bottom: 2px solid #e0d8cc; font-weight: 500; color: #8b7e6a; font-size: 12px; }
+    .sales-trend-table td { padding: 10px 12px; border-bottom: 1px solid #f0ebe1; }
+    .sales-trend-table tr:hover td { background: #faf8f4; }
+    .sales-bar { display: inline-block; height: 10px; background: #5a5245; border-radius: 3px; vertical-align: middle; margin-right: 8px; min-width: 2px; }
+    .sales-org-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .sales-org-table th { text-align: left; padding: 8px 12px; border-bottom: 2px solid #e0d8cc; font-weight: 500; color: #8b7e6a; font-size: 12px; }
+    .sales-org-table td { padding: 10px 12px; border-bottom: 1px solid #f0ebe1; }
+    .sales-org-table tr:hover td { background: #faf8f4; }
 </style>
 @endsection
 
@@ -177,6 +196,7 @@
     <button class="tab active" onclick="switchTab('devices', this)">デバイス管理</button>
     <button class="tab" onclick="switchTab('admins', this)">管理者アカウント</button>
     <button class="tab" onclick="switchTab('orgs', this)">パートナー管理</button>
+    <button class="tab" onclick="switchTab('sales', this)">売上集計</button>
 </div>
 
 {{-- ===== デバイス管理タブ ===== --}}
@@ -383,6 +403,82 @@
                 @endforelse
             </tbody>
         </table>
+    </div>
+</div>
+
+{{-- ===== 売上集計タブ ===== --}}
+<div id="tab-sales" class="tab-content">
+    @php
+        $diff = $salesData['this_month'] - $salesData['last_month'];
+        $diffSign = $diff > 0 ? 'up' : ($diff < 0 ? 'down' : 'flat');
+        $diffLabel = $diff > 0 ? '▲ ¥' . number_format($diff) : ($diff < 0 ? '▼ ¥' . number_format(abs($diff)) : '±0');
+        $maxMonthly = $salesData['monthly']->max('total') ?: 1;
+    @endphp
+    <div class="sales-grid">
+        <div class="sales-card">
+            <div class="sales-card-label">今月の売上</div>
+            <div class="sales-card-value">¥{{ number_format($salesData['this_month']) }}</div>
+            <div class="sales-card-sub">{{ now()->format('Y年n月') }} / {{ $salesData['count_this'] }}件</div>
+            <div class="sales-card-diff {{ $diffSign }}">{{ $diffLabel }} 先月比</div>
+        </div>
+        <div class="sales-card">
+            <div class="sales-card-label">先月の売上</div>
+            <div class="sales-card-value">¥{{ number_format($salesData['last_month']) }}</div>
+            <div class="sales-card-sub">{{ now()->subMonth()->format('Y年n月') }}</div>
+        </div>
+        <div class="sales-card">
+            <div class="sales-card-label">稼働デバイス数</div>
+            <div class="sales-card-value">{{ $stats['active'] }}台</div>
+            <div class="sales-card-sub">全{{ $stats['total'] }}台中</div>
+        </div>
+    </div>
+
+    <div class="card" style="margin-bottom:16px;">
+        <div style="font-size:15px;font-weight:600;color:#5a5245;margin-bottom:16px;">月別推移（直近6ヶ月）</div>
+        @if($salesData['monthly']->isEmpty())
+            <p style="text-align:center;color:#aaa;padding:24px 0;">課金データがありません</p>
+        @else
+            <table class="sales-trend-table">
+                <thead>
+                    <tr><th>月</th><th>売上</th><th>件数</th><th></th></tr>
+                </thead>
+                <tbody>
+                    @foreach($salesData['monthly'] as $row)
+                        @php
+                            $barWidth = $maxMonthly > 0 ? round($row->total / $maxMonthly * 160) : 0;
+                        @endphp
+                        <tr>
+                            <td>{{ \Carbon\Carbon::createFromFormat('Y-m', $row->month)->format('Y年n月') }}</td>
+                            <td style="font-weight:600;">¥{{ number_format($row->total) }}</td>
+                            <td style="color:#888;">{{ $row->count }}件</td>
+                            <td><span class="sales-bar" style="width:{{ $barWidth }}px;"></span></td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        @endif
+    </div>
+
+    <div class="card">
+        <div style="font-size:15px;font-weight:600;color:#5a5245;margin-bottom:16px;">パートナー別内訳（今月）</div>
+        @if($salesData['by_org']->isEmpty())
+            <p style="text-align:center;color:#aaa;padding:24px 0;">今月の課金データがありません</p>
+        @else
+            <table class="sales-org-table">
+                <thead>
+                    <tr><th>パートナー名</th><th>売上</th><th>件数</th></tr>
+                </thead>
+                <tbody>
+                    @foreach($salesData['by_org'] as $row)
+                        <tr>
+                            <td style="font-weight:500;">{{ $row->org_name }}</td>
+                            <td style="font-weight:600;">¥{{ number_format($row->total) }}</td>
+                            <td style="color:#888;">{{ $row->count }}件</td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        @endif
     </div>
 </div>
 
@@ -769,6 +865,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const tab = new URLSearchParams(window.location.search).get('tab');
     if (tab === 'admins') switchTab('admins', document.querySelectorAll('.tab')[1]);
     else if (tab === 'orgs') switchTab('orgs', document.querySelectorAll('.tab')[2]);
+    else if (tab === 'sales') switchTab('sales', document.querySelectorAll('.tab')[3]);
 
     @if($errors->hasAny(['partner_email', 'partner_password', 'name']))
         switchTab('orgs', document.querySelectorAll('.tab')[2]);
