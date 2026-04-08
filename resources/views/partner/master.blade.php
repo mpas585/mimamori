@@ -608,8 +608,10 @@
             <div class="modal-body">
                 @if($errors->hasAny(['partner_email', 'partner_password', 'name']))
                     <div class="flash-error" style="margin-bottom:12px;">
-                        @foreach($errors->only(['partner_email', 'partner_password', 'name']) as $error)
-                            <div>⚠ {{ $error }}</div>
+                        @foreach(['partner_email', 'partner_password', 'name'] as $field)
+                            @if($errors->has($field))
+                                <div>⚠ {{ $errors->first($field) }}</div>
+                            @endif
                         @endforeach
                     </div>
                 @endif
