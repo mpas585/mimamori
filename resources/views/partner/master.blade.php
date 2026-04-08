@@ -248,7 +248,17 @@
                         </td>
                         <td style="font-size:12px;color:var(--gray-600);">{{ $device->organization ? $device->organization->name : '-' }}</td>
                         <td class="battery-cell {{ $device->battery_pct && $device->battery_pct < 20 ? 'battery-low' : '' }}">{{ $device->battery_pct ? $device->battery_pct . '%' : '-' }}</td>
-                        <td style="font-size:12px;">{{ $device->rssi ? $device->rssi . 'dBm' : '-' }}</td>
+                        <td style="font-size:12px;">
+                            @if($device->rssi)
+                                @if($device->rssi > -70) 良好
+                                @elseif($device->rssi > -85) 普通
+                                @else 弱い
+                                @endif
+                                ({{ $device->rssi }}dBm)
+                            @else
+                                -
+                            @endif
+                        </td>
                         <td style="font-size:12px;">{{ $device->last_received_at ? $device->last_received_at->format('m/d H:i') : '-' }}</td>
                         <td style="font-size:12px;">{{ $device->last_human_detected_at ? $device->last_human_detected_at->format('m/d H:i') : '-' }}</td>
                         <td><button class="action-btn" onclick="showDeviceDetail('{{ $device->device_id }}')">詳細</button><button class="action-btn danger" onclick="confirmDeleteDevice('{{ $device->device_id }}')">削除</button></td>
