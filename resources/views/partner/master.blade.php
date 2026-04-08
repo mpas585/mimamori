@@ -45,8 +45,8 @@
     .status-offline { background: #eeeeee; color: #616161; }
     .status-inactive { background: #f5f5f5; color: #9e9e9e; }
     .battery-cell { font-size: 12px; }
-    .battery-low { color: var(--red, #c62828); font-weight: 600; }
-    .signal-weak { color: var(--orange, #e65100); }
+    .battery-low { color: #c62828; font-weight: 600; }
+    .signal-weak { color: #e65100; font-weight: 600; }
     .row-inactive td { color: var(--gray-400) !important; }
     .row-inactive .mono { color: var(--gray-400) !important; }
     .row-inactive .status-badge { opacity: 0.45; }
