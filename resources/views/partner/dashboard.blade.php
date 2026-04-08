@@ -303,7 +303,7 @@
                             $isVacant = !$assignment || !$tenantName;
                             $displayStatus = $isVacant ? 'vacant' : $device->status;
                             $lastDetected = $device->last_human_detected_at;
-                            $timeSince = $lastDetected ? $lastDetected->diffForHumans() : null;
+                            $timeSince = $lastDetected ? $lastDetected->locale('ja')->diffForHumans() : null;
                             $rssi = $device->rssi;
                             $signalLabel = '-';
                             if ($rssi !== null) {
@@ -479,6 +479,7 @@
                         </div>
                         <button class="btn btn-sm btn-secondary" onclick="showSubscriptionModal()">📋 契約プラン</button>
                     </div>
+                    <p class="detail-notify-note">※ご契約後〇ヶ月は停止機能はご利用になれません。</p>
                 </div>
                 <div class="detail-section"><div class="detail-grid">
                     <div class="detail-item"><p class="detail-item-label">デバイスID</p><p class="detail-item-value mono" id="detailDeviceId">-</p></div>
@@ -502,7 +503,12 @@
                     <div class="detail-item"><p class="detail-item-label">ペット除外</p>
                         <select class="detail-form-input" id="detailPetExclusionInput"><option value="0">OFF</option><option value="1">ON</option></select>
                     </div>
-                    <div class="detail-item"><p class="detail-item-label">外出モード</p><p class="detail-item-value" id="detailAwayMode">-</p></div>
+                    <div class="detail-item"><p class="detail-item-label">外出モード</p>
+                        <div style="display:flex;align-items:center;gap:8px;">
+                            <label class="watch-toggle away"><input type="checkbox" id="detailAwayModeToggle" onchange="toggleAwayModeFromDetail(this.checked, this)"><span class="watch-slider"></span></label>
+                            <span id="detailAwayModeLabel" style="font-size:12px;color:var(--gray-600);">-</span>
+                        </div>
+                    </div>
                 </div></div>
                 <div class="detail-section"><div class="detail-section-title">📝 登録情報</div><div class="detail-grid">
                     <div class="detail-item"><p class="detail-item-label">登録日</p><p class="detail-item-value" id="detailRegistered">-</p></div>
@@ -832,7 +838,7 @@ function executeClearAlert() {
     .catch(() => showToast('通信エラー', 'error'));
 }
 
-// ===== 外出モード =====
+// ===== 外出モード（一覧テーブル） =====
 let pendingToggleDevice = null, pendingToggleCheckbox = null;
 function toggleAwayMode(deviceId, checked, checkbox) {
     if (checked) { pendingToggleDevice = deviceId; pendingToggleCheckbox = checkbox; checkbox.checked = false; showModal('watchOffModal'); return; }
@@ -844,6 +850,40 @@ function sendToggleAwayMode(deviceId, awayMode) {
     fetch('/partner/org/devices/' + deviceId + '/toggle-watch', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' }, body: JSON.stringify({ away_mode: awayMode }) })
     .then(r => r.json()).then(d => { if (d.success) showToast(d.message, 'success'); else showToast('エラー', 'error'); })
     .catch(() => showToast('通信エラー', 'error'));
+}
+
+// ===== 外出モード（詳細モーダル） =====
+let pendingDetailToggle = false, pendingDetailCheckbox = null;
+function toggleAwayModeFromDetail(checked, checkbox) {
+    if (checked) {
+        pendingDetailToggle = true;
+        pendingDetailCheckbox = checkbox;
+        checkbox.checked = false;
+        showModal('watchOffModal');
+        return;
+    }
+    sendToggleAwayMode(currentDetailDeviceId, false);
+    document.getElementById('detailAwayModeLabel').textContent = 'OFF';
+}
+function cancelAwayModeOn() {
+    hideModal('watchOffModal');
+    pendingToggleDevice = null;
+    pendingToggleCheckbox = null;
+    pendingDetailToggle = false;
+    pendingDetailCheckbox = null;
+}
+function executeAwayModeOn() {
+    if (pendingDetailToggle && currentDetailDeviceId) {
+        sendToggleAwayMode(currentDetailDeviceId, true);
+        if (pendingDetailCheckbox) pendingDetailCheckbox.checked = true;
+        document.getElementById('detailAwayModeLabel').textContent = 'ON（外出中）';
+        pendingDetailToggle = false;
+        pendingDetailCheckbox = null;
+    } else if (pendingToggleDevice) {
+        sendToggleAwayMode(pendingToggleDevice, true);
+        if (pendingToggleCheckbox) pendingToggleCheckbox.checked = true;
+    }
+    hideModal('watchOffModal');
 }
 
 // ===== デバイス詳細 =====
@@ -879,8 +919,12 @@ function showDeviceDetail(deviceId) {
         if (data.rssi !== null && data.rssi !== undefined) rssiLabel = data.rssi > -70 ? '良好 (' + data.rssi + 'dBm)' : data.rssi > -85 ? '普通 (' + data.rssi + 'dBm)' : '弱い (' + data.rssi + 'dBm)';
         document.getElementById('detailBattery').textContent = data.battery_pct !== null && data.battery_pct !== undefined ? data.battery_pct + '%' : '-';
         document.getElementById('detailSignal').textContent = rssiLabel;
-        var awayText = data.away_mode ? 'ON（外出中）' : 'OFF'; if (data.away_until) awayText += '（〜' + data.away_until + '）';
-        document.getElementById('detailAwayMode').textContent = awayText;
+        // 外出モードトグル
+        var awayMode = data.away_mode || false;
+        document.getElementById('detailAwayModeToggle').checked = awayMode;
+        var awayLabel = awayMode ? 'ON（外出中）' : 'OFF';
+        if (data.away_until) awayLabel += '（〜' + data.away_until + '）';
+        document.getElementById('detailAwayModeLabel').textContent = awayLabel;
         document.getElementById('detailRegistered').textContent = data.registered_at || '-';
         document.getElementById('detailRoomInput').value = data.room_number || '';
         document.getElementById('detailTenantInput').value = data.tenant_name || '';
