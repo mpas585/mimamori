@@ -793,22 +793,6 @@
         <div class="modal-body">
             <div style="font-size:13px;color:var(--gray-600);margin-bottom:16px;">組織: <strong id="orgAccountsOrgName"></strong></div>
             <div id="orgAccountsTable"><p style="text-align:center;color:var(--gray-400);padding:20px;">読み込み中...</p></div>
-            <hr class="modal-section-divider">
-            <div class="modal-section-title" style="margin-bottom:12px;">＋ アカウント追加</div>
-            <div class="form-group"><label class="form-label">名前 *</label><input type="text" id="orgNewUserName" class="form-input" placeholder="例: 田中 一郎"></div>
-            <div class="form-group"><label class="form-label">メールアドレス *</label><input type="email" id="orgNewUserEmail" class="form-input" placeholder="partner@example.com"></div>
-            <div class="form-group">
-                <label class="form-label">パスワード *</label>
-                <div class="password-field">
-                    <input type="text" id="orgNewUserPassword" class="form-input">
-                    <button type="button" class="password-generate-btn" onclick="generatePassword('orgNewUserPassword')">生成</button>
-                </div>
-            </div>
-            <div id="orgAccountsAddError" style="display:none;color:#c62828;font-size:12px;margin-top:4px;"></div>
-        </div>
-        <div class="modal-footer">
-            <button class="btn btn-secondary" onclick="hideModal('orgAccountsModal')">閉じる</button>
-            <button class="btn btn-primary" onclick="submitOrgNewUser()">追加</button>
         </div>
     </div>
 </div>
@@ -1199,11 +1183,6 @@ function confirmDeleteOrg(id, name) {
 async function showOrgAccountsModal(orgId, orgName) {
     orgAccountsCurrentOrgId = orgId;
     document.getElementById('orgAccountsOrgName').textContent = orgName;
-    document.getElementById('orgNewUserName').value = '';
-    document.getElementById('orgNewUserEmail').value = '';
-    document.getElementById('orgNewUserPassword').value = '';
-    document.getElementById('orgAccountsAddError').style.display = 'none';
-    generatePassword('orgNewUserPassword');
     showModal('orgAccountsModal');
     await loadOrgUsers();
 }
@@ -1239,34 +1218,6 @@ async function loadOrgUsers() {
     }
 }
 
-async function submitOrgNewUser() {
-    const name = document.getElementById('orgNewUserName').value.trim();
-    const email = document.getElementById('orgNewUserEmail').value.trim();
-    const password = document.getElementById('orgNewUserPassword').value;
-    const errEl = document.getElementById('orgAccountsAddError');
-    errEl.style.display = 'none';
-
-    if (!name || !email || !password) { errEl.textContent = '名前・メール・パスワードを入力してください'; errEl.style.display = 'block'; return; }
-
-    try {
-        const res = await fetch('/partner/orgs/' + orgAccountsCurrentOrgId + '/users', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' },
-            body: JSON.stringify({ name, email, password })
-        });
-        const data = await res.json();
-        if (res.ok && data.success) {
-            showToast(data.message, 'success');
-            document.getElementById('orgNewUserName').value = '';
-            document.getElementById('orgNewUserEmail').value = '';
-            document.getElementById('orgNewUserPassword').value = '';
-            generatePassword('orgNewUserPassword');
-            await loadOrgUsers();
-            setTimeout(() => location.reload(), 1500);
-        } else {
-            errEl.textContent = data.message || 'エラーが発生しました';
-            errEl.style.display = 'block';
-        }
     } catch(e) { errEl.textContent = '通信エラーが発生しました'; errEl.style.display = 'block'; }
 }
 
