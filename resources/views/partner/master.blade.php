@@ -155,7 +155,6 @@
     .partner-user-table th { text-align: left; padding: 8px 10px; border-bottom: 2px solid #e0d8cc; font-weight: 500; color: #8b7e6a; font-size: 11px; white-space: nowrap; }
     .partner-user-table td { padding: 8px 10px; border-bottom: 1px solid #f0ebe1; vertical-align: middle; }
     .partner-user-table tr:hover td { background: #faf8f4; }
-    .modal-section-divider { border: none; border-top: 1px solid var(--gray-200); margin: 20px 0; }
     /* 売上集計 */
     .sales-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 20px; }
     .sales-card { background: #fff; border-radius: 10px; padding: 18px 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
@@ -449,9 +448,7 @@
                 </thead>
                 <tbody>
                     @foreach($salesData['monthly'] as $row)
-                        @php
-                            $barWidth = $maxMonthly > 0 ? round($row->total / $maxMonthly * 160) : 0;
-                        @endphp
+                        @php $barWidth = $maxMonthly > 0 ? round($row->total / $maxMonthly * 160) : 0; @endphp
                         <tr>
                             <td>{{ \Carbon\Carbon::createFromFormat('Y-m', $row->month)->format('Y年n月') }}</td>
                             <td style="font-weight:600;">¥{{ number_format($row->total) }}</td>
@@ -470,9 +467,7 @@
             <p style="text-align:center;color:#aaa;padding:24px 0;">今月の課金データがありません</p>
         @else
             <table class="sales-org-table">
-                <thead>
-                    <tr><th>パートナー名</th><th>売上</th><th>件数</th></tr>
-                </thead>
+                <thead><tr><th>パートナー名</th><th>売上</th><th>件数</th></tr></thead>
                 <tbody>
                     @foreach($salesData['by_org'] as $row)
                         <tr>
@@ -700,7 +695,7 @@
 
 <form id="deleteAdminForm" method="POST" action="" style="display:none;">@csrf @method('DELETE')</form>
 
-{{-- ===== 組織追加モーダル（パートナーアカウント作成セクション付き） ===== --}}
+{{-- ===== 組織追加モーダル ===== --}}
 <div id="addOrgModal" class="modal-overlay" onclick="if(event.target===this)hideAddOrgModal()">
     <div class="modal" style="max-width:560px;">
         <div class="modal-header"><h3>パートナー登録</h3><button class="modal-close" onclick="hideAddOrgModal()">✕</button></div>
@@ -719,9 +714,9 @@
                 <div class="modal-section">
                     <div class="modal-section-title">パートナーアカウント</div>
                     <div class="form-row-2">
-                        <div class="form-group"><label class="form-label">メールアドレス *</label><input type="email" name="partner_email" class="form-input" placeholder="partner@example.com"></div>
+                        <div class="form-group"><label class="form-label">メールアドレス</label><input type="email" name="partner_email" class="form-input" placeholder="partner@example.com"></div>
                         <div class="form-group">
-                            <label class="form-label">パスワード *</label>
+                            <label class="form-label">パスワード</label>
                             <div class="password-field">
                                 <input type="text" name="partner_password" id="addOrgPartnerPassword" class="form-input">
                                 <button type="button" class="password-generate-btn" onclick="generatePassword('addOrgPartnerPassword')">生成</button>
@@ -786,7 +781,7 @@
 
 <form id="deleteOrgForm" method="POST" action="" style="display:none;">@csrf @method('DELETE')</form>
 
-{{-- ===== 組織パートナーアカウント管理モーダル ===== --}}
+{{-- ===== パートナーアカウント管理モーダル（一覧のみ） ===== --}}
 <div id="orgAccountsModal" class="modal-overlay" onclick="if(event.target===this)hideModal('orgAccountsModal')">
     <div class="modal" style="max-width:560px;">
         <div class="modal-header"><h3>👤 パートナーアカウント管理</h3><button class="modal-close" onclick="hideModal('orgAccountsModal')">✕</button></div>
@@ -794,10 +789,13 @@
             <div style="font-size:13px;color:var(--gray-600);margin-bottom:16px;">組織: <strong id="orgAccountsOrgName"></strong></div>
             <div id="orgAccountsTable"><p style="text-align:center;color:var(--gray-400);padding:20px;">読み込み中...</p></div>
         </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="hideModal('orgAccountsModal')">閉じる</button>
+        </div>
     </div>
 </div>
 
-{{-- ===== 組織パートナーアカウント編集モーダル ===== --}}
+{{-- ===== パートナーアカウント編集モーダル ===== --}}
 <div id="orgEditUserModal" class="modal-overlay" onclick="if(event.target===this)hideModal('orgEditUserModal')">
     <div class="modal" style="max-width:460px;">
         <div class="modal-header"><h3>パートナーアカウント編集</h3><button class="modal-close" onclick="hideModal('orgEditUserModal')">✕</button></div>
@@ -821,7 +819,7 @@
     </div>
 </div>
 
-{{-- ===== パートナーアカウント パスワードリセットモーダル ===== --}}
+{{-- ===== パスワードリセットモーダル ===== --}}
 <div id="orgResetPasswordModal" class="modal-overlay" onclick="if(event.target===this)hideModal('orgResetPasswordModal')">
     <div class="modal" style="max-width:420px;">
         <div class="modal-header"><h3>🔑 パスワードリセット</h3><button class="modal-close" onclick="hideModal('orgResetPasswordModal')">✕</button></div>
@@ -901,58 +899,46 @@ function generatePassword(inputId) {
 async function showDeviceDetail(deviceId) {
     masterCurrentDeviceId = deviceId;
     showModal('deviceDetailModal');
-
     try {
         const res = await fetch('/partner/devices/' + deviceId + '/detail', { headers: { 'Accept': 'application/json' } });
         const d = await res.json();
-
         const statusLabels = { normal: '正常・稼働中', warning: '注意', alert: '未検知アラート ⚠', offline: '通信途絶', inactive: '未稼働' };
         const badge = document.getElementById('masterDetailStatusBadge');
         badge.textContent = statusLabels[d.status] || d.status;
         badge.className = 'detail-status-badge ' + (d.status || 'inactive');
         document.getElementById('masterDetailClearAlertBtn').style.display = d.status === 'alert' ? 'inline-flex' : 'none';
-
         const notifyEnabled = d.notification_service_enabled !== false;
         document.getElementById('masterDetailNotifyEnabled').checked = notifyEnabled;
         document.getElementById('masterDetailNotifyLabel').textContent = notifyEnabled ? '有効' : '停止中';
-
         document.getElementById('masterDetailDeviceId').textContent = d.device_id;
         document.getElementById('masterDetailLastDetected').textContent = d.last_human_detected_at || '-';
         document.getElementById('masterDetailRoom').value = d.room_number || '';
         document.getElementById('masterDetailTenant').value = d.tenant_name || '';
-
         const battEl = document.getElementById('masterDetailBattery');
         battEl.textContent = (d.battery_pct !== null ? d.battery_pct + '%' : '-') + (d.battery_voltage ? ' / ' + d.battery_voltage + 'V' : '');
         battEl.style.color = (d.battery_pct !== null && d.battery_pct < 20) ? '#c62828' : '';
         document.getElementById('masterDetailSignal').textContent = d.rssi_label || '-';
-
         document.getElementById('masterDetailAlertHours').value = d.alert_threshold_hours || 24;
         document.getElementById('masterDetailHeight').value = d.install_height_cm || 200;
         document.getElementById('masterDetailPetExclusion').value = d.pet_exclusion_enabled ? '1' : '0';
         document.getElementById('masterDetailAwayMode').checked = d.away_mode;
         document.getElementById('masterDetailAwayLabel').textContent = d.away_mode ? ('ON' + (d.away_until ? ' (' + d.away_until + 'まで)' : '')) : 'OFF';
-
         document.getElementById('masterDetailSimId').value = d.sim_id || '';
         document.getElementById('masterDetailRegistered').textContent = d.registered_at || '-';
         document.getElementById('masterDetailMemo').value = d.memo || '';
-
         const now = new Date();
         const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
-        const defaultBillingDate = nextMonth.toISOString().split('T')[0];
-        document.getElementById('masterDetailBillingStartDate').value = d.billing_start_date || defaultBillingDate;
-
+        document.getElementById('masterDetailBillingStartDate').value = d.billing_start_date || nextMonth.toISOString().split('T')[0];
         document.getElementById('masterDetailSmsEnabled').checked = d.sms_enabled || false;
         document.getElementById('masterDetailSmsPhone1').value = d.sms_phone_1 || '';
         document.getElementById('masterDetailSmsPhone2').value = d.sms_phone_2 || '';
         document.getElementById('masterDetailVoiceEnabled').checked = d.voice_enabled || false;
         document.getElementById('masterDetailVoicePhone1').value = d.voice_phone_1 || '';
         document.getElementById('masterDetailVoicePhone2').value = d.voice_phone_2 || '';
-
         masterRenderSchedules(d.schedules || []);
     } catch(e) { showToast('詳細の取得に失敗しました', 'error'); }
 }
 
-// ===== 通知設定モーダル =====
 function masterShowSubscriptionModal() {
     if (!masterCurrentDeviceId) return;
     hideModal('deviceDetailModal');
@@ -967,13 +953,8 @@ function masterToggleNotifyService(enabled) {
         headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' },
         body: JSON.stringify({ enabled: enabled ? 1 : 0 })
     }).then(r => r.json()).then(d => {
-        if (d.success) {
-            showToast(d.message, 'success');
-        } else {
-            showToast(d.message || 'エラー', 'error');
-            document.getElementById('masterDetailNotifyEnabled').checked = !enabled;
-            document.getElementById('masterDetailNotifyLabel').textContent = !enabled ? '有効' : '停止中';
-        }
+        if (d.success) { showToast(d.message, 'success'); }
+        else { showToast(d.message || 'エラー', 'error'); document.getElementById('masterDetailNotifyEnabled').checked = !enabled; document.getElementById('masterDetailNotifyLabel').textContent = !enabled ? '有効' : '停止中'; }
     }).catch(() => showToast('通信エラー', 'error'));
 }
 
@@ -1040,7 +1021,6 @@ async function masterClearAlert() {
     }).catch(() => showToast('通信エラー', 'error'));
 }
 
-// ===== スケジュール =====
 function masterRenderSchedules(schedules) {
     const c = document.getElementById('masterDetailScheduleList');
     if (!schedules.length) { c.innerHTML = '<div class="detail-schedule-empty">スケジュールなし</div>'; return; }
@@ -1126,7 +1106,6 @@ async function masterExecuteDeleteSchedule() {
     } catch(e) { showToast('通信エラーが発生しました', 'error'); }
 }
 
-// ===== デバイス削除 =====
 function confirmDeleteDevice(deviceId) {
     if (!confirm('デバイス ' + deviceId + ' を削除しますか？\nこの操作は取り消せません。')) return;
     fetch('/partner/devices/' + deviceId, {
@@ -1137,7 +1116,7 @@ function confirmDeleteDevice(deviceId) {
     }).catch(() => showToast('通信エラー', 'error'));
 }
 
-// ===== 管理者アカウント（masterのみ） =====
+// ===== 管理者アカウント =====
 function showAddAdminModal() { generatePassword('addAdminPassword'); document.getElementById('addAdminModal').classList.add('show'); }
 function hideAddAdminModal() { document.getElementById('addAdminModal').classList.remove('show'); }
 function showEditAdminModal(data) {
@@ -1179,7 +1158,7 @@ function confirmDeleteOrg(id, name) {
     }
 }
 
-// ===== 組織パートナーアカウント管理 =====
+// ===== パートナーアカウント管理 =====
 async function showOrgAccountsModal(orgId, orgName) {
     orgAccountsCurrentOrgId = orgId;
     document.getElementById('orgAccountsOrgName').textContent = orgName;
@@ -1218,9 +1197,6 @@ async function loadOrgUsers() {
     }
 }
 
-    } catch(e) { errEl.textContent = '通信エラーが発生しました'; errEl.style.display = 'block'; }
-}
-
 function showOrgEditUserModal(userId, name, email) {
     document.getElementById('orgEditUserId').value = userId;
     document.getElementById('orgEditUserName').value = name;
@@ -1237,12 +1213,9 @@ async function submitOrgEditUser() {
     const password = document.getElementById('orgEditUserPassword').value;
     const errEl = document.getElementById('orgEditUserError');
     errEl.style.display = 'none';
-
     if (!name || !email) { errEl.textContent = '名前・メールを入力してください'; errEl.style.display = 'block'; return; }
-
     const payload = { name, email };
     if (password) payload.password = password;
-
     try {
         const res = await fetch('/partner/orgs/' + orgAccountsCurrentOrgId + '/users/' + userId, {
             method: 'PUT',
@@ -1254,7 +1227,6 @@ async function submitOrgEditUser() {
             showToast(data.message, 'success');
             hideModal('orgEditUserModal');
             await loadOrgUsers();
-            setTimeout(() => location.reload(), 1500);
         } else {
             errEl.textContent = data.message || 'エラーが発生しました';
             errEl.style.display = 'block';
@@ -1269,12 +1241,12 @@ async function confirmDeleteOrgUser(userId, name) {
             method: 'DELETE', headers: { 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' }
         });
         const data = await res.json();
-        if (res.ok && data.success) { showToast(data.message, 'success'); await loadOrgUsers(); setTimeout(() => location.reload(), 1500); }
+        if (res.ok && data.success) { showToast(data.message, 'success'); await loadOrgUsers(); }
         else showToast(data.message || '削除に失敗しました', 'error');
     } catch(e) { showToast('通信エラー', 'error'); }
 }
 
-// ===== パートナーアカウント パスワードリセット =====
+// ===== パスワードリセット =====
 function showOrgResetPasswordModal(userId, name) {
     document.getElementById('orgResetPasswordUserId').value = userId;
     document.getElementById('orgResetPasswordName').textContent = name;
@@ -1288,9 +1260,7 @@ async function submitOrgResetPassword() {
     const password = document.getElementById('orgResetPasswordValue').value;
     const errEl = document.getElementById('orgResetPasswordError');
     errEl.style.display = 'none';
-
     if (!password) { errEl.textContent = 'パスワードを入力してください'; errEl.style.display = 'block'; return; }
-
     try {
         const res = await fetch('/partner/orgs/' + orgAccountsCurrentOrgId + '/users/' + userId + '/reset-password', {
             method: 'POST',
