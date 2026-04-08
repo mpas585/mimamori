@@ -606,6 +606,13 @@
         <form method="POST" action="{{ route('partner.orgs.store') }}">
             @csrf
             <div class="modal-body">
+                @if($errors->hasAny(['partner_email', 'partner_password', 'name']))
+                    <div class="flash-error" style="margin-bottom:12px;">
+                        @foreach($errors->only(['partner_email', 'partner_password', 'name']) as $error)
+                            <div>⚠ {{ $error }}</div>
+                        @endforeach
+                    </div>
+                @endif
                 <div class="modal-section">
                     <div class="modal-section-title">パートナーアカウント</div>
                     <div class="form-row-2">
@@ -760,6 +767,11 @@ document.addEventListener('DOMContentLoaded', function() {
     const tab = new URLSearchParams(window.location.search).get('tab');
     if (tab === 'admins') switchTab('admins', document.querySelectorAll('.tab')[1]);
     else if (tab === 'orgs') switchTab('orgs', document.querySelectorAll('.tab')[2]);
+
+    @if($errors->hasAny(['partner_email', 'partner_password', 'name']))
+        switchTab('orgs', document.querySelectorAll('.tab')[2]);
+        showAddOrgModal();
+    @endif
 });
 
 function copyText(id) {
