@@ -532,8 +532,8 @@
                 <div class="modal-body">
                     <div class="form-group"><label class="form-label">デバイスID</label><input type="text" class="form-input" id="editDeviceId" disabled style="background:var(--gray-100);"></div>
                     <div class="form-group"><label class="form-label">部屋番号</label><input type="text" class="form-input" name="room_number" id="editRoomNumber" placeholder="101"></div>
-                    <div class="form-group"><label class="form-label">入居者名</label><input type="text" class="form-input" name="tenant_name" id="editTenantName"></div>
-                    <div class="form-group"><label class="form-label">メモ</label><input type="text" class="form-input" name="memo" id="editMemo"></div>
+                    <div class="form-group"><label class="form-label">入居者名</label><input type="text" class="form-input" name="tenant_name" id="editTenantName" placeholder="山田 太郎"></div>
+                    <div class="form-group"><label class="form-label">メモ</label><input type="text" class="form-input" name="memo" id="editMemo" placeholder="メモを入力..."></div>
                 </div>
                 <div class="modal-footer"><button type="button" class="btn btn-secondary" onclick="hideModal('editModal')">キャンセル</button><button type="submit" class="btn btn-primary">保存</button></div>
             </form>

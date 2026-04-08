@@ -629,16 +629,16 @@
                     </div>
                 </div>
                 <div class="modal-section"><div class="modal-section-title">基本情報</div>
-                    <div class="form-group"><label class="form-label">組織名 *</label><input type="text" name="name" class="form-input" required></div>
+                    <div class="form-group"><label class="form-label">組織名 *</label><input type="text" name="name" class="form-input" placeholder="例: ABC管理株式会社" required></div>
                     <div class="form-row-2">
-                        <div class="form-group"><label class="form-label">担当者名</label><input type="text" name="contact_name" class="form-input"></div>
-                        <div class="form-group"><label class="form-label">連絡先メール</label><input type="email" name="contact_email" class="form-input"></div>
+                        <div class="form-group"><label class="form-label">担当者名</label><input type="text" name="contact_name" class="form-input" placeholder="例: 山田 太郎"></div>
+                        <div class="form-group"><label class="form-label">連絡先メール</label><input type="email" name="contact_email" class="form-input" placeholder="admin@example.com"></div>
                     </div>
                     <div class="form-row-2">
-                        <div class="form-group"><label class="form-label">連絡先電話番号</label><input type="text" name="contact_phone" class="form-input"></div>
+                        <div class="form-group"><label class="form-label">連絡先電話番号</label><input type="text" name="contact_phone" class="form-input" placeholder="03-0000-0000"></div>
                         <div class="form-group"></div>
                     </div>
-                    <div class="form-group"><label class="form-label">住所</label><input type="text" name="address" class="form-input"></div>
+                    <div class="form-group"><label class="form-label">住所</label><input type="text" name="address" class="form-input" placeholder="東京都千代田区〇〇 1-2-3"></div>
                     <div class="form-group"><label class="form-label">メモ</label><textarea name="notes" class="form-input" rows="2" style="resize:vertical;"></textarea></div>
                 </div>
             </div>
@@ -655,26 +655,26 @@
             @csrf @method('PUT')
             <div class="modal-body">
                 <div class="modal-section"><div class="modal-section-title">基本情報</div>
-                    <div class="form-group"><label class="form-label">組織名 *</label><input type="text" name="name" id="editOrgName" class="form-input" required></div>
+                    <div class="form-group"><label class="form-label">組織名 *</label><input type="text" name="name" id="editOrgName" class="form-input" placeholder="例: ABC管理株式会社" required></div>
                     <div class="form-row-2">
-                        <div class="form-group"><label class="form-label">担当者名</label><input type="text" name="contact_name" id="editOrgContactName" class="form-input"></div>
-                        <div class="form-group"><label class="form-label">連絡先メール *</label><input type="email" name="contact_email" id="editOrgContactEmail" class="form-input" required></div>
+                        <div class="form-group"><label class="form-label">担当者名</label><input type="text" name="contact_name" id="editOrgContactName" class="form-input" placeholder="例: 山田 太郎"></div>
+                        <div class="form-group"><label class="form-label">連絡先メール *</label><input type="email" name="contact_email" id="editOrgContactEmail" class="form-input" placeholder="admin@example.com" required></div>
                     </div>
                     <div class="form-row-2">
-                        <div class="form-group"><label class="form-label">連絡先電話番号</label><input type="text" name="contact_phone" id="editOrgContactPhone" class="form-input"></div>
+                        <div class="form-group"><label class="form-label">連絡先電話番号</label><input type="text" name="contact_phone" id="editOrgContactPhone" class="form-input" placeholder="03-0000-0000"></div>
                         <div class="form-group"></div>
                     </div>
-                    <div class="form-group"><label class="form-label">住所</label><input type="text" name="address" id="editOrgAddress" class="form-input"></div>
+                    <div class="form-group"><label class="form-label">住所</label><input type="text" name="address" id="editOrgAddress" class="form-input" placeholder="東京都千代田区〇〇 1-2-3"></div>
                     <div class="form-group"><label class="form-label">メモ</label><textarea name="notes" id="editOrgNotes" class="form-input" rows="2" style="resize:vertical;"></textarea></div>
                 </div>
                 <div class="modal-section"><div class="modal-section-title">通知設定（アラート発生時に組織宛に送信）</div>
                     <p style="font-size:12px;color:var(--gray-500);margin-bottom:12px;">設定したメール・SMSにアラートを転送します。</p>
-                    <div class="form-group"><label class="form-label">通知メール 1</label><input type="email" name="notification_email_1" id="editOrgEmail1" class="form-input"></div>
-                    <div class="form-group"><label class="form-label">通知メール 2</label><input type="email" name="notification_email_2" id="editOrgEmail2" class="form-input"></div>
-                    <div class="form-group"><label class="form-label">通知メール 3</label><input type="email" name="notification_email_3" id="editOrgEmail3" class="form-input"></div>
+                    <div class="form-group"><label class="form-label">通知メール 1</label><input type="email" name="notification_email_1" id="editOrgEmail1" class="form-input" placeholder="admin@example.com"></div>
+                    <div class="form-group"><label class="form-label">通知メール 2</label><input type="email" name="notification_email_2" id="editOrgEmail2" class="form-input" placeholder="admin@example.com（任意）"></div>
+                    <div class="form-group"><label class="form-label">通知メール 3</label><input type="email" name="notification_email_3" id="editOrgEmail3" class="form-input" placeholder="admin@example.com（任意）"></div>
                     <div class="form-row-2">
-                        <div class="form-group"><label class="form-label">SMS通知先 1</label><input type="text" name="notification_sms_1" id="editOrgSms1" class="form-input"></div>
-                        <div class="form-group"><label class="form-label">SMS通知先 2</label><input type="text" name="notification_sms_2" id="editOrgSms2" class="form-input"></div>
+                        <div class="form-group"><label class="form-label">SMS通知先 1</label><input type="text" name="notification_sms_1" id="editOrgSms1" class="form-input" placeholder="09012345678"></div>
+                        <div class="form-group"><label class="form-label">SMS通知先 2</label><input type="text" name="notification_sms_2" id="editOrgSms2" class="form-input" placeholder="09012345678（任意）"></div>
                     </div>
                 </div>
             </div>
@@ -718,8 +718,8 @@
         <div class="modal-header"><h3>パートナーアカウント編集</h3><button class="modal-close" onclick="hideModal('orgEditUserModal')">✕</button></div>
         <div class="modal-body">
             <input type="hidden" id="orgEditUserId">
-            <div class="form-group"><label class="form-label">名前 *</label><input type="text" id="orgEditUserName" class="form-input"></div>
-            <div class="form-group"><label class="form-label">メールアドレス *</label><input type="email" id="orgEditUserEmail" class="form-input"></div>
+            <div class="form-group"><label class="form-label">名前 *</label><input type="text" id="orgEditUserName" class="form-input" placeholder="例: 田中 一郎"></div>
+            <div class="form-group"><label class="form-label">メールアドレス *</label><input type="email" id="orgEditUserEmail" class="form-input" placeholder="partner@example.com"></div>
             <div class="form-group">
                 <label class="form-label">新しいパスワード</label>
                 <div class="password-field">

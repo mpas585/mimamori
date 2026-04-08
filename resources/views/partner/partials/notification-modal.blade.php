@@ -28,11 +28,11 @@
                 </div>
                 <div class="form-group" style="margin-bottom:12px;">
                     <label class="form-label">通知メール②（任意）</label>
-                    <input type="email" class="form-input" id="orgNotifEmail2" placeholder="">
+                    <input type="email" class="form-input" id="orgNotifEmail2" placeholder="admin@example.com（任意）">
                 </div>
                 <div class="form-group" style="margin-bottom:12px;">
                     <label class="form-label">通知メール③（任意）</label>
-                    <input type="email" class="form-input" id="orgNotifEmail3" placeholder="">
+                    <input type="email" class="form-input" id="orgNotifEmail3" placeholder="admin@example.com（任意）">
                 </div>
             </div>
 
@@ -73,5 +73,3 @@
         </div>
     </div>
 </div>
-
-
