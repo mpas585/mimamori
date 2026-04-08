@@ -249,7 +249,7 @@
                         </td>
                         <td style="font-size:12px;color:var(--gray-600);">{{ $device->organization ? $device->organization->name : '-' }}</td>
                         <td style="font-size:12px;{{ $device->battery_pct && $device->battery_pct < 20 ? 'color:#c62828;font-weight:600;' : '' }}">{{ $device->battery_pct ? $device->battery_pct . '%' : '-' }}</td>
-                        <td style="font-size:12px;{{ $device->rssi !== null && $device->rssi < -85 ? 'color:#e65100;font-weight:600;' : '' }}">
+                        <td style="font-size:12px;{{ $device->rssi !== null && $device->rssi <= -85 ? 'color:#e65100;font-weight:600;' : '' }}">
                             @if($device->rssi !== null)
                                 @if($device->rssi > -70) 良好
                                 @elseif($device->rssi > -85) 普通
