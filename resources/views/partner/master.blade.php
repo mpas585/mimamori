@@ -373,7 +373,7 @@
                             </div>
                         </td>
                         <td>
-                            <button class="action-btn" onclick="showEditOrgModal({{ json_encode(['id'=>$org->id,'name'=>$org->name,'contact_name'=>$org->contact_name,'contact_email'=>$org->contact_email,'contact_phone'=>$org->contact_phone,'address'=>$org->address,'notes'=>$org->notes,'device_limit'=>$org->device_limit??100,'expires_at'=>$org->expires_at?$org->expires_at->format('Y-m-d'):'','notification_email_1'=>$org->notification_email_1,'notification_email_2'=>$org->notification_email_2,'notification_email_3'=>$org->notification_email_3,'notification_sms_1'=>$org->notification_sms_1,'notification_sms_2'=>$org->notification_sms_2]) }})">編集</button>
+                            <button class="action-btn" onclick="showEditOrgModal({{ json_encode(['id'=>$org->id,'name'=>$org->name,'contact_name'=>$org->contact_name,'contact_email'=>$org->contact_email,'contact_phone'=>$org->contact_phone,'address'=>$org->address,'notes'=>$org->notes,'notification_email_1'=>$org->notification_email_1,'notification_email_2'=>$org->notification_email_2,'notification_email_3'=>$org->notification_email_3,'notification_sms_1'=>$org->notification_sms_1,'notification_sms_2'=>$org->notification_sms_2]) }})">編集</button>
                             <button class="action-btn" onclick="showOrgAccountsModal({{ $org->id }}, '{{ addslashes($org->name) }}')">アカウント</button>
                             @if($org->devices_count === 0) <button class="action-btn danger" onclick="confirmDeleteOrg({{ $org->id }}, '{{ $org->name }}')">削除</button> @endif
                         </td>
@@ -619,16 +619,9 @@
                     <div class="form-group"><label class="form-label">住所</label><input type="text" name="address" class="form-input"></div>
                     <div class="form-group"><label class="form-label">メモ</label><textarea name="notes" class="form-input" rows="2" style="resize:vertical;"></textarea></div>
                 </div>
-                <div class="modal-section"><div class="modal-section-title">契約設定</div>
-                    <div class="form-row-2">
-                        <div class="form-group"><label class="form-label">台数上限</label><input type="number" name="device_limit" class="form-input" value="100" min="1" max="9999"><p class="form-hint">登録可能なデバイス台数</p></div>
-                        <div class="form-group"><label class="form-label">契約期限</label><input type="date" name="expires_at" class="form-input"><p class="form-hint">未入力で無期限</p></div>
-                    </div>
-                </div>
                 <div class="modal-section">
                     <div class="modal-section-title">パートナーアカウント <span style="font-size:11px;font-weight:400;color:var(--gray-400);">（任意）</span></div>
                     <p style="font-size:12px;color:var(--gray-500);margin-bottom:12px;">この組織を管理するパートナーアカウントを同時に作成できます。</p>
-                    <div class="form-group"><label class="form-label">名前</label><input type="text" name="partner_name" class="form-input" placeholder="例: 田中 一郎"></div>
                     <div class="form-row-2">
                         <div class="form-group"><label class="form-label">メールアドレス</label><input type="email" name="partner_email" class="form-input" placeholder="partner@example.com"></div>
                         <div class="form-group">
@@ -665,12 +658,6 @@
                     </div>
                     <div class="form-group"><label class="form-label">住所</label><input type="text" name="address" id="editOrgAddress" class="form-input"></div>
                     <div class="form-group"><label class="form-label">メモ</label><textarea name="notes" id="editOrgNotes" class="form-input" rows="2" style="resize:vertical;"></textarea></div>
-                </div>
-                <div class="modal-section"><div class="modal-section-title">契約設定</div>
-                    <div class="form-row-2">
-                        <div class="form-group"><label class="form-label">台数上限</label><input type="number" name="device_limit" id="editOrgDeviceLimit" class="form-input" min="1" max="9999"></div>
-                        <div class="form-group"><label class="form-label">契約期限</label><input type="date" name="expires_at" id="editOrgExpiresAt" class="form-input"><p class="form-hint">未入力で無期限</p></div>
-                    </div>
                 </div>
                 <div class="modal-section"><div class="modal-section-title">通知設定（アラート発生時に組織宛に送信）</div>
                     <p style="font-size:12px;color:var(--gray-500);margin-bottom:12px;">設定したメール・SMSにアラートを転送します。</p>
@@ -1056,8 +1043,6 @@ function showEditOrgModal(data) {
     document.getElementById('editOrgContactPhone').value = data.contact_phone || '';
     document.getElementById('editOrgAddress').value = data.address || '';
     document.getElementById('editOrgNotes').value = data.notes || '';
-    document.getElementById('editOrgDeviceLimit').value = data.device_limit || 100;
-    document.getElementById('editOrgExpiresAt').value = data.expires_at || '';
     document.getElementById('editOrgEmail1').value = data.notification_email_1 || '';
     document.getElementById('editOrgEmail2').value = data.notification_email_2 || '';
     document.getElementById('editOrgEmail3').value = data.notification_email_3 || '';

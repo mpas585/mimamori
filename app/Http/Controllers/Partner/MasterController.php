@@ -408,10 +408,7 @@ class MasterController extends Controller
             'contact_phone'    => 'nullable|string|max:20',
             'address'          => 'nullable|string|max:500',
             'notes'            => 'nullable|string|max:1000',
-            'device_limit'     => 'nullable|integer|min:1|max:9999',
-            'expires_at'       => 'nullable|date',
             // パートナーアカウント（任意）
-            'partner_name'     => 'nullable|string|max:100',
             'partner_email'    => 'nullable|email|max:255|unique:admin_users,email',
             'partner_password' => 'nullable|string|min:8|max:100',
         ], [
@@ -422,14 +419,12 @@ class MasterController extends Controller
             'partner_password.min'   => 'パスワードは8文字以上にしてください',
         ]);
 
-        // パートナー情報がどれか入力されていたら3項目すべて必須
-        if ($request->filled('partner_name') || $request->filled('partner_email') || $request->filled('partner_password')) {
+        // パートナー情報がどれか入力されていたら2項目すべて必須
+        if ($request->filled('partner_email') || $request->filled('partner_password')) {
             $request->validate([
-                'partner_name'     => 'required|string|max:100',
                 'partner_email'    => 'required|email|max:255|unique:admin_users,email',
                 'partner_password' => 'required|string|min:8|max:100',
             ], [
-                'partner_name.required'     => 'パートナー名を入力してください',
                 'partner_email.required'    => 'パートナーメールを入力してください',
                 'partner_password.required' => 'パスワードを入力してください',
             ]);
@@ -442,15 +437,13 @@ class MasterController extends Controller
             'contact_phone'   => $request->contact_phone,
             'address'         => $request->address,
             'notes'           => $request->notes,
-            'device_limit'    => $request->filled('device_limit') ? (int) $request->device_limit : 100,
-            'expires_at'      => $request->expires_at ?: null,
             'premium_enabled' => false,
         ]);
 
-        // パートナーアカウント作成（任意）
+        // パートナーアカウント作成（任意）。名前は担当者名、なければ組織名を使用
         if ($request->filled('partner_email')) {
             PartnerUser::create([
-                'name'            => $request->partner_name,
+                'name'            => $request->contact_name ?: $request->name,
                 'email'           => $request->partner_email,
                 'password_hash'   => Hash::make($request->partner_password),
                 'role'            => 'operator',
@@ -472,8 +465,6 @@ class MasterController extends Controller
             'contact_phone'        => 'nullable|string|max:20',
             'address'              => 'nullable|string|max:500',
             'notes'                => 'nullable|string|max:1000',
-            'device_limit'         => 'nullable|integer|min:1|max:9999',
-            'expires_at'           => 'nullable|date',
             'notification_email_1' => 'nullable|email|max:255',
             'notification_email_2' => 'nullable|email|max:255',
             'notification_email_3' => 'nullable|email|max:255',
@@ -492,8 +483,6 @@ class MasterController extends Controller
             'contact_phone'        => $request->contact_phone,
             'address'              => $request->address,
             'notes'                => $request->notes,
-            'device_limit'         => $request->filled('device_limit') ? (int) $request->device_limit : $org->device_limit,
-            'expires_at'           => $request->expires_at ?: null,
             'notification_email_1' => $request->notification_email_1 ?: null,
             'notification_email_2' => $request->notification_email_2 ?: null,
             'notification_email_3' => $request->notification_email_3 ?: null,
