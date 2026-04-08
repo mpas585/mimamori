@@ -1,6 +1,6 @@
 @extends('layouts.partner')
 
-@section('title', '繝繝・す繝･繝懊・繝・- 邂｡逅・判髱｢')
+@section('title', 'みまもりトーフ - マスター管理')
 
 @section('styles')
 <style>
@@ -78,7 +78,7 @@
     .watch-slider::before { content: ''; position: absolute; height: 18px; width: 18px; left: 3px; bottom: 3px; background: white; border-radius: 50%; transition: 0.3s; }
     .watch-toggle input:checked + .watch-slider { background: #22c55e; }
     .watch-toggle input:checked + .watch-slider::before { transform: translateX(20px); }
-    /* 邨・ｹ斐ユ繝ｼ繝悶Ν */
+    /* 組織管理テーブル */
     .org-table { width: 100%; border-collapse: collapse; font-size: 13px; }
     .org-table th { text-align: left; padding: 10px 12px; border-bottom: 2px solid #e0d8cc; font-weight: 500; color: #8b7e6a; font-size: 12px; white-space: nowrap; }
     .org-table td { padding: 10px 12px; border-bottom: 1px solid #f0ebe1; vertical-align: middle; }
@@ -86,11 +86,11 @@
     .expires-warn { color: #c62828; font-weight: 600; }
     .expires-ok { color: #2e7d32; }
     .org-notify-icons { display: flex; gap: 6px; align-items: center; font-size: 11px; }
-    /* 繝｢繝ｼ繝繝ｫ蜈ｱ騾・*/
+    /* デバイス詳細モーダル */
     .modal-section { margin-bottom: 20px; }
     .modal-section-title { font-size: 13px; font-weight: 700; color: var(--gray-600); margin-bottom: 10px; padding-bottom: 6px; border-bottom: 1px solid var(--gray-200); }
     .form-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    /* 繝・ヰ繧､繧ｹ隧ｳ邏ｰ繝｢繝ｼ繝繝ｫ */
+    /* デバイス詳細グリッド */
     .detail-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
     .detail-item { padding: 10px 12px; background: var(--beige, #faf8f4); border-radius: var(--radius, 6px); }
     .detail-item-label { font-size: 11px; color: var(--gray-500, #888); margin-bottom: 4px; }
@@ -148,39 +148,39 @@
 @section('content')
 
 <div class="stats-grid">
-    <div class="stat-card"><div class="stat-value">{{ $stats['total'] }}</div><div class="stat-label">邱上ョ繝舌う繧ｹ</div></div>
-    <div class="stat-card"><div class="stat-value">{{ $stats['active'] }}</div><div class="stat-label">遞ｼ蜒堺ｸｭ</div></div>
-    <div class="stat-card"><div class="stat-value">{{ $stats['normal'] }}</div><div class="stat-label">豁｣蟶ｸ</div></div>
-    <div class="stat-card alert"><div class="stat-value">{{ $stats['alert'] }}</div><div class="stat-label">譛ｪ讀懃衍</div></div>
-    <div class="stat-card offline"><div class="stat-value">{{ $stats['offline'] }}</div><div class="stat-label">騾壻ｿ｡騾皮ｵｶ</div></div>
-    <div class="stat-card"><div class="stat-value">{{ $stats['inactive'] }}</div><div class="stat-label">譛ｪ遞ｼ蜒・/div></div>
+    <div class="stat-card"><div class="stat-value">{{ $stats['total'] }}</div><div class="stat-label">総デバイス数</div></div>
+    <div class="stat-card"><div class="stat-value">{{ $stats['active'] }}</div><div class="stat-label">稼働中</div></div>
+    <div class="stat-card"><div class="stat-value">{{ $stats['normal'] }}</div><div class="stat-label">正常</div></div>
+    <div class="stat-card alert"><div class="stat-value">{{ $stats['alert'] }}</div><div class="stat-label">未検知アラート</div></div>
+    <div class="stat-card offline"><div class="stat-value">{{ $stats['offline'] }}</div><div class="stat-label">通信途絶</div></div>
+    <div class="stat-card"><div class="stat-value">{{ $stats['inactive'] }}</div><div class="stat-label">未稼働</div></div>
 </div>
 
-@if(session('success')) <div class="flash-success">笨・{{ session('success') }}</div> @endif
-@if(session('error')) <div class="flash-error">笞・・{{ session('error') }}</div> @endif
+@if(session('success')) <div class="flash-success">✓ {{ session('success') }}</div> @endif
+@if(session('error')) <div class="flash-error">⚠ {{ session('error') }}</div> @endif
 
 <div class="tab-bar">
-    <button class="tab active" onclick="switchTab('devices', this)">繝・ヰ繧､繧ｹ邂｡逅・/button>
-    <button class="tab" onclick="switchTab('admins', this)">邂｡逅・・い繧ｫ繧ｦ繝ｳ繝・/button>
-    <button class="tab" onclick="switchTab('orgs', this)">邨・ｹ皮ｮ｡逅・/button>
+    <button class="tab active" onclick="switchTab('devices', this)">デバイス管理</button>
+    <button class="tab" onclick="switchTab('admins', this)">管理者アカウント</button>
+    <button class="tab" onclick="switchTab('orgs', this)">組織管理</button>
 </div>
 
-{{-- ===== 繝・ヰ繧､繧ｹ邂｡逅・ち繝・===== --}}
+{{-- ===== デバイス管理タブ ===== --}}
 <div id="tab-devices" class="tab-content active">
     <div class="card" id="issueSectionCard">
-        <div class="card-title" style="font-size:15px;font-weight:600;color:#5a5245;margin-bottom:12px;">繝・ヰ繧､繧ｹ逋ｺ逡ｪ</div>
+        <div class="card-title" style="font-size:15px;font-weight:600;color:#5a5245;margin-bottom:12px;">デバイス発番</div>
         <div class="issue-section">
             <form method="POST" action="/partner/issue" class="issue-form">
                 @csrf
-                <button type="submit" class="btn btn-primary">1蜿ｰ逋ｺ逡ｪ</button>
+                <button type="submit" class="btn btn-primary">1台発番</button>
             </form>
             <form method="POST" action="/partner/issue-bulk" class="issue-form">
                 @csrf
                 <div>
-                    <div class="issue-label">蜿ｰ謨ｰ</div>
+                    <div class="issue-label">台数</div>
                     <input type="number" name="count" class="issue-input" value="5" min="1" max="100">
                 </div>
-                <button type="submit" class="btn btn-secondary">荳諡ｬ逋ｺ逡ｪ</button>
+                <button type="submit" class="btn btn-secondary">まとめて発番</button>
             </form>
         </div>
         @error('count') <div style="color:#c62828;font-size:12px;margin-top:8px;">{{ $message }}</div> @enderror
@@ -189,16 +189,16 @@
     @if(session('issued'))
         @php $issued = session('issued'); @endphp
         <div class="issued-result">
-            <div class="issued-title">笨・繝・ヰ繧､繧ｹ繧堤匱逡ｪ縺励∪縺励◆</div>
-            <div class="issued-item"><span class="label">蜩∫分</span><span class="value" id="issued-id">{{ $issued['device_id'] }}</span><button class="issued-copy-btn" onclick="copyText('issued-id')">繧ｳ繝斐・</button></div>
-            <div class="issued-item"><span class="label">蛻晄悄PIN</span><span class="value" id="issued-pin">{{ $issued['pin'] }}</span><button class="issued-copy-btn" onclick="copyText('issued-pin')">繧ｳ繝斐・</button></div>
+            <div class="issued-title">✓ デバイスを発番しました</div>
+            <div class="issued-item"><span class="label">品番</span><span class="value" id="issued-id">{{ $issued['device_id'] }}</span><button class="issued-copy-btn" onclick="copyText('issued-id')">コピー</button></div>
+            <div class="issued-item"><span class="label">初期PIN</span><span class="value" id="issued-pin">{{ $issued['pin'] }}</span><button class="issued-copy-btn" onclick="copyText('issued-pin')">コピー</button></div>
         </div>
     @endif
 
     @if(session('issued_bulk'))
         @php $bulkList = session('issued_bulk'); @endphp
         <div class="issued-result">
-            <div class="issued-title">笨・{{ count($bulkList) }}蜿ｰ縺ｮ繝・ヰ繧､繧ｹ繧堤匱逡ｪ縺励∪縺励◆</div>
+            <div class="issued-title">✓ {{ count($bulkList) }}台のデバイスを発番しました</div>
             @foreach($bulkList as $i => $item)
                 <div class="issued-item"><span class="label">{{ $i + 1 }}.</span><span class="value">{{ $item['device_id'] }}</span><span style="color:#666;margin:0 8px;">/</span><span class="value">{{ $item['pin'] }}</span></div>
             @endforeach
@@ -206,29 +206,29 @@
     @endif
 
     <div class="card">
-        <div style="font-size:15px;font-weight:600;color:#5a5245;margin-bottom:12px;">繝・ヰ繧､繧ｹ荳隕ｧ</div>
+        <div style="font-size:15px;font-weight:600;color:#5a5245;margin-bottom:12px;">デバイス一覧</div>
         <form method="GET" action="/partner" class="filter-bar">
             <input type="hidden" name="tab" value="devices">
-            <input type="text" name="search" class="filter-input" placeholder="蜩∫分繝ｻ繝九ャ繧ｯ繝阪・繝縺ｧ讀懃ｴ｢" value="{{ request('search') }}">
+            <input type="text" name="search" class="filter-input" placeholder="品番・表示名で検索" value="{{ request('search') }}">
             <select name="status" class="filter-select">
-                <option value="">縺吶∋縺ｦ</option>
-                <option value="normal" {{ request('status') === 'normal' ? 'selected' : '' }}>豁｣蟶ｸ</option>
-                <option value="alert" {{ request('status') === 'alert' ? 'selected' : '' }}>譛ｪ讀懃衍</option>
-                <option value="offline" {{ request('status') === 'offline' ? 'selected' : '' }}>騾壻ｿ｡騾皮ｵｶ</option>
-                <option value="inactive" {{ request('status') === 'inactive' ? 'selected' : '' }}>譛ｪ遞ｼ蜒・/option>
+                <option value="">全ステータス</option>
+                <option value="normal" {{ request('status') === 'normal' ? 'selected' : '' }}>正常</option>
+                <option value="alert" {{ request('status') === 'alert' ? 'selected' : '' }}>未検知アラート</option>
+                <option value="offline" {{ request('status') === 'offline' ? 'selected' : '' }}>通信途絶</option>
+                <option value="inactive" {{ request('status') === 'inactive' ? 'selected' : '' }}>未稼働</option>
             </select>
             <select name="org" class="filter-select">
-                <option value="">縺吶∋縺ｦ縺ｮ邨・ｹ・/option>
-                <option value="none" {{ request('org') === 'none' ? 'selected' : '' }}>邨・ｹ疲悴蜑ｲ蠖・/option>
+                <option value="">全組織</option>
+                <option value="none" {{ request('org') === 'none' ? 'selected' : '' }}>組織未所属</option>
                 @foreach($organizations as $org)
                     <option value="{{ $org->id }}" {{ request('org') == $org->id ? 'selected' : '' }}>{{ $org->name }}</option>
                 @endforeach
             </select>
-            <button type="submit" class="btn btn-sm btn-secondary">邨槭ｊ霎ｼ縺ｿ</button>
+            <button type="submit" class="btn btn-sm btn-secondary">絞り込む</button>
         </form>
         <table class="device-table">
             <thead>
-                <tr><th>蜩∫分</th><th>陦ｨ遉ｺ蜷・/th><th>迥ｶ諷・/th><th>邨・ｹ・/th><th>髮ｻ豎</th><th>髮ｻ豕｢</th><th>譛邨ょ女菫｡</th><th>譛邨よ､懃衍</th><th>謫堺ｽ・/th></tr>
+                <tr><th>品番</th><th>表示名</th><th>ステータス</th><th>組織</th><th>電池残量</th><th>電波強度</th><th>最終受信</th><th>最終検知</th><th>操作</th></tr>
             </thead>
             <tbody>
                 @forelse($devices as $device)
@@ -238,11 +238,11 @@
                         <td>
                             <span class="status-badge status-{{ $device->status }}">
                                 @switch($device->status)
-                                    @case('normal') 豁｣蟶ｸ @break
-                                    @case('warning') 豕ｨ諢・@break
-                                    @case('alert') 譛ｪ讀懃衍 @break
-                                    @case('offline') 騾壻ｿ｡騾皮ｵｶ @break
-                                    @case('inactive') 譛ｪ遞ｼ蜒・@break
+                                    @case('normal') 正常 @break
+                                    @case('warning') 注意 @break
+                                    @case('alert') 未検知アラート @break
+                                    @case('offline') 通信途絶 @break
+                                    @case('inactive') 未稼働 @break
                                 @endswitch
                             </span>
                         </td>
@@ -251,13 +251,13 @@
                         <td style="font-size:12px;">{{ $device->rssi ? $device->rssi . 'dBm' : '-' }}</td>
                         <td style="font-size:12px;">{{ $device->last_received_at ? $device->last_received_at->format('m/d H:i') : '-' }}</td>
                         <td style="font-size:12px;">{{ $device->last_human_detected_at ? $device->last_human_detected_at->format('m/d H:i') : '-' }}</td>
-                        <td><button class="action-btn" onclick="showDeviceDetail('{{ $device->device_id }}')">隧ｳ邏ｰ</button><button class="action-btn danger" onclick="confirmDeleteDevice('{{ $device->device_id }}')">蜑企勁</button></td>
+                        <td><button class="action-btn" onclick="showDeviceDetail('{{ $device->device_id }}')">詳細</button><button class="action-btn danger" onclick="confirmDeleteDevice('{{ $device->device_id }}')">削除</button></td>
                     </tr>
                 @empty
                     <tr>
                         <td colspan="9" class="empty-row">
-                            繝・ヰ繧､繧ｹ縺後≠繧翫∪縺帙ｓ縲ゅョ繝舌う繧ｹ霑ｽ蜉繧定｡後▲縺ｦ縺上□縺輔＞縲・br>
-                            <button class="btn btn-sm btn-primary" style="margin-top:10px;" onclick="scrollToIssueSection()">・・繝・ヰ繧､繧ｹ繧堤匱逡ｪ縺吶ｋ</button>
+                            デバイスがありません。<br>
+                            <button class="btn btn-sm btn-primary" style="margin-top:10px;" onclick="scrollToIssueSection()">デバイスを発番する</button>
                         </td>
                     </tr>
                 @endforelse
@@ -265,26 +265,26 @@
         </table>
         @if($devices->hasPages())
             <div class="pagination-wrap">
-                @if($devices->onFirstPage()) <span class="disabled">竊・/span> @else <a href="{{ $devices->previousPageUrl() }}">竊・/a> @endif
+                @if($devices->onFirstPage()) <span class="disabled">‹</span> @else <a href="{{ $devices->previousPageUrl() }}">‹</a> @endif
                 @foreach($devices->getUrlRange(1, $devices->lastPage()) as $page => $url)
                     @if($page == $devices->currentPage()) <span class="active">{{ $page }}</span> @else <a href="{{ $url }}">{{ $page }}</a> @endif
                 @endforeach
-                @if($devices->hasMorePages()) <a href="{{ $devices->nextPageUrl() }}">竊・/a> @else <span class="disabled">竊・/span> @endif
+                @if($devices->hasMorePages()) <a href="{{ $devices->nextPageUrl() }}">›</a> @else <span class="disabled">›</span> @endif
             </div>
         @endif
     </div>
 </div>
 
-{{-- ===== 邂｡逅・・い繧ｫ繧ｦ繝ｳ繝医ち繝・===== --}}
+{{-- ===== 管理者アカウントタブ ===== --}}
 <div id="tab-admins" class="tab-content">
     <div class="card">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
-            <div style="font-size:15px;font-weight:600;color:#5a5245;">邂｡逅・・い繧ｫ繧ｦ繝ｳ繝井ｸ隕ｧ</div>
-            <div class="toolbar-right"><button class="btn btn-sm btn-primary" onclick="showAddAdminModal()">・・繧｢繧ｫ繧ｦ繝ｳ繝郁ｿｽ蜉</button></div>
+            <div style="font-size:15px;font-weight:600;color:#5a5245;">管理者アカウント一覧</div>
+            <div class="toolbar-right"><button class="btn btn-sm btn-primary" onclick="showAddAdminModal()">＋ 管理者追加</button></div>
         </div>
         <table class="admin-table">
             <thead>
-                <tr><th>ID</th><th>蜷榊燕</th><th>繝｡繝ｼ繝ｫ繧｢繝峨Ξ繧ｹ</th><th>讓ｩ髯・/th><th>謇螻樒ｵ・ｹ・/th><th>譛邨ゅΟ繧ｰ繧､繝ｳ</th><th>菴懈・譌･</th><th>謫堺ｽ・/th></tr>
+                <tr><th>ID</th><th>名前</th><th>メールアドレス</th><th>権限</th><th>所属組織</th><th>最終ログイン</th><th>作成日</th><th>操作</th></tr>
             </thead>
             <tbody>
                 @forelse($adminUsers as $admin)
@@ -292,35 +292,35 @@
                         <td style="font-size:12px;color:#999;">{{ $admin->id }}</td>
                         <td style="font-weight:500;">{{ $admin->name }}</td>
                         <td style="font-size:13px;">{{ $admin->email }}</td>
-                        <td><span class="role-badge {{ $admin->role === 'master' ? 'role-master' : 'role-operator' }}">{{ $admin->role === 'master' ? '繝槭せ繧ｿ繝ｼ' : '繧ｪ繝壹Ξ繝ｼ繧ｿ繝ｼ' }}</span></td>
+                        <td><span class="role-badge {{ $admin->role === 'master' ? 'role-master' : 'role-operator' }}">{{ $admin->role === 'master' ? 'マスター' : 'オペレーター' }}</span></td>
                         <td style="font-size:12px;color:var(--gray-600);">{{ $admin->organization ? $admin->organization->name : '-' }}</td>
-                        <td style="font-size:12px;color:#888;">{{ $admin->last_login_at ? \Carbon\Carbon::parse($admin->last_login_at)->format('Y/m/d H:i') : '譛ｪ繝ｭ繧ｰ繧､繝ｳ' }}</td>
+                        <td style="font-size:12px;color:#888;">{{ $admin->last_login_at ? \Carbon\Carbon::parse($admin->last_login_at)->format('Y/m/d H:i') : '未ログイン' }}</td>
                         <td style="font-size:12px;color:#888;">{{ $admin->created_at->format('Y/m/d') }}</td>
                         <td>
-                            <button class="action-btn" onclick="showEditAdminModal({{ json_encode(['id' => $admin->id, 'name' => $admin->name, 'email' => $admin->email, 'role' => $admin->role, 'organization_id' => $admin->organization_id]) }})">邱ｨ髮・/button>
+                            <button class="action-btn" onclick="showEditAdminModal({{ json_encode(['id' => $admin->id, 'name' => $admin->name, 'email' => $admin->email, 'role' => $admin->role, 'organization_id' => $admin->organization_id]) }})">編集</button>
                             @if($admin->id !== Auth::guard('partner')->id())
-                                <button class="action-btn danger" onclick="confirmDeleteAdmin({{ $admin->id }}, '{{ $admin->name }}')">蜑企勁</button>
+                                <button class="action-btn danger" onclick="confirmDeleteAdmin({{ $admin->id }}, '{{ $admin->name }}')">削除</button>
                             @endif
                         </td>
                     </tr>
                 @empty
-                    <tr><td colspan="8" class="empty-row">邂｡逅・・い繧ｫ繧ｦ繝ｳ繝医′縺ゅｊ縺ｾ縺帙ｓ</td></tr>
+                    <tr><td colspan="8" class="empty-row">管理者アカウントがありません</td></tr>
                 @endforelse
             </tbody>
         </table>
     </div>
 </div>
 
-{{-- ===== 邨・ｹ皮ｮ｡逅・ち繝・===== --}}
+{{-- ===== 組織管理タブ ===== --}}
 <div id="tab-orgs" class="tab-content">
     <div class="card">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
-            <div style="font-size:15px;font-weight:600;color:#5a5245;">邨・ｹ比ｸ隕ｧ</div>
-            <button class="btn btn-sm btn-primary" onclick="showAddOrgModal()">・・邨・ｹ碑ｿｽ蜉</button>
+            <div style="font-size:15px;font-weight:600;color:#5a5245;">組織一覧</div>
+            <button class="btn btn-sm btn-primary" onclick="showAddOrgModal()">＋ 組織追加</button>
         </div>
         <table class="org-table">
             <thead>
-                <tr><th>邨・ｹ泌錐</th><th>諡・ｽ楢・/th><th>騾｣邨｡蜈・/th><th>繝・ヰ繧､繧ｹ謨ｰ</th><th>驟埼∝・菴乗園</th><th>騾夂衍</th><th>謫堺ｽ・/th></tr>
+                <tr><th>組織名</th><th>担当者</th><th>連絡先</th><th>デバイス数</th><th>住所</th><th>通知</th><th>操作</th></tr>
             </thead>
             <tbody>
                 @forelse($organizations as $org)
@@ -332,83 +332,78 @@
                         <td style="font-weight:500;">{{ $org->name }}</td>
                         <td style="font-size:12px;">{{ $org->contact_name ?: '-' }}</td>
                         <td style="font-size:12px;">{{ $org->contact_email }}</td>
-                        <td style="font-size:13px;">{{ $org->devices_count }}蜿ｰ</td>
+                        <td style="font-size:13px;">{{ $org->devices_count }}台</td>
                         <td style="font-size:12px;color:var(--gray-600);">{{ $org->delivery_address ?: '-' }}</td>
                         <td>
                             <div class="org-notify-icons">
-                                @if($hasEmail) <span title="繝｡繝ｼ繝ｫ" style="{{ $org->notification_enabled ? '' : 'opacity:0.4;' }}">透</span> @endif
-                                @if($hasSms) <span title="SMS" style="{{ $org->notification_sms_enabled ? '' : 'opacity:0.4;' }}">町</span> @endif
-                                @if(!$hasEmail && !$hasSms) <span style="color:var(--gray-300);font-size:11px;">譛ｪ險ｭ螳・/span> @endif
+                                @if($hasEmail) <span title="メール" style="{{ $org->notification_enabled ? '' : 'opacity:0.4;' }}">✉</span> @endif
+                                @if($hasSms) <span title="SMS" style="{{ $org->notification_sms_enabled ? '' : 'opacity:0.4;' }}">📱</span> @endif
+                                @if(!$hasEmail && !$hasSms) <span style="color:var(--gray-300);font-size:11px;">未設定</span> @endif
                             </div>
                         </td>
                         <td>
-                            <button class="action-btn" onclick="showEditOrgModal({{ json_encode(['id'=>$org->id,'name'=>$org->name,'contact_name'=>$org->contact_name,'contact_email'=>$org->contact_email,'contact_phone'=>$org->contact_phone,'address'=>$org->address,'notes'=>$org->notes,'device_limit'=>$org->device_limit??100,'expires_at'=>$org->expires_at?$org->expires_at->format('Y-m-d'):'','notification_email_1'=>$org->notification_email_1,'notification_email_2'=>$org->notification_email_2,'notification_email_3'=>$org->notification_email_3,'notification_sms_1'=>$org->notification_sms_1,'notification_sms_2'=>$org->notification_sms_2]) }})">邱ｨ髮・/button>
-                            @if($org->devices_count === 0) <button class="action-btn danger" onclick="confirmDeleteOrg({{ $org->id }}, '{{ $org->name }}')">蜑企勁</button> @endif
+                            <button class="action-btn" onclick="showEditOrgModal({{ json_encode(['id'=>$org->id,'name'=>$org->name,'contact_name'=>$org->contact_name,'contact_email'=>$org->contact_email,'contact_phone'=>$org->contact_phone,'address'=>$org->address,'notes'=>$org->notes,'device_limit'=>$org->device_limit??100,'expires_at'=>$org->expires_at?$org->expires_at->format('Y-m-d'):'','notification_email_1'=>$org->notification_email_1,'notification_email_2'=>$org->notification_email_2,'notification_email_3'=>$org->notification_email_3,'notification_sms_1'=>$org->notification_sms_1,'notification_sms_2'=>$org->notification_sms_2]) }})">編集</button>
+                            @if($org->devices_count === 0) <button class="action-btn danger" onclick="confirmDeleteOrg({{ $org->id }}, '{{ $org->name }}')">削除</button> @endif
                         </td>
                     </tr>
                 @empty
-                    <tr><td colspan="7" class="empty-row">邨・ｹ斐′縺ゅｊ縺ｾ縺帙ｓ</td></tr>
+                    <tr><td colspan="7" class="empty-row">組織がありません</td></tr>
                 @endforelse
             </tbody>
         </table>
     </div>
 </div>
 
-{{-- ===== 繝・ヰ繧､繧ｹ隧ｳ邏ｰ繝｢繝ｼ繝繝ｫ ===== --}}
+{{-- ===== デバイス詳細モーダル ===== --}}
 <div id="deviceDetailModal" class="modal-overlay" onclick="if(event.target===this)hideModal('deviceDetailModal')">
     <div class="modal" style="max-width:560px;">
-        <div class="modal-header"><h3>搭 繝・ヰ繧､繧ｹ隧ｳ邏ｰ</h3><button class="modal-close" onclick="hideModal('deviceDetailModal')">ﾃ・/button></div>
+        <div class="modal-header"><h3>🔍 デバイス詳細</h3><button class="modal-close" onclick="hideModal('deviceDetailModal')">✕</button></div>
         <div class="modal-body">
-            {{-- 繧ｹ繝・・繧ｿ繧ｹ --}}
             <div class="detail-status-row">
                 <div class="detail-status-badge normal" id="masterDetailStatusBadge">-</div>
-                <button class="detail-clear-alert-btn" id="masterDetailClearAlertBtn" style="display:none;" onclick="masterClearAlert()">笨・隴ｦ蜻願ｧ｣髯､</button>
+                <button class="detail-clear-alert-btn" id="masterDetailClearAlertBtn" style="display:none;" onclick="masterClearAlert()">✓ 警告を解除して退去処理</button>
             </div>
-            {{-- 遶ｯ譛ｫ繧ｵ繝悶せ繧ｯ繝ｪ繝励す繝ｧ繝ｳ --}}
             <div class="modal-section" style="margin-bottom:16px;">
                 <div style="display:flex;align-items:center;justify-content:space-between;">
                     <div style="display:flex;align-items:center;gap:12px;">
                         <label class="watch-toggle"><input type="checkbox" id="masterDetailNotifyEnabled" checked onchange="masterToggleNotifyService(this.checked)"><span class="watch-slider"></span></label>
-                        <span style="font-size:13px;font-weight:600;color:var(--gray-700);">粕 遶ｯ譛ｫ繧ｵ繝悶せ繧ｯ繝ｪ繝励す繝ｧ繝ｳ</span>
-                        <span id="masterDetailNotifyLabel" style="font-size:12px;color:var(--gray-500);">譛牙柑</span>
+                        <span style="font-size:13px;font-weight:600;color:var(--gray-700);">📢 通知サービス有効</span>
+                        <span id="masterDetailNotifyLabel" style="font-size:12px;color:var(--gray-500);">有効</span>
                     </div>
-                    <button class="btn btn-sm btn-secondary" onclick="masterShowSubscriptionModal()">搭 螂醍ｴ・・繝ｩ繝ｳ</button>
+                    <button class="btn btn-sm btn-secondary" onclick="masterShowSubscriptionModal()">🔍 通知設定</button>
                 </div>
-                <p class="detail-notify-note">窶ｻ縺泌･醍ｴ・ｾ後・Ω譛医・蛛懈ｭ｢讖溯・縺ｯ縺泌茜逕ｨ縺ｫ縺ｪ繧後∪縺帙ｓ縲・/p>
+                <p class="detail-notify-note">OFFにすると未検知チェックが停止し、通知が送られなくなります。</p>
             </div>
-            {{-- 繝・ヰ繧､繧ｹ蝓ｺ譛ｬ諠・ｱ --}}
             <div class="modal-section">
                 <div class="detail-grid">
-                    <div class="detail-item"><p class="detail-item-label">繝・ヰ繧､繧ｹID</p><p class="detail-item-value mono" id="masterDetailDeviceId">-</p></div>
-                    <div class="detail-item"><p class="detail-item-label">譛邨よ､懃衍</p><p class="detail-item-value" id="masterDetailLastDetected">-</p></div>
-                    <div class="detail-item"><p class="detail-item-label">驛ｨ螻狗分蜿ｷ</p><input type="text" class="detail-form-input" id="masterDetailRoom" placeholder="101"></div>
-                    <div class="detail-item"><p class="detail-item-label">蜈･螻・・錐</p><input type="text" class="detail-form-input" id="masterDetailTenant" placeholder="螻ｱ逕ｰ 螟ｪ驛・></div>
+                    <div class="detail-item"><p class="detail-item-label">デバイスID</p><p class="detail-item-value mono" id="masterDetailDeviceId">-</p></div>
+                    <div class="detail-item"><p class="detail-item-label">最終検知</p><p class="detail-item-value" id="masterDetailLastDetected">-</p></div>
+                    <div class="detail-item"><p class="detail-item-label">部屋番号</p><input type="text" class="detail-form-input" id="masterDetailRoom" placeholder="101"></div>
+                    <div class="detail-item"><p class="detail-item-label">入居者名</p><input type="text" class="detail-form-input" id="masterDetailTenant" placeholder="山田 太郎"></div>
                 </div>
             </div>
-            {{-- 繧ｻ繝ｳ繧ｵ繝ｼ迥ｶ諷・--}}
             <div class="modal-section">
-                <div class="modal-section-title">投 繧ｻ繝ｳ繧ｵ繝ｼ迥ｶ諷・/div>
+                <div class="modal-section-title">📡 センサー状態</div>
                 <div class="detail-grid">
-                    <div class="detail-item"><p class="detail-item-label">髮ｻ豎谿矩㍼</p><p class="detail-item-value" id="masterDetailBattery">-</p></div>
-                    <div class="detail-item"><p class="detail-item-label">髮ｻ豕｢蠑ｷ蠎ｦ</p><p class="detail-item-value" id="masterDetailSignal">-</p></div>
+                    <div class="detail-item"><p class="detail-item-label">電池残量(%)</p><p class="detail-item-value" id="masterDetailBattery">-</p></div>
+                    <div class="detail-item"><p class="detail-item-label">電波強度</p><p class="detail-item-value" id="masterDetailSignal">-</p></div>
                 </div>
             </div>
-            {{-- 險ｭ螳・--}}
             <div class="modal-section">
-                <div class="modal-section-title">笞呻ｸ・險ｭ螳・/div>
+                <div class="modal-section-title">⚙ 設定</div>
                 <div class="detail-grid">
-                    <div class="detail-item"><p class="detail-item-label">繧｢繝ｩ繝ｼ繝磯明蛟､</p>
+                    <div class="detail-item"><p class="detail-item-label">アラート閾値</p>
                         <select class="detail-form-input" id="masterDetailAlertHours">
-                            <option value="12">12譎る俣</option><option value="24">24譎る俣</option><option value="36">36譎る俣</option><option value="48">48譎る俣</option><option value="72">72譎る俣</option>
+                            <option value="12">12時間</option><option value="24">24時間</option><option value="36">36時間</option><option value="48">48時間</option><option value="72">72時間</option>
                         </select>
                     </div>
-                    <div class="detail-item"><p class="detail-item-label">險ｭ鄂ｮ鬮倥＆</p>
+                    <div class="detail-item"><p class="detail-item-label">設置高さ</p>
                         <div style="display:flex;align-items:center;gap:4px;"><input type="number" class="detail-form-input" id="masterDetailHeight" min="100" max="300" style="width:70px;"><span style="font-size:12px;color:var(--gray-500);">cm</span></div>
                     </div>
-                    <div class="detail-item"><p class="detail-item-label">繝壹ャ繝磯勁螟・/p>
+                    <div class="detail-item"><p class="detail-item-label">ペット除外</p>
                         <select class="detail-form-input" id="masterDetailPetExclusion"><option value="0">OFF</option><option value="1">ON</option></select>
                     </div>
-                    <div class="detail-item"><p class="detail-item-label">螟門・繝｢繝ｼ繝・/p>
+                    <div class="detail-item"><p class="detail-item-label">外出モード</p>
                         <div style="display:flex;align-items:center;gap:8px;">
                             <label class="watch-toggle"><input type="checkbox" id="masterDetailAwayMode" onchange="masterToggleAwayMode(this.checked)"><span class="watch-slider"></span></label>
                             <span id="masterDetailAwayLabel" style="font-size:12px;color:var(--gray-600);">OFF</span>
@@ -416,263 +411,259 @@
                     </div>
                 </div>
             </div>
-            {{-- 逋ｻ骭ｲ諠・ｱ --}}
             <div class="modal-section">
-                <div class="modal-section-title">統 逋ｻ骭ｲ諠・ｱ</div>
+                <div class="modal-section-title">🔧 端末情報</div>
                 <div class="detail-grid">
                     <div class="detail-item" style="grid-column: span 2;">
-                        <p class="detail-item-label">藤 SIM ID・・CCID・・/p>
-                        <input type="text" class="detail-form-input" id="masterDetailSimId" placeholder="萓具ｼ・9882806660000123456" maxlength="22" style="font-family:monospace;letter-spacing:1px;" inputmode="numeric">
-                        <p style="font-size:11px;color:var(--gray-500);margin-top:4px;">SIM繧ｫ繝ｼ繝芽｣城擇縺ｾ縺溘・1NCE邂｡逅・判髱｢縺ｮICCID・域焚蟄励・縺ｿ繝ｻ譛螟ｧ22譯・ｼ峨ゅョ繝舌う繧ｹ縺九ｉ縺ｮJSON縺ｫ蜷ｫ縺ｾ繧後ｋSIM ID縺ｨ蜩∫分繧堤ｴ舌▼縺代∪縺吶・/p>
+                        <p class="detail-item-label">📶 SIM ID（ICCID）</p>
+                        <input type="text" class="detail-form-input" id="masterDetailSimId" placeholder="例: 09882806660000123456" maxlength="22" style="font-family:monospace;letter-spacing:1px;" inputmode="numeric">
+                        <p style="font-size:11px;color:var(--gray-500);margin-top:4px;">1NCE管理画面のICCIDを入力。22桁以内の数字。デバイスからのJSONにSIM IDが含まれる場合は自動設定されます。</p>
                     </div>
-                    <div class="detail-item"><p class="detail-item-label">逋ｻ骭ｲ譌･</p><p class="detail-item-value" id="masterDetailRegistered">-</p></div>
-                    <div class="detail-item"><p class="detail-item-label">繝｡繝｢</p><input type="text" class="detail-form-input" id="masterDetailMemo" placeholder="繝｡繝｢繧定ｿｽ蜉..." maxlength="200"></div>
+                    <div class="detail-item"><p class="detail-item-label">登録日</p><p class="detail-item-value" id="masterDetailRegistered">-</p></div>
+                    <div class="detail-item"><p class="detail-item-label">メモ</p><input type="text" class="detail-form-input" id="masterDetailMemo" placeholder="メモを入力..." maxlength="200"></div>
                     <div class="detail-item" style="grid-column: span 2;">
-                        <p class="detail-item-label">諜 豎ｺ貂磯幕蟋区律</p>
+                        <p class="detail-item-label">💳 課金開始日</p>
                         <input type="date" class="detail-form-input" id="masterDetailBillingStartDate" style="max-width:180px;">
-                        <p style="font-size:11px;color:var(--gray-500);margin-top:4px;">窶ｻ 繝・ヵ繧ｩ繝ｫ繝医・鄙梧怦1譌･縲ゅ％縺ｮ譌･莉倥°繧・pay.jp 縺ｮ螳壽悄隱ｲ驥代′髢句ｧ九＆繧後∪縺吶・/p>
+                        <p style="font-size:11px;color:var(--gray-500);margin-top:4px;">月締め請求の開始日を指定。pay.jp の定期課金に使用予定。</p>
                     </div>
                 </div>
             </div>
-            {{-- 螟門・繧ｹ繧ｱ繧ｸ繝･繝ｼ繝ｫ --}}
             <div class="modal-section">
-                <div class="modal-section-title">垳 螟門・繧ｹ繧ｱ繧ｸ繝･繝ｼ繝ｫ</div>
+                <div class="modal-section-title">📅 外出スケジュール</div>
                 <div id="masterDetailScheduleList"></div>
-                <button class="detail-schedule-add" onclick="masterOpenScheduleAdd()">・・螟門・繧ｹ繧ｱ繧ｸ繝･繝ｼ繝ｫ霑ｽ蜉</button>
+                <button class="detail-schedule-add" onclick="masterOpenScheduleAdd()">＋ スケジュール追加</button>
             </div>
         </div>
         <div class="modal-footer">
-            <button class="btn btn-secondary" onclick="hideModal('deviceDetailModal')">髢峨§繧・/button>
-            <button class="btn btn-primary" onclick="masterSaveAssignment()">菫晏ｭ・/button>
+            <button class="btn btn-secondary" onclick="hideModal('deviceDetailModal')">閉じる</button>
+            <button class="btn btn-primary" onclick="masterSaveAssignment()">保存</button>
         </div>
     </div>
 </div>
 
-{{-- ===== 螂醍ｴ・・繝ｩ繝ｳ繝｢繝ｼ繝繝ｫ・医・繧ｹ繧ｿ繝ｼ・・===== --}}
+{{-- ===== 通知設定モーダル ===== --}}
 <div id="masterSubscriptionModal" class="modal-overlay" onclick="if(event.target===this)hideModal('masterSubscriptionModal')">
     <div class="modal" style="max-width:500px;">
-        <div class="modal-header"><h3>搭 螂醍ｴ・・繝ｩ繝ｳ</h3><button class="modal-close" onclick="hideModal('masterSubscriptionModal')">ﾃ・/button></div>
+        <div class="modal-header"><h3>🔍 通知設定</h3><button class="modal-close" onclick="hideModal('masterSubscriptionModal')">✕</button></div>
         <div class="modal-body">
-            <div style="font-size:12px;color:var(--gray-500);margin-bottom:16px;">蟇ｾ雎｡繝・ヰ繧､繧ｹ・・span id="masterSubModalDeviceId" class="mono" style="font-size:12px;"></span></div>
-            {{-- SMS騾夂衍 --}}
+            <div style="font-size:12px;color:var(--gray-500);margin-bottom:16px;">対象デバイス: <span id="masterSubModalDeviceId" class="mono" style="font-size:12px;"></span></div>
             <div style="border:1px solid var(--gray-200);border-radius:var(--radius);padding:14px;margin-bottom:10px;">
                 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-                    <p style="font-size:13px;font-weight:600;color:var(--gray-700);">町 SMS騾夂衍 <span style="font-size:11px;font-weight:400;color:var(--gray-500);">+ﾂ･100/蜿ｰ/譛・/span></p>
+                    <p style="font-size:13px;font-weight:600;color:var(--gray-700);">📱 SMS通知 <span style="font-size:11px;font-weight:400;color:var(--gray-500);">+税込100円/台/月</span></p>
                     <label class="watch-toggle"><input type="checkbox" id="masterDetailSmsEnabled"><span class="watch-slider"></span></label>
                 </div>
                 <input type="tel" class="detail-form-input" id="masterDetailSmsPhone1" placeholder="09012345678" style="margin-bottom:6px;">
-                <input type="tel" class="detail-form-input" id="masterDetailSmsPhone2" placeholder="09012345678・井ｻｻ諢擾ｼ・>
+                <input type="tel" class="detail-form-input" id="masterDetailSmsPhone2" placeholder="09012345678（任意）">
             </div>
-            {{-- AI繧ｳ繝ｼ繝ｫ --}}
             <div style="border:1px solid var(--gray-200);border-radius:var(--radius);padding:14px;">
                 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-                    <p style="font-size:13px;font-weight:600;color:var(--gray-700);">到 髮ｻ隧ｱ騾夂衍・・I繧ｳ繝ｼ繝ｫ・・span style="font-size:11px;font-weight:400;color:var(--gray-500);">+ﾂ･300/蜿ｰ/譛・/span></p>
+                    <p style="font-size:13px;font-weight:600;color:var(--gray-700);">📞 自動音声電話 <span style="font-size:11px;font-weight:400;color:var(--gray-500);">+税込300円/台/月</span></p>
                     <label class="watch-toggle"><input type="checkbox" id="masterDetailVoiceEnabled"><span class="watch-slider"></span></label>
                 </div>
                 <input type="tel" class="detail-form-input" id="masterDetailVoicePhone1" placeholder="09012345678" style="margin-bottom:6px;">
-                <input type="tel" class="detail-form-input" id="masterDetailVoicePhone2" placeholder="09012345678・井ｻｻ諢擾ｼ・>
+                <input type="tel" class="detail-form-input" id="masterDetailVoicePhone2" placeholder="09012345678（任意）">
             </div>
         </div>
         <div class="modal-footer">
-            <button class="btn btn-secondary" onclick="hideModal('masterSubscriptionModal'); showDeviceDetail(masterCurrentDeviceId)">髢峨§繧・/button>
-            <button class="btn btn-primary" onclick="masterSaveNotification(); hideModal('masterSubscriptionModal'); showDeviceDetail(masterCurrentDeviceId)">菫晏ｭ・/button>
+            <button class="btn btn-secondary" onclick="hideModal('masterSubscriptionModal'); showDeviceDetail(masterCurrentDeviceId)">戻る</button>
+            <button class="btn btn-primary" onclick="masterSaveNotification(); hideModal('masterSubscriptionModal'); showDeviceDetail(masterCurrentDeviceId)">保存</button>
         </div>
     </div>
 </div>
 
-{{-- ===== 繧ｹ繧ｱ繧ｸ繝･繝ｼ繝ｫ霑ｽ蜉繝｢繝ｼ繝繝ｫ ===== --}}
+{{-- ===== スケジュール追加モーダル ===== --}}
 <div id="masterScheduleAddModal" class="modal-overlay" onclick="if(event.target===this)hideModal('masterScheduleAddModal')">
     <div class="modal" style="max-width:480px;">
-        <div class="modal-header"><h3>垳 螟門・繧ｹ繧ｱ繧ｸ繝･繝ｼ繝ｫ霑ｽ蜉</h3><button class="modal-close" onclick="hideModal('masterScheduleAddModal')">ﾃ・/button></div>
+        <div class="modal-header"><h3>📅 スケジュール追加</h3><button class="modal-close" onclick="hideModal('masterScheduleAddModal')">✕</button></div>
         <div class="modal-body">
             <div class="schedule-type-tabs">
-                <button class="schedule-type-tab active" id="masterTabOneshot" onclick="masterSwitchScheduleType('oneshot')">套 蜊倡匱</button>
-                <button class="schedule-type-tab" id="masterTabRecurring" onclick="masterSwitchScheduleType('recurring')">煤 螳壽悄</button>
+                <button class="schedule-type-tab active" id="masterTabOneshot" onclick="masterSwitchScheduleType('oneshot')">📅 単発</button>
+                <button class="schedule-type-tab" id="masterTabRecurring" onclick="masterSwitchScheduleType('recurring')">🔄 定期</button>
             </div>
             <div id="masterOneshotForm">
-                <div class="schedule-form-group"><label>髢句ｧ区律譎・/label><input type="datetime-local" id="masterSchedStartAt"></div>
-                <div class="schedule-form-group"><label>邨ゆｺ・律譎ゑｼ育ｩｺ谺・ｼ晄焔蜍募ｾｩ蟶ｰ・・/label><input type="datetime-local" id="masterSchedEndAt"></div>
+                <div class="schedule-form-group"><label>開始日時</label><input type="datetime-local" id="masterSchedStartAt"></div>
+                <div class="schedule-form-group"><label>終了日時（省略可・未入力は無期限）</label><input type="datetime-local" id="masterSchedEndAt"></div>
             </div>
             <div id="masterRecurringForm" style="display:none;">
-                <div class="schedule-form-group"><label>譖懈律</label>
+                <div class="schedule-form-group"><label>曜日</label>
                     <div class="schedule-days" id="masterScheduleDays">
-                        <button type="button" class="schedule-day-btn" data-day="0" onclick="toggleDay(this)">譌･</button>
-                        <button type="button" class="schedule-day-btn" data-day="1" onclick="toggleDay(this)">譛・/button>
-                        <button type="button" class="schedule-day-btn" data-day="2" onclick="toggleDay(this)">轣ｫ</button>
-                        <button type="button" class="schedule-day-btn" data-day="3" onclick="toggleDay(this)">豌ｴ</button>
-                        <button type="button" class="schedule-day-btn" data-day="4" onclick="toggleDay(this)">譛ｨ</button>
-                        <button type="button" class="schedule-day-btn" data-day="5" onclick="toggleDay(this)">驥・/button>
-                        <button type="button" class="schedule-day-btn" data-day="6" onclick="toggleDay(this)">蝨・/button>
+                        <button type="button" class="schedule-day-btn" data-day="0" onclick="toggleDay(this)">日</button>
+                        <button type="button" class="schedule-day-btn" data-day="1" onclick="toggleDay(this)">月</button>
+                        <button type="button" class="schedule-day-btn" data-day="2" onclick="toggleDay(this)">火</button>
+                        <button type="button" class="schedule-day-btn" data-day="3" onclick="toggleDay(this)">水</button>
+                        <button type="button" class="schedule-day-btn" data-day="4" onclick="toggleDay(this)">木</button>
+                        <button type="button" class="schedule-day-btn" data-day="5" onclick="toggleDay(this)">金</button>
+                        <button type="button" class="schedule-day-btn" data-day="6" onclick="toggleDay(this)">土</button>
                     </div>
                 </div>
-                <div class="schedule-form-group"><label>譎る俣蟶ｯ</label>
-                    <div class="schedule-time-row"><input type="time" id="masterSchedStartTime"><span>縲・/span><input type="time" id="masterSchedEndTime"></div>
-                    <label class="schedule-nextday-check"><input type="checkbox" id="masterSchedNextDay"> 鄙梧律縺ｫ縺ｾ縺溘′繧・/label>
+                <div class="schedule-form-group"><label>時間帯</label>
+                    <div class="schedule-time-row"><input type="time" id="masterSchedStartTime"><span>〜</span><input type="time" id="masterSchedEndTime"></div>
+                    <label class="schedule-nextday-check"><input type="checkbox" id="masterSchedNextDay"> 翌日にまたがる</label>
                 </div>
             </div>
-            <div class="schedule-form-group"><label>繝｡繝｢・井ｻｻ諢擾ｼ・/label><input type="text" id="masterSchedMemo" placeholder="萓具ｼ壹ョ繧､繧ｵ繝ｼ繝薙せ" maxlength="200"></div>
+            <div class="schedule-form-group"><label>メモ（任意）</label><input type="text" id="masterSchedMemo" placeholder="例: 外出・旅行" maxlength="200"></div>
         </div>
         <div class="modal-footer">
-            <button class="btn btn-secondary" onclick="hideModal('masterScheduleAddModal')">繧ｭ繝｣繝ｳ繧ｻ繝ｫ</button>
-            <button class="btn btn-primary" onclick="masterSubmitSchedule()">霑ｽ蜉</button>
+            <button class="btn btn-secondary" onclick="hideModal('masterScheduleAddModal')">キャンセル</button>
+            <button class="btn btn-primary" onclick="masterSubmitSchedule()">追加</button>
         </div>
     </div>
 </div>
 
-{{-- ===== 繧ｹ繧ｱ繧ｸ繝･繝ｼ繝ｫ蜑企勁遒ｺ隱阪Δ繝ｼ繝繝ｫ ===== --}}
+{{-- ===== スケジュール削除確認モーダル ===== --}}
 <div id="masterScheduleDeleteModal" class="modal-overlay" onclick="if(event.target===this)hideModal('masterScheduleDeleteModal')">
-    <div class="modal"><div class="modal-header"><h3>笞・・螟門・繧ｹ繧ｱ繧ｸ繝･繝ｼ繝ｫ蜑企勁</h3><button class="modal-close" onclick="hideModal('masterScheduleDeleteModal')">ﾃ・/button></div>
-        <div class="modal-body"><p>縺薙・繧ｹ繧ｱ繧ｸ繝･繝ｼ繝ｫ繧貞炎髯､縺励∪縺吶°・・/p></div>
-        <div class="modal-footer"><button class="btn btn-secondary" onclick="hideModal('masterScheduleDeleteModal')">繧ｭ繝｣繝ｳ繧ｻ繝ｫ</button><button class="btn btn-danger" onclick="masterExecuteDeleteSchedule()">蜑企勁縺吶ｋ</button></div>
+    <div class="modal"><div class="modal-header"><h3>⚠ スケジュール削除</h3><button class="modal-close" onclick="hideModal('masterScheduleDeleteModal')">✕</button></div>
+        <div class="modal-body"><p>このスケジュールを削除しますか？</p></div>
+        <div class="modal-footer"><button class="btn btn-secondary" onclick="hideModal('masterScheduleDeleteModal')">キャンセル</button><button class="btn btn-danger" onclick="masterExecuteDeleteSchedule()">削除する</button></div>
     </div>
 </div>
 
-{{-- ===== 邂｡逅・・ｿｽ蜉繝｢繝ｼ繝繝ｫ ===== --}}
+{{-- ===== 管理者追加モーダル ===== --}}
 <div id="addAdminModal" class="modal-overlay" onclick="if(event.target===this)hideAddAdminModal()">
     <div class="modal" style="max-width:500px;">
-        <div class="modal-header"><h3>邂｡逅・・い繧ｫ繧ｦ繝ｳ繝郁ｿｽ蜉</h3><button class="modal-close" onclick="hideAddAdminModal()">ﾃ・/button></div>
+        <div class="modal-header"><h3>管理者アカウント追加</h3><button class="modal-close" onclick="hideAddAdminModal()">✕</button></div>
         <form method="POST" action="{{ route('partner.admin-users.store') }}">
             @csrf
             <div class="modal-body">
-                <div class="form-group"><label class="form-label">蜷榊燕 *</label><input type="text" name="name" class="form-input" placeholder="萓具ｼ壼ｱｱ逕ｰ螟ｪ驛・ required></div>
-                <div class="form-group"><label class="form-label">繝｡繝ｼ繝ｫ繧｢繝峨Ξ繧ｹ *</label><input type="email" name="email" class="form-input" placeholder="admin@example.com" required><p class="form-hint">縺薙・繧｢繝峨Ξ繧ｹ縺ｧ繝ｭ繧ｰ繧､繝ｳ縺励∪縺・/p></div>
+                <div class="form-group"><label class="form-label">名前 *</label><input type="text" name="name" class="form-input" placeholder="例: 山田 太郎" required></div>
+                <div class="form-group"><label class="form-label">メールアドレス *</label><input type="email" name="email" class="form-input" placeholder="admin@example.com" required><p class="form-hint">このメールアドレスでログインします</p></div>
                 <div class="form-group">
-                    <label class="form-label">讓ｩ髯・*</label>
+                    <label class="form-label">権限 *</label>
                     <select name="role" class="form-input" id="addAdminRole" onchange="toggleOrgSelect('addAdminOrgRow', this.value)">
-                        <option value="operator">繧ｪ繝壹Ξ繝ｼ繧ｿ繝ｼ・育ｵ・ｹ皮ｮ｡逅・・ｼ・/option>
-                        <option value="master">繝槭せ繧ｿ繝ｼ・亥・讓ｩ髯撰ｼ・/option>
+                        <option value="operator">オペレーター（組織管理のみ）</option>
+                        <option value="master">マスター（全権限）</option>
                     </select>
-                    <p class="form-hint">繧ｪ繝壹Ξ繝ｼ繧ｿ繝ｼ・壽球蠖鍋ｵ・ｹ斐・縺ｿ / 繝槭せ繧ｿ繝ｼ・壼・讖溯・</p>
+                    <p class="form-hint">オペレーター: 担当組織のみ / マスター: 全デバイス</p>
                 </div>
                 <div class="form-group" id="addAdminOrgRow">
-                    <label class="form-label">謇螻樒ｵ・ｹ・/label>
+                    <label class="form-label">所属組織</label>
                     <select name="organization_id" class="form-input">
-                        <option value="">譛ｪ蜑ｲ蠖・/option>
+                        <option value="">なし</option>
                         @foreach($organizations as $org) <option value="{{ $org->id }}">{{ $org->name }}</option> @endforeach
                     </select>
                 </div>
                 <div class="form-group">
-                    <label class="form-label">蛻晄悄繝代せ繝ｯ繝ｼ繝・*</label>
+                    <label class="form-label">初期パスワード *</label>
                     <div class="password-field">
                         <input type="text" name="password" id="addAdminPassword" class="form-input" required>
-                        <button type="button" class="password-generate-btn" onclick="generatePassword('addAdminPassword')">逕滓・</button>
+                        <button type="button" class="password-generate-btn" onclick="generatePassword('addAdminPassword')">生成</button>
                     </div>
-                    <p class="form-hint">蛻晏屓繝ｭ繧ｰ繧､繝ｳ蠕後↓繝代せ繝ｯ繝ｼ繝牙､画峩繧呈耳螂ｨ</p>
+                    <p class="form-hint">ログイン後に変更するよう案内してください</p>
                 </div>
             </div>
-            <div class="modal-footer"><button type="button" class="btn btn-secondary" onclick="hideAddAdminModal()">繧ｭ繝｣繝ｳ繧ｻ繝ｫ</button><button type="submit" class="btn btn-primary">菴懈・</button></div>
+            <div class="modal-footer"><button type="button" class="btn btn-secondary" onclick="hideAddAdminModal()">キャンセル</button><button type="submit" class="btn btn-primary">作成</button></div>
         </form>
     </div>
 </div>
 
-{{-- ===== 邂｡逅・・ｷｨ髮・Δ繝ｼ繝繝ｫ ===== --}}
+{{-- ===== 管理者編集モーダル ===== --}}
 <div id="editAdminModal" class="modal-overlay" onclick="if(event.target===this)hideEditAdminModal()">
     <div class="modal" style="max-width:500px;">
-        <div class="modal-header"><h3>邂｡逅・・い繧ｫ繧ｦ繝ｳ繝育ｷｨ髮・/h3><button class="modal-close" onclick="hideEditAdminModal()">ﾃ・/button></div>
+        <div class="modal-header"><h3>管理者アカウント編集</h3><button class="modal-close" onclick="hideEditAdminModal()">✕</button></div>
         <form method="POST" id="editAdminForm" action="">
             @csrf @method('PUT')
             <div class="modal-body">
-                <div class="form-group"><label class="form-label">蜷榊燕 *</label><input type="text" name="name" id="editAdminName" class="form-input" required></div>
-                <div class="form-group"><label class="form-label">繝｡繝ｼ繝ｫ繧｢繝峨Ξ繧ｹ *</label><input type="email" name="email" id="editAdminEmail" class="form-input" required></div>
+                <div class="form-group"><label class="form-label">名前 *</label><input type="text" name="name" id="editAdminName" class="form-input" required></div>
+                <div class="form-group"><label class="form-label">メールアドレス *</label><input type="email" name="email" id="editAdminEmail" class="form-input" required></div>
                 <div class="form-group">
-                    <label class="form-label">讓ｩ髯・*</label>
+                    <label class="form-label">権限 *</label>
                     <select name="role" id="editAdminRole" class="form-input" onchange="toggleOrgSelect('editAdminOrgRow', this.value)">
-                        <option value="operator">繧ｪ繝壹Ξ繝ｼ繧ｿ繝ｼ</option>
-                        <option value="master">繝槭せ繧ｿ繝ｼ</option>
+                        <option value="operator">オペレーター</option>
+                        <option value="master">マスター</option>
                     </select>
                 </div>
                 <div class="form-group" id="editAdminOrgRow">
-                    <label class="form-label">謇螻樒ｵ・ｹ・/label>
+                    <label class="form-label">所属組織</label>
                     <select name="organization_id" id="editAdminOrg" class="form-input">
-                        <option value="">譛ｪ蜑ｲ蠖・/option>
+                        <option value="">なし</option>
                         @foreach($organizations as $org) <option value="{{ $org->id }}">{{ $org->name }}</option> @endforeach
                     </select>
                 </div>
                 <div class="form-group">
-                    <label class="form-label">譁ｰ縺励＞繝代せ繝ｯ繝ｼ繝・/label>
+                    <label class="form-label">新しいパスワード</label>
                     <div class="password-field">
-                        <input type="text" name="password" id="editAdminPassword" class="form-input" placeholder="螟画峩縺励↑縺・ｴ蜷医・遨ｺ谺・>
-                        <button type="button" class="password-generate-btn" onclick="generatePassword('editAdminPassword')">逕滓・</button>
+                        <input type="text" name="password" id="editAdminPassword" class="form-input" placeholder="変更しない場合は空欄">
+                        <button type="button" class="password-generate-btn" onclick="generatePassword('editAdminPassword')">生成</button>
                     </div>
                 </div>
             </div>
-            <div class="modal-footer"><button type="button" class="btn btn-secondary" onclick="hideEditAdminModal()">繧ｭ繝｣繝ｳ繧ｻ繝ｫ</button><button type="submit" class="btn btn-primary">菫晏ｭ・/button></div>
+            <div class="modal-footer"><button type="button" class="btn btn-secondary" onclick="hideEditAdminModal()">キャンセル</button><button type="submit" class="btn btn-primary">保存</button></div>
         </form>
     </div>
 </div>
 
 <form id="deleteAdminForm" method="POST" action="" style="display:none;">@csrf @method('DELETE')</form>
 
-{{-- ===== 邨・ｹ碑ｿｽ蜉繝｢繝ｼ繝繝ｫ ===== --}}
+{{-- ===== 組織追加モーダル ===== --}}
 <div id="addOrgModal" class="modal-overlay" onclick="if(event.target===this)hideAddOrgModal()">
     <div class="modal" style="max-width:560px;">
-        <div class="modal-header"><h3>邨・ｹ碑ｿｽ蜉</h3><button class="modal-close" onclick="hideAddOrgModal()">ﾃ・/button></div>
+        <div class="modal-header"><h3>組織追加</h3><button class="modal-close" onclick="hideAddOrgModal()">✕</button></div>
         <form method="POST" action="{{ route('partner.orgs.store') }}">
             @csrf
             <div class="modal-body">
-                <div class="modal-section"><div class="modal-section-title">蝓ｺ譛ｬ諠・ｱ</div>
-                    <div class="form-group"><label class="form-label">邨・ｹ泌錐 *</label><input type="text" name="name" class="form-input" required></div>
+                <div class="modal-section"><div class="modal-section-title">基本情報</div>
+                    <div class="form-group"><label class="form-label">組織名 *</label><input type="text" name="name" class="form-input" required></div>
                     <div class="form-row-2">
-                        <div class="form-group"><label class="form-label">諡・ｽ楢・錐</label><input type="text" name="contact_name" class="form-input"></div>
-                        <div class="form-group"><label class="form-label">騾｣邨｡蜈医Γ繝ｼ繝ｫ *</label><input type="email" name="contact_email" class="form-input" required></div>
+                        <div class="form-group"><label class="form-label">担当者名</label><input type="text" name="contact_name" class="form-input"></div>
+                        <div class="form-group"><label class="form-label">連絡先メール *</label><input type="email" name="contact_email" class="form-input" required></div>
                     </div>
                     <div class="form-row-2">
-                        <div class="form-group"><label class="form-label">髮ｻ隧ｱ逡ｪ蜿ｷ</label><input type="text" name="contact_phone" class="form-input"></div>
+                        <div class="form-group"><label class="form-label">連絡先電話番号</label><input type="text" name="contact_phone" class="form-input"></div>
                         <div class="form-group"></div>
                     </div>
-                    <div class="form-group"><label class="form-label">菴乗園</label><input type="text" name="address" class="form-input"></div>
-                    <div class="form-group"><label class="form-label">繝｡繝｢</label><textarea name="notes" class="form-input" rows="2" style="resize:vertical;"></textarea></div>
+                    <div class="form-group"><label class="form-label">住所</label><input type="text" name="address" class="form-input"></div>
+                    <div class="form-group"><label class="form-label">メモ</label><textarea name="notes" class="form-input" rows="2" style="resize:vertical;"></textarea></div>
                 </div>
-                <div class="modal-section"><div class="modal-section-title">螂醍ｴ・ュ蝣ｱ</div>
+                <div class="modal-section"><div class="modal-section-title">契約設定</div>
                     <div class="form-row-2">
-                        <div class="form-group"><label class="form-label">蜿ｰ謨ｰ荳企剞</label><input type="number" name="device_limit" class="form-input" value="100" min="1" max="9999"><p class="form-hint">譛螟ｧ逋ｻ骭ｲ蜿ｰ謨ｰ</p></div>
-                        <div class="form-group"><label class="form-label">螂醍ｴ・悄髯・/label><input type="date" name="expires_at" class="form-input"><p class="form-hint">遨ｺ谺・ｼ晉┌譛滄剞</p></div>
+                        <div class="form-group"><label class="form-label">台数上限</label><input type="number" name="device_limit" class="form-input" value="100" min="1" max="9999"><p class="form-hint">登録可能なデバイス台数</p></div>
+                        <div class="form-group"><label class="form-label">契約期限</label><input type="date" name="expires_at" class="form-input"><p class="form-hint">未入力で無期限</p></div>
                     </div>
                 </div>
             </div>
-            <div class="modal-footer"><button type="button" class="btn btn-secondary" onclick="hideAddOrgModal()">繧ｭ繝｣繝ｳ繧ｻ繝ｫ</button><button type="submit" class="btn btn-primary">菴懈・</button></div>
+            <div class="modal-footer"><button type="button" class="btn btn-secondary" onclick="hideAddOrgModal()">キャンセル</button><button type="submit" class="btn btn-primary">作成</button></div>
         </form>
     </div>
 </div>
 
-{{-- ===== 邨・ｹ皮ｷｨ髮・Δ繝ｼ繝繝ｫ ===== --}}
+{{-- ===== 組織編集モーダル ===== --}}
 <div id="editOrgModal" class="modal-overlay" onclick="if(event.target===this)hideEditOrgModal()">
     <div class="modal" style="max-width:560px;">
-        <div class="modal-header"><h3>邨・ｹ皮ｷｨ髮・/h3><button class="modal-close" onclick="hideEditOrgModal()">ﾃ・/button></div>
+        <div class="modal-header"><h3>組織編集</h3><button class="modal-close" onclick="hideEditOrgModal()">✕</button></div>
         <form method="POST" id="editOrgForm" action="">
             @csrf @method('PUT')
             <div class="modal-body">
-                <div class="modal-section"><div class="modal-section-title">蝓ｺ譛ｬ諠・ｱ</div>
-                    <div class="form-group"><label class="form-label">邨・ｹ泌錐 *</label><input type="text" name="name" id="editOrgName" class="form-input" required></div>
+                <div class="modal-section"><div class="modal-section-title">基本情報</div>
+                    <div class="form-group"><label class="form-label">組織名 *</label><input type="text" name="name" id="editOrgName" class="form-input" required></div>
                     <div class="form-row-2">
-                        <div class="form-group"><label class="form-label">諡・ｽ楢・錐</label><input type="text" name="contact_name" id="editOrgContactName" class="form-input"></div>
-                        <div class="form-group"><label class="form-label">騾｣邨｡蜈医Γ繝ｼ繝ｫ *</label><input type="email" name="contact_email" id="editOrgContactEmail" class="form-input" required></div>
+                        <div class="form-group"><label class="form-label">担当者名</label><input type="text" name="contact_name" id="editOrgContactName" class="form-input"></div>
+                        <div class="form-group"><label class="form-label">連絡先メール *</label><input type="email" name="contact_email" id="editOrgContactEmail" class="form-input" required></div>
                     </div>
                     <div class="form-row-2">
-                        <div class="form-group"><label class="form-label">髮ｻ隧ｱ逡ｪ蜿ｷ</label><input type="text" name="contact_phone" id="editOrgContactPhone" class="form-input"></div>
+                        <div class="form-group"><label class="form-label">連絡先電話番号</label><input type="text" name="contact_phone" id="editOrgContactPhone" class="form-input"></div>
                         <div class="form-group"></div>
                     </div>
-                    <div class="form-group"><label class="form-label">菴乗園</label><input type="text" name="address" id="editOrgAddress" class="form-input"></div>
-                    <div class="form-group"><label class="form-label">繝｡繝｢</label><textarea name="notes" id="editOrgNotes" class="form-input" rows="2" style="resize:vertical;"></textarea></div>
+                    <div class="form-group"><label class="form-label">住所</label><input type="text" name="address" id="editOrgAddress" class="form-input"></div>
+                    <div class="form-group"><label class="form-label">メモ</label><textarea name="notes" id="editOrgNotes" class="form-input" rows="2" style="resize:vertical;"></textarea></div>
                 </div>
-                <div class="modal-section"><div class="modal-section-title">螂醍ｴ・ュ蝣ｱ</div>
+                <div class="modal-section"><div class="modal-section-title">契約設定</div>
                     <div class="form-row-2">
-                        <div class="form-group"><label class="form-label">蜿ｰ謨ｰ荳企剞</label><input type="number" name="device_limit" id="editOrgDeviceLimit" class="form-input" min="1" max="9999"></div>
-                        <div class="form-group"><label class="form-label">螂醍ｴ・悄髯・/label><input type="date" name="expires_at" id="editOrgExpiresAt" class="form-input"><p class="form-hint">遨ｺ谺・ｼ晉┌譛滄剞</p></div>
+                        <div class="form-group"><label class="form-label">台数上限</label><input type="number" name="device_limit" id="editOrgDeviceLimit" class="form-input" min="1" max="9999"></div>
+                        <div class="form-group"><label class="form-label">契約期限</label><input type="date" name="expires_at" id="editOrgExpiresAt" class="form-input"><p class="form-hint">未入力で無期限</p></div>
                     </div>
                 </div>
-                <div class="modal-section"><div class="modal-section-title">騾夂衍險ｭ螳夲ｼ育｢ｺ隱阪・菫ｮ豁｣逕ｨ・・/div>
-                    <p style="font-size:12px;color:var(--gray-500);margin-bottom:12px;">騾壼ｸｸ縺ｯ繝代・繝医リ繝ｼ蛛ｴ縺ｧ險ｭ螳壹＠縺ｾ縺吶・/p>
-                    <div class="form-group"><label class="form-label">騾夂衍繝｡繝ｼ繝ｫ 1</label><input type="email" name="notification_email_1" id="editOrgEmail1" class="form-input"></div>
-                    <div class="form-group"><label class="form-label">騾夂衍繝｡繝ｼ繝ｫ 2</label><input type="email" name="notification_email_2" id="editOrgEmail2" class="form-input"></div>
-                    <div class="form-group"><label class="form-label">騾夂衍繝｡繝ｼ繝ｫ 3</label><input type="email" name="notification_email_3" id="editOrgEmail3" class="form-input"></div>
+                <div class="modal-section"><div class="modal-section-title">通知設定（アラート発生時に組織宛に送信）</div>
+                    <p style="font-size:12px;color:var(--gray-500);margin-bottom:12px;">設定したメール・SMSにアラートを転送します。</p>
+                    <div class="form-group"><label class="form-label">通知メール 1</label><input type="email" name="notification_email_1" id="editOrgEmail1" class="form-input"></div>
+                    <div class="form-group"><label class="form-label">通知メール 2</label><input type="email" name="notification_email_2" id="editOrgEmail2" class="form-input"></div>
+                    <div class="form-group"><label class="form-label">通知メール 3</label><input type="email" name="notification_email_3" id="editOrgEmail3" class="form-input"></div>
                     <div class="form-row-2">
-                        <div class="form-group"><label class="form-label">SMS騾夂衍蜈・1</label><input type="text" name="notification_sms_1" id="editOrgSms1" class="form-input"></div>
-                        <div class="form-group"><label class="form-label">SMS騾夂衍蜈・2</label><input type="text" name="notification_sms_2" id="editOrgSms2" class="form-input"></div>
+                        <div class="form-group"><label class="form-label">SMS通知先 1</label><input type="text" name="notification_sms_1" id="editOrgSms1" class="form-input"></div>
+                        <div class="form-group"><label class="form-label">SMS通知先 2</label><input type="text" name="notification_sms_2" id="editOrgSms2" class="form-input"></div>
                     </div>
                 </div>
             </div>
-            <div class="modal-footer"><button type="button" class="btn btn-secondary" onclick="hideEditOrgModal()">繧ｭ繝｣繝ｳ繧ｻ繝ｫ</button><button type="submit" class="btn btn-primary">菫晏ｭ・/button></div>
+            <div class="modal-footer"><button type="button" class="btn btn-secondary" onclick="hideEditOrgModal()">キャンセル</button><button type="submit" class="btn btn-primary">保存</button></div>
         </form>
     </div>
 </div>
@@ -715,7 +706,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function copyText(id) {
     navigator.clipboard.writeText(document.getElementById(id).textContent).then(() => {
-        const btn = event.target; btn.textContent = '繧ｳ繝斐・貂・; setTimeout(() => { btn.textContent = '繧ｳ繝斐・'; }, 1500);
+        const btn = event.target; btn.textContent = 'コピー済'; setTimeout(() => { btn.textContent = 'コピー'; }, 1500);
     });
 }
 
@@ -725,7 +716,7 @@ function generatePassword(inputId) {
     document.getElementById(inputId).value = pw;
 }
 
-// ===== 繝・ヰ繧､繧ｹ隧ｳ邏ｰ =====
+// ===== デバイス詳細 =====
 async function showDeviceDetail(deviceId) {
     masterCurrentDeviceId = deviceId;
     showModal('deviceDetailModal');
@@ -734,16 +725,15 @@ async function showDeviceDetail(deviceId) {
         const res = await fetch('/partner/devices/' + deviceId + '/detail', { headers: { 'Accept': 'application/json' } });
         const d = await res.json();
 
-        const statusLabels = { normal: '豁｣蟶ｸ遞ｼ蜒堺ｸｭ', warning: '豕ｨ諢・, alert: '譛ｪ讀懃衍隴ｦ蜻・, offline: '騾壻ｿ｡騾皮ｵｶ', inactive: '譛ｪ遞ｼ蜒・ };
+        const statusLabels = { normal: '正常・稼働中', warning: '注意', alert: '未検知アラート ⚠', offline: '通信途絶', inactive: '未稼働' };
         const badge = document.getElementById('masterDetailStatusBadge');
         badge.textContent = statusLabels[d.status] || d.status;
         badge.className = 'detail-status-badge ' + (d.status || 'inactive');
         document.getElementById('masterDetailClearAlertBtn').style.display = d.status === 'alert' ? 'inline-flex' : 'none';
 
-        // 遶ｯ譛ｫ繧ｵ繝悶せ繧ｯ繝ｪ繝励す繝ｧ繝ｳ
         const notifyEnabled = d.notification_service_enabled !== false;
         document.getElementById('masterDetailNotifyEnabled').checked = notifyEnabled;
-        document.getElementById('masterDetailNotifyLabel').textContent = notifyEnabled ? '譛牙柑' : '蛛懈ｭ｢荳ｭ';
+        document.getElementById('masterDetailNotifyLabel').textContent = notifyEnabled ? '有効' : '停止中';
 
         document.getElementById('masterDetailDeviceId').textContent = d.device_id;
         document.getElementById('masterDetailLastDetected').textContent = d.last_human_detected_at || '-';
@@ -759,7 +749,7 @@ async function showDeviceDetail(deviceId) {
         document.getElementById('masterDetailHeight').value = d.install_height_cm || 200;
         document.getElementById('masterDetailPetExclusion').value = d.pet_exclusion_enabled ? '1' : '0';
         document.getElementById('masterDetailAwayMode').checked = d.away_mode;
-        document.getElementById('masterDetailAwayLabel').textContent = d.away_mode ? ('ON' + (d.away_until ? '・・ + d.away_until + '縺ｾ縺ｧ・・ : '')) : 'OFF';
+        document.getElementById('masterDetailAwayLabel').textContent = d.away_mode ? ('ON' + (d.away_until ? ' (' + d.away_until + 'まで)' : '')) : 'OFF';
 
         document.getElementById('masterDetailSimId').value = d.sim_id || '';
         document.getElementById('masterDetailRegistered').textContent = d.registered_at || '-';
@@ -770,7 +760,6 @@ async function showDeviceDetail(deviceId) {
         const defaultBillingDate = nextMonth.toISOString().split('T')[0];
         document.getElementById('masterDetailBillingStartDate').value = d.billing_start_date || defaultBillingDate;
 
-        // SMS/髮ｻ隧ｱ繧ｭ繝｣繝・す繝･
         document.getElementById('masterDetailSmsEnabled').checked = d.sms_enabled || false;
         document.getElementById('masterDetailSmsPhone1').value = d.sms_phone_1 || '';
         document.getElementById('masterDetailSmsPhone2').value = d.sms_phone_2 || '';
@@ -779,10 +768,10 @@ async function showDeviceDetail(deviceId) {
         document.getElementById('masterDetailVoicePhone2').value = d.voice_phone_2 || '';
 
         masterRenderSchedules(d.schedules || []);
-    } catch(e) { showToast('隧ｳ邏ｰ縺ｮ蜿門ｾ励↓螟ｱ謨励＠縺ｾ縺励◆', 'error'); }
+    } catch(e) { showToast('詳細の取得に失敗しました', 'error'); }
 }
 
-// ===== 螂醍ｴ・・繝ｩ繝ｳ繝｢繝ｼ繝繝ｫ =====
+// ===== 通知設定モーダル =====
 function masterShowSubscriptionModal() {
     if (!masterCurrentDeviceId) return;
     hideModal('deviceDetailModal');
@@ -791,7 +780,7 @@ function masterShowSubscriptionModal() {
 }
 
 function masterToggleNotifyService(enabled) {
-    document.getElementById('masterDetailNotifyLabel').textContent = enabled ? '譛牙柑' : '蛛懈ｭ｢荳ｭ';
+    document.getElementById('masterDetailNotifyLabel').textContent = enabled ? '有効' : '停止中';
     fetch('/partner/devices/' + masterCurrentDeviceId + '/toggle-notify', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' },
@@ -800,11 +789,11 @@ function masterToggleNotifyService(enabled) {
         if (d.success) {
             showToast(d.message, 'success');
         } else {
-            showToast(d.message || '繧ｨ繝ｩ繝ｼ', 'error');
+            showToast(d.message || 'エラー', 'error');
             document.getElementById('masterDetailNotifyEnabled').checked = !enabled;
-            document.getElementById('masterDetailNotifyLabel').textContent = !enabled ? '譛牙柑' : '蛛懈ｭ｢荳ｭ';
+            document.getElementById('masterDetailNotifyLabel').textContent = !enabled ? '有効' : '停止中';
         }
-    }).catch(() => showToast('騾壻ｿ｡繧ｨ繝ｩ繝ｼ', 'error'));
+    }).catch(() => showToast('通信エラー', 'error'));
 }
 
 async function masterSaveAssignment() {
@@ -824,9 +813,9 @@ async function masterSaveAssignment() {
             method: 'PUT', headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' }, body: JSON.stringify(payload)
         });
         const data = await res.json();
-        if (res.ok && data.success) { showToast('菫晏ｭ倥＠縺ｾ縺励◆', 'success'); setTimeout(() => location.reload(), 800); }
-        else showToast(data.message || '菫晏ｭ倥↓螟ｱ謨励＠縺ｾ縺励◆', 'error');
-    } catch(e) { showToast('騾壻ｿ｡繧ｨ繝ｩ繝ｼ縺檎匱逕溘＠縺ｾ縺励◆', 'error'); }
+        if (res.ok && data.success) { showToast('保存しました', 'success'); setTimeout(() => location.reload(), 800); }
+        else showToast(data.message || '保存に失敗しました', 'error');
+    } catch(e) { showToast('通信エラーが発生しました', 'error'); }
 }
 
 async function masterSaveNotification() {
@@ -844,9 +833,9 @@ async function masterSaveNotification() {
             method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' }, body: JSON.stringify(payload)
         });
         const data = await res.json();
-        if (data.success) showToast('騾夂衍險ｭ螳壹ｒ菫晏ｭ倥＠縺ｾ縺励◆', 'success');
-        else showToast(data.message || '繧ｨ繝ｩ繝ｼ縺檎匱逕溘＠縺ｾ縺励◆', 'error');
-    } catch(e) { showToast('騾壻ｿ｡繧ｨ繝ｩ繝ｼ', 'error'); }
+        if (data.success) showToast('通知設定を保存しました', 'success');
+        else showToast(data.message || 'エラーが発生しました', 'error');
+    } catch(e) { showToast('通信エラー', 'error'); }
 }
 
 async function masterToggleAwayMode(checked) {
@@ -855,34 +844,34 @@ async function masterToggleAwayMode(checked) {
         method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' }, body: JSON.stringify({ away_mode: checked })
     }).then(r => r.json()).then(d => {
         if (d.success) { document.getElementById('masterDetailAwayLabel').textContent = checked ? 'ON' : 'OFF'; showToast(d.message, 'success'); }
-        else { document.getElementById('masterDetailAwayMode').checked = !checked; showToast('繧ｨ繝ｩ繝ｼ', 'error'); }
-    }).catch(() => showToast('騾壻ｿ｡繧ｨ繝ｩ繝ｼ', 'error'));
+        else { document.getElementById('masterDetailAwayMode').checked = !checked; showToast('エラー', 'error'); }
+    }).catch(() => showToast('通信エラー', 'error'));
 }
 
 async function masterClearAlert() {
     if (!masterCurrentDeviceId) return;
-    if (!confirm('繝・ヰ繧､繧ｹ ' + masterCurrentDeviceId + ' 縺ｮ隴ｦ蜻翫ｒ隗｣髯､縺励∪縺吶°・歃n繧ｹ繝・・繧ｿ繧ｹ縺悟・譛溽憾諷九↓謌ｻ繧翫∵､懃衍繝ｭ繧ｰ縺後け繝ｪ繧｢縺輔ｌ縺ｾ縺吶・)) return;
+    if (!confirm('デバイス ' + masterCurrentDeviceId + ' の警告を解除して退去処理を行いますか？\n検知ログはすべて削除されます。')) return;
     fetch('/partner/devices/' + masterCurrentDeviceId + '/clear-alert', {
         method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' }
     }).then(r => r.json()).then(d => {
         if (d.success) { showToast(d.message, 'success'); hideModal('deviceDetailModal'); setTimeout(() => location.reload(), 500); }
-        else showToast(d.message || '繧ｨ繝ｩ繝ｼ', 'error');
-    }).catch(() => showToast('騾壻ｿ｡繧ｨ繝ｩ繝ｼ', 'error'));
+        else showToast(d.message || 'エラー', 'error');
+    }).catch(() => showToast('通信エラー', 'error'));
 }
 
-// ===== 繧ｹ繧ｱ繧ｸ繝･繝ｼ繝ｫ =====
+// ===== スケジュール =====
 function masterRenderSchedules(schedules) {
     const c = document.getElementById('masterDetailScheduleList');
-    if (!schedules.length) { c.innerHTML = '<div class="detail-schedule-empty">螟門・繧ｹ繧ｱ繧ｸ繝･繝ｼ繝ｫ縺ｪ縺・/div>'; return; }
+    if (!schedules.length) { c.innerHTML = '<div class="detail-schedule-empty">スケジュールなし</div>'; return; }
     let html = '<div class="detail-schedule-list">';
     schedules.forEach(s => {
         html += '<div class="detail-schedule-item">';
         if (s.type === 'oneshot') {
-            html += '<div class="detail-schedule-icon oneshot">套</div><div class="detail-schedule-info"><p class="detail-schedule-main">' + formatDt(s.start_at) + ' 縲・' + (s.end_at ? formatDt(s.end_at) : '謇句虚蠕ｩ蟶ｰ') + '</p><p class="detail-schedule-sub">' + escapeHtml(s.memo || '蜊倡匱') + '</p></div>';
+            html += '<div class="detail-schedule-icon oneshot">📅</div><div class="detail-schedule-info"><p class="detail-schedule-main">' + formatDt(s.start_at) + ' 〜 ' + (s.end_at ? formatDt(s.end_at) : '無期限') + '</p><p class="detail-schedule-sub">' + escapeHtml(s.memo || '単発') + '</p></div>';
         } else {
-            html += '<div class="detail-schedule-icon recurring">煤</div><div class="detail-schedule-info"><p class="detail-schedule-main">豈朱ｱ ' + escapeHtml(s.days_label) + ' ' + s.start_time + '縲・ + (s.next_day ? '鄙・ : '') + s.end_time + '</p><p class="detail-schedule-sub">' + escapeHtml(s.memo || '螳壽悄') + '</p></div>';
+            html += '<div class="detail-schedule-icon recurring">🔄</div><div class="detail-schedule-info"><p class="detail-schedule-main">毎週 ' + escapeHtml(s.days_label) + ' ' + s.start_time + '〜' + (s.next_day ? '翌' : '') + s.end_time + '</p><p class="detail-schedule-sub">' + escapeHtml(s.memo || '定期') + '</p></div>';
         }
-        html += '<button class="detail-schedule-del" onclick="masterConfirmDeleteSchedule(' + s.id + ')">ﾃ・/button></div>';
+        html += '<button class="detail-schedule-del" onclick="masterConfirmDeleteSchedule(' + s.id + ')">✕</button></div>';
     });
     c.innerHTML = html + '</div>';
 }
@@ -918,15 +907,15 @@ async function masterSubmitSchedule() {
     const payload = { type: masterScheduleType, memo: document.getElementById('masterSchedMemo').value || null };
     if (masterScheduleType === 'oneshot') {
         const startAt = document.getElementById('masterSchedStartAt').value;
-        if (!startAt) { showToast('髢句ｧ区律譎ゅｒ蜈･蜉帙＠縺ｦ縺上□縺輔＞', 'error'); return; }
+        if (!startAt) { showToast('開始日時を入力してください', 'error'); return; }
         payload.start_at = startAt;
         const endAt = document.getElementById('masterSchedEndAt').value;
         if (endAt) payload.end_at = endAt;
     } else {
         const days = []; document.querySelectorAll('#masterScheduleDays .schedule-day-btn.active').forEach(b => days.push(parseInt(b.dataset.day)));
-        if (!days.length) { showToast('譖懈律繧・縺､莉･荳企∈謚槭＠縺ｦ縺上□縺輔＞', 'error'); return; }
+        if (!days.length) { showToast('曜日を選択してください', 'error'); return; }
         const st = document.getElementById('masterSchedStartTime').value, et = document.getElementById('masterSchedEndTime').value;
-        if (!st || !et) { showToast('譎る俣蟶ｯ繧貞・蜉帙＠縺ｦ縺上□縺輔＞', 'error'); return; }
+        if (!st || !et) { showToast('時間帯を入力してください', 'error'); return; }
         payload.days_of_week = days; payload.start_time = st; payload.end_time = et; payload.next_day = document.getElementById('masterSchedNextDay').checked;
     }
     try {
@@ -934,9 +923,9 @@ async function masterSubmitSchedule() {
             method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' }, body: JSON.stringify(payload)
         });
         const data = await res.json();
-        if (res.ok && data.success) { showToast('繧ｹ繧ｱ繧ｸ繝･繝ｼ繝ｫ繧定ｿｽ蜉縺励∪縺励◆', 'success'); hideModal('masterScheduleAddModal'); showDeviceDetail(masterCurrentDeviceId); }
-        else showToast(data.message || '霑ｽ蜉縺ｫ螟ｱ謨励＠縺ｾ縺励◆', 'error');
-    } catch(e) { showToast('騾壻ｿ｡繧ｨ繝ｩ繝ｼ縺檎匱逕溘＠縺ｾ縺励◆', 'error'); }
+        if (res.ok && data.success) { showToast('スケジュールを追加しました', 'success'); hideModal('masterScheduleAddModal'); showDeviceDetail(masterCurrentDeviceId); }
+        else showToast(data.message || '追加に失敗しました', 'error');
+    } catch(e) { showToast('通信エラーが発生しました', 'error'); }
 }
 
 function masterConfirmDeleteSchedule(scheduleId) {
@@ -951,23 +940,23 @@ async function masterExecuteDeleteSchedule() {
             method: 'DELETE', headers: { 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' }
         });
         const data = await res.json();
-        if (res.ok && data.success) { showToast('繧ｹ繧ｱ繧ｸ繝･繝ｼ繝ｫ繧貞炎髯､縺励∪縺励◆', 'success'); hideModal('masterScheduleDeleteModal'); showDeviceDetail(masterCurrentDeviceId); }
-        else showToast(data.message || '蜑企勁縺ｫ螟ｱ謨励＠縺ｾ縺励◆', 'error');
-    } catch(e) { showToast('騾壻ｿ｡繧ｨ繝ｩ繝ｼ縺檎匱逕溘＠縺ｾ縺励◆', 'error'); }
+        if (res.ok && data.success) { showToast('スケジュールを削除しました', 'success'); hideModal('masterScheduleDeleteModal'); showDeviceDetail(masterCurrentDeviceId); }
+        else showToast(data.message || '削除に失敗しました', 'error');
+    } catch(e) { showToast('通信エラーが発生しました', 'error'); }
 }
 
-// ===== 繝・ヰ繧､繧ｹ蜑企勁 =====
+// ===== デバイス削除 =====
 function confirmDeleteDevice(deviceId) {
-    if (!confirm('繝・ヰ繧､繧ｹ ' + deviceId + ' 繧貞炎髯､縺励∪縺吶°・歃n縺薙・謫堺ｽ懊・蜿悶ｊ豸医○縺ｾ縺帙ｓ縲・)) return;
+    if (!confirm('デバイス ' + deviceId + ' を削除しますか？\nこの操作は取り消せません。')) return;
     fetch('/partner/devices/' + deviceId, {
         method: 'DELETE', headers: { 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' }
     }).then(r => r.json()).then(d => {
         if (d.success) { showToast(d.message, 'success'); setTimeout(() => location.reload(), 800); }
-        else showToast(d.message || '蜑企勁縺ｫ螟ｱ謨励＠縺ｾ縺励◆', 'error');
-    }).catch(() => showToast('騾壻ｿ｡繧ｨ繝ｩ繝ｼ', 'error'));
+        else showToast(d.message || '削除に失敗しました', 'error');
+    }).catch(() => showToast('通信エラー', 'error'));
 }
 
-// ===== 邂｡逅・・い繧ｫ繧ｦ繝ｳ繝・=====
+// ===== 管理者アカウント =====
 function toggleOrgSelect(rowId, role) {
     const row = document.getElementById(rowId);
     if (row) row.style.display = role === 'operator' ? '' : 'none';
@@ -986,12 +975,12 @@ function showEditAdminModal(data) {
 }
 function hideEditAdminModal() { document.getElementById('editAdminModal').classList.remove('show'); }
 function confirmDeleteAdmin(id, name) {
-    if (confirm('縲・ + name + '縲阪・繧｢繧ｫ繧ｦ繝ｳ繝医ｒ蜑企勁縺励∪縺吶°・歃n縺薙・謫堺ｽ懊・蜿悶ｊ豸医○縺ｾ縺帙ｓ縲・)) {
+    if (confirm(name + ' を削除しますか？\nこの操作は取り消せません。')) {
         const form = document.getElementById('deleteAdminForm'); form.action = '/partner/admin-users/' + id; form.submit();
     }
 }
 
-// ===== 邨・ｹ皮ｮ｡逅・=====
+// ===== 組織管理 =====
 function showAddOrgModal() { document.getElementById('addOrgModal').classList.add('show'); }
 function hideAddOrgModal() { document.getElementById('addOrgModal').classList.remove('show'); }
 function showEditOrgModal(data) {
@@ -1013,7 +1002,7 @@ function showEditOrgModal(data) {
 }
 function hideEditOrgModal() { document.getElementById('editOrgModal').classList.remove('show'); }
 function confirmDeleteOrg(id, name) {
-    if (confirm('縲・ + name + '縲阪ｒ蜑企勁縺励∪縺吶°・歃n縺薙・謫堺ｽ懊・蜿悶ｊ豸医○縺ｾ縺帙ｓ縲・)) {
+    if (confirm(name + ' を削除しますか？\nこの操作は取り消せません。')) {
         const form = document.getElementById('deleteOrgForm'); form.action = '/partner/orgs/' + id; form.submit();
     }
 }
