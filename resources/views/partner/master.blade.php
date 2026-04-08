@@ -837,6 +837,29 @@
     </div>
 </div>
 
+{{-- ===== パートナーアカウント パスワードリセットモーダル ===== --}}
+<div id="orgResetPasswordModal" class="modal-overlay" onclick="if(event.target===this)hideModal('orgResetPasswordModal')">
+    <div class="modal" style="max-width:420px;">
+        <div class="modal-header"><h3>🔑 パスワードリセット</h3><button class="modal-close" onclick="hideModal('orgResetPasswordModal')">✕</button></div>
+        <div class="modal-body">
+            <div style="font-size:13px;color:var(--gray-600);margin-bottom:16px;">対象: <strong id="orgResetPasswordName"></strong></div>
+            <input type="hidden" id="orgResetPasswordUserId">
+            <div class="form-group">
+                <label class="form-label">新しいパスワード *</label>
+                <div class="password-field">
+                    <input type="text" id="orgResetPasswordValue" class="form-input">
+                    <button type="button" class="password-generate-btn" onclick="generatePassword('orgResetPasswordValue')">生成</button>
+                </div>
+            </div>
+            <div id="orgResetPasswordError" style="display:none;color:#c62828;font-size:12px;margin-top:4px;"></div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="hideModal('orgResetPasswordModal')">キャンセル</button>
+            <button class="btn btn-primary" onclick="submitOrgResetPassword()">リセット</button>
+        </div>
+    </div>
+</div>
+
 <div id="toast" class="toast"></div>
 
 @endsection
@@ -1202,8 +1225,11 @@ async function loadOrgUsers() {
                 + '<td style="font-weight:500;">' + escapeHtml(u.name) + '</td>'
                 + '<td style="font-size:12px;">' + escapeHtml(u.email) + '</td>'
                 + '<td style="font-size:11px;color:var(--gray-500);">' + escapeHtml(lastLogin) + '</td>'
-                + '<td><button class="action-btn" onclick="showOrgEditUserModal(' + u.id + ', ' + JSON.stringify(u.name) + ', ' + JSON.stringify(u.email) + ')">編集</button>'
-                + '<button class="action-btn danger" onclick="confirmDeleteOrgUser(' + u.id + ', ' + JSON.stringify(u.name) + ')">削除</button></td>'
+                + '<td>'
+                + '<button class="action-btn" onclick="showOrgEditUserModal(' + u.id + ', ' + JSON.stringify(u.name) + ', ' + JSON.stringify(u.email) + ')">編集</button>'
+                + '<button class="action-btn" onclick="showOrgResetPasswordModal(' + u.id + ', ' + JSON.stringify(u.name) + ')">PW</button>'
+                + '<button class="action-btn danger" onclick="confirmDeleteOrgUser(' + u.id + ', ' + JSON.stringify(u.name) + ')">削除</button>'
+                + '</td>'
                 + '</tr>';
         });
         html += '</tbody></table>';
@@ -1295,6 +1321,40 @@ async function confirmDeleteOrgUser(userId, name) {
         if (res.ok && data.success) { showToast(data.message, 'success'); await loadOrgUsers(); setTimeout(() => location.reload(), 1500); }
         else showToast(data.message || '削除に失敗しました', 'error');
     } catch(e) { showToast('通信エラー', 'error'); }
+}
+
+// ===== パートナーアカウント パスワードリセット =====
+function showOrgResetPasswordModal(userId, name) {
+    document.getElementById('orgResetPasswordUserId').value = userId;
+    document.getElementById('orgResetPasswordName').textContent = name;
+    document.getElementById('orgResetPasswordError').style.display = 'none';
+    generatePassword('orgResetPasswordValue');
+    showModal('orgResetPasswordModal');
+}
+
+async function submitOrgResetPassword() {
+    const userId = document.getElementById('orgResetPasswordUserId').value;
+    const password = document.getElementById('orgResetPasswordValue').value;
+    const errEl = document.getElementById('orgResetPasswordError');
+    errEl.style.display = 'none';
+
+    if (!password) { errEl.textContent = 'パスワードを入力してください'; errEl.style.display = 'block'; return; }
+
+    try {
+        const res = await fetch('/partner/orgs/' + orgAccountsCurrentOrgId + '/users/' + userId + '/reset-password', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' },
+            body: JSON.stringify({ password })
+        });
+        const data = await res.json();
+        if (res.ok && data.success) {
+            showToast(data.message, 'success');
+            hideModal('orgResetPasswordModal');
+        } else {
+            errEl.textContent = data.message || 'エラーが発生しました';
+            errEl.style.display = 'block';
+        }
+    } catch(e) { errEl.textContent = '通信エラーが発生しました'; errEl.style.display = 'block'; }
 }
 </script>
 @endsection

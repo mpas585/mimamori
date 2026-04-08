@@ -7,8 +7,6 @@ use App\Models\PartnerUser;
 use App\Models\Device;
 use App\Models\Organization;
 use App\Models\OrgDeviceAssignment;
-use App\Models\BillingLog;
-use App\Models\BillingContract;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -62,57 +60,7 @@ class MasterController extends Controller
             ->with(['partnerUsers' => function ($q) { $q->where('role', 'operator'); }])
             ->orderBy('created_at', 'desc')->get();
 
-        // ============================================================
-        // 売上集計
-        // ============================================================
-        $now       = now();
-        $lastMonth = $now->copy()->subMonth();
-
-        $salesThisMonth = BillingLog::where('status', 'success')
-            ->whereYear('billed_at', $now->year)
-            ->whereMonth('billed_at', $now->month)
-            ->sum('amount');
-
-        $salesLastMonth = BillingLog::where('status', 'success')
-            ->whereYear('billed_at', $lastMonth->year)
-            ->whereMonth('billed_at', $lastMonth->month)
-            ->sum('amount');
-
-        $countThisMonth = BillingLog::where('status', 'success')
-            ->whereYear('billed_at', $now->year)
-            ->whereMonth('billed_at', $now->month)
-            ->count();
-
-        // 月別推移（直近6ヶ月）
-        $monthlyTrend = BillingLog::where('status', 'success')
-            ->where('billed_at', '>=', $now->copy()->subMonths(5)->startOfMonth())
-            ->selectRaw("DATE_FORMAT(billed_at, '%Y-%m') as month, SUM(amount) as total, COUNT(*) as count")
-            ->groupBy('month')
-            ->orderBy('month')
-            ->get();
-
-        // 今月パートナー別内訳
-        $salesByOrg = BillingLog::join('billing_contracts', 'billing_logs.billing_contract_id', '=', 'billing_contracts.id')
-            ->leftJoin('organizations', 'billing_contracts.organization_id', '=', 'organizations.id')
-            ->where('billing_logs.status', 'success')
-            ->whereYear('billing_logs.billed_at', $now->year)
-            ->whereMonth('billing_logs.billed_at', $now->month)
-            ->selectRaw('COALESCE(organizations.name, "個人") as org_name, SUM(billing_logs.amount) as total, COUNT(*) as count')
-            ->groupBy('billing_contracts.organization_id', 'organizations.name')
-            ->orderByDesc('total')
-            ->get();
-
-        $salesData = [
-            'this_month'   => $salesThisMonth,
-            'last_month'   => $salesLastMonth,
-            'count_this'   => $countThisMonth,
-            'monthly'      => $monthlyTrend,
-            'total_all'    => \App\Models\BillingLog::where('status', 'success')->sum('amount'),
-            'count_all'    => \App\Models\BillingLog::where('status', 'success')->count(),
-            'by_org'       => $salesByOrg,
-        ];
-
-        return view('partner.master', compact('stats', 'devices', 'adminUsers', 'organizations', 'salesData'));
+        return view('partner.master', compact('stats', 'devices', 'adminUsers', 'organizations'));
     }
 
     // ============================================================
@@ -653,6 +601,27 @@ class MasterController extends Controller
         $user->delete();
 
         return response()->json(['success' => true, 'message' => 'アカウント「' . $name . '」を削除しました']);
+    }
+
+    // ============================================================
+    // パートナーアカウント パスワードリセット（masterのみ）
+    // ============================================================
+
+    public function resetOrgUserPassword(Request $request, int $orgId, int $userId)
+    {
+        $user = PartnerUser::where('id', $userId)->where('organization_id', $orgId)->where('role', 'operator')->firstOrFail();
+
+        $request->validate([
+            'password' => 'required|string|min:8|max:100',
+        ], [
+            'password.required' => 'パスワードを入力してください',
+            'password.min'      => 'パスワードは8文字以上にしてください',
+        ]);
+
+        $user->password_hash = Hash::make($request->password);
+        $user->save();
+
+        return response()->json(['success' => true, 'message' => '「' . $user->name . '」のパスワードをリセットしました']);
     }
 
     // ============================================================

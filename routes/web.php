@@ -121,6 +121,7 @@ Route::middleware(PartnerAuth::class)->prefix('partner')->group(function () {
     Route::post('/orgs/{orgId}/users', [MasterController::class, 'storeOrgUser'])->name('partner.orgs.users.store');
     Route::put('/orgs/{orgId}/users/{userId}', [MasterController::class, 'updateOrgUser'])->name('partner.orgs.users.update');
     Route::delete('/orgs/{orgId}/users/{userId}', [MasterController::class, 'destroyOrgUser'])->name('partner.orgs.users.destroy');
+    Route::post('/orgs/{orgId}/users/{userId}/reset-password', [MasterController::class, 'resetOrgUserPassword'])->name('partner.orgs.users.reset-password');
 });
 
 // ★ master 限定（課金管理）
