@@ -1184,9 +1184,9 @@ async function loadOrgUsers() {
                 + '<td style="font-size:12px;">' + escapeHtml(u.email) + '</td>'
                 + '<td style="font-size:11px;color:var(--gray-500);">' + escapeHtml(lastLogin) + '</td>'
                 + '<td>'
-                + '<button class="action-btn" onclick="showOrgEditUserModal(' + u.id + ', ' + JSON.stringify(u.name) + ', ' + JSON.stringify(u.email) + ')">編集</button>'
-                + '<button class="action-btn" onclick="showOrgResetPasswordModal(' + u.id + ', ' + JSON.stringify(u.name) + ')">PW</button>'
-                + '<button class="action-btn danger" onclick="confirmDeleteOrgUser(' + u.id + ', ' + JSON.stringify(u.name) + ')">削除</button>'
+                + '<button class="action-btn" onclick="showOrgEditUserModal(' + u.id + ', \'' + (u.name||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'") + '\', \'' + (u.email||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'") + '\')">編集</button>'
+                + '<button class="action-btn" onclick="showOrgResetPasswordModal(' + u.id + ', \'' + (u.name||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'") + '\')">PW</button>'
+                + '<button class="action-btn danger" onclick="confirmDeleteOrgUser(' + u.id + ', \'' + (u.name||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'") + '\')">削除</button>'
                 + '</td>'
                 + '</tr>';
         });
