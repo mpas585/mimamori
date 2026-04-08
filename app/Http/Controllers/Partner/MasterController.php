@@ -107,6 +107,8 @@ class MasterController extends Controller
             'last_month'   => $salesLastMonth,
             'count_this'   => $countThisMonth,
             'monthly'      => $monthlyTrend,
+            'total_all'    => \App\Models\BillingLog::where('status', 'success')->sum('amount'),
+            'count_all'    => \App\Models\BillingLog::where('status', 'success')->count(),
             'by_org'       => $salesByOrg,
         ];
 

@@ -416,6 +416,11 @@
     @endphp
     <div class="sales-grid">
         <div class="sales-card">
+            <div class="sales-card-label">累計売上（全期間）</div>
+            <div class="sales-card-value">¥{{ number_format($salesData['total_all']) }}</div>
+            <div class="sales-card-sub">{{ $salesData['count_all'] }}件</div>
+        </div>
+        <div class="sales-card">
             <div class="sales-card-label">今月の売上</div>
             <div class="sales-card-value">¥{{ number_format($salesData['this_month']) }}</div>
             <div class="sales-card-sub">{{ now()->format('Y年n月') }} / {{ $salesData['count_this'] }}件</div>
