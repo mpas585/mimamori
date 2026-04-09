@@ -16,9 +16,11 @@ use App\Models\BillingLog;
 
 class MasterController extends Controller
 {
+
     public function index(Request $request)
     {
         $admin = Auth::guard('partner')->user();
+
         if ($admin->role === 'operator') {
             return redirect('/partner/org');
         }
@@ -54,14 +56,17 @@ class MasterController extends Controller
             }
         }
 
-        $devices       = $query->orderBy('created_at', 'desc')->paginate(20);
+        $devices = $query->orderBy('created_at', 'desc')->paginate(20);
+
         // masterアカウントのみ
-        $adminUsers    = PartnerUser::where('role', 'master')->orderBy('created_at', 'desc')->get();
+        $adminUsers = PartnerUser::where('role', 'master')->orderBy('created_at', 'desc')->get();
+
         $organizations = Organization::withCount('devices')
             ->with(['partnerUsers' => function ($q) { $q->where('role', 'operator'); }])
             ->orderBy('created_at', 'desc')->get();
 
         $salesData = $this->buildSalesData();
+
         return view('partner.master', compact('stats', 'devices', 'adminUsers', 'organizations', 'salesData'));
     }
 
@@ -72,11 +77,22 @@ class MasterController extends Controller
     public function issueDevice(Request $request)
     {
         $deviceId = $this->generateDeviceId();
-        $pin      = $this->generatePin();
+        $pin = $this->generatePin();
 
-        $device = Device::create(['device_id' => $deviceId, 'pin_hash' => Hash::make($pin), 'status' => 'inactive']);
+        $device = Device::create([
+            'device_id'   => $deviceId,
+            'pin_hash'    => Hash::make($pin),
+            'initial_pin' => $pin,
+            'current_pin' => $pin,
+            'status'      => 'inactive',
+        ]);
 
-        DB::table('notification_settings')->insert(['device_id' => $device->id, 'email_enabled' => 1, 'created_at' => now(), 'updated_at' => now()]);
+        DB::table('notification_settings')->insert([
+            'device_id'     => $device->id,
+            'email_enabled' => 1,
+            'created_at'    => now(),
+            'updated_at'    => now(),
+        ]);
 
         return back()->with('issued', ['device_id' => $deviceId, 'pin' => $pin]);
     }
@@ -88,14 +104,28 @@ class MasterController extends Controller
             'count.max'      => '一度に発番できるのは100台までです',
         ]);
 
-        $count  = (int) $request->count;
+        $count = (int) $request->count;
         $issued = [];
 
         for ($i = 0; $i < $count; $i++) {
             $deviceId = $this->generateDeviceId();
-            $pin      = $this->generatePin();
-            $device   = Device::create(['device_id' => $deviceId, 'pin_hash' => Hash::make($pin), 'status' => 'inactive']);
-            DB::table('notification_settings')->insert(['device_id' => $device->id, 'email_enabled' => 1, 'created_at' => now(), 'updated_at' => now()]);
+            $pin = $this->generatePin();
+
+            $device = Device::create([
+                'device_id'   => $deviceId,
+                'pin_hash'    => Hash::make($pin),
+                'initial_pin' => $pin,
+                'current_pin' => $pin,
+                'status'      => 'inactive',
+            ]);
+
+            DB::table('notification_settings')->insert([
+                'device_id'     => $device->id,
+                'email_enabled' => 1,
+                'created_at'    => now(),
+                'updated_at'    => now(),
+            ]);
+
             $issued[] = ['device_id' => $deviceId, 'pin' => $pin];
         }
 
@@ -115,16 +145,16 @@ class MasterController extends Controller
             ->firstOrFail();
 
         $assignment = $device->orgAssignment;
-        $notif      = $device->notificationSetting;
+        $notif = $device->notificationSetting;
 
         $rssiLabel = '-';
         if ($device->rssi !== null) {
-            if ($device->rssi > -70)     $rssiLabel = '良好 (' . $device->rssi . 'dBm)';
+            if ($device->rssi > -70) $rssiLabel = '良好 (' . $device->rssi . 'dBm)';
             elseif ($device->rssi > -85) $rssiLabel = '普通 (' . $device->rssi . 'dBm)';
-            else                          $rssiLabel = '弱い (' . $device->rssi . 'dBm)';
+            else $rssiLabel = '弱い (' . $device->rssi . 'dBm)';
         }
 
-        $dayNames  = ['日', '月', '火', '水', '木', '金', '土'];
+        $dayNames = ['日', '月', '火', '水', '木', '金', '土'];
         $schedules = $device->schedules->map(function ($s) use ($dayNames) {
             $data = ['id' => $s->id, 'type' => $s->type, 'memo' => $s->memo];
             if ($s->type === 'oneshot') {
@@ -141,34 +171,36 @@ class MasterController extends Controller
         });
 
         return response()->json([
-            'device_id'                    => $device->device_id,
-            'sim_id'                       => $device->sim_id,
-            'notification_service_enabled' => (bool) $device->notification_service_enabled,
-            'status'                       => $device->status,
-            'organization_id'              => $device->organization_id,
-            'organization_name'            => $device->organization ? $device->organization->name : null,
-            'room_number'                  => $assignment ? $assignment->room_number : null,
-            'tenant_name'                  => $assignment ? $assignment->tenant_name : null,
-            'last_received_at'             => $device->last_received_at       ? $device->last_received_at->format('Y/m/d H:i')      : null,
-            'last_human_detected_at'       => $device->last_human_detected_at ? $device->last_human_detected_at->format('Y/m/d H:i') : null,
-            'battery_pct'                  => $device->battery_pct,
-            'battery_voltage'              => $device->battery_voltage,
-            'rssi_label'                   => $rssiLabel,
-            'alert_threshold_hours'        => $device->alert_threshold_hours,
-            'pet_exclusion_enabled'        => (bool) $device->pet_exclusion_enabled,
-            'install_height_cm'            => $device->install_height_cm,
-            'away_mode'                    => (bool) $device->away_mode,
-            'away_until'                   => $device->away_until ? $device->away_until->format('Y/m/d H:i') : null,
-            'memo'                         => $device->location_memo,
-            'registered_at'                => $device->created_at->format('Y/m/d'),
-            'billing_start_date'           => $device->billing_start_date ? $device->billing_start_date->format('Y-m-d') : null,
-            'schedules'                    => $schedules,
-            'sms_enabled'                  => $notif ? (bool) $notif->sms_enabled   : false,
-            'sms_phone_1'                  => $notif && $notif->sms_phone_1 ? preg_replace('/^\+81/', '0', $notif->sms_phone_1) : null,
-            'sms_phone_2'                  => $notif && $notif->sms_phone_2 ? preg_replace('/^\+81/', '0', $notif->sms_phone_2) : null,
-            'voice_enabled'                => $notif ? (bool) $notif->voice_enabled : false,
-            'voice_phone_1'                => $notif && $notif->voice_phone_1 ? preg_replace('/^\+81/', '0', $notif->voice_phone_1) : null,
-            'voice_phone_2'                => $notif && $notif->voice_phone_2 ? preg_replace('/^\+81/', '0', $notif->voice_phone_2) : null,
+            'device_id'                   => $device->device_id,
+            'initial_pin'                 => $device->initial_pin,
+            'current_pin'                 => $device->current_pin,
+            'sim_id'                      => $device->sim_id,
+            'notification_service_enabled'=> (bool) $device->notification_service_enabled,
+            'status'                      => $device->status,
+            'organization_id'             => $device->organization_id,
+            'organization_name'           => $device->organization ? $device->organization->name : null,
+            'room_number'                 => $assignment ? $assignment->room_number : null,
+            'tenant_name'                 => $assignment ? $assignment->tenant_name : null,
+            'last_received_at'            => $device->last_received_at ? $device->last_received_at->format('Y/m/d H:i') : null,
+            'last_human_detected_at'      => $device->last_human_detected_at ? $device->last_human_detected_at->format('Y/m/d H:i') : null,
+            'battery_pct'                 => $device->battery_pct,
+            'battery_voltage'             => $device->battery_voltage,
+            'rssi_label'                  => $rssiLabel,
+            'alert_threshold_hours'       => $device->alert_threshold_hours,
+            'pet_exclusion_enabled'       => (bool) $device->pet_exclusion_enabled,
+            'install_height_cm'           => $device->install_height_cm,
+            'away_mode'                   => (bool) $device->away_mode,
+            'away_until'                  => $device->away_until ? $device->away_until->format('Y/m/d H:i') : null,
+            'memo'                        => $device->location_memo,
+            'registered_at'               => $device->created_at->format('Y/m/d'),
+            'billing_start_date'          => $device->billing_start_date ? $device->billing_start_date->format('Y-m-d') : null,
+            'schedules'                   => $schedules,
+            'sms_enabled'                 => $notif ? (bool) $notif->sms_enabled : false,
+            'sms_phone_1'                 => $notif && $notif->sms_phone_1 ? preg_replace('/^\+81/', '0', $notif->sms_phone_1) : null,
+            'sms_phone_2'                 => $notif && $notif->sms_phone_2 ? preg_replace('/^\+81/', '0', $notif->sms_phone_2) : null,
+            'voice_enabled'               => $notif ? (bool) $notif->voice_enabled : false,
+            'voice_phone_1'               => $notif && $notif->voice_phone_1 ? preg_replace('/^\+81/', '0', $notif->voice_phone_1) : null,
+            'voice_phone_2'               => $notif && $notif->voice_phone_2 ? preg_replace('/^\+81/', '0', $notif->voice_phone_2) : null,
         ]);
     }
 
@@ -184,9 +216,8 @@ class MasterController extends Controller
             'alert_threshold_hours' => 'nullable|integer|in:12,24,36,48,72',
             'install_height_cm'     => 'nullable|integer|min:100|max:300',
             'pet_exclusion_enabled' => 'nullable|boolean',
-            'away_mode'             => 'nullable|boolean',
             'billing_start_date'    => 'nullable|date',
-            'sim_id'                => [
+            'sim_id' => [
                 'nullable',
                 'string',
                 'max:22',
@@ -195,27 +226,23 @@ class MasterController extends Controller
             ],
         ], [
             'organization_id.exists' => '指定された組織は存在しません',
-            'sim_id.max'    => 'SIM IDは22桁以内で入力してください',
-            'sim_id.regex'  => 'SIM IDは数字のみ使用できます',
-            'sim_id.unique' => 'このSIM IDは既に別のデバイスに登録されています',
+            'sim_id.max'             => 'SIM IDは22桁以内で入力してください',
+            'sim_id.regex'           => 'SIM IDは数字のみ使用できます',
+            'sim_id.unique'          => 'このSIM IDは既に別のデバイスに登録されています',
         ]);
 
-        // 組織割当の変更処理
         $newOrgId = $request->filled('organization_id') ? (int) $request->organization_id : null;
         $oldOrgId = $device->organization_id;
 
         if ($newOrgId !== $oldOrgId) {
-            // 旧組織のassignmentを削除
             if ($oldOrgId) {
                 OrgDeviceAssignment::where('organization_id', $oldOrgId)
                     ->where('device_id', $device->id)
                     ->delete();
             }
-            // devices.organization_id を更新
             $device->organization_id = $newOrgId;
         }
 
-        // 新組織のassignmentを作成・更新（組織が設定されている場合）
         $orgIdForAssignment = $newOrgId ?? $oldOrgId;
         if ($orgIdForAssignment) {
             OrgDeviceAssignment::updateOrCreate(
@@ -224,15 +251,12 @@ class MasterController extends Controller
             );
         }
 
-        $device->location_memo         = $request->memo;
-        $device->alert_threshold_hours = $request->alert_threshold_hours ?? $device->alert_threshold_hours;
-        $device->install_height_cm     = $request->install_height_cm     ?? $device->install_height_cm;
-        $device->pet_exclusion_enabled = $request->has('pet_exclusion_enabled') ? (int) $request->pet_exclusion_enabled : $device->pet_exclusion_enabled;
-        $device->billing_start_date    = $request->billing_start_date    ?? $device->billing_start_date;
-        if ($request->has('away_mode')) {
-            $device->away_mode = (bool) $request->away_mode;
-        }
-        $device->sim_id                = $request->filled('sim_id') ? $request->sim_id : null;
+        $device->location_memo           = $request->memo;
+        $device->alert_threshold_hours   = $request->alert_threshold_hours ?? $device->alert_threshold_hours;
+        $device->install_height_cm       = $request->install_height_cm ?? $device->install_height_cm;
+        $device->pet_exclusion_enabled   = $request->has('pet_exclusion_enabled') ? (int) $request->pet_exclusion_enabled : $device->pet_exclusion_enabled;
+        $device->billing_start_date      = $request->billing_start_date ?? $device->billing_start_date;
+        $device->sim_id                  = $request->filled('sim_id') ? $request->sim_id : null;
         $device->save();
 
         return response()->json(['success' => true, 'message' => '更新しました']);
@@ -274,18 +298,16 @@ class MasterController extends Controller
         $device = Device::where('device_id', $deviceId)->firstOrFail();
         $request->validate(['away_mode' => 'required|boolean']);
         $device->update(['away_mode' => $request->away_mode]);
-
         return response()->json([
-            'success'   => true,
-            'away_mode' => (bool) $device->away_mode,
-            'message'   => $device->away_mode ? '外出モードをONにしました' : '外出モードをOFFにしました',
+            'success'  => true,
+            'away_mode'=> (bool) $device->away_mode,
+            'message'  => $device->away_mode ? '外出モードをONにしました' : '外出モードをOFFにしました',
         ]);
     }
 
     public function clearDeviceAlert(Request $request, string $deviceId)
     {
         $device = Device::where('device_id', $deviceId)->firstOrFail();
-
         $device->update([
             'status'                 => 'inactive',
             'last_human_detected_at' => null,
@@ -294,9 +316,7 @@ class MasterController extends Controller
             'battery_pct'            => null,
             'rssi'                   => null,
         ]);
-
         $device->detectionLogs()->delete();
-
         return response()->json(['success' => true, 'message' => "デバイス {$deviceId} の警告を解除しました"]);
     }
 
@@ -304,45 +324,41 @@ class MasterController extends Controller
     {
         $device = Device::where('device_id', $deviceId)->firstOrFail();
         $device->delete();
-
         return response()->json(['success' => true, 'message' => "デバイス {$deviceId} を削除しました"]);
     }
 
     public function storeDeviceSchedule(Request $request, string $deviceId)
     {
-        $device    = Device::where('device_id', $deviceId)->firstOrFail();
+        $device = Device::where('device_id', $deviceId)->firstOrFail();
         $validated = $request->validate([
-            'type'           => 'required|in:oneshot,recurring',
-            'start_at'       => 'required_if:type,oneshot|nullable|date',
-            'end_at'         => 'nullable|date|after:start_at',
-            'days_of_week'   => 'required_if:type,recurring|nullable|array',
-            'days_of_week.*' => 'integer|between:0,6',
-            'start_time'     => 'required_if:type,recurring|nullable|date_format:H:i',
-            'end_time'       => 'required_if:type,recurring|nullable|date_format:H:i',
-            'next_day'       => 'nullable|boolean',
-            'memo'           => 'nullable|string|max:200',
+            'type'          => 'required|in:oneshot,recurring',
+            'start_at'      => 'required_if:type,oneshot|nullable|date',
+            'end_at'        => 'nullable|date|after:start_at',
+            'days_of_week'  => 'required_if:type,recurring|nullable|array',
+            'days_of_week.*'=> 'integer|between:0,6',
+            'start_time'    => 'required_if:type,recurring|nullable|date_format:H:i',
+            'end_time'      => 'required_if:type,recurring|nullable|date_format:H:i',
+            'next_day'      => 'nullable|boolean',
+            'memo'          => 'nullable|string|max:200',
         ]);
-
         $schedule = $device->schedules()->create([
             'type'         => $validated['type'],
-            'start_at'     => $validated['start_at']     ?? null,
-            'end_at'       => $validated['end_at']       ?? null,
+            'start_at'     => $validated['start_at'] ?? null,
+            'end_at'       => $validated['end_at'] ?? null,
             'days_of_week' => $validated['days_of_week'] ?? null,
-            'start_time'   => $validated['start_time']   ?? null,
-            'end_time'     => $validated['end_time']     ?? null,
-            'next_day'     => $validated['next_day']     ?? false,
-            'memo'         => $validated['memo']         ?? null,
+            'start_time'   => $validated['start_time'] ?? null,
+            'end_time'     => $validated['end_time'] ?? null,
+            'next_day'     => $validated['next_day'] ?? false,
+            'memo'         => $validated['memo'] ?? null,
         ]);
-
         return response()->json(['success' => true, 'schedule' => $schedule], 201);
     }
 
     public function destroyDeviceSchedule(Request $request, string $deviceId, int $scheduleId)
     {
-        $device   = Device::where('device_id', $deviceId)->firstOrFail();
+        $device = Device::where('device_id', $deviceId)->firstOrFail();
         $schedule = $device->schedules()->findOrFail($scheduleId);
         $schedule->delete();
-
         return response()->json(['success' => true, 'message' => 'スケジュールを削除しました']);
     }
 
@@ -353,32 +369,21 @@ class MasterController extends Controller
     public function deviceLogs(Request $request, string $deviceId)
     {
         $device = Device::where('device_id', $deviceId)->firstOrFail();
-
         $query = $device->detectionLogs()->orderBy('period_start', 'desc');
 
-        if ($request->filled('date_from')) {
-            $query->where('period_start', '>=', $request->date_from . ' 00:00:00');
-        }
-        if ($request->filled('date_to')) {
-            $query->where('period_start', '<=', $request->date_to . ' 23:59:59');
-        }
+        if ($request->filled('date_from')) $query->where('period_start', '>=', $request->date_from . ' 00:00:00');
+        if ($request->filled('date_to'))   $query->where('period_start', '<=', $request->date_to . ' 23:59:59');
         if ($request->filled('type')) {
-            if ($request->type === 'human') {
-                $query->where('human_count', '>', 0);
-            } elseif ($request->type === 'pet') {
-                $query->where('pet_count', '>', 0);
-            }
+            if ($request->type === 'human') $query->where('human_count', '>', 0);
+            elseif ($request->type === 'pet') $query->where('pet_count', '>', 0);
         }
 
         $logs = $query->paginate(20)->withQueryString();
 
         $summaryQuery = $device->detectionLogs();
-        if ($request->filled('date_from')) {
-            $summaryQuery->where('period_start', '>=', $request->date_from . ' 00:00:00');
-        }
-        if ($request->filled('date_to')) {
-            $summaryQuery->where('period_start', '<=', $request->date_to . ' 23:59:59');
-        }
+        if ($request->filled('date_from')) $summaryQuery->where('period_start', '>=', $request->date_from . ' 00:00:00');
+        if ($request->filled('date_to'))   $summaryQuery->where('period_start', '<=', $request->date_to . ' 23:59:59');
+
         $summary = [
             'total' => $summaryQuery->sum('detection_count'),
             'human' => $summaryQuery->sum('human_count'),
@@ -386,7 +391,6 @@ class MasterController extends Controller
         ];
 
         $backUrl = '/partner';
-
         return view('partner.device_logs', compact('device', 'logs', 'summary', 'backUrl'));
     }
 
@@ -410,10 +414,10 @@ class MasterController extends Controller
         ]);
 
         PartnerUser::create([
-            'name'            => $request->name,
-            'email'           => $request->email,
-            'password_hash'   => Hash::make($request->password),
-            'role'            => $request->role,
+            'name'          => $request->name,
+            'email'         => $request->email,
+            'password_hash' => Hash::make($request->password),
+            'role'          => $request->role,
             'organization_id' => $request->filled('organization_id') ? (int) $request->organization_id : null,
         ]);
 
@@ -423,7 +427,6 @@ class MasterController extends Controller
     public function updateAdminUser(Request $request, int $id)
     {
         $admin = PartnerUser::findOrFail($id);
-
         $request->validate([
             'name'     => 'required|string|max:100',
             'email'    => ['required', 'email', 'max:255', Rule::unique('admin_users', 'email')->ignore($admin->id)],
@@ -436,15 +439,13 @@ class MasterController extends Controller
             'password.min'   => 'パスワードは8文字以上にしてください',
         ]);
 
-        $admin->name            = $request->name;
-        $admin->email           = $request->email;
-        $admin->role            = $request->role;
+        $admin->name  = $request->name;
+        $admin->email = $request->email;
+        $admin->role  = $request->role;
         $admin->organization_id = $request->filled('organization_id') ? (int) $request->organization_id : null;
-
         if ($request->filled('password')) {
             $admin->password_hash = Hash::make($request->password);
         }
-
         $admin->save();
 
         return redirect('/partner?tab=admins')->with('success', '管理者アカウント「' . $admin->name . '」を更新しました');
@@ -453,14 +454,11 @@ class MasterController extends Controller
     public function destroyAdminUser(int $id)
     {
         $admin = PartnerUser::findOrFail($id);
-
         if ($admin->id === Auth::guard('partner')->id()) {
             return redirect('/partner?tab=admins')->with('error', '自分自身のアカウントは削除できません');
         }
-
         $name = $admin->name;
         $admin->delete();
-
         return redirect('/partner?tab=admins')->with('success', '管理者アカウント「' . $name . '」を削除しました');
     }
 
@@ -477,16 +475,14 @@ class MasterController extends Controller
             'contact_phone'    => 'nullable|string|max:20',
             'address'          => 'nullable|string|max:500',
             'notes'            => 'nullable|string|max:1000',
-            // パートナーアカウント（任意）
             'partner_email'    => 'nullable|email|max:255|unique:admin_users,email',
             'partner_password' => 'nullable|string|min:8|max:100',
         ], [
-            'name.required'        => '組織名を入力してください',
-            'partner_email.unique'   => 'このメールアドレスは既に使用されています',
-            'partner_password.min'   => 'パスワードは8文字以上にしてください',
+            'name.required'           => '組織名を入力してください',
+            'partner_email.unique'    => 'このメールアドレスは既に使用されています',
+            'partner_password.min'    => 'パスワードは8文字以上にしてください',
         ]);
 
-        // パートナー情報がどれか入力されていたら2項目すべて必須
         if ($request->filled('partner_email') || $request->filled('partner_password')) {
             $request->validate([
                 'partner_email'    => 'required|email|max:255|unique:admin_users,email',
@@ -507,7 +503,6 @@ class MasterController extends Controller
             'premium_enabled' => false,
         ]);
 
-        // パートナーアカウント作成（任意）。名前は担当者名、なければ組織名を使用
         if ($request->filled('partner_email')) {
             PartnerUser::create([
                 'name'            => $request->contact_name ?: $request->name,
@@ -524,19 +519,18 @@ class MasterController extends Controller
     public function updateOrg(Request $request, int $id)
     {
         $org = Organization::findOrFail($id);
-
         $request->validate([
-            'name'                 => 'required|string|max:200',
-            'contact_name'         => 'nullable|string|max:100',
-            'contact_email'        => 'required|email|max:255',
-            'contact_phone'        => 'nullable|string|max:20',
-            'address'              => 'nullable|string|max:500',
-            'notes'                => 'nullable|string|max:1000',
-            'notification_email_1' => 'nullable|email|max:255',
-            'notification_email_2' => 'nullable|email|max:255',
-            'notification_email_3' => 'nullable|email|max:255',
-            'notification_sms_1'   => 'nullable|string|max:20',
-            'notification_sms_2'   => 'nullable|string|max:20',
+            'name'                  => 'required|string|max:200',
+            'contact_name'          => 'nullable|string|max:100',
+            'contact_email'         => 'required|email|max:255',
+            'contact_phone'         => 'nullable|string|max:20',
+            'address'               => 'nullable|string|max:500',
+            'notes'                 => 'nullable|string|max:1000',
+            'notification_email_1'  => 'nullable|email|max:255',
+            'notification_email_2'  => 'nullable|email|max:255',
+            'notification_email_3'  => 'nullable|email|max:255',
+            'notification_sms_1'    => 'nullable|string|max:20',
+            'notification_sms_2'    => 'nullable|string|max:20',
         ], [
             'name.required'          => '組織名を入力してください',
             'contact_email.required' => '連絡先メールを入力してください',
@@ -563,29 +557,21 @@ class MasterController extends Controller
     public function destroyOrg(int $id)
     {
         $org = Organization::withCount('devices')->findOrFail($id);
-
         if ($org->devices_count > 0) {
             return redirect('/partner?tab=orgs')->with('error', '「' . $org->name . '」にはデバイスが登録されているため削除できません');
         }
-
         $name = $org->name;
         $org->delete();
-
         return redirect('/partner?tab=orgs')->with('success', '組織「' . $name . '」を削除しました');
     }
 
     public function toggleOrgPremium(Request $request, int $orgId)
     {
         $org = Organization::findOrFail($orgId);
-
         $request->validate(['premium_enabled' => 'required|boolean']);
-
         $enabled = (bool) $request->premium_enabled;
-
         $org->update(['premium_enabled' => $enabled]);
-
         Device::where('organization_id', $orgId)->update(['premium_enabled' => $enabled ? 1 : 0]);
-
         return response()->json([
             'success'         => true,
             'premium_enabled' => $org->premium_enabled,
@@ -599,22 +585,17 @@ class MasterController extends Controller
 
     public function orgUsers(int $orgId)
     {
-        $org = Organization::findOrFail($orgId);
+        $org   = Organization::findOrFail($orgId);
         $users = PartnerUser::where('organization_id', $orgId)
             ->where('role', 'operator')
             ->orderBy('created_at', 'desc')
             ->get(['id', 'name', 'email', 'last_login_at', 'created_at']);
-
-        return response()->json([
-            'org_name' => $org->name,
-            'users'    => $users,
-        ]);
+        return response()->json(['org_name' => $org->name, 'users' => $users]);
     }
 
     public function storeOrgUser(Request $request, int $orgId)
     {
         Organization::findOrFail($orgId);
-
         $request->validate([
             'name'     => 'required|string|max:100',
             'email'    => 'required|email|max:255|unique:admin_users,email',
@@ -641,7 +622,6 @@ class MasterController extends Controller
     public function updateOrgUser(Request $request, int $orgId, int $userId)
     {
         $user = PartnerUser::where('id', $userId)->where('organization_id', $orgId)->where('role', 'operator')->firstOrFail();
-
         $request->validate([
             'name'     => 'required|string|max:100',
             'email'    => ['required', 'email', 'max:255', Rule::unique('admin_users', 'email')->ignore($user->id)],
@@ -652,14 +632,10 @@ class MasterController extends Controller
             'email.unique'   => 'このメールアドレスは既に使用されています',
             'password.min'   => 'パスワードは8文字以上にしてください',
         ]);
-
         $user->name  = $request->name;
         $user->email = $request->email;
-        if ($request->filled('password')) {
-            $user->password_hash = Hash::make($request->password);
-        }
+        if ($request->filled('password')) $user->password_hash = Hash::make($request->password);
         $user->save();
-
         return response()->json(['success' => true, 'message' => 'アカウント「' . $user->name . '」を更新しました']);
     }
 
@@ -668,7 +644,6 @@ class MasterController extends Controller
         $user = PartnerUser::where('id', $userId)->where('organization_id', $orgId)->where('role', 'operator')->firstOrFail();
         $name = $user->name;
         $user->delete();
-
         return response()->json(['success' => true, 'message' => 'アカウント「' . $name . '」を削除しました']);
     }
 
@@ -679,17 +654,12 @@ class MasterController extends Controller
     public function resetOrgUserPassword(Request $request, int $orgId, int $userId)
     {
         $user = PartnerUser::where('id', $userId)->where('organization_id', $orgId)->where('role', 'operator')->firstOrFail();
-
-        $request->validate([
-            'password' => 'required|string|min:8|max:100',
-        ], [
+        $request->validate(['password' => 'required|string|min:8|max:100'], [
             'password.required' => 'パスワードを入力してください',
             'password.min'      => 'パスワードは8文字以上にしてください',
         ]);
-
         $user->password_hash = Hash::make($request->password);
         $user->save();
-
         return response()->json(['success' => true, 'message' => '「' . $user->name . '」のパスワードをリセットしました']);
     }
 
@@ -700,14 +670,12 @@ class MasterController extends Controller
     private function generateDeviceId(): string
     {
         $chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-
         do {
             $id = '';
             for ($i = 0; $i < 6; $i++) {
                 $id .= $chars[random_int(0, strlen($chars) - 1)];
             }
         } while (Device::where('device_id', $id)->exists());
-
         return $id;
     }
 
@@ -721,7 +689,6 @@ class MasterController extends Controller
         $device = Device::where('device_id', $deviceId)->firstOrFail();
         $request->validate(['enabled' => 'required|boolean']);
         $device->update(['notification_service_enabled' => (bool) $request->enabled]);
-
         return response()->json([
             'success' => true,
             'message' => $request->enabled ? '通知サービスを有効にしました' : '通知サービスを停止しました',
@@ -733,7 +700,6 @@ class MasterController extends Controller
         $device = Device::where('device_id', $deviceId)->firstOrFail();
         $request->validate(['premium_enabled' => 'required|boolean']);
         $device->update(['premium_enabled' => (bool) $request->premium_enabled]);
-
         return response()->json([
             'success'         => true,
             'premium_enabled' => (bool) $device->premium_enabled,
@@ -743,10 +709,10 @@ class MasterController extends Controller
 
     private function buildSalesData(): array
     {
-        $now            = now();
-        $thisMonthStart = $now->copy()->startOfMonth();
-        $lastMonthStart = $now->copy()->subMonth()->startOfMonth();
-        $lastMonthEnd   = $now->copy()->subMonth()->endOfMonth();
+        $now             = now();
+        $thisMonthStart  = $now->copy()->startOfMonth();
+        $lastMonthStart  = $now->copy()->subMonth()->startOfMonth();
+        $lastMonthEnd    = $now->copy()->subMonth()->endOfMonth();
 
         $totalAll  = BillingLog::where('status', 'success')->sum('amount');
         $countAll  = BillingLog::where('status', 'success')->count();

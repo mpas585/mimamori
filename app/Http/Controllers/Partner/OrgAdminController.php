@@ -20,15 +20,14 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class OrgAdminController extends Controller
 {
+
     private function getOrganization(): Organization
     {
         $admin = Auth::guard('partner')->user();
         $organization = $admin->organization;
-
         if (!$organization) {
             abort(403, '組織が割り当てられていません');
         }
-
         return $organization;
     }
 
@@ -90,38 +89,35 @@ class OrgAdminController extends Controller
     public function updateNotification(Request $request)
     {
         $organization = $this->getOrganization();
-
         $request->validate([
-            'notification_email_1'     => 'nullable|email|max:255',
-            'notification_email_2'     => 'nullable|email|max:255',
-            'notification_email_3'     => 'nullable|email|max:255',
-            'notification_enabled'     => 'nullable|boolean',
-            'notification_sms_1'       => 'nullable|string|max:20',
-            'notification_sms_2'       => 'nullable|string|max:20',
+            'notification_email_1'   => 'nullable|email|max:255',
+            'notification_email_2'   => 'nullable|email|max:255',
+            'notification_email_3'   => 'nullable|email|max:255',
+            'notification_enabled'   => 'nullable|boolean',
+            'notification_sms_1'     => 'nullable|string|max:20',
+            'notification_sms_2'     => 'nullable|string|max:20',
             'notification_sms_enabled' => 'nullable|boolean',
         ]);
 
         $organization->update([
-            'notification_email_1'     => $request->notification_email_1 ?: null,
-            'notification_email_2'     => $request->notification_email_2 ?: null,
-            'notification_email_3'     => $request->notification_email_3 ?: null,
-            'notification_enabled'     => $request->has('notification_enabled') ? (bool) $request->notification_enabled : true,
-            'notification_sms_1'       => PhoneHelper::normalize($request->notification_sms_1),
-            'notification_sms_2'       => PhoneHelper::normalize($request->notification_sms_2),
+            'notification_email_1'   => $request->notification_email_1 ?: null,
+            'notification_email_2'   => $request->notification_email_2 ?: null,
+            'notification_email_3'   => $request->notification_email_3 ?: null,
+            'notification_enabled'   => $request->has('notification_enabled') ? (bool) $request->notification_enabled : true,
+            'notification_sms_1'     => PhoneHelper::normalize($request->notification_sms_1),
+            'notification_sms_2'     => PhoneHelper::normalize($request->notification_sms_2),
             'notification_sms_enabled' => $request->has('notification_sms_enabled') ? (bool) $request->notification_sms_enabled : false,
         ]);
 
         if ($request->expectsJson()) {
             return response()->json(['success' => true, 'message' => '通知設定を更新しました']);
         }
-
         return back()->with('success', '通知設定を更新しました');
     }
 
     public function getNotification()
     {
         $organization = $this->getOrganization();
-
         return response()->json([
             'notification_email_1'     => $organization->notification_email_1,
             'notification_email_2'     => $organization->notification_email_2,
@@ -136,7 +132,6 @@ class OrgAdminController extends Controller
     public function addDevice(Request $request)
     {
         $organization = $this->getOrganization();
-
         $request->validate([
             'device_id'   => 'required|string|size:6',
             'room_number' => 'nullable|string|max:50',
@@ -145,12 +140,11 @@ class OrgAdminController extends Controller
         ]);
 
         $deviceCode = strtoupper($request->device_id);
-
         $device = Device::where('device_id', $deviceCode)->first();
+
         if (!$device) {
             return back()->with('error', "デバイス {$deviceCode} が見つかりません");
         }
-
         if ($device->organization_id && $device->organization_id !== $organization->id) {
             return back()->with('error', "デバイス {$deviceCode} は別の組織に登録されています");
         }
@@ -171,7 +165,6 @@ class OrgAdminController extends Controller
     public function removeDevice(Request $request, $deviceId)
     {
         $organization = $this->getOrganization();
-
         $device = Device::where('device_id', $deviceId)
             ->where('organization_id', $organization->id)
             ->firstOrFail();
@@ -189,33 +182,29 @@ class OrgAdminController extends Controller
         if ($request->expectsJson()) {
             return response()->json(['success' => true, 'message' => "デバイス {$deviceId} を削除しました"]);
         }
-
         return back()->with('success', "デバイス {$deviceId} を組織から削除しました");
     }
 
     public function toggleWatch(Request $request, $deviceId)
     {
         $organization = $this->getOrganization();
-
         $device = Device::where('device_id', $deviceId)
             ->where('organization_id', $organization->id)
             ->firstOrFail();
 
         $request->validate(['away_mode' => 'required|boolean']);
-
         $device->update(['away_mode' => $request->away_mode, 'away_until' => null]);
 
         return response()->json([
-            'success'   => true,
-            'away_mode' => (bool) $device->away_mode,
-            'message'   => $device->away_mode ? '見守りをOFFにしました' : '見守りをONにしました',
+            'success'  => true,
+            'away_mode'=> (bool) $device->away_mode,
+            'message'  => $device->away_mode ? '見守りをOFFにしました' : '見守りをONにしました',
         ]);
     }
 
     public function deviceDetail($deviceId)
     {
         $organization = $this->getOrganization();
-
         $device = Device::where('device_id', $deviceId)
             ->where('organization_id', $organization->id)
             ->with(['orgAssignment', 'schedules' => function ($q) {
@@ -225,8 +214,7 @@ class OrgAdminController extends Controller
 
         $assignment = $device->orgAssignment;
         $dayNames   = ['日', '月', '火', '水', '木', '金', '土'];
-
-        $schedules = $device->schedules->map(function ($schedule) use ($dayNames) {
+        $schedules  = $device->schedules->map(function ($schedule) use ($dayNames) {
             $data = ['id' => $schedule->id, 'type' => $schedule->type, 'memo' => $schedule->memo];
             if ($schedule->type === 'oneshot') {
                 $data['start_at'] = $schedule->start_at ? $schedule->start_at->format('Y-m-d H:i') : null;
@@ -244,30 +232,32 @@ class OrgAdminController extends Controller
         $notif = $device->notificationSetting;
 
         return response()->json([
-            'device_id'                  => $device->device_id,
-            'status'                     => $device->status,
-            'room_number'                => $assignment->room_number ?? null,
-            'tenant_name'                => $assignment->tenant_name ?? null,
-            'last_human_detected'        => $device->last_human_detected_at ? $device->last_human_detected_at->format('Y/m/d H:i') : null,
-            'battery_pct'                => $device->battery_pct,
-            'battery_voltage'            => $device->battery_voltage,
-            'rssi'                       => $device->rssi,
-            'alert_threshold_hours'      => $device->alert_threshold_hours,
-            'pet_exclusion_enabled'      => $device->pet_exclusion_enabled,
-            'pet_exclusion_threshold_cm' => $device->pet_exclusion_threshold_cm,
-            'install_height_cm'          => $device->install_height_cm,
-            'away_mode'                  => $device->away_mode,
-            'away_until'                 => $device->away_until ? $device->away_until->format('Y/m/d H:i') : null,
-            'memo'                       => $device->location_memo,
-            'registered_at'              => $device->created_at->format('Y/m/d'),
-            'schedules'                  => $schedules,
-            'sms_enabled'                => $notif ? (bool) $notif->sms_enabled   : false,
-            'sms_phone_1'                => $notif && $notif->sms_phone_1 ? preg_replace('/^\+81/', '0', $notif->sms_phone_1) : null,
-            'sms_phone_2'                => $notif && $notif->sms_phone_2 ? preg_replace('/^\+81/', '0', $notif->sms_phone_2) : null,
-            'voice_enabled'              => $notif ? (bool) $notif->voice_enabled : false,
-            'voice_phone_1'              => $notif && $notif->voice_phone_1 ? preg_replace('/^\+81/', '0', $notif->voice_phone_1) : null,
-            'voice_phone_2'              => $notif && $notif->voice_phone_2 ? preg_replace('/^\+81/', '0', $notif->voice_phone_2) : null,
-            'premium_enabled'            => (bool) ($device->premium_enabled ?? false),
+            'device_id'                    => $device->device_id,
+            'initial_pin'                  => $device->initial_pin,
+            'current_pin'                  => $device->current_pin,
+            'status'                       => $device->status,
+            'room_number'                  => $assignment->room_number ?? null,
+            'tenant_name'                  => $assignment->tenant_name ?? null,
+            'last_human_detected'          => $device->last_human_detected_at ? $device->last_human_detected_at->format('Y/m/d H:i') : null,
+            'battery_pct'                  => $device->battery_pct,
+            'battery_voltage'              => $device->battery_voltage,
+            'rssi'                         => $device->rssi,
+            'alert_threshold_hours'        => $device->alert_threshold_hours,
+            'pet_exclusion_enabled'        => $device->pet_exclusion_enabled,
+            'pet_exclusion_threshold_cm'   => $device->pet_exclusion_threshold_cm,
+            'install_height_cm'            => $device->install_height_cm,
+            'away_mode'                    => $device->away_mode,
+            'away_until'                   => $device->away_until ? $device->away_until->format('Y/m/d H:i') : null,
+            'memo'                         => $device->location_memo,
+            'registered_at'                => $device->created_at->format('Y/m/d'),
+            'schedules'                    => $schedules,
+            'sms_enabled'                  => $notif ? (bool) $notif->sms_enabled : false,
+            'sms_phone_1'                  => $notif && $notif->sms_phone_1 ? preg_replace('/^\+81/', '0', $notif->sms_phone_1) : null,
+            'sms_phone_2'                  => $notif && $notif->sms_phone_2 ? preg_replace('/^\+81/', '0', $notif->sms_phone_2) : null,
+            'voice_enabled'                => $notif ? (bool) $notif->voice_enabled : false,
+            'voice_phone_1'                => $notif && $notif->voice_phone_1 ? preg_replace('/^\+81/', '0', $notif->voice_phone_1) : null,
+            'voice_phone_2'                => $notif && $notif->voice_phone_2 ? preg_replace('/^\+81/', '0', $notif->voice_phone_2) : null,
+            'premium_enabled'              => (bool) ($device->premium_enabled ?? false),
             'notification_service_enabled' => (bool) ($device->notification_service_enabled ?? true),
         ]);
     }
@@ -275,13 +265,11 @@ class OrgAdminController extends Controller
     public function toggleNotifyService(Request $request, $deviceId)
     {
         $organization = $this->getOrganization();
-
         $device = Device::where('device_id', $deviceId)
             ->where('organization_id', $organization->id)
             ->firstOrFail();
 
         $request->validate(['enabled' => 'required|boolean']);
-
         $device->update(['notification_service_enabled' => (bool) $request->enabled]);
 
         return response()->json([
@@ -294,13 +282,11 @@ class OrgAdminController extends Controller
     public function toggleDevicePremium(Request $request, $deviceId)
     {
         $organization = $this->getOrganization();
-
         $device = Device::where('device_id', $deviceId)
             ->where('organization_id', $organization->id)
             ->firstOrFail();
 
         $request->validate(['premium_enabled' => 'required|boolean']);
-
         $device->update(['premium_enabled' => (bool) $request->premium_enabled]);
 
         return response()->json([
@@ -313,46 +299,31 @@ class OrgAdminController extends Controller
     public function updateAssignment(Request $request, $deviceId)
     {
         $organization = $this->getOrganization();
-
         $device = Device::where('device_id', $deviceId)
             ->where('organization_id', $organization->id)
             ->firstOrFail();
 
         $request->validate([
-            'room_number'           => 'nullable|string|max:50',
-            'tenant_name'           => 'nullable|string|max:100',
-            'memo'                  => 'nullable|string|max:255',
-            'alert_threshold_hours' => 'nullable|integer|in:12,24,36,48,72',
-            'install_height_cm'     => 'nullable|integer|min:100|max:300',
-            'pet_exclusion_enabled' => 'nullable|boolean',
-            'away_mode'             => 'nullable|boolean',
+            'room_number' => 'nullable|string|max:50',
+            'tenant_name' => 'nullable|string|max:100',
+            'memo'        => 'nullable|string|max:255',
         ]);
 
         OrgDeviceAssignment::updateOrCreate(
             ['organization_id' => $organization->id, 'device_id' => $device->id],
             ['room_number' => $request->room_number, 'tenant_name' => $request->tenant_name]
         );
-
-        $device->location_memo         = $request->memo;
-        $device->alert_threshold_hours = $request->alert_threshold_hours ?? $device->alert_threshold_hours;
-        $device->install_height_cm     = $request->install_height_cm     ?? $device->install_height_cm;
-        $device->pet_exclusion_enabled = $request->has('pet_exclusion_enabled') ? (int) $request->pet_exclusion_enabled : $device->pet_exclusion_enabled;
-        if ($request->has('away_mode')) {
-            $device->away_mode = (bool) $request->away_mode;
-        }
-        $device->save();
+        $device->update(['location_memo' => $request->memo]);
 
         if ($request->expectsJson()) {
             return response()->json(['success' => true, 'message' => '更新しました']);
         }
-
         return back()->with('success', "デバイス {$deviceId} の情報を更新しました");
     }
 
     public function clearAlert(Request $request, $deviceId)
     {
         $organization = $this->getOrganization();
-
         $device = Device::where('device_id', $deviceId)
             ->where('organization_id', $organization->id)
             ->firstOrFail();
@@ -365,13 +336,11 @@ class OrgAdminController extends Controller
             'battery_pct'            => null,
             'rssi'                   => null,
         ]);
-
         $device->detectionLogs()->delete();
 
         if ($request->expectsJson()) {
             return response()->json(['success' => true, 'message' => "デバイス {$deviceId} の警告を解除しました"]);
         }
-
         return back()->with('success', "デバイス {$deviceId} の警告を解除しました");
     }
 
@@ -382,36 +351,24 @@ class OrgAdminController extends Controller
     public function deviceLogs(Request $request, $deviceId)
     {
         $organization = $this->getOrganization();
-
         $device = Device::where('device_id', $deviceId)
             ->where('organization_id', $organization->id)
             ->firstOrFail();
 
         $query = $device->detectionLogs()->orderBy('period_start', 'desc');
-
-        if ($request->filled('date_from')) {
-            $query->where('period_start', '>=', $request->date_from . ' 00:00:00');
-        }
-        if ($request->filled('date_to')) {
-            $query->where('period_start', '<=', $request->date_to . ' 23:59:59');
-        }
+        if ($request->filled('date_from')) $query->where('period_start', '>=', $request->date_from . ' 00:00:00');
+        if ($request->filled('date_to'))   $query->where('period_start', '<=', $request->date_to . ' 23:59:59');
         if ($request->filled('type')) {
-            if ($request->type === 'human') {
-                $query->where('human_count', '>', 0);
-            } elseif ($request->type === 'pet') {
-                $query->where('pet_count', '>', 0);
-            }
+            if ($request->type === 'human') $query->where('human_count', '>', 0);
+            elseif ($request->type === 'pet') $query->where('pet_count', '>', 0);
         }
 
         $logs = $query->paginate(20)->withQueryString();
 
         $summaryQuery = $device->detectionLogs();
-        if ($request->filled('date_from')) {
-            $summaryQuery->where('period_start', '>=', $request->date_from . ' 00:00:00');
-        }
-        if ($request->filled('date_to')) {
-            $summaryQuery->where('period_start', '<=', $request->date_to . ' 23:59:59');
-        }
+        if ($request->filled('date_from')) $summaryQuery->where('period_start', '>=', $request->date_from . ' 00:00:00');
+        if ($request->filled('date_to'))   $summaryQuery->where('period_start', '<=', $request->date_to . ' 23:59:59');
+
         $summary = [
             'total' => $summaryQuery->sum('detection_count'),
             'human' => $summaryQuery->sum('human_count'),
@@ -419,7 +376,6 @@ class OrgAdminController extends Controller
         ];
 
         $backUrl = '/partner/org';
-
         return view('partner.device_logs', compact('device', 'logs', 'summary', 'backUrl'));
     }
 
@@ -432,7 +388,7 @@ class OrgAdminController extends Controller
         $organization = $this->getOrganization();
 
         $devices = Device::where('organization_id', $organization->id)
-            ->with('orgAssignment')
+            ->with(['orgAssignment', 'notificationSetting'])
             ->orderBy('created_at')
             ->get();
 
@@ -441,23 +397,49 @@ class OrgAdminController extends Controller
         return new StreamedResponse(function () use ($devices) {
             $handle = fopen('php://output', 'w');
             fwrite($handle, "\xEF\xBB\xBF");
-            fputcsv($handle, ['ステータス', '部屋番号', '入居者名', 'デバイスID', '見守り', '最終検知', '電池残量(%)', '電波(dBm)', 'メモ', 'プレミアム']);
 
-            $statusLabels = ['normal' => '正常', 'warning' => '注意', 'alert' => '警告', 'offline' => '離線', 'inactive' => '未稼働'];
+            fputcsv($handle, [
+                'ステータス', '部屋番号', '入居者名', 'デバイスID',
+                '初期PIN', '現在PIN', 'PIN変更済',
+                '見守り', '最終検知', '電池残量(%)', '電波(dBm)', 'メモ',
+                'プレミアム',
+                '通知メール1', '通知メール2', '通知メール3',
+                'SMS通知先1', 'SMS通知先2',
+            ]);
+
+            $statusLabels = [
+                'normal'   => '正常',
+                'warning'  => '注意',
+                'alert'    => '警告',
+                'offline'  => '離線',
+                'inactive' => '未稼働',
+            ];
 
             foreach ($devices as $device) {
                 $assignment = $device->orgAssignment;
+                $notif      = $device->notificationSetting;
+
+                $pinChanged = ($device->current_pin && $device->initial_pin && $device->current_pin !== $device->initial_pin) ? '変更済' : '';
+
                 fputcsv($handle, [
                     $statusLabels[$device->status] ?? $device->status,
                     $assignment->room_number ?? '',
                     $assignment->tenant_name ?? '',
                     $device->device_id,
+                    $device->initial_pin ?? '',
+                    $device->current_pin ?? '',
+                    $pinChanged,
                     $device->away_mode ? 'OFF' : 'ON',
                     $device->last_human_detected_at ? $device->last_human_detected_at->format('Y/m/d H:i') : '',
                     $device->battery_pct ?? '',
                     $device->rssi ?? '',
                     $device->location_memo ?? '',
                     $device->premium_enabled ? '有効' : '無効',
+                    $notif->email_1   ?? '',
+                    $notif->email_2   ?? '',
+                    $notif->email_3   ?? '',
+                    $notif && $notif->sms_phone_1 ? preg_replace('/^\+81/', '0', $notif->sms_phone_1) : '',
+                    $notif && $notif->sms_phone_2 ? preg_replace('/^\+81/', '0', $notif->sms_phone_2) : '',
                 ]);
             }
 
@@ -471,7 +453,6 @@ class OrgAdminController extends Controller
     public function timerList(Request $request)
     {
         $organization = $this->getOrganization();
-
         $devices = Device::where('organization_id', $organization->id)
             ->with(['orgAssignment', 'schedules' => function ($q) {
                 $q->where('is_active', true)->orderBy('created_at', 'desc');
@@ -482,10 +463,9 @@ class OrgAdminController extends Controller
         $dayNames = ['日', '月', '火', '水', '木', '金', '土'];
 
         foreach ($devices as $device) {
-            $assignment  = $device->orgAssignment;
+            $assignment   = $device->orgAssignment;
             $hasSchedules = $device->schedules->isNotEmpty();
-            $isAwayMode  = $device->away_mode;
-
+            $isAwayMode   = $device->away_mode;
             if (!$hasSchedules && !$isAwayMode) continue;
 
             $schedules = $device->schedules->map(function ($schedule) use ($dayNames) {
@@ -520,32 +500,31 @@ class OrgAdminController extends Controller
     public function storeSchedule(Request $request, $deviceId)
     {
         $organization = $this->getOrganization();
-
         $device = Device::where('device_id', $deviceId)
             ->where('organization_id', $organization->id)
             ->firstOrFail();
 
         $validated = $request->validate([
-            'type'           => 'required|in:oneshot,recurring',
-            'start_at'       => 'required_if:type,oneshot|nullable|date',
-            'end_at'         => 'nullable|date|after:start_at',
-            'days_of_week'   => 'required_if:type,recurring|nullable|array',
-            'days_of_week.*' => 'integer|between:0,6',
-            'start_time'     => 'required_if:type,recurring|nullable|date_format:H:i',
-            'end_time'       => 'required_if:type,recurring|nullable|date_format:H:i',
-            'next_day'       => 'nullable|boolean',
-            'memo'           => 'nullable|string|max:200',
+            'type'          => 'required|in:oneshot,recurring',
+            'start_at'      => 'required_if:type,oneshot|nullable|date',
+            'end_at'        => 'nullable|date|after:start_at',
+            'days_of_week'  => 'required_if:type,recurring|nullable|array',
+            'days_of_week.*'=> 'integer|between:0,6',
+            'start_time'    => 'required_if:type,recurring|nullable|date_format:H:i',
+            'end_time'      => 'required_if:type,recurring|nullable|date_format:H:i',
+            'next_day'      => 'nullable|boolean',
+            'memo'          => 'nullable|string|max:200',
         ]);
 
         $schedule = $device->schedules()->create([
             'type'         => $validated['type'],
-            'start_at'     => $validated['start_at']     ?? null,
-            'end_at'       => $validated['end_at']       ?? null,
+            'start_at'     => $validated['start_at'] ?? null,
+            'end_at'       => $validated['end_at'] ?? null,
             'days_of_week' => $validated['days_of_week'] ?? null,
-            'start_time'   => $validated['start_time']   ?? null,
-            'end_time'     => $validated['end_time']     ?? null,
-            'next_day'     => $validated['next_day']     ?? false,
-            'memo'         => $validated['memo']         ?? null,
+            'start_time'   => $validated['start_time'] ?? null,
+            'end_time'     => $validated['end_time'] ?? null,
+            'next_day'     => $validated['next_day'] ?? false,
+            'memo'         => $validated['memo'] ?? null,
         ]);
 
         return response()->json(['success' => true, 'schedule' => $schedule], 201);
@@ -554,7 +533,6 @@ class OrgAdminController extends Controller
     public function destroySchedule(Request $request, $deviceId, $scheduleId)
     {
         $organization = $this->getOrganization();
-
         $device = Device::where('device_id', $deviceId)
             ->where('organization_id', $organization->id)
             ->firstOrFail();
@@ -568,7 +546,6 @@ class OrgAdminController extends Controller
     public function updateDeviceNotification(Request $request, $deviceId)
     {
         $organization = $this->getOrganization();
-
         $device = Device::where('device_id', $deviceId)
             ->where('organization_id', $organization->id)
             ->firstOrFail();
@@ -594,7 +571,6 @@ class OrgAdminController extends Controller
         if ($request->has('voice_enabled')) $data['voice_enabled'] = (bool) $request->voice_enabled;
         if ($request->has('voice_phone_1')) $data['voice_phone_1'] = PhoneHelper::normalize($request->voice_phone_1);
         if ($request->has('voice_phone_2')) $data['voice_phone_2'] = PhoneHelper::normalize($request->voice_phone_2);
-
         if (!empty($data)) $notif->update($data);
 
         // SMS or AIコールの有効/無効に応じてpremium_enabledを同期
@@ -612,7 +588,6 @@ class OrgAdminController extends Controller
     public function getCardInfo()
     {
         $organization = $this->getOrganization();
-
         $contract = BillingContract::where('organization_id', $organization->id)
             ->where('status', 'active')
             ->first();
@@ -624,18 +599,11 @@ class OrgAdminController extends Controller
         try {
             \Payjp\Payjp::setApiKey(config('services.payjp.secret_key'));
             $customer = \Payjp\Customer::retrieve($contract->payjp_customer_id);
-            $card     = $customer->cards->data[0] ?? null;
-
+            $card = $customer->cards->data[0] ?? null;
             if (!$card) {
                 return response()->json(['found' => false]);
             }
-
-            return response()->json([
-                'found' => true,
-                'brand' => $card->brand,
-                'last4' => $card->last4,
-            ]);
-
+            return response()->json(['found' => true, 'brand' => $card->brand, 'last4' => $card->last4]);
         } catch (\Exception $e) {
             Log::error('getCardInfo error: ' . $e->getMessage());
             return response()->json(['found' => false]);
@@ -664,13 +632,13 @@ class OrgAdminController extends Controller
         $optAi  = (bool) ($request->opt_ai  ?? false);
         $optSms = (bool) ($request->opt_sms ?? false);
 
-        // ── 料金計算（税抜単価）
+        // 料金計算（税抜単価）
         $unitPrice = 1000 + ($optAi ? 300 : 0) + ($optSms ? 100 : 0);
         $subtotal  = $unitPrice * $count;
         $tax       = (int) floor($subtotal * 0.1);
         $total     = $subtotal + $tax;
 
-        // ── BillingContract（カード情報）取得
+        // BillingContract（カード情報）取得
         $contract = BillingContract::where('organization_id', $organization->id)
             ->where('status', 'active')
             ->first();
@@ -682,27 +650,23 @@ class OrgAdminController extends Controller
             ], 422);
         }
 
-        // ── Pay.jp 課金
+        // Pay.jp 課金
         \Payjp\Payjp::setApiKey(config('services.payjp.secret_key'));
-
         try {
             $charge = \Payjp\Charge::create([
                 'amount'      => $total,
                 'currency'    => 'jpy',
                 'customer'    => $contract->payjp_customer_id,
                 'description' => "みまもりデバイス 追加料金 - {$organization->name} {$count}台"
-                               . ($optAi ? ' / AIコール' : '')
-                               . ($optSms ? ' / SMS' : ''),
+                    . ($optAi  ? ' / AIコール' : '')
+                    . ($optSms ? ' / SMS'      : ''),
             ]);
         } catch (\Exception $e) {
             Log::error('bulkCheckout charge error: ' . $e->getMessage());
-            return response()->json([
-                'success' => false,
-                'message' => '決済に失敗しました: ' . $e->getMessage(),
-            ], 500);
+            return response()->json(['success' => false, 'message' => '決済に失敗しました: ' . $e->getMessage()], 500);
         }
 
-        // ── 課金ログ
+        // 課金ログ
         BillingLog::create([
             'billing_contract_id'  => $contract->id,
             'amount'               => $total,
@@ -713,26 +677,27 @@ class OrgAdminController extends Controller
             'billed_at'            => now(),
         ]);
 
-        // ── BillingContract の台数・金額を更新（翌月分の自動課金に反映）
+        // BillingContract の台数・金額を更新
         $contract->update([
             'device_count'         => $contract->device_count + $count,
             'premium_device_count' => $contract->premium_device_count + (($optAi || $optSms) ? $count : 0),
             'amount'               => $contract->calcAmount() + ($unitPrice * $count),
         ]);
 
-        // ── デバイス発番
+        // デバイス発番
         $issued = [];
-
         for ($i = 0; $i < $count; $i++) {
             $deviceId = $this->generateDeviceId();
             $pin      = $this->generatePin();
 
             $device = Device::create([
-                'device_id'       => $deviceId,
-                'pin_hash'        => Hash::make($pin),
-                'status'          => 'inactive',
-                'organization_id' => $organization->id,
-                'premium_enabled' => $optAi || $optSms ? 1 : 0,
+                'device_id'      => $deviceId,
+                'pin_hash'       => Hash::make($pin),
+                'initial_pin'    => $pin,
+                'current_pin'    => $pin,
+                'status'         => 'inactive',
+                'organization_id'=> $organization->id,
+                'premium_enabled'=> $optAi || $optSms ? 1 : 0,
             ]);
 
             DB::table('notification_settings')->insert([
@@ -747,12 +712,12 @@ class OrgAdminController extends Controller
             $issued[] = ['device_id' => $deviceId, 'pin' => $pin];
         }
 
-        // ── 運営への通知メール（masterユーザーのメールアドレス宛）
+        // 運営への通知メール
         $masterUser = \App\Models\PartnerUser::where('role', 'master')->first();
         $adminEmail = $masterUser?->email;
         if ($adminEmail) {
             try {
-                $admin        = Auth::guard('partner')->user();
+                $admin           = Auth::guard('partner')->user();
                 $deliveryName    = $request->delivery_name    ?? '-';
                 $deliveryPostal  = $request->delivery_postal  ?? '-';
                 $deliveryAddress = $request->delivery_address ?? '-';
@@ -767,20 +732,23 @@ class OrgAdminController extends Controller
 【みまもりトーフ】デバイス追加申込みがありました
 
 ■ 申込み情報
-組織名　　: {$organization->name}
-担当者　　: {$admin->name}（{$admin->email}）
-申込日時　: {$organization->created_at->format('Y/m/d H:i')}
-申込台数　: {$count}台
+
+組織名 : {$organization->name}
+担当者 : {$admin->name}（{$admin->email}）
+申込日時 : {$organization->created_at->format('Y/m/d H:i')}
+申込台数 : {$count}台
 オプション: AIコール＝{$this->boolLabel($optAi)} / SMS＝{$this->boolLabel($optSms)}
-月額合計　: ¥{$total}（税込）
+月額合計 : ¥{$total}（税込）
 
 ■ 配送先
-お名前　　: {$deliveryName}
-郵便番号　: {$deliveryPostal}
-住所　　　: {$deliveryAddress}
-電話番号　: {$deliveryPhone}
+
+お名前 : {$deliveryName}
+郵便番号 : {$deliveryPostal}
+住所 : {$deliveryAddress}
+電話番号 : {$deliveryPhone}
 
 ■ 発番デバイス一覧（{$count}台）
+
 {$deviceList}
 
 ※ SIMをデバイスに登録後、発送をお願いします。
@@ -790,19 +758,17 @@ TEXT;
                     $message->to($adminEmail)
                             ->subject("[みまもりトーフ] デバイス追加申込み：{$organization->name} {$count}台");
                 });
-
             } catch (\Exception $e) {
                 Log::error('bulkCheckout admin mail error: ' . $e->getMessage());
-                // メール失敗でも処理は継続
             }
         }
 
         return response()->json([
-            'success'    => true,
-            'count'      => $count,
-            'issued'     => $issued,
-            'amount'     => $total,
-            'charge_id'  => $charge->id,
+            'success'   => true,
+            'count'     => $count,
+            'issued'    => $issued,
+            'amount'    => $total,
+            'charge_id' => $charge->id,
         ]);
     }
 
@@ -814,14 +780,12 @@ TEXT;
     private function generateDeviceId(): string
     {
         $chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-
         do {
             $id = '';
             for ($i = 0; $i < 6; $i++) {
                 $id .= $chars[random_int(0, strlen($chars) - 1)];
             }
         } while (Device::where('device_id', $id)->exists());
-
         return $id;
     }
 

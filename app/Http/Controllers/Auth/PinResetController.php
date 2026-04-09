@@ -11,6 +11,7 @@ use Illuminate\Support\Str;
 
 class PinResetController extends Controller
 {
+
     /**
      * Step 1: デバイスID入力フォーム
      */
@@ -28,27 +29,25 @@ class PinResetController extends Controller
             'device_id' => 'required|string|size:6',
         ], [
             'device_id.required' => '品番を入力してください',
-            'device_id.size' => '品番は6文字です',
+            'device_id.size'     => '品番は6文字です',
         ]);
 
         $deviceId = strtoupper($request->device_id);
-        $device = Device::where('device_id', $deviceId)->first();
+        $device   = Device::where('device_id', $deviceId)->first();
 
         if (!$device) {
             return back()->withErrors(['device_id' => '登録情報と一致しません'])->withInput();
         }
 
-        // メールアドレスが登録されているか確認
-        $notif = $device->notificationSetting;
+        $notif    = $device->notificationSetting;
         $hasEmail = $notif && $notif->email_1;
 
-        // セッションにデバイスIDを保存（5分間有効）
         $request->session()->put('pin_reset_device_id', $deviceId);
         $request->session()->put('pin_reset_expires', now()->addMinutes(5)->timestamp);
 
         return view('auth.pin-reset-select', [
-            'device_id' => $deviceId,
-            'has_email' => $hasEmail,
+            'device_id'    => $deviceId,
+            'has_email'    => $hasEmail,
             'masked_email' => $hasEmail ? $this->maskEmail($notif->email_1) : null,
         ]);
     }
@@ -63,7 +62,7 @@ class PinResetController extends Controller
         }
 
         $deviceId = $request->session()->get('pin_reset_device_id');
-        $device = Device::where('device_id', $deviceId)->first();
+        $device   = Device::where('device_id', $deviceId)->first();
 
         if (!$device) {
             return redirect('/pin-reset')->with('error', 'デバイスが見つかりません');
@@ -74,14 +73,12 @@ class PinResetController extends Controller
             return redirect('/pin-reset')->with('error', 'メールアドレスが登録されていません');
         }
 
-        // 既存のトークンを削除
         DB::table('pin_reset_tokens')->where('device_id', $device->id)->delete();
 
-        // 新しいトークンを生成
         $token = Str::random(64);
         DB::table('pin_reset_tokens')->insert([
-            'device_id' => $device->id,
-            'token' => hash('sha256', $token),
+            'device_id'  => $device->id,
+            'token'      => hash('sha256', $token),
             'created_at' => now(),
             'expires_at' => now()->addHours(1),
         ]);
@@ -90,14 +87,13 @@ class PinResetController extends Controller
         // $resetUrl = url('/pin-reset/token/' . $token);
         // Mail::to($notif->email_1)->send(new PinResetMail($device, $resetUrl));
 
-        // セッションクリア
         $request->session()->forget(['pin_reset_device_id', 'pin_reset_expires']);
 
         return view('auth.pin-reset-email-sent', [
             'masked_email' => $this->maskEmail($notif->email_1),
             // デバッグ用（本番では削除）
             'debug_token' => $token,
-            'debug_url' => url('/pin-reset/token/' . $token),
+            'debug_url'   => url('/pin-reset/token/' . $token),
         ]);
     }
 
@@ -111,10 +107,7 @@ class PinResetController extends Controller
         }
 
         $deviceId = $request->session()->get('pin_reset_device_id');
-
-        return view('auth.pin-reset-initial', [
-            'device_id' => $deviceId,
-        ]);
+        return view('auth.pin-reset-initial', ['device_id' => $deviceId]);
     }
 
     /**
@@ -128,37 +121,48 @@ class PinResetController extends Controller
 
         $request->validate([
             'initial_pin' => 'required|string|size:4',
-            'new_pin' => 'required|string|size:4|confirmed',
+            'new_pin'     => 'required|string|size:4|confirmed',
         ], [
             'initial_pin.required' => '初期PINを入力してください',
-            'initial_pin.size' => 'PINは4桁です',
-            'new_pin.required' => '新しいPINを入力してください',
-            'new_pin.size' => 'PINは4桁です',
-            'new_pin.confirmed' => '新しいPINが一致しません',
+            'initial_pin.size'     => 'PINは4桁です',
+            'new_pin.required'     => '新しいPINを入力してください',
+            'new_pin.size'         => 'PINは4桁です',
+            'new_pin.confirmed'    => '新しいPINが一致しません',
         ]);
 
         $deviceId = $request->session()->get('pin_reset_device_id');
-        $device = Device::where('device_id', $deviceId)->first();
+        $device   = Device::where('device_id', $deviceId)->first();
 
         if (!$device) {
             return redirect('/pin-reset')->with('error', 'デバイスが見つかりません');
         }
 
-        // order_devicesテーブルから初期PINを取得して照合
-        $orderDevice = DB::table('order_devices')
-            ->where('device_id', $device->id)
-            ->first();
+        // devices.initial_pin で照合（order_devicesが存在しない場合のフォールバック含む）
+        $initialPinMatch = false;
 
-        if (!$orderDevice || $orderDevice->initial_pin !== $request->initial_pin) {
+        // まず devices.initial_pin を確認
+        if ($device->initial_pin !== null) {
+            $initialPinMatch = ($device->initial_pin === $request->initial_pin);
+        } else {
+            // 旧来の order_devices テーブルから確認
+            $orderDevice = DB::table('order_devices')
+                ->where('device_id', $device->id)
+                ->first();
+            if ($orderDevice) {
+                $initialPinMatch = ($orderDevice->initial_pin === $request->initial_pin);
+            }
+        }
+
+        if (!$initialPinMatch) {
             return back()->withErrors(['initial_pin' => '初期PINが正しくありません'])->withInput();
         }
 
-        // PINを更新
+        // PINを更新（pin_hash と current_pin の両方）
         $device->update([
-            'pin_hash' => Hash::make($request->new_pin),
+            'pin_hash'    => Hash::make($request->new_pin),
+            'current_pin' => $request->new_pin,
         ]);
 
-        // セッションクリア
         $request->session()->forget(['pin_reset_device_id', 'pin_reset_expires']);
 
         return view('auth.pin-reset-complete');
@@ -178,9 +182,7 @@ class PinResetController extends Controller
             return redirect('/pin-reset')->with('error', 'リンクが無効または期限切れです。もう一度やり直してください。');
         }
 
-        return view('auth.pin-reset-new-pin', [
-            'token' => $token,
-        ]);
+        return view('auth.pin-reset-new-pin', ['token' => $token]);
     }
 
     /**
@@ -191,8 +193,8 @@ class PinResetController extends Controller
         $request->validate([
             'new_pin' => 'required|string|size:4|confirmed',
         ], [
-            'new_pin.required' => '新しいPINを入力してください',
-            'new_pin.size' => 'PINは4桁です',
+            'new_pin.required'  => '新しいPINを入力してください',
+            'new_pin.size'      => 'PINは4桁です',
             'new_pin.confirmed' => '新しいPINが一致しません',
         ]);
 
@@ -210,12 +212,12 @@ class PinResetController extends Controller
             return redirect('/pin-reset')->with('error', 'デバイスが見つかりません');
         }
 
-        // PINを更新
+        // PINを更新（pin_hash と current_pin の両方）
         $device->update([
-            'pin_hash' => Hash::make($request->new_pin),
+            'pin_hash'    => Hash::make($request->new_pin),
+            'current_pin' => $request->new_pin,
         ]);
 
-        // トークンを削除
         DB::table('pin_reset_tokens')->where('device_id', $device->id)->delete();
 
         return view('auth.pin-reset-complete');
@@ -227,7 +229,7 @@ class PinResetController extends Controller
     private function isSessionValid(Request $request): bool
     {
         $deviceId = $request->session()->get('pin_reset_device_id');
-        $expires = $request->session()->get('pin_reset_expires');
+        $expires  = $request->session()->get('pin_reset_expires');
 
         if (!$deviceId || !$expires) {
             return false;
@@ -246,8 +248,8 @@ class PinResetController extends Controller
      */
     private function maskEmail(string $email): string
     {
-        $parts = explode('@', $email);
-        $local = $parts[0];
+        $parts  = explode('@', $email);
+        $local  = $parts[0];
         $domain = $parts[1];
 
         if (strlen($local) <= 2) {
@@ -257,5 +259,3 @@ class PinResetController extends Controller
         return substr($local, 0, 2) . '***@' . $domain;
     }
 }
-
-
