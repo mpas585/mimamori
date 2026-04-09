@@ -344,7 +344,7 @@
                             <td class="{{ $device->battery_pct && $device->battery_pct < 20 ? 'battery-low' : '' }}" style="font-size:12px;">{{ $device->battery_pct ? $device->battery_pct . '%' : '-' }}</td>
                             <td class="{{ $rssi !== null && $rssi < -85 ? 'signal-weak' : '' }}" style="font-size:12px;">{{ $signalLabel }}</td>
                             <td>
-                                <button class="action-btn" onclick="showDeviceDetail('{{ $device->device_id }}')">詳細</button>
+                                <button class="action-btn" onclick="showDeviceDetail('{{ $device->device_id }}')">詳細</button><a class="action-btn" href="/partner/org/devices/{{ $device->device_id }}/logs">ログ</a>
                             </td>
                         </tr>
                     @empty
