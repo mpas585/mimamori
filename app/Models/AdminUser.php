@@ -23,6 +23,14 @@ class AdminUser extends Authenticatable
     ];
 
     /**
+     * remember_token カラムが存在しないため無効化
+     */
+    public function getRememberTokenName(): string
+    {
+        return '';
+    }
+
+    /**
      * 認証用パスワードカラム
      */
     public function getAuthPassword(): string
@@ -54,5 +62,3 @@ class AdminUser extends Authenticatable
         return $this->belongsTo(Organization::class);
     }
 }
-
-
