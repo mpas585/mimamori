@@ -184,6 +184,7 @@ class MasterController extends Controller
             'alert_threshold_hours' => 'nullable|integer|in:12,24,36,48,72',
             'install_height_cm'     => 'nullable|integer|min:100|max:300',
             'pet_exclusion_enabled' => 'nullable|boolean',
+            'away_mode'             => 'nullable|boolean',
             'billing_start_date'    => 'nullable|date',
             'sim_id'                => [
                 'nullable',
@@ -228,6 +229,9 @@ class MasterController extends Controller
         $device->install_height_cm     = $request->install_height_cm     ?? $device->install_height_cm;
         $device->pet_exclusion_enabled = $request->has('pet_exclusion_enabled') ? (int) $request->pet_exclusion_enabled : $device->pet_exclusion_enabled;
         $device->billing_start_date    = $request->billing_start_date    ?? $device->billing_start_date;
+        if ($request->has('away_mode')) {
+            $device->away_mode = (bool) $request->away_mode;
+        }
         $device->sim_id                = $request->filled('sim_id') ? $request->sim_id : null;
         $device->save();
 
