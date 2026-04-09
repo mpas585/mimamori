@@ -16,6 +16,8 @@ class Device extends Authenticatable
     protected $fillable = [
         'device_id',
         'pin_hash',
+        'initial_pin',
+        'current_pin',
         'nickname',
         'location_memo',
         'status',
@@ -41,6 +43,8 @@ class Device extends Authenticatable
 
     protected $hidden = [
         'pin_hash',
+        'initial_pin',
+        'current_pin',
     ];
 
     protected function casts(): array
