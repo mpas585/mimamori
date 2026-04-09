@@ -953,7 +953,15 @@ function masterToggleNotifyService(enabled) {
         headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' },
         body: JSON.stringify({ enabled: enabled ? 1 : 0 })
     }).then(r => r.json()).then(d => {
-        if (d.success) { showToast(d.message, 'success'); }
+        if (d.success) {
+            showToast(d.message, 'success');
+            document.querySelectorAll('.device-table tbody tr').forEach(row => {
+                const idCell = row.querySelector('.device-id-cell');
+                if (idCell && idCell.textContent.trim() === masterCurrentDeviceId) {
+                    enabled ? row.classList.remove('row-inactive') : row.classList.add('row-inactive');
+                }
+            });
+        }
         else { showToast(d.message || 'エラー', 'error'); document.getElementById('masterDetailNotifyEnabled').checked = !enabled; document.getElementById('masterDetailNotifyLabel').textContent = !enabled ? '有効' : '停止中'; }
     }).catch(() => showToast('通信エラー', 'error'));
 }
