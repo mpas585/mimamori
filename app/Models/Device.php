@@ -55,7 +55,8 @@ class Device extends Authenticatable
             'deleted_at'             => 'datetime',
             'pet_exclusion_enabled'  => 'boolean',
             'away_mode'              => 'boolean',
-            'premium_enabled'        => 'boolean',
+            'premium_enabled'                => 'boolean',
+            'notification_service_enabled'   => 'boolean',
         ];
     }
 
