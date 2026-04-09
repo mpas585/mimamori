@@ -80,6 +80,7 @@
     .watch-slider { position: absolute; cursor: pointer; inset: 0; background: var(--gray-300, #d1d5db); border-radius: 12px; transition: 0.3s; }
     .watch-slider::before { content: ''; position: absolute; height: 18px; width: 18px; left: 3px; bottom: 3px; background: white; border-radius: 50%; transition: 0.3s; }
     .watch-toggle input:checked + .watch-slider { background: #22c55e; }
+    #masterDetailAwayMode:checked + .watch-slider { background: #dc2626; }
     .watch-toggle input:checked + .watch-slider::before { transform: translateX(20px); }
     /* 組織管理テーブル */
     .org-table { width: 100%; border-collapse: collapse; font-size: 13px; }
