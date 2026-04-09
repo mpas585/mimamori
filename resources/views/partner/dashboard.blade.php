@@ -312,7 +312,7 @@
                                 else $signalLabel = '弱い';
                             }
                         @endphp
-                        <tr id="row-{{ $device->device_id }}" {{ !$device->notification_service_enabled ? 'class="row-inactive"' : '' }}>
+                        <tr id="row-{{ $device->device_id }}" class="{{ !$device->notification_service_enabled ? 'row-inactive' : '' }}">
                             <td>
                                 @switch($displayStatus)
                                     @case('normal') <span class="device-status normal">正常</span> @break
