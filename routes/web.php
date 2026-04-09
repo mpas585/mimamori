@@ -123,10 +123,8 @@ Route::middleware(PartnerAuth::class)->prefix('partner')->group(function () {
     Route::put('/orgs/{orgId}/users/{userId}', [MasterController::class, 'updateOrgUser'])->name('partner.orgs.users.update');
     Route::delete('/orgs/{orgId}/users/{userId}', [MasterController::class, 'destroyOrgUser'])->name('partner.orgs.users.destroy');
     Route::post('/orgs/{orgId}/users/{userId}/reset-password', [MasterController::class, 'resetOrgUserPassword'])->name('partner.orgs.users.reset-password');
-});
 
-// ★ master 限定（課金管理）
-Route::middleware(PartnerAuth::class.':master')->prefix('partner')->group(function () {
+    // 課金管理（master・operator 共通 — operatorは自組織のみ）
     Route::get('/billing', [BillingController::class, 'index'])->name('partner.billing.index');
     Route::post('/billing', [BillingController::class, 'store'])->name('partner.billing.store');
     Route::get('/billing/tds-complete', [BillingController::class, 'tdsComplete'])->name('partner.billing.tds-complete');

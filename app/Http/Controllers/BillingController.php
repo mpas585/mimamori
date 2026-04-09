@@ -12,13 +12,41 @@ use App\Models\Organization;
 class BillingController extends Controller
 {
     /**
+     * ログイン中パートナーユーザーを取得
+     */
+    private function authUser()
+    {
+        return Auth::guard('partner')->user();
+    }
+
+    /**
+     * operatorの場合は自組織の契約か確認。違えばabort(403)
+     */
+    private function authorizeContract(BillingContract $contract): void
+    {
+        $user = $this->authUser();
+        if ($user->isOperator() && $contract->organization_id !== $user->organization_id) {
+            abort(403);
+        }
+    }
+
+    /**
      * 課金管理画面
      */
     public function index()
     {
-        $contracts = BillingContract::with(['organization', 'logs' => function ($q) {
+        $user = $this->authUser();
+
+        $query = BillingContract::with(['organization', 'logs' => function ($q) {
             $q->orderByDesc('billed_at')->limit(5);
-        }])->orderByDesc('id')->paginate(20);
+        }]);
+
+        // operatorは自組織の契約のみ表示
+        if ($user->isOperator()) {
+            $query->where('organization_id', $user->organization_id);
+        }
+
+        $contracts = $query->orderByDesc('id')->paginate(20);
 
         return view('billing.index', compact('contracts'));
     }
@@ -28,6 +56,8 @@ class BillingController extends Controller
      */
     public function store(Request $request)
     {
+        $user = $this->authUser();
+
         $request->validate([
             'payjp_token'          => 'required|string',
             'organization_id'      => 'nullable|exists:organizations,id',
@@ -35,22 +65,27 @@ class BillingController extends Controller
             'premium_device_count' => 'required|integer|min:0|max:999',
         ]);
 
+        // operatorは自組織のみ登録可能（リクエストの organization_id を上書き）
+        $organizationId = $user->isOperator()
+            ? $user->organization_id
+            : $request->organization_id;
+
         \Payjp\Payjp::setApiKey(config('services.payjp.secret_key'));
 
         try {
-            $orgName = $request->organization_id
-                ? Organization::find($request->organization_id)?->name
+            $orgName = $organizationId
+                ? Organization::find($organizationId)?->name
                 : 'individual';
 
             // ログイン中のパートナーユーザーのメアドを取得
-            $email = Auth::guard('partner')->user()?->email ?? null;
+            $email = $user->email ?? null;
 
             // Customer 作成（メアド付き）
             $customer = \Payjp\Customer::create([
                 'card'        => $request->payjp_token,
                 'email'       => $email,
                 'description' => 'みまもりデバイス - ' . $orgName,
-                'metadata'    => ['organization_id' => $request->organization_id ?? 'none'],
+                'metadata'    => ['organization_id' => $organizationId ?? 'none'],
             ]);
 
             // 金額計算（ベース¥1000/台 + AIコール¥300/台）
@@ -71,7 +106,7 @@ class BillingController extends Controller
             if (isset($charge->three_d_secure_status) && $charge->three_d_secure_status === 'unverified') {
                 // BillingContractを一時保存（未確定状態）
                 BillingContract::create([
-                    'organization_id'   => $request->organization_id,
+                    'organization_id'   => $organizationId,
                     'payjp_customer_id' => $customer->id,
                     'device_count'      => $request->device_count,
                     'unit_price'        => 1000,
@@ -91,7 +126,7 @@ class BillingController extends Controller
             // 3DS不要 or 認証済み → 通常完了
             return $this->completeContract(
                 $customer->id, $charge,
-                $request->organization_id, $request->device_count, $amount
+                $organizationId, $request->device_count, $amount
             );
 
         } catch (\Exception $e) {
@@ -190,6 +225,8 @@ class BillingController extends Controller
      */
     public function update(Request $request, BillingContract $contract)
     {
+        $this->authorizeContract($contract);
+
         $request->validate([
             'device_count'         => 'required|integer|min:1|max:999',
             'premium_device_count' => 'required|integer|min:0|max:999',
@@ -213,6 +250,8 @@ class BillingController extends Controller
      */
     public function cancel(BillingContract $contract)
     {
+        $this->authorizeContract($contract);
+
         $contract->update([
             'status'      => 'canceled',
             'canceled_at' => now(),
@@ -226,6 +265,8 @@ class BillingController extends Controller
      */
     public function updateCard(Request $request, BillingContract $contract)
     {
+        $this->authorizeContract($contract);
+
         $request->validate(['payjp_token' => 'required|string']);
 
         \Payjp\Payjp::setApiKey(config('services.payjp.secret_key'));
@@ -247,6 +288,8 @@ class BillingController extends Controller
      */
     public function chargeNow(BillingContract $contract)
     {
+        $this->authorizeContract($contract);
+
         \App\Jobs\MonthlyBillingJob::dispatchSync($contract->id);
         return response()->json(['ok' => true, 'message' => '課金を実行しました']);
     }

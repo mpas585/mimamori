@@ -776,7 +776,7 @@ async function bulkUpdateSummary() {
         var res = await fetch('/partner/org/card-info', { headers: { 'Accept': 'application/json' } });
         var data = await res.json();
         if (data.found) { cardDisplay.textContent = data.brand + ' **** ' + data.last4; cardDisplay.style.color = 'var(--gray-800)'; nextBtn.disabled = false; }
-        else { cardDisplay.innerHTML = '<span style="color:var(--red);">未登録 — 管理者にカードのご登録をご依頼ください</span>'; nextBtn.disabled = true; }
+        else { cardDisplay.innerHTML = '<span style="color:var(--red);">未登録 — <a href="/partner/billing" style="color:var(--red);text-decoration:underline;">カードを登録する</a></span>'; nextBtn.disabled = true; }
     } catch(e) { cardDisplay.textContent = '取得できませんでした'; }
 }
 
