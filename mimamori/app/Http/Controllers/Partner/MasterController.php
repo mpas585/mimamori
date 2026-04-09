@@ -674,4 +674,40 @@ class MasterController extends Controller
             'message'         => $request->premium_enabled ? 'プレミアムを有効にしました' : 'プレミアムを無効にしました',
         ]);
     }
+
+    private function buildSalesData(): array
+    {
+        $now            = now();
+        $thisMonthStart = $now->copy()->startOfMonth();
+        $lastMonthStart = $now->copy()->subMonth()->startOfMonth();
+        $lastMonthEnd   = $now->copy()->subMonth()->endOfMonth();
+
+        $totalAll  = BillingLog::where('status', 'success')->sum('amount');
+        $countAll  = BillingLog::where('status', 'success')->count();
+        $thisMonth = BillingLog::where('status', 'success')->where('billed_at', '>=', $thisMonthStart)->sum('amount');
+        $countThis = BillingLog::where('status', 'success')->where('billed_at', '>=', $thisMonthStart)->count();
+        $lastMonth = BillingLog::where('status', 'success')->whereBetween('billed_at', [$lastMonthStart, $lastMonthEnd])->sum('amount');
+
+        $monthly = BillingLog::where('status', 'success')
+            ->where('billed_at', '>=', $now->copy()->subMonths(5)->startOfMonth())
+            ->selectRaw("DATE_FORMAT(billed_at, '%Y-%m') as month, SUM(amount) as total, COUNT(*) as count")
+            ->groupBy('month')->orderBy('month', 'desc')->get();
+
+        $byOrg = BillingLog::where('billing_logs.status', 'success')
+            ->where('billing_logs.billed_at', '>=', $thisMonthStart)
+            ->join('billing_contracts', 'billing_logs.billing_contract_id', '=', 'billing_contracts.id')
+            ->leftJoin('organizations', 'billing_contracts.organization_id', '=', 'organizations.id')
+            ->selectRaw('COALESCE(organizations.name, "個人") as org_name, SUM(billing_logs.amount) as total, COUNT(*) as count')
+            ->groupBy('org_name')->orderByDesc('total')->get();
+
+        return [
+            'total_all'  => $totalAll,
+            'count_all'  => $countAll,
+            'this_month' => $thisMonth,
+            'count_this' => $countThis,
+            'last_month' => $lastMonth,
+            'monthly'    => $monthly,
+            'by_org'     => $byOrg,
+        ];
+    }
 }
