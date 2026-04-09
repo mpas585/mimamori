@@ -716,6 +716,14 @@
 @endsection
 
 @section('scripts')
+<script src="https://js.pay.jp/v2/pay.js"></script>
+<script>
+var payjp, elements;
+window.addEventListener('load', function() {
+    payjp = Payjp('{{ config("services.payjp.public_key") }}');
+    elements = payjp.elements();
+});
+</script>
 <script>
 const csrfToken = '{{ csrf_token() }}';
 function showModal(id) { document.getElementById(id).classList.add('show'); }
