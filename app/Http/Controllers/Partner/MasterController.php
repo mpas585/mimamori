@@ -177,6 +177,7 @@ class MasterController extends Controller
         $device = Device::where('device_id', $deviceId)->firstOrFail();
 
         $request->validate([
+            'organization_id'       => 'nullable|integer|exists:organizations,id',
             'room_number'           => 'nullable|string|max:50',
             'tenant_name'           => 'nullable|string|max:100',
             'memo'                  => 'nullable|string|max:255',
@@ -192,26 +193,43 @@ class MasterController extends Controller
                 Rule::unique('devices', 'sim_id')->ignore($device->id),
             ],
         ], [
+            'organization_id.exists' => '指定された組織は存在しません',
             'sim_id.max'    => 'SIM IDは22桁以内で入力してください',
             'sim_id.regex'  => 'SIM IDは数字のみ使用できます',
             'sim_id.unique' => 'このSIM IDは既に別のデバイスに登録されています',
         ]);
 
-        if ($device->organization_id) {
+        // 組織割当の変更処理
+        $newOrgId = $request->filled('organization_id') ? (int) $request->organization_id : null;
+        $oldOrgId = $device->organization_id;
+
+        if ($newOrgId !== $oldOrgId) {
+            // 旧組織のassignmentを削除
+            if ($oldOrgId) {
+                OrgDeviceAssignment::where('organization_id', $oldOrgId)
+                    ->where('device_id', $device->id)
+                    ->delete();
+            }
+            // devices.organization_id を更新
+            $device->organization_id = $newOrgId;
+        }
+
+        // 新組織のassignmentを作成・更新（組織が設定されている場合）
+        $orgIdForAssignment = $newOrgId ?? $oldOrgId;
+        if ($orgIdForAssignment) {
             OrgDeviceAssignment::updateOrCreate(
-                ['organization_id' => $device->organization_id, 'device_id' => $device->id],
+                ['organization_id' => $orgIdForAssignment, 'device_id' => $device->id],
                 ['room_number' => $request->room_number, 'tenant_name' => $request->tenant_name]
             );
         }
 
-        $device->update([
-            'location_memo'         => $request->memo,
-            'alert_threshold_hours' => $request->alert_threshold_hours ?? $device->alert_threshold_hours,
-            'install_height_cm'     => $request->install_height_cm     ?? $device->install_height_cm,
-            'pet_exclusion_enabled' => $request->has('pet_exclusion_enabled') ? (int) $request->pet_exclusion_enabled : $device->pet_exclusion_enabled,
-            'billing_start_date'    => $request->billing_start_date    ?? $device->billing_start_date,
-            'sim_id'                => $request->filled('sim_id') ? $request->sim_id : null,
-        ]);
+        $device->location_memo         = $request->memo;
+        $device->alert_threshold_hours = $request->alert_threshold_hours ?? $device->alert_threshold_hours;
+        $device->install_height_cm     = $request->install_height_cm     ?? $device->install_height_cm;
+        $device->pet_exclusion_enabled = $request->has('pet_exclusion_enabled') ? (int) $request->pet_exclusion_enabled : $device->pet_exclusion_enabled;
+        $device->billing_start_date    = $request->billing_start_date    ?? $device->billing_start_date;
+        $device->sim_id                = $request->filled('sim_id') ? $request->sim_id : null;
+        $device->save();
 
         return response()->json(['success' => true, 'message' => '更新しました']);
     }
@@ -425,7 +443,7 @@ class MasterController extends Controller
 
         $admin->save();
 
-        return redirect('/partner?tab=admins')->with('success', '管理者アカウント「' . $request->name . '」を更新しました');
+        return redirect('/partner?tab=admins')->with('success', '管理者アカウント「' . $admin->name . '」を更新しました');
     }
 
     public function destroyAdminUser(int $id)

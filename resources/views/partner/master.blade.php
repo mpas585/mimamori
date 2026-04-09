@@ -506,6 +506,16 @@
                 <div class="detail-grid">
                     <div class="detail-item"><p class="detail-item-label">デバイスID</p><p class="detail-item-value mono" id="masterDetailDeviceId">-</p></div>
                     <div class="detail-item"><p class="detail-item-label">最終検知</p><p class="detail-item-value" id="masterDetailLastDetected">-</p></div>
+                    {{-- 組織割当セレクト --}}
+                    <div class="detail-item" style="grid-column: span 2;">
+                        <p class="detail-item-label">🏢 組織割当</p>
+                        <select class="detail-form-input" id="masterDetailOrgId">
+                            <option value="">未割当</option>
+                            @foreach($organizations as $org)
+                                <option value="{{ $org->id }}">{{ $org->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
                     <div class="detail-item"><p class="detail-item-label">部屋番号</p><input type="text" class="detail-form-input" id="masterDetailRoom" placeholder="101"></div>
                     <div class="detail-item"><p class="detail-item-label">入居者名</p><input type="text" class="detail-form-input" id="masterDetailTenant" placeholder="山田 太郎"></div>
                 </div>
@@ -912,6 +922,8 @@ async function showDeviceDetail(deviceId) {
         document.getElementById('masterDetailNotifyLabel').textContent = notifyEnabled ? '有効' : '停止中';
         document.getElementById('masterDetailDeviceId').textContent = d.device_id;
         document.getElementById('masterDetailLastDetected').textContent = d.last_human_detected_at || '-';
+        // 組織割当セレクトをセット
+        document.getElementById('masterDetailOrgId').value = d.organization_id || '';
         document.getElementById('masterDetailRoom').value = d.room_number || '';
         document.getElementById('masterDetailTenant').value = d.tenant_name || '';
         const battEl = document.getElementById('masterDetailBattery');
@@ -968,7 +980,9 @@ function masterToggleNotifyService(enabled) {
 
 async function masterSaveAssignment() {
     if (!masterCurrentDeviceId) return;
+    const orgIdVal = document.getElementById('masterDetailOrgId').value;
     const payload = {
+        organization_id: orgIdVal ? parseInt(orgIdVal) : null,
         room_number: document.getElementById('masterDetailRoom').value || null,
         tenant_name: document.getElementById('masterDetailTenant').value || null,
         memo: document.getElementById('masterDetailMemo').value || null,
