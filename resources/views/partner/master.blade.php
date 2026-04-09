@@ -294,7 +294,7 @@
                         </td>
                         <td style="font-size:12px;">{{ $device->last_received_at ? $device->last_received_at->format('m/d H:i') : '-' }}</td>
                         <td style="font-size:12px;">{{ $device->last_human_detected_at ? $device->last_human_detected_at->format('m/d H:i') : '-' }}</td>
-                        <td><button class="action-btn" onclick="showDeviceDetail('{{ $device->device_id }}')">詳細</button><button class="action-btn danger" onclick="confirmDeleteDevice('{{ $device->device_id }}')">削除</button></td>
+                        <td><button class="action-btn" onclick="showDeviceDetail('{{ $device->device_id }}')">詳細</button><a class="action-btn" href="/partner/devices/{{ $device->device_id }}/logs">ログ</a><button class="action-btn danger" onclick="confirmDeleteDevice('{{ $device->device_id }}')">削除</button></td>
                     </tr>
                 @empty
                     <tr>
