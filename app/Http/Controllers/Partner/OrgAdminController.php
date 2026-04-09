@@ -319,9 +319,13 @@ class OrgAdminController extends Controller
             ->firstOrFail();
 
         $request->validate([
-            'room_number' => 'nullable|string|max:50',
-            'tenant_name' => 'nullable|string|max:100',
-            'memo'        => 'nullable|string|max:255',
+            'room_number'           => 'nullable|string|max:50',
+            'tenant_name'           => 'nullable|string|max:100',
+            'memo'                  => 'nullable|string|max:255',
+            'alert_threshold_hours' => 'nullable|integer|in:12,24,36,48,72',
+            'install_height_cm'     => 'nullable|integer|min:100|max:300',
+            'pet_exclusion_enabled' => 'nullable|boolean',
+            'away_mode'             => 'nullable|boolean',
         ]);
 
         OrgDeviceAssignment::updateOrCreate(
@@ -329,7 +333,14 @@ class OrgAdminController extends Controller
             ['room_number' => $request->room_number, 'tenant_name' => $request->tenant_name]
         );
 
-        $device->update(['location_memo' => $request->memo]);
+        $device->location_memo         = $request->memo;
+        $device->alert_threshold_hours = $request->alert_threshold_hours ?? $device->alert_threshold_hours;
+        $device->install_height_cm     = $request->install_height_cm     ?? $device->install_height_cm;
+        $device->pet_exclusion_enabled = $request->has('pet_exclusion_enabled') ? (int) $request->pet_exclusion_enabled : $device->pet_exclusion_enabled;
+        if ($request->has('away_mode')) {
+            $device->away_mode = (bool) $request->away_mode;
+        }
+        $device->save();
 
         if ($request->expectsJson()) {
             return response()->json(['success' => true, 'message' => '更新しました']);
