@@ -1,6 +1,6 @@
 @extends('layouts.partner')
 
-@section('title', 'みまもりト�EチE- マスター管琁E)
+@section('title', 'みまもりトーフ - マスター管理')
 
 @section('styles')
 <style>
@@ -81,7 +81,7 @@
     .watch-slider::before { content: ''; position: absolute; height: 18px; width: 18px; left: 3px; bottom: 3px; background: white; border-radius: 50%; transition: 0.3s; }
     .watch-toggle input:checked + .watch-slider { background: #22c55e; }
     .watch-toggle input:checked + .watch-slider::before { transform: translateX(20px); }
-    /* 絁E��管琁E��ーブル */
+    /* 組織管理テーブル */
     .org-table { width: 100%; border-collapse: collapse; font-size: 13px; }
     .org-table th { text-align: left; padding: 10px 12px; border-bottom: 2px solid #e0d8cc; font-weight: 500; color: #8b7e6a; font-size: 12px; white-space: nowrap; }
     .org-table td { padding: 10px 12px; border-bottom: 1px solid #f0ebe1; vertical-align: middle; }
@@ -89,16 +89,16 @@
     .expires-warn { color: #c62828; font-weight: 600; }
     .expires-ok { color: #2e7d32; }
     .org-notify-icons { display: flex; gap: 6px; align-items: center; font-size: 11px; }
-    /* パ�EトナーアカウンチE*/
+    /* パートナーアカウント */
     .partner-account-cell { font-size: 12px; }
     .partner-account-name { font-weight: 500; color: var(--gray-700); }
     .partner-account-email { color: var(--gray-500); font-size: 11px; }
     .partner-account-count { display: inline-block; padding: 1px 8px; border-radius: 10px; font-size: 11px; font-weight: 600; background: var(--blue-light, #dbeafe); color: #2563eb; }
-    /* チE��イス詳細モーダル */
+    /* デバイス詳細モーダル */
     .modal-section { margin-bottom: 20px; }
     .modal-section-title { font-size: 13px; font-weight: 700; color: var(--gray-600); margin-bottom: 10px; padding-bottom: 6px; border-bottom: 1px solid var(--gray-200); }
     .form-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    /* チE��イス詳細グリチE�� */
+    /* デバイス詳細グリッド */
     .detail-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
     .detail-item { padding: 10px 12px; background: var(--beige, #faf8f4); border-radius: var(--radius, 6px); }
     .detail-item-label { font-size: 11px; color: var(--gray-500, #888); margin-bottom: 4px; }
@@ -150,12 +150,12 @@
     .toast.show { transform: translateY(0); opacity: 1; }
     .toast.success { background: #2e7d32; }
     .toast.error { background: var(--red); }
-    /* パ�Eトナーアカウント管琁E��ーダル冁E��ーブル */
+    /* パートナーアカウント管理モーダル内テーブル */
     .partner-user-table { width: 100%; border-collapse: collapse; font-size: 13px; }
     .partner-user-table th { text-align: left; padding: 8px 10px; border-bottom: 2px solid #e0d8cc; font-weight: 500; color: #8b7e6a; font-size: 11px; white-space: nowrap; }
     .partner-user-table td { padding: 8px 10px; border-bottom: 1px solid #f0ebe1; vertical-align: middle; }
     .partner-user-table tr:hover td { background: #faf8f4; }
-    /* 売上集訁E*/
+    /* 売上集計 */
     .sales-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 20px; }
     .sales-card { background: #fff; border-radius: 10px; padding: 18px 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
     .sales-card-label { font-size: 11px; color: #999; margin-bottom: 6px; }
@@ -183,25 +183,25 @@
     <div class="stat-card"><div class="stat-value">{{ $stats['total'] }}</div><div class="stat-label">総デバイス数</div></div>
     <div class="stat-card"><div class="stat-value">{{ $stats['active'] }}</div><div class="stat-label">稼働中</div></div>
     <div class="stat-card"><div class="stat-value">{{ $stats['normal'] }}</div><div class="stat-label">正常</div></div>
-    <div class="stat-card alert"><div class="stat-value">{{ $stats['alert'] }}</div><div class="stat-label">未検知アラーチE/div></div>
+    <div class="stat-card alert"><div class="stat-value">{{ $stats['alert'] }}</div><div class="stat-label">未検知アラート</div></div>
     <div class="stat-card offline"><div class="stat-value">{{ $stats['offline'] }}</div><div class="stat-label">通信途絶</div></div>
-    <div class="stat-card"><div class="stat-value">{{ $stats['inactive'] }}</div><div class="stat-label">未稼僁E/div></div>
+    <div class="stat-card"><div class="stat-value">{{ $stats['inactive'] }}</div><div class="stat-label">未稼働</div></div>
 </div>
 
-@if(session('success')) <div class="flash-success">✁E{{ session('success') }}</div> @endif
+@if(session('success')) <div class="flash-success">✓ {{ session('success') }}</div> @endif
 @if(session('error')) <div class="flash-error">⚠ {{ session('error') }}</div> @endif
 
 <div class="tab-bar">
-    <button class="tab active" onclick="switchTab('devices', this)">チE��イス管琁E/button>
-    <button class="tab" onclick="switchTab('admins', this)">管琁E��E��カウンチE/button>
-    <button class="tab" onclick="switchTab('orgs', this)">パ�Eトナー管琁E/button>
-    <button class="tab" onclick="switchTab('sales', this)">売上集訁E/button>
+    <button class="tab active" onclick="switchTab('devices', this)">デバイス管理</button>
+    <button class="tab" onclick="switchTab('admins', this)">管理者アカウント</button>
+    <button class="tab" onclick="switchTab('orgs', this)">パートナー管理</button>
+    <button class="tab" onclick="switchTab('sales', this)">売上集計</button>
 </div>
 
-{{-- ===== チE��イス管琁E��チE===== --}}
+{{-- ===== デバイス管理タブ ===== --}}
 <div id="tab-devices" class="tab-content active">
     <div class="card" id="issueSectionCard">
-        <div class="card-title" style="font-size:15px;font-weight:600;color:#5a5245;margin-bottom:12px;">チE��イス発番</div>
+        <div class="card-title" style="font-size:15px;font-weight:600;color:#5a5245;margin-bottom:12px;">デバイス発番</div>
         <div class="issue-section">
             <form method="POST" action="/partner/issue" class="issue-form">
                 @csrf
@@ -222,16 +222,16 @@
     @if(session('issued'))
         @php $issued = session('issued'); @endphp
         <div class="issued-result">
-            <div class="issued-title">✁EチE��イスを発番しました</div>
-            <div class="issued-item"><span class="label">品番</span><span class="value" id="issued-id">{{ $issued['device_id'] }}</span><button class="issued-copy-btn" onclick="copyText('issued-id')">コピ�E</button></div>
-            <div class="issued-item"><span class="label">初期PIN</span><span class="value" id="issued-pin">{{ $issued['pin'] }}</span><button class="issued-copy-btn" onclick="copyText('issued-pin')">コピ�E</button></div>
+            <div class="issued-title">✓ デバイスを発番しました</div>
+            <div class="issued-item"><span class="label">品番</span><span class="value" id="issued-id">{{ $issued['device_id'] }}</span><button class="issued-copy-btn" onclick="copyText('issued-id')">コピー</button></div>
+            <div class="issued-item"><span class="label">初期PIN</span><span class="value" id="issued-pin">{{ $issued['pin'] }}</span><button class="issued-copy-btn" onclick="copyText('issued-pin')">コピー</button></div>
         </div>
     @endif
 
     @if(session('issued_bulk'))
         @php $bulkList = session('issued_bulk'); @endphp
         <div class="issued-result">
-            <div class="issued-title">✁E{{ count($bulkList) }}台のチE��イスを発番しました</div>
+            <div class="issued-title">✓ {{ count($bulkList) }}台のデバイスを発番しました</div>
             @foreach($bulkList as $i => $item)
                 <div class="issued-item"><span class="label">{{ $i + 1 }}.</span><span class="value">{{ $item['device_id'] }}</span><span style="color:#666;margin:0 8px;">/</span><span class="value">{{ $item['pin'] }}</span></div>
             @endforeach
@@ -239,20 +239,20 @@
     @endif
 
     <div class="card">
-        <div style="font-size:15px;font-weight:600;color:#5a5245;margin-bottom:12px;">チE��イス一覧</div>
+        <div style="font-size:15px;font-weight:600;color:#5a5245;margin-bottom:12px;">デバイス一覧</div>
         <form method="GET" action="/partner" class="filter-bar">
             <input type="hidden" name="tab" value="devices">
             <input type="text" name="search" class="filter-input" placeholder="品番・表示名で検索" value="{{ request('search') }}">
             <select name="status" class="filter-select">
-                <option value="">全スチE�Eタス</option>
+                <option value="">全ステータス</option>
                 <option value="normal" {{ request('status') === 'normal' ? 'selected' : '' }}>正常</option>
-                <option value="alert" {{ request('status') === 'alert' ? 'selected' : '' }}>未検知アラーチE/option>
+                <option value="alert" {{ request('status') === 'alert' ? 'selected' : '' }}>未検知アラート</option>
                 <option value="offline" {{ request('status') === 'offline' ? 'selected' : '' }}>通信途絶</option>
-                <option value="inactive" {{ request('status') === 'inactive' ? 'selected' : '' }}>未稼僁E/option>
+                <option value="inactive" {{ request('status') === 'inactive' ? 'selected' : '' }}>未稼働</option>
             </select>
             <select name="org" class="filter-select">
-                <option value="">全絁E��E/option>
-                <option value="none" {{ request('org') === 'none' ? 'selected' : '' }}>絁E��未所屁E/option>
+                <option value="">全組織</option>
+                <option value="none" {{ request('org') === 'none' ? 'selected' : '' }}>組織未所属</option>
                 @foreach($organizations as $org)
                     <option value="{{ $org->id }}" {{ request('org') == $org->id ? 'selected' : '' }}>{{ $org->name }}</option>
                 @endforeach
@@ -261,7 +261,7 @@
         </form>
         <table class="device-table">
             <thead>
-                <tr><th>品番</th><th>表示吁E/th><th>スチE�Eタス</th><th>絁E��E/th><th>電池残量</th><th>電波強度</th><th>最終受信</th><th>最終検知</th><th>操佁E/th></tr>
+                <tr><th>品番</th><th>表示名</th><th>ステータス</th><th>組織</th><th>電池残量</th><th>電波強度</th><th>最終受信</th><th>最終検知</th><th>操作</th></tr>
             </thead>
             <tbody>
                 @forelse($devices as $device)
@@ -272,10 +272,10 @@
                             <span class="status-badge status-{{ $device->status }}">
                                 @switch($device->status)
                                     @case('normal') 正常 @break
-                                    @case('warning') 注愁E@break
-                                    @case('alert') 未検知アラーチE@break
+                                    @case('warning') 注意 @break
+                                    @case('alert') 未検知アラート @break
                                     @case('offline') 通信途絶 @break
-                                    @case('inactive') 未稼僁E@break
+                                    @case('inactive') 未稼働 @break
                                 @endswitch
                             </span>
                         </td>
@@ -284,7 +284,9 @@
                         <td class="{{ $device->rssi !== null && $device->rssi <= -85 ? 'signal-weak' : '' }}" style="font-size:12px;">
                             @if($device->rssi !== null)
                                 @if($device->rssi > -70) 良好
-                                @elseif($device->rssi > -85) 普送E                                @else 弱ぁE                                @endif
+                                @elseif($device->rssi > -85) 普通
+                                @else 弱い
+                                @endif
                                 ({{ $device->rssi }}dBm)
                             @else
                                 -
@@ -297,8 +299,8 @@
                 @empty
                     <tr>
                         <td colspan="9" class="empty-row">
-                            チE��イスがありません、Ebr>
-                            <button class="btn btn-sm btn-primary" style="margin-top:10px;" onclick="scrollToIssueSection()">チE��イスを発番する</button>
+                            デバイスがありません。<br>
+                            <button class="btn btn-sm btn-primary" style="margin-top:10px;" onclick="scrollToIssueSection()">デバイスを発番する</button>
                         </td>
                     </tr>
                 @endforelse
@@ -316,16 +318,16 @@
     </div>
 </div>
 
-{{-- ===== 管琁E��E��カウントタブ！Easterのみ�E�E===== --}}
+{{-- ===== 管理者アカウントタブ（masterのみ） ===== --}}
 <div id="tab-admins" class="tab-content">
     <div class="card">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
-            <div style="font-size:15px;font-weight:600;color:#5a5245;">管琁E��E��カウント一覧</div>
-            <div class="toolbar-right"><button class="btn btn-sm btn-primary" onclick="showAddAdminModal()">�E�E管琁E��E��加</button></div>
+            <div style="font-size:15px;font-weight:600;color:#5a5245;">管理者アカウント一覧</div>
+            <div class="toolbar-right"><button class="btn btn-sm btn-primary" onclick="showAddAdminModal()">＋ 管理者追加</button></div>
         </div>
         <table class="admin-table">
             <thead>
-                <tr><th>ID</th><th>名前</th><th>メールアドレス</th><th>最終ログイン</th><th>作�E日</th><th>操佁E/th></tr>
+                <tr><th>ID</th><th>名前</th><th>メールアドレス</th><th>最終ログイン</th><th>作成日</th><th>操作</th></tr>
             </thead>
             <tbody>
                 @forelse($adminUsers as $admin)
@@ -336,30 +338,30 @@
                         <td style="font-size:12px;color:#888;">{{ $admin->last_login_at ? \Carbon\Carbon::parse($admin->last_login_at)->format('Y/m/d H:i') : '未ログイン' }}</td>
                         <td style="font-size:12px;color:#888;">{{ $admin->created_at->format('Y/m/d') }}</td>
                         <td>
-                            <button class="action-btn" onclick="showEditAdminModal({{ json_encode(['id' => $admin->id, 'name' => $admin->name, 'email' => $admin->email]) }})">編雁E/button>
+                            <button class="action-btn" onclick="showEditAdminModal({{ json_encode(['id' => $admin->id, 'name' => $admin->name, 'email' => $admin->email]) }})">編集</button>
                             @if($admin->id !== Auth::guard('partner')->id())
                                 <button class="action-btn danger" onclick="confirmDeleteAdmin({{ $admin->id }}, '{{ $admin->name }}')">削除</button>
                             @endif
                         </td>
                     </tr>
                 @empty
-                    <tr><td colspan="6" class="empty-row">管琁E��E��カウントがありません</td></tr>
+                    <tr><td colspan="6" class="empty-row">管理者アカウントがありません</td></tr>
                 @endforelse
             </tbody>
         </table>
     </div>
 </div>
 
-{{-- ===== 絁E��管琁E��チE===== --}}
+{{-- ===== 組織管理タブ ===== --}}
 <div id="tab-orgs" class="tab-content">
     <div class="card">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
-            <div style="font-size:15px;font-weight:600;color:#5a5245;">パ�Eトナー一覧</div>
-            <button class="btn btn-sm btn-primary" onclick="showAddOrgModal()">�E�Eパ�Eトナー登録</button>
+            <div style="font-size:15px;font-weight:600;color:#5a5245;">パートナー一覧</div>
+            <button class="btn btn-sm btn-primary" onclick="showAddOrgModal()">＋ パートナー登録</button>
         </div>
         <table class="org-table">
             <thead>
-                <tr><th>絁E��名</th><th>拁E��老E/th><th>連絡允E/th><th>チE��イス数</th><th>パ�EトナーアカウンチE/th><th>通知</th><th>操佁E/th></tr>
+                <tr><th>組織名</th><th>担当者</th><th>連絡先</th><th>デバイス数</th><th>パートナーアカウント</th><th>通知</th><th>操作</th></tr>
             </thead>
             <tbody>
                 @forelse($organizations as $org)
@@ -379,31 +381,31 @@
                                     <div><span class="partner-account-name">{{ $pu->name }}</span><br><span class="partner-account-email">{{ $pu->email }}</span></div>
                                 @endforeach
                             @else
-                                <span style="color:var(--gray-400);font-size:11px;">未設宁E/span>
+                                <span style="color:var(--gray-400);font-size:11px;">未設定</span>
                             @endif
                         </td>
                         <td>
                             <div class="org-notify-icons">
-                                @if($hasEmail) <span title="メール" style="{{ $org->notification_enabled ? '' : 'opacity:0.4;' }}">✁E/span> @endif
+                                @if($hasEmail) <span title="メール" style="{{ $org->notification_enabled ? '' : 'opacity:0.4;' }}">✉</span> @endif
                                 @if($hasSms) <span title="SMS" style="{{ $org->notification_sms_enabled ? '' : 'opacity:0.4;' }}">📱</span> @endif
-                                @if(!$hasEmail && !$hasSms) <span style="color:var(--gray-300);font-size:11px;">未設宁E/span> @endif
+                                @if(!$hasEmail && !$hasSms) <span style="color:var(--gray-300);font-size:11px;">未設定</span> @endif
                             </div>
                         </td>
                         <td>
-                            <button class="action-btn" onclick="showEditOrgModal({{ json_encode(['id'=>$org->id,'name'=>$org->name,'contact_name'=>$org->contact_name,'contact_email'=>$org->contact_email,'contact_phone'=>$org->contact_phone,'address'=>$org->address,'notes'=>$org->notes,'notification_email_1'=>$org->notification_email_1,'notification_email_2'=>$org->notification_email_2,'notification_email_3'=>$org->notification_email_3,'notification_sms_1'=>$org->notification_sms_1,'notification_sms_2'=>$org->notification_sms_2]) }})">編雁E/button>
-                            <button class="action-btn" onclick="showOrgAccountsModal({{ $org->id }}, '{{ addslashes($org->name) }}')">アカウンチE/button>
+                            <button class="action-btn" onclick="showEditOrgModal({{ json_encode(['id'=>$org->id,'name'=>$org->name,'contact_name'=>$org->contact_name,'contact_email'=>$org->contact_email,'contact_phone'=>$org->contact_phone,'address'=>$org->address,'notes'=>$org->notes,'notification_email_1'=>$org->notification_email_1,'notification_email_2'=>$org->notification_email_2,'notification_email_3'=>$org->notification_email_3,'notification_sms_1'=>$org->notification_sms_1,'notification_sms_2'=>$org->notification_sms_2]) }})">編集</button>
+                            <button class="action-btn" onclick="showOrgAccountsModal({{ $org->id }}, '{{ addslashes($org->name) }}')">アカウント</button>
                             @if($org->devices_count === 0) <button class="action-btn danger" onclick="confirmDeleteOrg({{ $org->id }}, '{{ $org->name }}')">削除</button> @endif
                         </td>
                     </tr>
                 @empty
-                    <tr><td colspan="7" class="empty-row">絁E��がありません</td></tr>
+                    <tr><td colspan="7" class="empty-row">組織がありません</td></tr>
                 @endforelse
             </tbody>
         </table>
     </div>
 </div>
 
-{{-- ===== 売上集計タチE===== --}}
+{{-- ===== 売上集計タブ ===== --}}
 <div id="tab-sales" class="tab-content">
     @php
         $diff = $salesData['this_month'] - $salesData['last_month'];
@@ -413,20 +415,20 @@
     @endphp
     <div class="sales-grid">
         <div class="sales-card">
-            <div class="sales-card-label">累計売上（�E期間�E�E/div>
+            <div class="sales-card-label">累計売上（全期間）</div>
             <div class="sales-card-value">¥{{ number_format($salesData['total_all']) }}</div>
             <div class="sales-card-sub">{{ $salesData['count_all'] }}件</div>
         </div>
         <div class="sales-card">
-            <div class="sales-card-label">今月の売丁E/div>
+            <div class="sales-card-label">今月の売上</div>
             <div class="sales-card-value">¥{{ number_format($salesData['this_month']) }}</div>
-            <div class="sales-card-sub">{{ now()->format('Y年n朁E) }} / {{ $salesData['count_this'] }}件</div>
-            <div class="sales-card-diff {{ $diffSign }}">{{ $diffLabel }} 先月毁E/div>
+            <div class="sales-card-sub">{{ now()->format('Y年n月') }} / {{ $salesData['count_this'] }}件</div>
+            <div class="sales-card-diff {{ $diffSign }}">{{ $diffLabel }} 先月比</div>
         </div>
         <div class="sales-card">
-            <div class="sales-card-label">先月の売丁E/div>
+            <div class="sales-card-label">先月の売上</div>
             <div class="sales-card-value">¥{{ number_format($salesData['last_month']) }}</div>
-            <div class="sales-card-sub">{{ now()->subMonth()->format('Y年n朁E) }}</div>
+            <div class="sales-card-sub">{{ now()->subMonth()->format('Y年n月') }}</div>
         </div>
         <div class="sales-card">
             <div class="sales-card-label">稼働デバイス数</div>
@@ -436,19 +438,19 @@
     </div>
 
     <div class="card" style="margin-bottom:16px;">
-        <div style="font-size:15px;font-weight:600;color:#5a5245;margin-bottom:16px;">月別推移�E�直迁Eヶ月！E/div>
+        <div style="font-size:15px;font-weight:600;color:#5a5245;margin-bottom:16px;">月別推移（直近6ヶ月）</div>
         @if($salesData['monthly']->isEmpty())
             <p style="text-align:center;color:#aaa;padding:24px 0;">課金データがありません</p>
         @else
             <table class="sales-trend-table">
                 <thead>
-                    <tr><th>朁E/th><th>売丁E/th><th>件数</th><th></th></tr>
+                    <tr><th>月</th><th>売上</th><th>件数</th><th></th></tr>
                 </thead>
                 <tbody>
                     @foreach($salesData['monthly'] as $row)
                         @php $barWidth = $maxMonthly > 0 ? round($row->total / $maxMonthly * 160) : 0; @endphp
                         <tr>
-                            <td>{{ \Carbon\Carbon::createFromFormat('Y-m', $row->month)->format('Y年n朁E) }}</td>
+                            <td>{{ \Carbon\Carbon::createFromFormat('Y-m', $row->month)->format('Y年n月') }}</td>
                             <td style="font-weight:600;">¥{{ number_format($row->total) }}</td>
                             <td style="color:#888;">{{ $row->count }}件</td>
                             <td><span class="sales-bar" style="width:{{ $barWidth }}px;"></span></td>
@@ -460,12 +462,12 @@
     </div>
 
     <div class="card">
-        <div style="font-size:15px;font-weight:600;color:#5a5245;margin-bottom:16px;">パ�Eトナー別冁E���E�今月�E�E/div>
+        <div style="font-size:15px;font-weight:600;color:#5a5245;margin-bottom:16px;">パートナー別内訳（今月）</div>
         @if($salesData['by_org']->isEmpty())
             <p style="text-align:center;color:#aaa;padding:24px 0;">今月の課金データがありません</p>
         @else
             <table class="sales-org-table">
-                <thead><tr><th>パ�Eトナー吁E/th><th>売丁E/th><th>件数</th></tr></thead>
+                <thead><tr><th>パートナー名</th><th>売上</th><th>件数</th></tr></thead>
                 <tbody>
                     @foreach($salesData['by_org'] as $row)
                         <tr>
@@ -480,14 +482,14 @@
     </div>
 </div>
 
-{{-- ===== チE��イス詳細モーダル ===== --}}
+{{-- ===== デバイス詳細モーダル ===== --}}
 <div id="deviceDetailModal" class="modal-overlay" onclick="if(event.target===this)hideModal('deviceDetailModal')">
     <div class="modal" style="max-width:560px;">
-        <div class="modal-header"><h3>🔍 チE��イス詳細</h3><button class="modal-close" onclick="hideModal('deviceDetailModal')">✁E/button></div>
+        <div class="modal-header"><h3>🔍 デバイス詳細</h3><button class="modal-close" onclick="hideModal('deviceDetailModal')">✕</button></div>
         <div class="modal-body">
             <div class="detail-status-row">
                 <div class="detail-status-badge normal" id="masterDetailStatusBadge">-</div>
-                <button class="detail-clear-alert-btn" id="masterDetailClearAlertBtn" style="display:none;" onclick="masterClearAlert()">✁E警告を解除して退去処琁E/button>
+                <button class="detail-clear-alert-btn" id="masterDetailClearAlertBtn" style="display:none;" onclick="masterClearAlert()">✓ 警告を解除して退去処理</button>
             </div>
             <div class="modal-section" style="margin-bottom:16px;">
                 <div style="display:flex;align-items:center;justify-content:space-between;">
@@ -496,37 +498,37 @@
                         <span style="font-size:13px;font-weight:600;color:var(--gray-700);">📢 通知サービス有効</span>
                         <span id="masterDetailNotifyLabel" style="font-size:12px;color:var(--gray-500);">有効</span>
                     </div>
-                    <button class="btn btn-sm btn-secondary" onclick="masterShowSubscriptionModal()">🔍 通知設宁E/button>
+                    <button class="btn btn-sm btn-secondary" onclick="masterShowSubscriptionModal()">🔍 通知設定</button>
                 </div>
-                <p class="detail-notify-note">OFFにすると未検知チェチE��が停止し、E��知が送られなくなります、E/p>
+                <p class="detail-notify-note">OFFにすると未検知チェックが停止し、通知が送られなくなります。</p>
             </div>
             <div class="modal-section">
                 <div class="detail-grid">
-                    <div class="detail-item"><p class="detail-item-label">チE��イスID</p><p class="detail-item-value mono" id="masterDetailDeviceId">-</p></div>
+                    <div class="detail-item"><p class="detail-item-label">デバイスID</p><p class="detail-item-value mono" id="masterDetailDeviceId">-</p></div>
                     <div class="detail-item"><p class="detail-item-label">最終検知</p><p class="detail-item-value" id="masterDetailLastDetected">-</p></div>
-                    {{-- 絁E��割当セレクチE--}}
+                    {{-- 組織割当セレクト --}}
                     <div class="detail-item" style="grid-column: span 2;">
-                        <p class="detail-item-label">🏢 絁E��割彁E/p>
+                        <p class="detail-item-label">🏢 パートナー割当</p>
                         <select class="detail-form-input" id="masterDetailOrgId">
-                            <option value="">未割彁E/option>
+                            <option value="">未割当</option>
                             @foreach($organizations as $org)
                                 <option value="{{ $org->id }}">{{ $org->name }}</option>
                             @endforeach
                         </select>
                     </div>
                     <div class="detail-item"><p class="detail-item-label">部屋番号</p><input type="text" class="detail-form-input" id="masterDetailRoom" placeholder="101"></div>
-                    <div class="detail-item"><p class="detail-item-label">入屁E��E��</p><input type="text" class="detail-form-input" id="masterDetailTenant" placeholder="山田 太郁E></div>
+                    <div class="detail-item"><p class="detail-item-label">入居者名</p><input type="text" class="detail-form-input" id="masterDetailTenant" placeholder="山田 太郎"></div>
                 </div>
             </div>
             <div class="modal-section">
-                <div class="modal-section-title">📡 センサー状慁E/div>
+                <div class="modal-section-title">📡 センサー状態</div>
                 <div class="detail-grid">
                     <div class="detail-item"><p class="detail-item-label">電池残量(%)</p><p class="detail-item-value" id="masterDetailBattery">-</p></div>
                     <div class="detail-item"><p class="detail-item-label">電波強度</p><p class="detail-item-value" id="masterDetailSignal">-</p></div>
                 </div>
             </div>
             <div class="modal-section">
-                <div class="modal-section-title">⚁E設宁E/div>
+                <div class="modal-section-title">⚙ 設定</div>
                 <div class="detail-grid">
                     <div class="detail-item"><p class="detail-item-label">アラート閾値</p>
                         <select class="detail-form-input" id="masterDetailAlertHours">
@@ -536,10 +538,10 @@
                     <div class="detail-item"><p class="detail-item-label">設置高さ</p>
                         <div style="display:flex;align-items:center;gap:4px;"><input type="number" class="detail-form-input" id="masterDetailHeight" min="100" max="300" style="width:70px;"><span style="font-size:12px;color:var(--gray-500);">cm</span></div>
                     </div>
-                    <div class="detail-item"><p class="detail-item-label">ペット除夁E/p>
+                    <div class="detail-item"><p class="detail-item-label">ペット除外</p>
                         <select class="detail-form-input" id="masterDetailPetExclusion"><option value="0">OFF</option><option value="1">ON</option></select>
                     </div>
-                    <div class="detail-item"><p class="detail-item-label">外�EモーチE/p>
+                    <div class="detail-item"><p class="detail-item-label">外出モード</p>
                         <div style="display:flex;align-items:center;gap:8px;">
                             <label class="watch-toggle"><input type="checkbox" id="masterDetailAwayMode" onchange="masterToggleAwayMode(this.checked)"><span class="watch-slider"></span></label>
                             <span id="masterDetailAwayLabel" style="font-size:12px;color:var(--gray-600);">OFF</span>
@@ -548,31 +550,31 @@
                 </div>
             </div>
             <div class="modal-section">
-                <div class="modal-section-title">🔧 端末惁E��</div>
+                <div class="modal-section-title">🔧 端末情報</div>
                 <div class="detail-grid">
                     <div class="detail-item" style="grid-column: span 2;">
-                        <p class="detail-item-label">📶 SIM ID�E�ECCID�E�E/p>
-                        <input type="text" class="detail-form-input" id="masterDetailSimId" placeholder="侁E 09882806660000123456" maxlength="22" style="font-family:monospace;letter-spacing:1px;" inputmode="numeric">
-                        <p style="font-size:11px;color:var(--gray-500);margin-top:4px;">1NCE管琁E��面のICCIDを�E力、E2桁以冁E�E数字。デバイスからのJSONにSIM IDが含まれる場合�E自動設定されます、E/p>
+                        <p class="detail-item-label">📶 SIM ID（ICCID）</p>
+                        <input type="text" class="detail-form-input" id="masterDetailSimId" placeholder="例: 09882806660000123456" maxlength="22" style="font-family:monospace;letter-spacing:1px;" inputmode="numeric">
+                        <p style="font-size:11px;color:var(--gray-500);margin-top:4px;">1NCE管理画面のICCIDを入力。22桁以内の数字。デバイスからのJSONにSIM IDが含まれる場合は自動設定されます。</p>
                     </div>
                     <div class="detail-item"><p class="detail-item-label">登録日</p><p class="detail-item-value" id="masterDetailRegistered">-</p></div>
-                    <div class="detail-item"><p class="detail-item-label">メモ</p><input type="text" class="detail-form-input" id="masterDetailMemo" placeholder="メモを�E劁E.." maxlength="200"></div>
+                    <div class="detail-item"><p class="detail-item-label">メモ</p><input type="text" class="detail-form-input" id="masterDetailMemo" placeholder="メモを入力..." maxlength="200"></div>
                     <div class="detail-item" style="grid-column: span 2;">
                         <p class="detail-item-label">💳 課金開始日</p>
                         <input type="date" class="detail-form-input" id="masterDetailBillingStartDate" style="max-width:180px;">
-                        <p style="font-size:11px;color:var(--gray-500);margin-top:4px;">月締め請求�E開始日を指定。pay.jp の定期課金に使用予定、E/p>
+                        <p style="font-size:11px;color:var(--gray-500);margin-top:4px;">月締め請求の開始日を指定。pay.jp の定期課金に使用予定。</p>
                     </div>
                 </div>
             </div>
             <div class="modal-section">
-                <div class="modal-section-title">📅 外�Eスケジュール</div>
+                <div class="modal-section-title">📅 外出スケジュール</div>
                 <div id="masterDetailScheduleList"></div>
-                <button class="detail-schedule-add" onclick="masterOpenScheduleAdd()">�E�Eスケジュール追加</button>
+                <button class="detail-schedule-add" onclick="masterOpenScheduleAdd()">＋ スケジュール追加</button>
             </div>
         </div>
         <div class="modal-footer">
-            <button class="btn btn-secondary" onclick="hideModal('deviceDetailModal')">閉じめE/button>
-            <button class="btn btn-primary" onclick="masterSaveAssignment()">保孁E/button>
+            <button class="btn btn-secondary" onclick="hideModal('deviceDetailModal')">閉じる</button>
+            <button class="btn btn-primary" onclick="masterSaveAssignment()">保存</button>
         </div>
     </div>
 </div>
@@ -580,29 +582,29 @@
 {{-- ===== 通知設定モーダル ===== --}}
 <div id="masterSubscriptionModal" class="modal-overlay" onclick="if(event.target===this)hideModal('masterSubscriptionModal')">
     <div class="modal" style="max-width:500px;">
-        <div class="modal-header"><h3>🔍 通知設宁E/h3><button class="modal-close" onclick="hideModal('masterSubscriptionModal')">✁E/button></div>
+        <div class="modal-header"><h3>🔍 通知設定</h3><button class="modal-close" onclick="hideModal('masterSubscriptionModal')">✕</button></div>
         <div class="modal-body">
-            <div style="font-size:12px;color:var(--gray-500);margin-bottom:16px;">対象チE��イス: <span id="masterSubModalDeviceId" class="mono" style="font-size:12px;"></span></div>
+            <div style="font-size:12px;color:var(--gray-500);margin-bottom:16px;">対象デバイス: <span id="masterSubModalDeviceId" class="mono" style="font-size:12px;"></span></div>
             <div style="border:1px solid var(--gray-200);border-radius:var(--radius);padding:14px;margin-bottom:10px;">
                 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-                    <p style="font-size:13px;font-weight:600;color:var(--gray-700);">📱 SMS通知 <span style="font-size:11px;font-weight:400;color:var(--gray-500);">+税込100冁E台/朁E/span></p>
+                    <p style="font-size:13px;font-weight:600;color:var(--gray-700);">📱 SMS通知 <span style="font-size:11px;font-weight:400;color:var(--gray-500);">+税込100円/台/月</span></p>
                     <label class="watch-toggle"><input type="checkbox" id="masterDetailSmsEnabled"><span class="watch-slider"></span></label>
                 </div>
                 <input type="tel" class="detail-form-input" id="masterDetailSmsPhone1" placeholder="09012345678" style="margin-bottom:6px;">
-                <input type="tel" class="detail-form-input" id="masterDetailSmsPhone2" placeholder="09012345678�E�任意！E>
+                <input type="tel" class="detail-form-input" id="masterDetailSmsPhone2" placeholder="09012345678（任意）">
             </div>
             <div style="border:1px solid var(--gray-200);border-radius:var(--radius);padding:14px;">
                 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-                    <p style="font-size:13px;font-weight:600;color:var(--gray-700);">📞 自動音声電話 <span style="font-size:11px;font-weight:400;color:var(--gray-500);">+税込300冁E台/朁E/span></p>
+                    <p style="font-size:13px;font-weight:600;color:var(--gray-700);">📞 自動音声電話 <span style="font-size:11px;font-weight:400;color:var(--gray-500);">+税込300円/台/月</span></p>
                     <label class="watch-toggle"><input type="checkbox" id="masterDetailVoiceEnabled"><span class="watch-slider"></span></label>
                 </div>
                 <input type="tel" class="detail-form-input" id="masterDetailVoicePhone1" placeholder="09012345678" style="margin-bottom:6px;">
-                <input type="tel" class="detail-form-input" id="masterDetailVoicePhone2" placeholder="09012345678�E�任意！E>
+                <input type="tel" class="detail-form-input" id="masterDetailVoicePhone2" placeholder="09012345678（任意）">
             </div>
         </div>
         <div class="modal-footer">
-            <button class="btn btn-secondary" onclick="hideModal('masterSubscriptionModal'); showDeviceDetail(masterCurrentDeviceId)">戻めE/button>
-            <button class="btn btn-primary" onclick="masterSaveNotification(); hideModal('masterSubscriptionModal'); showDeviceDetail(masterCurrentDeviceId)">保孁E/button>
+            <button class="btn btn-secondary" onclick="hideModal('masterSubscriptionModal'); showDeviceDetail(masterCurrentDeviceId)">戻る</button>
+            <button class="btn btn-primary" onclick="masterSaveNotification(); hideModal('masterSubscriptionModal'); showDeviceDetail(masterCurrentDeviceId)">保存</button>
         </div>
     </div>
 </div>
@@ -610,34 +612,34 @@
 {{-- ===== スケジュール追加モーダル ===== --}}
 <div id="masterScheduleAddModal" class="modal-overlay" onclick="if(event.target===this)hideModal('masterScheduleAddModal')">
     <div class="modal" style="max-width:480px;">
-        <div class="modal-header"><h3>📅 スケジュール追加</h3><button class="modal-close" onclick="hideModal('masterScheduleAddModal')">✁E/button></div>
+        <div class="modal-header"><h3>📅 スケジュール追加</h3><button class="modal-close" onclick="hideModal('masterScheduleAddModal')">✕</button></div>
         <div class="modal-body">
             <div class="schedule-type-tabs">
                 <button class="schedule-type-tab active" id="masterTabOneshot" onclick="masterSwitchScheduleType('oneshot')">📅 単発</button>
                 <button class="schedule-type-tab" id="masterTabRecurring" onclick="masterSwitchScheduleType('recurring')">🔄 定期</button>
             </div>
             <div id="masterOneshotForm">
-                <div class="schedule-form-group"><label>開始日晁E/label><input type="datetime-local" id="masterSchedStartAt"></div>
-                <div class="schedule-form-group"><label>終亁E��時（省略可・未入力�E無期限�E�E/label><input type="datetime-local" id="masterSchedEndAt"></div>
+                <div class="schedule-form-group"><label>開始日時</label><input type="datetime-local" id="masterSchedStartAt"></div>
+                <div class="schedule-form-group"><label>終了日時（省略可・未入力は無期限）</label><input type="datetime-local" id="masterSchedEndAt"></div>
             </div>
             <div id="masterRecurringForm" style="display:none;">
                 <div class="schedule-form-group"><label>曜日</label>
                     <div class="schedule-days" id="masterScheduleDays">
                         <button type="button" class="schedule-day-btn" data-day="0" onclick="toggleDay(this)">日</button>
-                        <button type="button" class="schedule-day-btn" data-day="1" onclick="toggleDay(this)">朁E/button>
+                        <button type="button" class="schedule-day-btn" data-day="1" onclick="toggleDay(this)">月</button>
                         <button type="button" class="schedule-day-btn" data-day="2" onclick="toggleDay(this)">火</button>
                         <button type="button" class="schedule-day-btn" data-day="3" onclick="toggleDay(this)">水</button>
                         <button type="button" class="schedule-day-btn" data-day="4" onclick="toggleDay(this)">木</button>
-                        <button type="button" class="schedule-day-btn" data-day="5" onclick="toggleDay(this)">釁E/button>
-                        <button type="button" class="schedule-day-btn" data-day="6" onclick="toggleDay(this)">圁E/button>
+                        <button type="button" class="schedule-day-btn" data-day="5" onclick="toggleDay(this)">金</button>
+                        <button type="button" class="schedule-day-btn" data-day="6" onclick="toggleDay(this)">土</button>
                     </div>
                 </div>
                 <div class="schedule-form-group"><label>時間帯</label>
-                    <div class="schedule-time-row"><input type="time" id="masterSchedStartTime"><span>、E/span><input type="time" id="masterSchedEndTime"></div>
-                    <label class="schedule-nextday-check"><input type="checkbox" id="masterSchedNextDay"> 翌日にまたがめE/label>
+                    <div class="schedule-time-row"><input type="time" id="masterSchedStartTime"><span>〜</span><input type="time" id="masterSchedEndTime"></div>
+                    <label class="schedule-nextday-check"><input type="checkbox" id="masterSchedNextDay"> 翌日にまたがる</label>
                 </div>
             </div>
-            <div class="schedule-form-group"><label>メモ�E�任意！E/label><input type="text" id="masterSchedMemo" placeholder="侁E 外�E・旁E��E maxlength="200"></div>
+            <div class="schedule-form-group"><label>メモ（任意）</label><input type="text" id="masterSchedMemo" placeholder="例: 外出・旅行" maxlength="200"></div>
         </div>
         <div class="modal-footer">
             <button class="btn btn-secondary" onclick="hideModal('masterScheduleAddModal')">キャンセル</button>
@@ -648,40 +650,40 @@
 
 {{-- ===== スケジュール削除確認モーダル ===== --}}
 <div id="masterScheduleDeleteModal" class="modal-overlay" onclick="if(event.target===this)hideModal('masterScheduleDeleteModal')">
-    <div class="modal"><div class="modal-header"><h3>⚠ スケジュール削除</h3><button class="modal-close" onclick="hideModal('masterScheduleDeleteModal')">✁E/button></div>
-        <div class="modal-body"><p>こ�Eスケジュールを削除しますか�E�E/p></div>
+    <div class="modal"><div class="modal-header"><h3>⚠ スケジュール削除</h3><button class="modal-close" onclick="hideModal('masterScheduleDeleteModal')">✕</button></div>
+        <div class="modal-body"><p>このスケジュールを削除しますか？</p></div>
         <div class="modal-footer"><button class="btn btn-secondary" onclick="hideModal('masterScheduleDeleteModal')">キャンセル</button><button class="btn btn-danger" onclick="masterExecuteDeleteSchedule()">削除する</button></div>
     </div>
 </div>
 
-{{-- ===== 管琁E��E��加モーダル�E�Easterのみ�E�E===== --}}
+{{-- ===== 管理者追加モーダル（masterのみ） ===== --}}
 <div id="addAdminModal" class="modal-overlay" onclick="if(event.target===this)hideAddAdminModal()">
     <div class="modal" style="max-width:500px;">
-        <div class="modal-header"><h3>管琁E��E��カウント追加</h3><button class="modal-close" onclick="hideAddAdminModal()">✁E/button></div>
+        <div class="modal-header"><h3>管理者アカウント追加</h3><button class="modal-close" onclick="hideAddAdminModal()">✕</button></div>
         <form method="POST" action="{{ route('partner.admin-users.store') }}">
             @csrf
             <input type="hidden" name="role" value="master">
             <div class="modal-body">
-                <div class="form-group"><label class="form-label">名前 *</label><input type="text" name="name" class="form-input" placeholder="侁E 山田 太郁E required></div>
-                <div class="form-group"><label class="form-label">メールアドレス *</label><input type="email" name="email" class="form-input" placeholder="admin@example.com" required><p class="form-hint">こ�EメールアドレスでログインしまぁE/p></div>
+                <div class="form-group"><label class="form-label">名前 *</label><input type="text" name="name" class="form-input" placeholder="例: 山田 太郎" required></div>
+                <div class="form-group"><label class="form-label">メールアドレス *</label><input type="email" name="email" class="form-input" placeholder="admin@example.com" required><p class="form-hint">このメールアドレスでログインします</p></div>
                 <div class="form-group">
-                    <label class="form-label">初期パスワーチE*</label>
+                    <label class="form-label">初期パスワード *</label>
                     <div class="password-field">
                         <input type="text" name="password" id="addAdminPassword" class="form-input" required>
-                        <button type="button" class="password-generate-btn" onclick="generatePassword('addAdminPassword')">生�E</button>
+                        <button type="button" class="password-generate-btn" onclick="generatePassword('addAdminPassword')">生成</button>
                     </div>
-                    <p class="form-hint">ログイン後に変更するよう案�Eしてください</p>
+                    <p class="form-hint">ログイン後に変更するよう案内してください</p>
                 </div>
             </div>
-            <div class="modal-footer"><button type="button" class="btn btn-secondary" onclick="hideAddAdminModal()">キャンセル</button><button type="submit" class="btn btn-primary">作�E</button></div>
+            <div class="modal-footer"><button type="button" class="btn btn-secondary" onclick="hideAddAdminModal()">キャンセル</button><button type="submit" class="btn btn-primary">作成</button></div>
         </form>
     </div>
 </div>
 
-{{-- ===== 管琁E��E��雁E��ーダル�E�Easterのみ�E�E===== --}}
+{{-- ===== 管理者編集モーダル（masterのみ） ===== --}}
 <div id="editAdminModal" class="modal-overlay" onclick="if(event.target===this)hideEditAdminModal()">
     <div class="modal" style="max-width:500px;">
-        <div class="modal-header"><h3>管琁E��E��カウント編雁E/h3><button class="modal-close" onclick="hideEditAdminModal()">✁E/button></div>
+        <div class="modal-header"><h3>管理者アカウント編集</h3><button class="modal-close" onclick="hideEditAdminModal()">✕</button></div>
         <form method="POST" id="editAdminForm" action="">
             @csrf @method('PUT')
             <input type="hidden" name="role" value="master">
@@ -689,24 +691,24 @@
                 <div class="form-group"><label class="form-label">名前 *</label><input type="text" name="name" id="editAdminName" class="form-input" required></div>
                 <div class="form-group"><label class="form-label">メールアドレス *</label><input type="email" name="email" id="editAdminEmail" class="form-input" required></div>
                 <div class="form-group">
-                    <label class="form-label">新しいパスワーチE/label>
+                    <label class="form-label">新しいパスワード</label>
                     <div class="password-field">
-                        <input type="text" name="password" id="editAdminPassword" class="form-input" placeholder="変更しなぁE��合�E空欁E>
-                        <button type="button" class="password-generate-btn" onclick="generatePassword('editAdminPassword')">生�E</button>
+                        <input type="text" name="password" id="editAdminPassword" class="form-input" placeholder="変更しない場合は空欄">
+                        <button type="button" class="password-generate-btn" onclick="generatePassword('editAdminPassword')">生成</button>
                     </div>
                 </div>
             </div>
-            <div class="modal-footer"><button type="button" class="btn btn-secondary" onclick="hideEditAdminModal()">キャンセル</button><button type="submit" class="btn btn-primary">保孁E/button></div>
+            <div class="modal-footer"><button type="button" class="btn btn-secondary" onclick="hideEditAdminModal()">キャンセル</button><button type="submit" class="btn btn-primary">保存</button></div>
         </form>
     </div>
 </div>
 
 <form id="deleteAdminForm" method="POST" action="" style="display:none;">@csrf @method('DELETE')</form>
 
-{{-- ===== 絁E��追加モーダル ===== --}}
+{{-- ===== 組織追加モーダル ===== --}}
 <div id="addOrgModal" class="modal-overlay" onclick="if(event.target===this)hideAddOrgModal()">
     <div class="modal" style="max-width:560px;">
-        <div class="modal-header"><h3>パ�Eトナー登録</h3><button class="modal-close" onclick="hideAddOrgModal()">✁E/button></div>
+        <div class="modal-header"><h3>パートナー登録</h3><button class="modal-close" onclick="hideAddOrgModal()">✕</button></div>
         <form method="POST" action="{{ route('partner.orgs.store') }}">
             @csrf
             <div class="modal-body">
@@ -720,22 +722,22 @@
                     </div>
                 @endif
                 <div class="modal-section">
-                    <div class="modal-section-title">パ�EトナーアカウンチE/div>
+                    <div class="modal-section-title">パートナーアカウント</div>
                     <div class="form-row-2">
                         <div class="form-group"><label class="form-label">メールアドレス</label><input type="email" name="partner_email" class="form-input" placeholder="partner@example.com"></div>
                         <div class="form-group">
-                            <label class="form-label">パスワーチE/label>
+                            <label class="form-label">パスワード</label>
                             <div class="password-field">
                                 <input type="text" name="partner_password" id="addOrgPartnerPassword" class="form-input">
-                                <button type="button" class="password-generate-btn" onclick="generatePassword('addOrgPartnerPassword')">生�E</button>
+                                <button type="button" class="password-generate-btn" onclick="generatePassword('addOrgPartnerPassword')">生成</button>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="modal-section"><div class="modal-section-title">基本惁E��</div>
-                    <div class="form-group"><label class="form-label">絁E��名 *</label><input type="text" name="name" class="form-input" required></div>
+                <div class="modal-section"><div class="modal-section-title">基本情報</div>
+                    <div class="form-group"><label class="form-label">組織名 *</label><input type="text" name="name" class="form-input" required></div>
                     <div class="form-row-2">
-                        <div class="form-group"><label class="form-label">拁E��老E��</label><input type="text" name="contact_name" class="form-input"></div>
+                        <div class="form-group"><label class="form-label">担当者名</label><input type="text" name="contact_name" class="form-input"></div>
                         <div class="form-group"><label class="form-label">連絡先メール</label><input type="email" name="contact_email" class="form-input"></div>
                     </div>
                     <div class="form-row-2">
@@ -746,22 +748,22 @@
                     <div class="form-group"><label class="form-label">メモ</label><textarea name="notes" class="form-input" rows="2" style="resize:vertical;"></textarea></div>
                 </div>
             </div>
-            <div class="modal-footer"><button type="button" class="btn btn-secondary" onclick="hideAddOrgModal()">キャンセル</button><button type="submit" class="btn btn-primary">作�E</button></div>
+            <div class="modal-footer"><button type="button" class="btn btn-secondary" onclick="hideAddOrgModal()">キャンセル</button><button type="submit" class="btn btn-primary">作成</button></div>
         </form>
     </div>
 </div>
 
-{{-- ===== 絁E��編雁E��ーダル ===== --}}
+{{-- ===== 組織編集モーダル ===== --}}
 <div id="editOrgModal" class="modal-overlay" onclick="if(event.target===this)hideEditOrgModal()">
     <div class="modal" style="max-width:560px;">
-        <div class="modal-header"><h3>パ�Eトナー編雁E/h3><button class="modal-close" onclick="hideEditOrgModal()">✁E/button></div>
+        <div class="modal-header"><h3>パートナー編集</h3><button class="modal-close" onclick="hideEditOrgModal()">✕</button></div>
         <form method="POST" id="editOrgForm" action="">
             @csrf @method('PUT')
             <div class="modal-body">
-                <div class="modal-section"><div class="modal-section-title">基本惁E��</div>
-                    <div class="form-group"><label class="form-label">絁E��名 *</label><input type="text" name="name" id="editOrgName" class="form-input" required></div>
+                <div class="modal-section"><div class="modal-section-title">基本情報</div>
+                    <div class="form-group"><label class="form-label">組織名 *</label><input type="text" name="name" id="editOrgName" class="form-input" required></div>
                     <div class="form-row-2">
-                        <div class="form-group"><label class="form-label">拁E��老E��</label><input type="text" name="contact_name" id="editOrgContactName" class="form-input"></div>
+                        <div class="form-group"><label class="form-label">担当者名</label><input type="text" name="contact_name" id="editOrgContactName" class="form-input"></div>
                         <div class="form-group"><label class="form-label">連絡先メール *</label><input type="email" name="contact_email" id="editOrgContactEmail" class="form-input" required></div>
                     </div>
                     <div class="form-row-2">
@@ -771,81 +773,81 @@
                     <div class="form-group"><label class="form-label">住所</label><input type="text" name="address" id="editOrgAddress" class="form-input"></div>
                     <div class="form-group"><label class="form-label">メモ</label><textarea name="notes" id="editOrgNotes" class="form-input" rows="2" style="resize:vertical;"></textarea></div>
                 </div>
-                <div class="modal-section"><div class="modal-section-title">通知設定（アラート発生時に絁E��宛に送信�E�E/div>
-                    <p style="font-size:12px;color:var(--gray-500);margin-bottom:12px;">設定したメール・SMSにアラートを転送します、E/p>
+                <div class="modal-section"><div class="modal-section-title">通知設定（アラート発生時に組織宛に送信）</div>
+                    <p style="font-size:12px;color:var(--gray-500);margin-bottom:12px;">設定したメール・SMSにアラートを転送します。</p>
                     <div class="form-group"><label class="form-label">通知メール 1</label><input type="email" name="notification_email_1" id="editOrgEmail1" class="form-input"></div>
                     <div class="form-group"><label class="form-label">通知メール 2</label><input type="email" name="notification_email_2" id="editOrgEmail2" class="form-input"></div>
                     <div class="form-group"><label class="form-label">通知メール 3</label><input type="email" name="notification_email_3" id="editOrgEmail3" class="form-input"></div>
                     <div class="form-row-2">
-                        <div class="form-group"><label class="form-label">SMS通知允E1</label><input type="text" name="notification_sms_1" id="editOrgSms1" class="form-input"></div>
-                        <div class="form-group"><label class="form-label">SMS通知允E2</label><input type="text" name="notification_sms_2" id="editOrgSms2" class="form-input"></div>
+                        <div class="form-group"><label class="form-label">SMS通知先 1</label><input type="text" name="notification_sms_1" id="editOrgSms1" class="form-input"></div>
+                        <div class="form-group"><label class="form-label">SMS通知先 2</label><input type="text" name="notification_sms_2" id="editOrgSms2" class="form-input"></div>
                     </div>
                 </div>
             </div>
-            <div class="modal-footer"><button type="button" class="btn btn-secondary" onclick="hideEditOrgModal()">キャンセル</button><button type="submit" class="btn btn-primary">保孁E/button></div>
+            <div class="modal-footer"><button type="button" class="btn btn-secondary" onclick="hideEditOrgModal()">キャンセル</button><button type="submit" class="btn btn-primary">保存</button></div>
         </form>
     </div>
 </div>
 
 <form id="deleteOrgForm" method="POST" action="" style="display:none;">@csrf @method('DELETE')</form>
 
-{{-- ===== パ�Eトナーアカウント管琁E��ーダル�E�一覧のみ�E�E===== --}}
+{{-- ===== パートナーアカウント管理モーダル（一覧のみ） ===== --}}
 <div id="orgAccountsModal" class="modal-overlay" onclick="if(event.target===this)hideModal('orgAccountsModal')">
     <div class="modal" style="max-width:560px;">
-        <div class="modal-header"><h3>👤 パ�Eトナーアカウント管琁E/h3><button class="modal-close" onclick="hideModal('orgAccountsModal')">✁E/button></div>
+        <div class="modal-header"><h3>👤 パートナーアカウント管理</h3><button class="modal-close" onclick="hideModal('orgAccountsModal')">✕</button></div>
         <div class="modal-body">
-            <div style="font-size:13px;color:var(--gray-600);margin-bottom:16px;">絁E��E <strong id="orgAccountsOrgName"></strong></div>
+            <div style="font-size:13px;color:var(--gray-600);margin-bottom:16px;">組織: <strong id="orgAccountsOrgName"></strong></div>
             <div id="orgAccountsTable"><p style="text-align:center;color:var(--gray-400);padding:20px;">読み込み中...</p></div>
         </div>
         <div class="modal-footer">
-            <button class="btn btn-secondary" onclick="hideModal('orgAccountsModal')">閉じめE/button>
+            <button class="btn btn-secondary" onclick="hideModal('orgAccountsModal')">閉じる</button>
         </div>
     </div>
 </div>
 
-{{-- ===== パ�Eトナーアカウント編雁E��ーダル ===== --}}
+{{-- ===== パートナーアカウント編集モーダル ===== --}}
 <div id="orgEditUserModal" class="modal-overlay" onclick="if(event.target===this)hideModal('orgEditUserModal')">
     <div class="modal" style="max-width:460px;">
-        <div class="modal-header"><h3>パ�Eトナーアカウント編雁E/h3><button class="modal-close" onclick="hideModal('orgEditUserModal')">✁E/button></div>
+        <div class="modal-header"><h3>パートナーアカウント編集</h3><button class="modal-close" onclick="hideModal('orgEditUserModal')">✕</button></div>
         <div class="modal-body">
             <input type="hidden" id="orgEditUserId">
             <div class="form-group"><label class="form-label">名前 *</label><input type="text" id="orgEditUserName" class="form-input"></div>
             <div class="form-group"><label class="form-label">メールアドレス *</label><input type="email" id="orgEditUserEmail" class="form-input"></div>
             <div class="form-group">
-                <label class="form-label">新しいパスワーチE/label>
+                <label class="form-label">新しいパスワード</label>
                 <div class="password-field">
-                    <input type="text" id="orgEditUserPassword" class="form-input" placeholder="変更しなぁE��合�E空欁E>
-                    <button type="button" class="password-generate-btn" onclick="generatePassword('orgEditUserPassword')">生�E</button>
+                    <input type="text" id="orgEditUserPassword" class="form-input" placeholder="変更しない場合は空欄">
+                    <button type="button" class="password-generate-btn" onclick="generatePassword('orgEditUserPassword')">生成</button>
                 </div>
             </div>
             <div id="orgEditUserError" style="display:none;color:#c62828;font-size:12px;margin-top:4px;"></div>
         </div>
         <div class="modal-footer">
             <button class="btn btn-secondary" onclick="hideModal('orgEditUserModal')">キャンセル</button>
-            <button class="btn btn-primary" onclick="submitOrgEditUser()">保孁E/button>
+            <button class="btn btn-primary" onclick="submitOrgEditUser()">保存</button>
         </div>
     </div>
 </div>
 
-{{-- ===== パスワードリセチE��モーダル ===== --}}
+{{-- ===== パスワードリセットモーダル ===== --}}
 <div id="orgResetPasswordModal" class="modal-overlay" onclick="if(event.target===this)hideModal('orgResetPasswordModal')">
     <div class="modal" style="max-width:420px;">
-        <div class="modal-header"><h3>🔑 パスワードリセチE��</h3><button class="modal-close" onclick="hideModal('orgResetPasswordModal')">✁E/button></div>
+        <div class="modal-header"><h3>🔑 パスワードリセット</h3><button class="modal-close" onclick="hideModal('orgResetPasswordModal')">✕</button></div>
         <div class="modal-body">
             <div style="font-size:13px;color:var(--gray-600);margin-bottom:16px;">対象: <strong id="orgResetPasswordName"></strong></div>
             <input type="hidden" id="orgResetPasswordUserId">
             <div class="form-group">
-                <label class="form-label">新しいパスワーチE*</label>
+                <label class="form-label">新しいパスワード *</label>
                 <div class="password-field">
                     <input type="text" id="orgResetPasswordValue" class="form-input">
-                    <button type="button" class="password-generate-btn" onclick="generatePassword('orgResetPasswordValue')">生�E</button>
+                    <button type="button" class="password-generate-btn" onclick="generatePassword('orgResetPasswordValue')">生成</button>
                 </div>
             </div>
             <div id="orgResetPasswordError" style="display:none;color:#c62828;font-size:12px;margin-top:4px;"></div>
         </div>
         <div class="modal-footer">
             <button class="btn btn-secondary" onclick="hideModal('orgResetPasswordModal')">キャンセル</button>
-            <button class="btn btn-primary" onclick="submitOrgResetPassword()">リセチE��</button>
+            <button class="btn btn-primary" onclick="submitOrgResetPassword()">リセット</button>
         </div>
     </div>
 </div>
@@ -893,7 +895,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function copyText(id) {
     navigator.clipboard.writeText(document.getElementById(id).textContent).then(() => {
-        const btn = event.target; btn.textContent = 'コピ�E渁E; setTimeout(() => { btn.textContent = 'コピ�E'; }, 1500);
+        const btn = event.target; btn.textContent = 'コピー済'; setTimeout(() => { btn.textContent = 'コピー'; }, 1500);
     });
 }
 
@@ -903,14 +905,14 @@ function generatePassword(inputId) {
     document.getElementById(inputId).value = pw;
 }
 
-// ===== チE��イス詳細 =====
+// ===== デバイス詳細 =====
 async function showDeviceDetail(deviceId) {
     masterCurrentDeviceId = deviceId;
     showModal('deviceDetailModal');
     try {
         const res = await fetch('/partner/devices/' + deviceId + '/detail', { headers: { 'Accept': 'application/json' } });
         const d = await res.json();
-        const statusLabels = { normal: '正常・稼働中', warning: '注愁E, alert: '未検知アラーチE⚠', offline: '通信途絶', inactive: '未稼僁E };
+        const statusLabels = { normal: '正常・稼働中', warning: '注意', alert: '未検知アラート ⚠', offline: '通信途絶', inactive: '未稼働' };
         const badge = document.getElementById('masterDetailStatusBadge');
         badge.textContent = statusLabels[d.status] || d.status;
         badge.className = 'detail-status-badge ' + (d.status || 'inactive');
@@ -920,7 +922,7 @@ async function showDeviceDetail(deviceId) {
         document.getElementById('masterDetailNotifyLabel').textContent = notifyEnabled ? '有効' : '停止中';
         document.getElementById('masterDetailDeviceId').textContent = d.device_id;
         document.getElementById('masterDetailLastDetected').textContent = d.last_human_detected_at || '-';
-        // 絁E��割当セレクトをセチE��
+        // 組織割当セレクトをセット
         document.getElementById('masterDetailOrgId').value = d.organization_id || '';
         document.getElementById('masterDetailRoom').value = d.room_number || '';
         document.getElementById('masterDetailTenant').value = d.tenant_name || '';
@@ -1032,7 +1034,7 @@ async function masterToggleAwayMode(checked) {
 
 async function masterClearAlert() {
     if (!masterCurrentDeviceId) return;
-    if (!confirm('チE��イス ' + masterCurrentDeviceId + ' の警告を解除して退去処琁E��行いますか�E�\n検知ログはすべて削除されます、E)) return;
+    if (!confirm('デバイス ' + masterCurrentDeviceId + ' の警告を解除して退去処理を行いますか？\n検知ログはすべて削除されます。')) return;
     fetch('/partner/devices/' + masterCurrentDeviceId + '/clear-alert', {
         method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' }
     }).then(r => r.json()).then(d => {
@@ -1043,16 +1045,16 @@ async function masterClearAlert() {
 
 function masterRenderSchedules(schedules) {
     const c = document.getElementById('masterDetailScheduleList');
-    if (!schedules.length) { c.innerHTML = '<div class="detail-schedule-empty">スケジュールなぁE/div>'; return; }
+    if (!schedules.length) { c.innerHTML = '<div class="detail-schedule-empty">スケジュールなし</div>'; return; }
     let html = '<div class="detail-schedule-list">';
     schedules.forEach(s => {
         html += '<div class="detail-schedule-item">';
         if (s.type === 'oneshot') {
-            html += '<div class="detail-schedule-icon oneshot">📅</div><div class="detail-schedule-info"><p class="detail-schedule-main">' + formatDt(s.start_at) + ' 、E' + (s.end_at ? formatDt(s.end_at) : '無期限') + '</p><p class="detail-schedule-sub">' + escapeHtml(s.memo || '単発') + '</p></div>';
+            html += '<div class="detail-schedule-icon oneshot">📅</div><div class="detail-schedule-info"><p class="detail-schedule-main">' + formatDt(s.start_at) + ' 〜 ' + (s.end_at ? formatDt(s.end_at) : '無期限') + '</p><p class="detail-schedule-sub">' + escapeHtml(s.memo || '単発') + '</p></div>';
         } else {
-            html += '<div class="detail-schedule-icon recurring">🔄</div><div class="detail-schedule-info"><p class="detail-schedule-main">毎週 ' + escapeHtml(s.days_label) + ' ' + s.start_time + '、E + (s.next_day ? '翁E : '') + s.end_time + '</p><p class="detail-schedule-sub">' + escapeHtml(s.memo || '定期') + '</p></div>';
+            html += '<div class="detail-schedule-icon recurring">🔄</div><div class="detail-schedule-info"><p class="detail-schedule-main">毎週 ' + escapeHtml(s.days_label) + ' ' + s.start_time + '〜' + (s.next_day ? '翌' : '') + s.end_time + '</p><p class="detail-schedule-sub">' + escapeHtml(s.memo || '定期') + '</p></div>';
         }
-        html += '<button class="detail-schedule-del" onclick="masterConfirmDeleteSchedule(' + s.id + ')">✁E/button></div>';
+        html += '<button class="detail-schedule-del" onclick="masterConfirmDeleteSchedule(' + s.id + ')">✕</button></div>';
     });
     c.innerHTML = html + '</div>';
 }
@@ -1096,7 +1098,7 @@ async function masterSubmitSchedule() {
         const days = []; document.querySelectorAll('#masterScheduleDays .schedule-day-btn.active').forEach(b => days.push(parseInt(b.dataset.day)));
         if (!days.length) { showToast('曜日を選択してください', 'error'); return; }
         const st = document.getElementById('masterSchedStartTime').value, et = document.getElementById('masterSchedEndTime').value;
-        if (!st || !et) { showToast('時間帯を�E力してください', 'error'); return; }
+        if (!st || !et) { showToast('時間帯を入力してください', 'error'); return; }
         payload.days_of_week = days; payload.start_time = st; payload.end_time = et; payload.next_day = document.getElementById('masterSchedNextDay').checked;
     }
     try {
@@ -1127,7 +1129,7 @@ async function masterExecuteDeleteSchedule() {
 }
 
 function confirmDeleteDevice(deviceId) {
-    if (!confirm('チE��イス ' + deviceId + ' を削除しますか�E�\nこ�E操作�E取り消せません、E)) return;
+    if (!confirm('デバイス ' + deviceId + ' を削除しますか？\nこの操作は取り消せません。')) return;
     fetch('/partner/devices/' + deviceId, {
         method: 'DELETE', headers: { 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' }
     }).then(r => r.json()).then(d => {
@@ -1136,7 +1138,7 @@ function confirmDeleteDevice(deviceId) {
     }).catch(() => showToast('通信エラー', 'error'));
 }
 
-// ===== 管琁E��E��カウンチE=====
+// ===== 管理者アカウント =====
 function showAddAdminModal() { generatePassword('addAdminPassword'); document.getElementById('addAdminModal').classList.add('show'); }
 function hideAddAdminModal() { document.getElementById('addAdminModal').classList.remove('show'); }
 function showEditAdminModal(data) {
@@ -1148,12 +1150,12 @@ function showEditAdminModal(data) {
 }
 function hideEditAdminModal() { document.getElementById('editAdminModal').classList.remove('show'); }
 function confirmDeleteAdmin(id, name) {
-    if (confirm(name + ' を削除しますか�E�\nこ�E操作�E取り消せません、E)) {
+    if (confirm(name + ' を削除しますか？\nこの操作は取り消せません。')) {
         const form = document.getElementById('deleteAdminForm'); form.action = '/partner/admin-users/' + id; form.submit();
     }
 }
 
-// ===== 絁E��管琁E=====
+// ===== 組織管理 =====
 function showAddOrgModal() { generatePassword('addOrgPartnerPassword'); document.getElementById('addOrgModal').classList.add('show'); }
 function hideAddOrgModal() { document.getElementById('addOrgModal').classList.remove('show'); }
 function showEditOrgModal(data) {
@@ -1173,12 +1175,12 @@ function showEditOrgModal(data) {
 }
 function hideEditOrgModal() { document.getElementById('editOrgModal').classList.remove('show'); }
 function confirmDeleteOrg(id, name) {
-    if (confirm(name + ' を削除しますか�E�\nこ�E操作�E取り消せません、E)) {
+    if (confirm(name + ' を削除しますか？\nこの操作は取り消せません。')) {
         const form = document.getElementById('deleteOrgForm'); form.action = '/partner/orgs/' + id; form.submit();
     }
 }
 
-// ===== パ�Eトナーアカウント管琁E=====
+// ===== パートナーアカウント管理 =====
 async function showOrgAccountsModal(orgId, orgName) {
     orgAccountsCurrentOrgId = orgId;
     document.getElementById('orgAccountsOrgName').textContent = orgName;
@@ -1196,7 +1198,7 @@ async function loadOrgUsers() {
             container.innerHTML = '<p style="text-align:center;color:var(--gray-400);padding:16px;font-size:13px;">アカウントがありません</p>';
             return;
         }
-        let html = '<table class="partner-user-table"><thead><tr><th>名前</th><th>メールアドレス</th><th>最終ログイン</th><th>操佁E/th></tr></thead><tbody>';
+        let html = '<table class="partner-user-table"><thead><tr><th>名前</th><th>メールアドレス</th><th>最終ログイン</th><th>操作</th></tr></thead><tbody>';
         data.users.forEach(u => {
             const lastLogin = u.last_login_at ? u.last_login_at.replace('T', ' ').substring(0, 16) : '未ログイン';
             html += '<tr>'
@@ -1204,7 +1206,7 @@ async function loadOrgUsers() {
                 + '<td style="font-size:12px;">' + escapeHtml(u.email) + '</td>'
                 + '<td style="font-size:11px;color:var(--gray-500);">' + escapeHtml(lastLogin) + '</td>'
                 + '<td>'
-                + '<button class="action-btn" onclick="showOrgEditUserModal(' + u.id + ', \'' + (u.name||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'") + '\', \'' + (u.email||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'") + '\')">編雁E/button>'
+                + '<button class="action-btn" onclick="showOrgEditUserModal(' + u.id + ', \'' + (u.name||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'") + '\', \'' + (u.email||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'") + '\')">編集</button>'
                 + '<button class="action-btn" onclick="showOrgResetPasswordModal(' + u.id + ', \'' + (u.name||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'") + '\')">PW</button>'
                 + '<button class="action-btn danger" onclick="confirmDeleteOrgUser(' + u.id + ', \'' + (u.name||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'") + '\')">削除</button>'
                 + '</td>'
@@ -1233,7 +1235,7 @@ async function submitOrgEditUser() {
     const password = document.getElementById('orgEditUserPassword').value;
     const errEl = document.getElementById('orgEditUserError');
     errEl.style.display = 'none';
-    if (!name || !email) { errEl.textContent = '名前・メールを�E力してください'; errEl.style.display = 'block'; return; }
+    if (!name || !email) { errEl.textContent = '名前・メールを入力してください'; errEl.style.display = 'block'; return; }
     const payload = { name, email };
     if (password) payload.password = password;
     try {
@@ -1255,7 +1257,7 @@ async function submitOrgEditUser() {
 }
 
 async function confirmDeleteOrgUser(userId, name) {
-    if (!confirm(name + ' を削除しますか�E�E)) return;
+    if (!confirm(name + ' を削除しますか？')) return;
     try {
         const res = await fetch('/partner/orgs/' + orgAccountsCurrentOrgId + '/users/' + userId, {
             method: 'DELETE', headers: { 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' }
@@ -1266,7 +1268,7 @@ async function confirmDeleteOrgUser(userId, name) {
     } catch(e) { showToast('通信エラー', 'error'); }
 }
 
-// ===== パスワードリセチE�� =====
+// ===== パスワードリセット =====
 function showOrgResetPasswordModal(userId, name) {
     document.getElementById('orgResetPasswordUserId').value = userId;
     document.getElementById('orgResetPasswordName').textContent = name;
