@@ -989,6 +989,7 @@ async function masterSaveAssignment() {
         alert_threshold_hours: parseInt(document.getElementById('masterDetailAlertHours').value) || 24,
         install_height_cm: parseInt(document.getElementById('masterDetailHeight').value) || 200,
         pet_exclusion_enabled: document.getElementById('masterDetailPetExclusion').value === '1' ? 1 : 0,
+        away_mode: document.getElementById('masterDetailAwayMode').checked,
         billing_start_date: document.getElementById('masterDetailBillingStartDate').value || null,
         sim_id: document.getElementById('masterDetailSimId').value || null,
     };
