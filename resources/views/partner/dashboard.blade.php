@@ -291,7 +291,7 @@
             <table>
                 <thead>
                     <tr>
-                        <th>状態</th><th>部屋 / 名前</th><th>デバイスID</th><th>外出モード</th><th>最終検知</th><th>電池</th><th>電波</th><th>操作</th>
+                        <th>状態</th><th>部屋 / 名前</th><th>デバイスID</th><th>初期PIN</th><th>現在PIN</th><th>外出モード</th><th>最終検知</th><th>電池</th><th>電波</th><th>操作</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -331,6 +331,8 @@
                                 @endif
                             </td>
                             <td class="mono">{{ $device->device_id }}</td>
+<td class="mono" style="font-size:12px;">{{ $device->initial_pin ?: '-' }}</td>
+<td class="mono" style="font-size:12px;{{ ($device->current_pin && $device->current_pin !== $device->initial_pin) ? 'color:#e65100;' : '' }}">{{ $device->current_pin ?: '-' }}</td>
                             <td>
                                 @if($assignment)
                                     <label class="watch-toggle away">
@@ -349,7 +351,7 @@
                         </tr>
                     @empty
                         <tr>
-                        <td colspan="8" style="text-align:center;color:var(--gray-400);padding:40px 12px;">
+                        <td colspan="10" style="text-align:center;color:var(--gray-400);padding:40px 12px;">
                             デバイスがありません。デバイス追加を行ってください。<br>
                             <button class="btn btn-sm btn-primary" style="margin-top:10px;" onclick="showAddDeviceModal()">＋ デバイスを追加する</button>
                         </td>
@@ -510,7 +512,9 @@
                     </div>
                 </div></div>
                 <div class="detail-section"><div class="detail-section-title">📝 登録情報</div><div class="detail-grid">
-                    <div class="detail-item"><p class="detail-item-label">登録日</p><p class="detail-item-value" id="detailRegistered">-</p></div>
+                    <div class="detail-item"><p class="detail-item-label">初期PIN</p><p class="detail-item-value mono" id="detailInitialPin">-</p></div>
+<div class="detail-item"><p class="detail-item-label">現在PIN</p><p class="detail-item-value mono" id="detailCurrentPin">-</p></div>
+<div class="detail-item"><p class="detail-item-label">登録日</p><p class="detail-item-value" id="detailRegistered">-</p></div>
                     <div class="detail-item"><p class="detail-item-label">メモ</p><input type="text" class="detail-form-input" id="detailMemoInput" placeholder="メモを入力..." maxlength="200"></div>
                 </div></div>
                 <div class="detail-section"><div class="detail-section-title">🚶 外出スケジュール</div><div id="detailScheduleList"></div><button class="detail-schedule-add" onclick="openScheduleAddFromDetail()">＋ 外出スケジュール追加</button></div>
@@ -925,6 +929,10 @@ function showDeviceDetail(deviceId) {
         if (data.away_until) awayLabel += '（〜' + data.away_until + '）';
         document.getElementById('detailAwayModeLabel').textContent = awayLabel;
         document.getElementById('detailRegistered').textContent = data.registered_at || '-';
+document.getElementById('detailInitialPin').textContent = data.initial_pin || '-';
+const _dpEl = document.getElementById('detailCurrentPin');
+_dpEl.textContent = data.current_pin || '-';
+_dpEl.style.color = (data.current_pin && data.current_pin !== data.initial_pin) ? '#e65100' : '';
         document.getElementById('detailRoomInput').value = data.room_number || '';
         document.getElementById('detailTenantInput').value = data.tenant_name || '';
         document.getElementById('detailAlertHoursInput').value = data.alert_threshold_hours || 24;
