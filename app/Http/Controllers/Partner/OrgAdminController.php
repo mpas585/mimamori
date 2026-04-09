@@ -622,6 +622,7 @@ class OrgAdminController extends Controller
             'count'            => 'required|integer|min:1|max:300',
             'opt_ai'           => 'nullable|boolean',
             'opt_sms'          => 'nullable|boolean',
+            'payjp_token'      => 'nullable|string',
             'delivery_name'    => 'nullable|string|max:100',
             'delivery_postal'  => 'nullable|string|max:10',
             'delivery_address' => 'nullable|string|max:255',
@@ -638,20 +639,47 @@ class OrgAdminController extends Controller
         $tax       = (int) floor($subtotal * 0.1);
         $total     = $subtotal + $tax;
 
+        \Payjp\Payjp::setApiKey(config('services.payjp.secret_key'));
+
         // BillingContract（カード情報）取得
         $contract = BillingContract::where('organization_id', $organization->id)
             ->where('status', 'active')
             ->first();
 
+        // カード未登録 かつ トークンが渡された場合 → その場でカード登録
+        if ((!$contract || !$contract->payjp_customer_id) && $request->filled('payjp_token')) {
+            try {
+                $admin    = Auth::guard('partner')->user();
+                $customer = \Payjp\Customer::create([
+                    'card'        => $request->payjp_token,
+                    'email'       => $admin->email,
+                    'description' => 'みまもりデバイス - ' . $organization->name,
+                    'metadata'    => ['organization_id' => $organization->id],
+                ]);
+                $contract = BillingContract::create([
+                    'organization_id'      => $organization->id,
+                    'payjp_customer_id'    => $customer->id,
+                    'device_count'         => 0,
+                    'premium_device_count' => 0,
+                    'unit_price'           => 1000,
+                    'amount'               => 0,
+                    'status'               => 'active',
+                    'next_billing_date'    => now()->addMonth()->startOfMonth()->toDateString(),
+                ]);
+            } catch (\Exception $e) {
+                Log::error('bulkCheckout registerCard error: ' . $e->getMessage());
+                return response()->json(['success' => false, 'message' => 'カード登録に失敗しました: ' . $e->getMessage()], 500);
+            }
+        }
+
         if (!$contract || !$contract->payjp_customer_id) {
             return response()->json([
                 'success' => false,
-                'message' => 'クレジットカードが登録されていません。管理者にお問い合わせください。',
+                'message' => 'クレジットカードが登録されていません。',
             ], 422);
         }
 
         // Pay.jp 課金
-        \Payjp\Payjp::setApiKey(config('services.payjp.secret_key'));
         try {
             $charge = \Payjp\Charge::create([
                 'amount'      => $total,

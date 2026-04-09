@@ -731,6 +731,10 @@ var bulkOpts = { ai: false, sms: false };
 function showAddDeviceModal() {
     bulkStep = 1;
     bulkOpts = { ai: false, sms: false };
+    bulkCardRequired = false;
+    if (bulkNewCardElement) { bulkNewCardElement.unmount(); bulkNewCardElement = null; }
+    var existingEl = document.getElementById('bulk-new-card-wrap');
+    if (existingEl) existingEl.remove();
     document.getElementById('bulk-qty-input').value = 10;
     document.querySelectorAll('.bulk-qty-preset').forEach(function(b) { b.classList.remove('active'); });
     ['ai', 'sms'].forEach(function(k) { document.getElementById('bulk-opt-' + k).classList.remove('selected'); });
@@ -758,6 +762,9 @@ function bulkUpdateStepUI() {
 
 function bulkGetQty() { var v = parseInt(document.getElementById('bulk-qty-input').value) || 1; if (v < 1) v = 1; if (v > 300) v = 300; return v; }
 
+var bulkNewCardElement = null;
+var bulkCardRequired = false;
+
 async function bulkUpdateSummary() {
     var q = bulkGetQty();
     var add = (bulkOpts.ai ? 300 : 0) + (bulkOpts.sms ? 100 : 0);
@@ -770,13 +777,39 @@ async function bulkUpdateSummary() {
     document.getElementById('bulk-sum-subtotal').textContent = '¥' + subtotal.toLocaleString() + ' / 月';
     document.getElementById('bulk-sum-tax').textContent = '¥' + tax.toLocaleString() + ' / 月';
     document.getElementById('bulk-sum-total').textContent = '¥' + total.toLocaleString() + ' / 月';
+    var cardInfo = document.getElementById('bulk-card-info');
     var cardDisplay = document.getElementById('bulk-card-display');
     var nextBtn = document.getElementById('bulk-btn-next');
     try {
         var res = await fetch('/partner/org/card-info', { headers: { 'Accept': 'application/json' } });
         var data = await res.json();
-        if (data.found) { cardDisplay.textContent = data.brand + ' **** ' + data.last4; cardDisplay.style.color = 'var(--gray-800)'; nextBtn.disabled = false; }
-        else { cardDisplay.innerHTML = '<span style="color:var(--red);">未登録 — <a href="/partner/billing" style="color:var(--red);text-decoration:underline;">カードを登録する</a></span>'; nextBtn.disabled = true; }
+        if (data.found) {
+            bulkCardRequired = false;
+            cardDisplay.textContent = data.brand + ' **** ' + data.last4;
+            cardDisplay.style.color = 'var(--gray-800)';
+            var existingEl = document.getElementById('bulk-new-card-wrap');
+            if (existingEl) existingEl.remove();
+            nextBtn.disabled = false;
+            nextBtn.textContent = '決済へ進む';
+        } else {
+            bulkCardRequired = true;
+            cardDisplay.innerHTML = '<span style="color:var(--red);">未登録</span>';
+            if (!document.getElementById('bulk-new-card-wrap')) {
+                var wrap = document.createElement('div');
+                wrap.id = 'bulk-new-card-wrap';
+                wrap.style.cssText = 'margin-top:10px;padding:12px 14px;background:var(--white);border:1px solid var(--gray-200);border-radius:var(--radius);';
+                wrap.innerHTML = '<p style="font-size:12px;color:var(--gray-600);margin-bottom:8px;">💳 クレジットカードを登録してください</p><div id="bulk-new-card-element" class="payjp-element"></div><div id="bulk-card-error" style="color:var(--red);font-size:12px;margin-top:6px;display:none;"></div>';
+                cardInfo.after(wrap);
+                if (bulkNewCardElement) { bulkNewCardElement.unmount(); bulkNewCardElement = null; }
+                bulkNewCardElement = elements.create('card', {
+                    style: { base: { color:'#3d3935', fontFamily:'"Noto Sans JP",sans-serif', fontSize:'15px', '::placeholder':{color:'#a8a29e'} } },
+                    hidePostalCode: true,
+                });
+                bulkNewCardElement.mount('#bulk-new-card-element');
+            }
+            nextBtn.disabled = false;
+            nextBtn.textContent = 'カードを登録して決済へ進む';
+        }
     } catch(e) { cardDisplay.textContent = '取得できませんでした'; }
 }
 
@@ -798,16 +831,33 @@ async function bulkExecute() {
     var btn = document.getElementById('bulk-btn-next');
     btn.disabled = true; btn.textContent = '処理中...';
     document.getElementById('bulk-loading').classList.add('show');
+
+    var payjpToken = null;
+    if (bulkCardRequired && bulkNewCardElement) {
+        var errEl = document.getElementById('bulk-card-error');
+        if (errEl) errEl.style.display = 'none';
+        var tokenResult = await payjp.createToken(bulkNewCardElement);
+        if (tokenResult.error) {
+            if (errEl) { errEl.textContent = tokenResult.error.message; errEl.style.display = 'block'; }
+            btn.disabled = false; btn.textContent = 'カードを登録して決済へ進む';
+            document.getElementById('bulk-loading').classList.remove('show');
+            return;
+        }
+        payjpToken = tokenResult.id;
+    }
+
     try {
+        var body = { count: bulkGetQty(), opt_ai: bulkOpts.ai, opt_sms: bulkOpts.sms, delivery_name: document.getElementById('bulk-delivery-name').value, delivery_postal: document.getElementById('bulk-delivery-postal').value, delivery_address: document.getElementById('bulk-delivery-address').value, delivery_phone: document.getElementById('bulk-delivery-phone').value };
+        if (payjpToken) body.payjp_token = payjpToken;
         var res = await fetch('{{ route("partner.org.devices.bulk-checkout") }}', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' },
-            body: JSON.stringify({ count: bulkGetQty(), opt_ai: bulkOpts.ai, opt_sms: bulkOpts.sms, delivery_name: document.getElementById('bulk-delivery-name').value, delivery_postal: document.getElementById('bulk-delivery-postal').value, delivery_address: document.getElementById('bulk-delivery-address').value, delivery_phone: document.getElementById('bulk-delivery-phone').value })
+            body: JSON.stringify(body)
         });
         var data = await res.json();
         if (res.ok && data.success) { hideModal('addDeviceModal'); showToast(data.count + '台のデバイスを追加しました', 'success'); setTimeout(function() { location.reload(); }, 1000); }
-        else { showToast(data.message || '追加に失敗しました', 'error'); btn.disabled = false; btn.textContent = '決済へ進む'; document.getElementById('bulk-loading').classList.remove('show'); }
-    } catch (e) { console.error(e); showToast('通信エラーが発生しました', 'error'); btn.disabled = false; btn.textContent = '決済へ進む'; document.getElementById('bulk-loading').classList.remove('show'); }
+        else { showToast(data.message || '追加に失敗しました', 'error'); btn.disabled = false; btn.textContent = bulkCardRequired ? 'カードを登録して決済へ進む' : '決済へ進む'; document.getElementById('bulk-loading').classList.remove('show'); }
+    } catch (e) { console.error(e); showToast('通信エラーが発生しました', 'error'); btn.disabled = false; btn.textContent = bulkCardRequired ? 'カードを登録して決済へ進む' : '決済へ進む'; document.getElementById('bulk-loading').classList.remove('show'); }
 }
 
 // ===== 配送先プリセット =====
