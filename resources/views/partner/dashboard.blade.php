@@ -62,7 +62,7 @@
     .watch-slider { position: absolute; cursor: pointer; inset: 0; background: var(--gray-300); border-radius: 12px; transition: 0.3s; }
     .watch-slider::before { content: ''; position: absolute; height: 18px; width: 18px; left: 3px; bottom: 3px; background: white; border-radius: 50%; transition: 0.3s; }
     .watch-toggle input:checked + .watch-slider { background: var(--green); }
-    .watch-toggle.away input:checked + .watch-slider { background: var(--red); }
+    .watch-toggle.away input:checked + .watch-slider { background: var(--red) !important; }
     .watch-toggle input:checked + .watch-slider::before { transform: translateX(20px); }
     .watch-timer-icon { font-size: 12px; color: var(--orange); margin-left: 4px; }
     .mono { font-family: monospace; font-weight: 700; letter-spacing: 1px; }
