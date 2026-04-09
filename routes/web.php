@@ -97,6 +97,7 @@ Route::middleware(PartnerAuth::class)->prefix('partner')->group(function () {
     Route::post('/account-delivery', [PartnerPasswordController::class, 'updateDelivery'])->name('partner.account-delivery');
 
     Route::get('/devices/{deviceId}/detail', [MasterController::class, 'deviceDetail'])->name('partner.devices.detail');
+    Route::get('/devices/{deviceId}/logs', [MasterController::class, 'deviceLogs'])->name('partner.devices.logs');
     Route::put('/devices/{deviceId}/assignment', [MasterController::class, 'updateDeviceAssignment'])->name('partner.devices.update-assignment');
     Route::post('/devices/{deviceId}/notification', [MasterController::class, 'updateDeviceNotification'])->name('partner.devices.update-notification');
     Route::post('/devices/{deviceId}/toggle-watch', [MasterController::class, 'toggleDeviceWatch'])->name('partner.devices.toggle-watch');
@@ -145,6 +146,7 @@ Route::middleware(PartnerAuth::class.':operator')->prefix('partner/org')->group(
     Route::post('/devices/{deviceId}/toggle-notify', [OrgAdminController::class, 'toggleNotifyService'])->name('partner.org.devices.toggle-notify');
     Route::post('/devices/{deviceId}/clear-alert', [OrgAdminController::class, 'clearAlert'])->name('partner.org.devices.clear-alert');
     Route::get('/devices/{deviceId}/detail', [OrgAdminController::class, 'deviceDetail'])->name('partner.org.devices.detail');
+    Route::get('/devices/{deviceId}/logs', [OrgAdminController::class, 'deviceLogs'])->name('partner.org.devices.logs');
     Route::put('/devices/{deviceId}/assignment', [OrgAdminController::class, 'updateAssignment'])->name('partner.org.devices.update-assignment');
     Route::post('/devices/{deviceId}/notification', [OrgAdminController::class, 'updateDeviceNotification'])->name('partner.org.devices.update-notification');
     Route::post('/devices/{deviceId}/toggle-premium', [OrgAdminController::class, 'toggleDevicePremium'])->name('partner.org.devices.toggle-premium');

@@ -325,6 +325,50 @@ class MasterController extends Controller
     }
 
     // ============================================================
+    // 検知ログ
+    // ============================================================
+
+    public function deviceLogs(Request $request, string $deviceId)
+    {
+        $device = Device::where('device_id', $deviceId)->firstOrFail();
+
+        $query = $device->detectionLogs()->orderBy('period_start', 'desc');
+
+        if ($request->filled('date_from')) {
+            $query->where('period_start', '>=', $request->date_from . ' 00:00:00');
+        }
+        if ($request->filled('date_to')) {
+            $query->where('period_start', '<=', $request->date_to . ' 23:59:59');
+        }
+        if ($request->filled('type')) {
+            if ($request->type === 'human') {
+                $query->where('human_count', '>', 0);
+            } elseif ($request->type === 'pet') {
+                $query->where('pet_count', '>', 0);
+            }
+        }
+
+        $logs = $query->paginate(20)->withQueryString();
+
+        $summaryQuery = $device->detectionLogs();
+        if ($request->filled('date_from')) {
+            $summaryQuery->where('period_start', '>=', $request->date_from . ' 00:00:00');
+        }
+        if ($request->filled('date_to')) {
+            $summaryQuery->where('period_start', '<=', $request->date_to . ' 23:59:59');
+        }
+        $summary = [
+            'total' => $summaryQuery->sum('detection_count'),
+            'human' => $summaryQuery->sum('human_count'),
+            'pet'   => $summaryQuery->sum('pet_count'),
+        ];
+
+        $backUrl = '/partner';
+
+        return view('partner.device_logs', compact('device', 'logs', 'summary', 'backUrl'));
+    }
+
+    // ============================================================
     // 管理者アカウント管理（masterのみ）
     // ============================================================
 
