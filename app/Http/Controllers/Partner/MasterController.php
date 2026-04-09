@@ -141,33 +141,34 @@ class MasterController extends Controller
         });
 
         return response()->json([
-            'device_id'              => $device->device_id,
-            'sim_id'                 => $device->sim_id,
-            'status'                 => $device->status,
-            'organization_id'        => $device->organization_id,
-            'organization_name'      => $device->organization ? $device->organization->name : null,
-            'room_number'            => $assignment ? $assignment->room_number : null,
-            'tenant_name'            => $assignment ? $assignment->tenant_name : null,
-            'last_received_at'       => $device->last_received_at       ? $device->last_received_at->format('Y/m/d H:i')      : null,
-            'last_human_detected_at' => $device->last_human_detected_at ? $device->last_human_detected_at->format('Y/m/d H:i') : null,
-            'battery_pct'            => $device->battery_pct,
-            'battery_voltage'        => $device->battery_voltage,
-            'rssi_label'             => $rssiLabel,
-            'alert_threshold_hours'  => $device->alert_threshold_hours,
-            'pet_exclusion_enabled'  => (bool) $device->pet_exclusion_enabled,
-            'install_height_cm'      => $device->install_height_cm,
-            'away_mode'              => (bool) $device->away_mode,
-            'away_until'             => $device->away_until ? $device->away_until->format('Y/m/d H:i') : null,
-            'memo'                   => $device->location_memo,
-            'registered_at'          => $device->created_at->format('Y/m/d'),
-            'billing_start_date'     => $device->billing_start_date ? $device->billing_start_date->format('Y-m-d') : null,
-            'schedules'              => $schedules,
-            'sms_enabled'            => $notif ? (bool) $notif->sms_enabled   : false,
-            'sms_phone_1'            => $notif && $notif->sms_phone_1 ? preg_replace('/^\+81/', '0', $notif->sms_phone_1) : null,
-            'sms_phone_2'            => $notif && $notif->sms_phone_2 ? preg_replace('/^\+81/', '0', $notif->sms_phone_2) : null,
-            'voice_enabled'          => $notif ? (bool) $notif->voice_enabled : false,
-            'voice_phone_1'          => $notif && $notif->voice_phone_1 ? preg_replace('/^\+81/', '0', $notif->voice_phone_1) : null,
-            'voice_phone_2'          => $notif && $notif->voice_phone_2 ? preg_replace('/^\+81/', '0', $notif->voice_phone_2) : null,
+            'device_id'                    => $device->device_id,
+            'sim_id'                       => $device->sim_id,
+            'notification_service_enabled' => (bool) $device->notification_service_enabled,
+            'status'                       => $device->status,
+            'organization_id'              => $device->organization_id,
+            'organization_name'            => $device->organization ? $device->organization->name : null,
+            'room_number'                  => $assignment ? $assignment->room_number : null,
+            'tenant_name'                  => $assignment ? $assignment->tenant_name : null,
+            'last_received_at'             => $device->last_received_at       ? $device->last_received_at->format('Y/m/d H:i')      : null,
+            'last_human_detected_at'       => $device->last_human_detected_at ? $device->last_human_detected_at->format('Y/m/d H:i') : null,
+            'battery_pct'                  => $device->battery_pct,
+            'battery_voltage'              => $device->battery_voltage,
+            'rssi_label'                   => $rssiLabel,
+            'alert_threshold_hours'        => $device->alert_threshold_hours,
+            'pet_exclusion_enabled'        => (bool) $device->pet_exclusion_enabled,
+            'install_height_cm'            => $device->install_height_cm,
+            'away_mode'                    => (bool) $device->away_mode,
+            'away_until'                   => $device->away_until ? $device->away_until->format('Y/m/d H:i') : null,
+            'memo'                         => $device->location_memo,
+            'registered_at'                => $device->created_at->format('Y/m/d'),
+            'billing_start_date'           => $device->billing_start_date ? $device->billing_start_date->format('Y-m-d') : null,
+            'schedules'                    => $schedules,
+            'sms_enabled'                  => $notif ? (bool) $notif->sms_enabled   : false,
+            'sms_phone_1'                  => $notif && $notif->sms_phone_1 ? preg_replace('/^\+81/', '0', $notif->sms_phone_1) : null,
+            'sms_phone_2'                  => $notif && $notif->sms_phone_2 ? preg_replace('/^\+81/', '0', $notif->sms_phone_2) : null,
+            'voice_enabled'                => $notif ? (bool) $notif->voice_enabled : false,
+            'voice_phone_1'                => $notif && $notif->voice_phone_1 ? preg_replace('/^\+81/', '0', $notif->voice_phone_1) : null,
+            'voice_phone_2'                => $notif && $notif->voice_phone_2 ? preg_replace('/^\+81/', '0', $notif->voice_phone_2) : null,
         ]);
     }
 
@@ -672,5 +673,41 @@ class MasterController extends Controller
             'premium_enabled' => (bool) $device->premium_enabled,
             'message'         => $request->premium_enabled ? 'プレミアムを有効にしました' : 'プレミアムを無効にしました',
         ]);
+    }
+
+    private function buildSalesData(): array
+    {
+        $now            = now();
+        $thisMonthStart = $now->copy()->startOfMonth();
+        $lastMonthStart = $now->copy()->subMonth()->startOfMonth();
+        $lastMonthEnd   = $now->copy()->subMonth()->endOfMonth();
+
+        $totalAll  = BillingLog::where('status', 'success')->sum('amount');
+        $countAll  = BillingLog::where('status', 'success')->count();
+        $thisMonth = BillingLog::where('status', 'success')->where('billed_at', '>=', $thisMonthStart)->sum('amount');
+        $countThis = BillingLog::where('status', 'success')->where('billed_at', '>=', $thisMonthStart)->count();
+        $lastMonth = BillingLog::where('status', 'success')->whereBetween('billed_at', [$lastMonthStart, $lastMonthEnd])->sum('amount');
+
+        $monthly = BillingLog::where('status', 'success')
+            ->where('billed_at', '>=', $now->copy()->subMonths(5)->startOfMonth())
+            ->selectRaw("DATE_FORMAT(billed_at, '%Y-%m') as month, SUM(amount) as total, COUNT(*) as count")
+            ->groupBy('month')->orderBy('month', 'desc')->get();
+
+        $byOrg = BillingLog::where('billing_logs.status', 'success')
+            ->where('billing_logs.billed_at', '>=', $thisMonthStart)
+            ->join('billing_contracts', 'billing_logs.billing_contract_id', '=', 'billing_contracts.id')
+            ->leftJoin('organizations', 'billing_contracts.organization_id', '=', 'organizations.id')
+            ->selectRaw('COALESCE(organizations.name, "個人") as org_name, SUM(billing_logs.amount) as total, COUNT(*) as count')
+            ->groupBy('org_name')->orderByDesc('total')->get();
+
+        return [
+            'total_all'  => $totalAll,
+            'count_all'  => $countAll,
+            'this_month' => $thisMonth,
+            'count_this' => $countThis,
+            'last_month' => $lastMonth,
+            'monthly'    => $monthly,
+            'by_org'     => $byOrg,
+        ];
     }
 }
