@@ -531,7 +531,10 @@ function selectAlert(el, hours) {
         method: 'POST',
         headers: headers,
         body: JSON.stringify({ alert_threshold_hours: hours })
-    });
+    })
+    .then(r => r.json())
+    .then(d => { if (!d.ok) showToast('保存に失敗しました'); })
+    .catch(() => showToast('保存に失敗しました'));
     showToast('保存しました');
 }
 
@@ -551,7 +554,10 @@ function togglePetFeature() {
         method: 'POST',
         headers: headers,
         body: JSON.stringify({ pet_exclusion_enabled: enabled ? 1 : 0 })
-    });
+    })
+    .then(r => r.json())
+    .then(d => { if (!d.ok) showToast('保存に失敗しました'); })
+    .catch(() => showToast('保存に失敗しました'));
     showToast('保存しました');
 }
 
