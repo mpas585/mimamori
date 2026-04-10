@@ -86,49 +86,6 @@ class OrgAdminController extends Controller
         return view('partner.dashboard', compact('organization', 'stats', 'devices'));
     }
 
-    public function updateNotification(Request $request)
-    {
-        $organization = $this->getOrganization();
-        $request->validate([
-            'notification_email_1'   => 'nullable|email|max:255',
-            'notification_email_2'   => 'nullable|email|max:255',
-            'notification_email_3'   => 'nullable|email|max:255',
-            'notification_enabled'   => 'nullable|boolean',
-            'notification_sms_1'     => 'nullable|string|max:20',
-            'notification_sms_2'     => 'nullable|string|max:20',
-            'notification_sms_enabled' => 'nullable|boolean',
-        ]);
-
-        $organization->update([
-            'notification_email_1'   => $request->notification_email_1 ?: null,
-            'notification_email_2'   => $request->notification_email_2 ?: null,
-            'notification_email_3'   => $request->notification_email_3 ?: null,
-            'notification_enabled'   => $request->has('notification_enabled') ? (bool) $request->notification_enabled : true,
-            'notification_sms_1'     => PhoneHelper::normalize($request->notification_sms_1),
-            'notification_sms_2'     => PhoneHelper::normalize($request->notification_sms_2),
-            'notification_sms_enabled' => $request->has('notification_sms_enabled') ? (bool) $request->notification_sms_enabled : false,
-        ]);
-
-        if ($request->expectsJson()) {
-            return response()->json(['success' => true, 'message' => '通知設定を更新しました']);
-        }
-        return back()->with('success', '通知設定を更新しました');
-    }
-
-    public function getNotification()
-    {
-        $organization = $this->getOrganization();
-        return response()->json([
-            'notification_email_1'     => $organization->notification_email_1,
-            'notification_email_2'     => $organization->notification_email_2,
-            'notification_email_3'     => $organization->notification_email_3,
-            'notification_enabled'     => (bool) $organization->notification_enabled,
-            'notification_sms_1'       => $organization->notification_sms_1,
-            'notification_sms_2'       => $organization->notification_sms_2,
-            'notification_sms_enabled' => (bool) $organization->notification_sms_enabled,
-        ]);
-    }
-
     public function addDevice(Request $request)
     {
         $organization = $this->getOrganization();
@@ -311,13 +268,23 @@ class OrgAdminController extends Controller
             'room_number' => 'nullable|string|max:50',
             'tenant_name' => 'nullable|string|max:100',
             'memo'        => 'nullable|string|max:255',
+            'alert_threshold_hours' => 'nullable|integer|in:12,24,36,48,72',
+            'install_height_cm'     => 'nullable|integer|min:100|max:300',
+            'pet_exclusion_enabled' => 'nullable|boolean',
         ]);
 
         OrgDeviceAssignment::updateOrCreate(
             ['organization_id' => $organization->id, 'device_id' => $device->id],
             ['room_number' => $request->room_number, 'tenant_name' => $request->tenant_name]
         );
-        $device->update(['location_memo' => $request->memo]);
+
+        $device->location_memo         = $request->memo;
+        $device->alert_threshold_hours = $request->alert_threshold_hours ?? $device->alert_threshold_hours;
+        $device->install_height_cm     = $request->install_height_cm     ?? $device->install_height_cm;
+        $device->pet_exclusion_enabled = $request->has('pet_exclusion_enabled')
+            ? (int) $request->pet_exclusion_enabled
+            : $device->pet_exclusion_enabled;
+        $device->save();
 
         if ($request->expectsJson()) {
             return response()->json(['success' => true, 'message' => '更新しました']);
@@ -594,7 +561,7 @@ class OrgAdminController extends Controller
     }
 
     // ============================================================
-    // 登録カード情報取得（ステップ4の確認画面で表示）
+    // 登録カード情報取得
     // ============================================================
 
     public function getCardInfo()
@@ -645,7 +612,6 @@ class OrgAdminController extends Controller
         $optAi  = (bool) ($request->opt_ai  ?? false);
         $optSms = (bool) ($request->opt_sms ?? false);
 
-        // 料金計算（税抜単価）
         $unitPrice = 1000 + ($optAi ? 300 : 0) + ($optSms ? 100 : 0);
         $subtotal  = $unitPrice * $count;
         $tax       = (int) floor($subtotal * 0.1);
@@ -653,12 +619,10 @@ class OrgAdminController extends Controller
 
         \Payjp\Payjp::setApiKey(config('services.payjp.secret_key'));
 
-        // BillingContract（カード情報）取得
         $contract = BillingContract::where('organization_id', $organization->id)
             ->where('status', 'active')
             ->first();
 
-        // カード未登録 かつ トークンが渡された場合 → その場でカード登録
         if ((!$contract || !$contract->payjp_customer_id) && $request->filled('payjp_token')) {
             try {
                 $admin    = Auth::guard('partner')->user();
@@ -691,7 +655,6 @@ class OrgAdminController extends Controller
             ], 422);
         }
 
-        // Pay.jp 課金
         try {
             $charge = \Payjp\Charge::create([
                 'amount'      => $total,
@@ -706,7 +669,6 @@ class OrgAdminController extends Controller
             return response()->json(['success' => false, 'message' => '決済に失敗しました: ' . $e->getMessage()], 500);
         }
 
-        // 課金ログ
         BillingLog::create([
             'billing_contract_id'  => $contract->id,
             'amount'               => $total,
@@ -717,14 +679,12 @@ class OrgAdminController extends Controller
             'billed_at'            => now(),
         ]);
 
-        // BillingContract の台数・金額を更新
         $contract->update([
             'device_count'         => $contract->device_count + $count,
             'premium_device_count' => $contract->premium_device_count + (($optAi || $optSms) ? $count : 0),
             'amount'               => $contract->calcAmount() + ($unitPrice * $count),
         ]);
 
-        // デバイス発番
         $issued = [];
         for ($i = 0; $i < $count; $i++) {
             $deviceId = $this->generateDeviceId();
@@ -752,7 +712,6 @@ class OrgAdminController extends Controller
             $issued[] = ['device_id' => $deviceId, 'pin' => $pin];
         }
 
-        // 運営への通知メール
         $masterUser = \App\Models\PartnerUser::where('role', 'master')->first();
         $adminEmail = $masterUser?->email;
         if ($adminEmail) {

@@ -783,16 +783,7 @@
                     <div class="form-group"><label class="form-label">住所</label><input type="text" name="address" id="editOrgAddress" class="form-input"></div>
                     <div class="form-group"><label class="form-label">メモ</label><textarea name="notes" id="editOrgNotes" class="form-input" rows="2" style="resize:vertical;"></textarea></div>
                 </div>
-                <div class="modal-section"><div class="modal-section-title">通知設定（アラート発生時に組織宛に送信）</div>
-                    <p style="font-size:12px;color:var(--gray-500);margin-bottom:12px;">設定したメール・SMSにアラートを転送します。</p>
-                    <div class="form-group"><label class="form-label">通知メール 1</label><input type="email" name="notification_email_1" id="editOrgEmail1" class="form-input"></div>
-                    <div class="form-group"><label class="form-label">通知メール 2</label><input type="email" name="notification_email_2" id="editOrgEmail2" class="form-input"></div>
-                    <div class="form-group"><label class="form-label">通知メール 3</label><input type="email" name="notification_email_3" id="editOrgEmail3" class="form-input"></div>
-                    <div class="form-row-2">
-                        <div class="form-group"><label class="form-label">SMS通知先 1</label><input type="text" name="notification_sms_1" id="editOrgSms1" class="form-input"></div>
-                        <div class="form-group"><label class="form-label">SMS通知先 2</label><input type="text" name="notification_sms_2" id="editOrgSms2" class="form-input"></div>
-                    </div>
-                </div>
+
             </div>
             <div class="modal-footer"><button type="button" class="btn btn-secondary" onclick="hideEditOrgModal()">キャンセル</button><button type="submit" class="btn btn-primary">保存</button></div>
         </form>
@@ -1186,11 +1177,7 @@ function showEditOrgModal(data) {
     document.getElementById('editOrgContactPhone').value = data.contact_phone || '';
     document.getElementById('editOrgAddress').value = data.address || '';
     document.getElementById('editOrgNotes').value = data.notes || '';
-    document.getElementById('editOrgEmail1').value = data.notification_email_1 || '';
-    document.getElementById('editOrgEmail2').value = data.notification_email_2 || '';
-    document.getElementById('editOrgEmail3').value = data.notification_email_3 || '';
-    document.getElementById('editOrgSms1').value = data.notification_sms_1 || '';
-    document.getElementById('editOrgSms2').value = data.notification_sms_2 || '';
+
     document.getElementById('editOrgModal').classList.add('show');
 }
 function hideEditOrgModal() { document.getElementById('editOrgModal').classList.remove('show'); }

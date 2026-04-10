@@ -279,7 +279,6 @@
             <span class="toolbar-count">登録: <strong>{{ $devices->total() ?? 0 }}</strong>台</span>
         </div>
         <div class="toolbar-right">
-            <button class="toolbar-btn" onclick="showNotificationModal()">🔔 通知設定</button>
             <button class="toolbar-btn" onclick="showTimerListModal()">🚶 外出スケジュール一覧</button>
             <button class="toolbar-btn" onclick="showAddDeviceModal()">デバイス新規お申込み</button>
             <a href="{{ route('partner.org.csv') }}" class="toolbar-btn">📥 CSV出力</a>
@@ -723,7 +722,6 @@
         </div>
     </div>
 
-    @include('partner.partials.notification-modal')
     <div id="toast" class="toast"></div>
 @endsection
 
@@ -1310,33 +1308,7 @@ async function executeDeleteSchedule() {
         else showToast(data.message || '削除に失敗しました', 'error');
     } catch (e) { console.error(e); showToast('通信エラーが発生しました', 'error'); }
 }
-
-// ===== 通知設定モーダル =====
-function showNotificationModal() {
-    fetch('{{ route("partner.org.notification") }}', { headers: { 'Accept': 'application/json' } })
-    .then(r => r.json()).then(d => {
-        document.getElementById('orgNotifEmail1').value = d.notification_email_1 || '';
-        document.getElementById('orgNotifEmail2').value = d.notification_email_2 || '';
-        document.getElementById('orgNotifEmail3').value = d.notification_email_3 || '';
-        document.getElementById('orgNotifEnabled').checked = d.notification_enabled;
-        document.getElementById('orgNotifSms1').value = d.notification_sms_1 ? d.notification_sms_1.replace(/^\+81/, '0') : '';
-        document.getElementById('orgNotifSms2').value = d.notification_sms_2 ? d.notification_sms_2.replace(/^\+81/, '0') : '';
-        document.getElementById('orgNotifSmsEnabled').checked = d.notification_sms_enabled;
-        showModal('notificationModal');
-    })
-    .catch(() => showModal('notificationModal'));
-}
-
-function saveOrgNotification() {
-    var payload = {
-        notification_email_1: document.getElementById('orgNotifEmail1').value || null,
-        notification_email_2: document.getElementById('orgNotifEmail2').value || null,
-        notification_email_3: document.getElementById('orgNotifEmail3').value || null,
-        notification_enabled: document.getElementById('orgNotifEnabled').checked ? 1 : 0,
-        notification_sms_1: document.getElementById('orgNotifSms1').value || null,
-        notification_sms_2: document.getElementById('orgNotifSms2').value || null,
-        notification_sms_enabled: document.getElementById('orgNotifSmsEnabled').checked ? 1 : 0,
-    };
+;
     fetch('{{ route("partner.org.notification.update") }}', {
         method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' }, body: JSON.stringify(payload)
     }).then(r => r.json()).then(d => {
