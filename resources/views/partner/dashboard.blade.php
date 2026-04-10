@@ -478,7 +478,7 @@
                             <span style="font-size:13px;font-weight:600;color:var(--gray-700);">🔔 端末サブスクリプション</span>
                             <span id="detailNotifyLabel" style="font-size:12px;color:var(--gray-500);">有効</span>
                         </div>
-                        <button class="btn btn-sm btn-secondary" onclick="showSubscriptionModal()">📋 契約プラン</button>
+                        <button class="btn btn-sm btn-secondary" onclick="showSubscriptionModal()">📋 通知設定</button>
                     </div>
                     <p class="detail-notify-note">※ご契約後〇ヶ月は停止機能はご利用になれません。</p>
                 </div>
@@ -604,10 +604,10 @@
         </div>
     </div>
 
-    {{-- モーダル: 契約プラン --}}
+    {{-- モーダル: 通知設定 --}}
     <div id="subscriptionModal" class="modal-overlay" onclick="if(event.target===this)hideModal('subscriptionModal')">
         <div class="modal" style="max-width:500px;">
-            <div class="modal-header"><h3>📋 契約プラン</h3><button class="modal-close" onclick="hideModal('subscriptionModal')">×</button></div>
+            <div class="modal-header"><h3>📋 通知設定</h3><button class="modal-close" onclick="hideModal('subscriptionModal')">×</button></div>
             <div class="modal-body">
                 <div style="font-size:12px;color:var(--gray-500);margin-bottom:16px;">対象デバイス：<span id="subModalDeviceId" class="mono" style="font-size:12px;"></span></div>
 
@@ -1018,7 +1018,7 @@ _dpEl.style.color = (data.current_pin && data.current_pin !== data.initial_pin) 
         document.getElementById('detailNotifyEnabled').checked = notifyEnabled;
         document.getElementById('detailNotifyLabel').textContent = notifyEnabled ? '有効' : '停止中';
 
-        // SMS・AIコール状態をキャッシュ（契約プランモーダルで使用）
+        // SMS・AIコール状態をキャッシュ（通知設定モーダルで使用）
         currentDetailEmailEnabled = data.email_enabled !== false;
         currentDetailEmail1 = data.email_1 || '';
         currentDetailEmail2 = data.email_2 || '';
