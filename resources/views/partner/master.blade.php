@@ -363,7 +363,7 @@
         </div>
         <table class="org-table">
             <thead>
-                <tr><th>組織名</th><th>担当者</th><th>連絡先</th><th>デバイス数</th><th>パートナーアカウント</th><th>通知</th><th>操作</th></tr>
+                <tr><th>組織名</th><th>担当者</th><th>デバイス数</th><th>パートナーアカウント</th><th>通知</th><th>操作</th></tr>
             </thead>
             <tbody>
                 @forelse($organizations as $org)
@@ -375,7 +375,6 @@
                     <tr>
                         <td style="font-weight:500;">{{ $org->name }}</td>
                         <td style="font-size:12px;">{{ $org->contact_name ?: '-' }}</td>
-                        <td style="font-size:12px;">{{ $org->contact_email }}</td>
                         <td style="font-size:13px;"><a href="/partner?tab=devices&search=&status=&org={{ $org->id }}" style="color:#2563eb;text-decoration:underline;font-weight:600;">{{ $org->devices_count }}台</a></td>
                         <td class="partner-account-cell">
                             @if($partnerUsers->count() > 0)
@@ -774,7 +773,7 @@
                     <div class="form-group"><label class="form-label">組織名 *</label><input type="text" name="name" id="editOrgName" class="form-input" required></div>
                     <div class="form-row-2">
                         <div class="form-group"><label class="form-label">担当者名</label><input type="text" name="contact_name" id="editOrgContactName" class="form-input"></div>
-                        <div class="form-group"><label class="form-label">連絡先メール *</label><input type="email" name="contact_email" id="editOrgContactEmail" class="form-input" required></div>
+
                     </div>
                     <div class="form-row-2">
                         <div class="form-group"><label class="form-label">連絡先電話番号</label><input type="text" name="contact_phone" id="editOrgContactPhone" class="form-input"></div>
@@ -1173,7 +1172,7 @@ function showEditOrgModal(data) {
     document.getElementById('editOrgForm').action = '/partner/orgs/' + data.id;
     document.getElementById('editOrgName').value = data.name || '';
     document.getElementById('editOrgContactName').value = data.contact_name || '';
-    document.getElementById('editOrgContactEmail').value = data.contact_email || '';
+
     document.getElementById('editOrgContactPhone').value = data.contact_phone || '';
     document.getElementById('editOrgAddress').value = data.address || '';
     document.getElementById('editOrgNotes').value = data.notes || '';

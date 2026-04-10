@@ -12,15 +12,11 @@ use App\Models\BillingLog;
 
 class PlanController extends Controller
 {
-    // ============================================================
-    // プランページ表示
-    // ============================================================
     public function index()
     {
         $device = Auth::user();
         $subscription = $device->subscription;
 
-        // subscriptionsのstripe_customer_idからBillingContractを取得
         if ($subscription?->stripe_customer_id) {
             $billingContract = BillingContract::where('payjp_customer_id', $subscription->stripe_customer_id)->first();
         } else {
@@ -30,10 +26,6 @@ class PlanController extends Controller
         return view('plan', compact('device', 'subscription', 'billingContract'));
     }
 
-    // ============================================================
-    // プレミアム購読開始（B2C）
-    // 初月即時課金（3Dセキュア対応）→ BillingContract作成 → 翌月以降はJobが実行
-    // ============================================================
     public function subscribe(Request $request)
     {
         $request->validate([
@@ -50,17 +42,16 @@ class PlanController extends Controller
 
         try {
             $subscription = $device->subscription;
-            $amount = 500; // B2Cはプレミアムオプション¥500固定
+            $amount = 500;
 
-            // メールアドレス取得：パートナー紐づきがあればcontact_email、なければ通知設定のemail_1
+            // メールアドレス取得：パートナー紐づきがあればオペレーターのログインメール、なければ通知設定のemail_1
             $email = null;
             if ($device->organization_id) {
-                $email = $device->organization?->contact_email;
+                $email = $device->organization?->partnerUsers()->where('role', 'operator')->first()?->email;
             } else {
                 $email = $device->notificationSetting?->email_1;
             }
 
-            // Customer 作成 or 既存取得
             if ($subscription?->stripe_customer_id) {
                 $customer = \Payjp\Customer::retrieve($subscription->stripe_customer_id);
                 $customer->cards->create(['card' => $request->payjp_token]);
@@ -73,7 +64,6 @@ class PlanController extends Controller
                 ]);
             }
 
-            // 初月即時課金（3Dセキュア有効）
             $charge = \Payjp\Charge::create([
                 'amount'         => $amount,
                 'currency'       => 'jpy',
@@ -83,9 +73,7 @@ class PlanController extends Controller
                 'tds_finish_url' => route('plan.tds-complete') . '?customer=' . $customer->id,
             ]);
 
-            // 3Dセキュア認証が必要な場合 → pendingで保存してクライアントにリダイレクト先を返す
             if (isset($charge->three_d_secure_status) && $charge->three_d_secure_status === 'unverified') {
-                // BillingContractをpending状態で保存
                 BillingContract::updateOrCreate(
                     ['payjp_customer_id' => $customer->id],
                     [
@@ -101,7 +89,6 @@ class PlanController extends Controller
                     ]
                 );
 
-                // Subscriptionをpending状態で保存（tdsComplete時のdevice特定用）
                 Subscription::updateOrCreate(
                     ['device_id' => $device->id],
                     [
@@ -123,7 +110,6 @@ class PlanController extends Controller
                 ]);
             }
 
-            // 3DS不要 or 認証済み → 通常完了
             return $this->completeSubscription($device, $customer->id, $charge, $amount);
 
         } catch (\Exception $e) {
@@ -132,9 +118,6 @@ class PlanController extends Controller
         }
     }
 
-    // ============================================================
-    // 3Dセキュア認証完了コールバック
-    // ============================================================
     public function tdsComplete(Request $request)
     {
         $customerId = $request->input('customer');
@@ -145,7 +128,6 @@ class PlanController extends Controller
         \Payjp\Payjp::setApiKey(config('services.payjp.secret_key'));
 
         try {
-            // pending状態のBillingContractを取得
             $contract = BillingContract::where('payjp_customer_id', $customerId)
                 ->where('status', 'pending')
                 ->latest()
@@ -155,11 +137,9 @@ class PlanController extends Controller
                 return redirect('/plan')->with('error', '契約情報が見つかりません');
             }
 
-            // Chargeを取得して3DS完了を確認
             $charge = \Payjp\Charge::retrieve($contract->payjp_charge_id);
 
             if ($charge->three_d_secure_status !== 'verified') {
-                // pending状態のSubscriptionとContractを削除
                 Subscription::where('stripe_customer_id', $customerId)
                     ->where('status', 'pending')
                     ->delete();
@@ -167,7 +147,6 @@ class PlanController extends Controller
                 return redirect('/plan')->with('error', '3Dセキュア認証が完了していません');
             }
 
-            // Subscriptionからデバイスを特定
             $sub = Subscription::where('stripe_customer_id', $customerId)->first();
             if (!$sub) {
                 return redirect('/plan')->with('error', 'サブスクリプション情報が見つかりません');
@@ -175,7 +154,6 @@ class PlanController extends Controller
 
             $device = Device::find($sub->device_id);
 
-            // 契約を確定
             $contract->update(['status' => 'active', 'payjp_charge_id' => null]);
 
             BillingLog::create([
@@ -188,10 +166,7 @@ class PlanController extends Controller
                 'billed_at'            => now(),
             ]);
 
-            // Subscriptionをactiveに更新
             $sub->update(['status' => 'active']);
-
-            // デバイスをプレミアムに更新
             $device?->update(['premium_enabled' => true]);
 
             return redirect('/plan')
@@ -203,9 +178,6 @@ class PlanController extends Controller
         }
     }
 
-    // ============================================================
-    // 購読完了処理（3DS不要の場合）
-    // ============================================================
     private function completeSubscription($device, $customerId, $charge, $amount)
     {
         $contract = BillingContract::updateOrCreate(
@@ -255,9 +227,6 @@ class PlanController extends Controller
         ]);
     }
 
-    // ============================================================
-    // 解約（当月末まで有効）
-    // ============================================================
     public function cancel(Request $request)
     {
         $device = Auth::user();
@@ -268,7 +237,6 @@ class PlanController extends Controller
         }
 
         try {
-            // BillingContractをキャンセル
             if ($subscription->stripe_customer_id) {
                 $contract = BillingContract::where('payjp_customer_id', $subscription->stripe_customer_id)->first();
                 $contract?->update([
@@ -277,14 +245,10 @@ class PlanController extends Controller
                 ]);
             }
 
-            // Subscriptionをキャンセル（当月末まで有効）
             $subscription->update([
                 'status'      => 'canceled',
                 'canceled_at' => now(),
             ]);
-
-            // premium_enabled は current_period_end まで true のまま
-            // MonthlyBillingJob はキャンセル済みなのでスキップされる
 
             $endDate = $subscription->current_period_end?->format('Y年n月j日') ?? '今月末';
 
@@ -300,9 +264,6 @@ class PlanController extends Controller
         }
     }
 
-    // ============================================================
-    // Pay.jp Webhook 受信（charge.failed のみ対応）
-    // ============================================================
     public function webhook(Request $request)
     {
         $payload = $request->getContent();
@@ -328,7 +289,6 @@ class PlanController extends Controller
                 $contract = BillingContract::where('payjp_customer_id', $customerId)->first();
                 $contract?->update(['status' => 'past_due']);
 
-                // stripe_customer_idカラムにpay.jpのcustomer_idを格納している
                 $sub = Subscription::where('stripe_customer_id', $customerId)->first();
                 $sub?->update(['status' => 'past_due']);
 
