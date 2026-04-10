@@ -112,8 +112,6 @@
     .detail-status-badge.alert { background: #fbe9e7; color: #c62828; }
     .detail-status-badge.offline { background: #eeeeee; color: #616161; }
     .detail-status-badge.inactive { background: #f5f5f5; color: #9e9e9e; }
-    .detail-clear-alert-btn { display: inline-flex; align-items: center; gap: 4px; padding: 4px 12px; font-size: 12px; font-weight: 600; font-family: inherit; color: var(--red); background: var(--white); border: 1px solid var(--red-light); border-radius: 6px; cursor: pointer; transition: all 0.2s; margin-left: 10px; }
-    .detail-clear-alert-btn:hover { background: var(--red-light); border-color: var(--red); }
     .detail-notify-note { font-size: 11px; color: var(--gray-500); margin-top: 6px; line-height: 1.5; }
     .detail-schedule-list { border: 1px solid var(--gray-200); border-radius: var(--radius); overflow: hidden; margin-bottom: 10px; }
     .detail-schedule-item { display: flex; align-items: center; padding: 8px 12px; border-bottom: 1px solid var(--gray-100); font-size: 13px; }
@@ -490,7 +488,6 @@
         <div class="modal-body">
             <div class="detail-status-row">
                 <div class="detail-status-badge normal" id="masterDetailStatusBadge">-</div>
-                <button class="detail-clear-alert-btn" id="masterDetailClearAlertBtn" style="display:none;" onclick="masterClearAlert()">✓ 警告を解除して退去処理</button>
             </div>
             <div class="modal-section" style="margin-bottom:16px;">
                 <div style="display:flex;align-items:center;justify-content:space-between;">
@@ -916,7 +913,6 @@ async function showDeviceDetail(deviceId) {
         const badge = document.getElementById('masterDetailStatusBadge');
         badge.textContent = statusLabels[d.status] || d.status;
         badge.className = 'detail-status-badge ' + (d.status || 'inactive');
-        document.getElementById('masterDetailClearAlertBtn').style.display = d.status === 'alert' ? 'inline-flex' : 'none';
         const notifyEnabled = d.notification_service_enabled !== false;
         document.getElementById('masterDetailNotifyEnabled').checked = notifyEnabled;
         document.getElementById('masterDetailNotifyLabel').textContent = notifyEnabled ? '有効' : '停止中';
@@ -1042,16 +1038,6 @@ async function masterToggleAwayMode(checked) {
     }).catch(() => showToast('通信エラー', 'error'));
 }
 
-async function masterClearAlert() {
-    if (!masterCurrentDeviceId) return;
-    if (!confirm('デバイス ' + masterCurrentDeviceId + ' の警告を解除して退去処理を行いますか？\n検知ログはすべて削除されます。')) return;
-    fetch('/partner/devices/' + masterCurrentDeviceId + '/clear-alert', {
-        method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' }
-    }).then(r => r.json()).then(d => {
-        if (d.success) { showToast(d.message, 'success'); hideModal('deviceDetailModal'); setTimeout(() => location.reload(), 500); }
-        else showToast(d.message || 'エラー', 'error');
-    }).catch(() => showToast('通信エラー', 'error'));
-}
 
 function masterRenderSchedules(schedules) {
     const c = document.getElementById('masterDetailScheduleList');

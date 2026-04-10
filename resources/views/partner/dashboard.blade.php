@@ -53,10 +53,6 @@
     .device-status.alert { background: var(--red-light); color: var(--red); }
     .device-status.offline { background: var(--gray-100); color: var(--gray-600); }
     .device-status.vacant { background: #f8fafc; color: var(--gray-400); border: 1px solid var(--gray-200); }
-    .clear-alert-btn { display: inline-flex; align-items: center; gap: 3px; padding: 2px 8px; font-size: 10px; font-weight: 600; font-family: inherit; color: var(--red); background: var(--white); border: 1px solid var(--red-light); border-radius: 4px; cursor: pointer; transition: all 0.2s; margin-left: 6px; white-space: nowrap; }
-    .clear-alert-btn:hover { background: var(--red-light); border-color: var(--red); }
-    .detail-clear-alert-btn { display: inline-flex; align-items: center; gap: 4px; padding: 4px 12px; font-size: 12px; font-weight: 600; font-family: inherit; color: var(--red); background: var(--white); border: 1px solid var(--red-light); border-radius: 6px; cursor: pointer; transition: all 0.2s; margin-left: 10px; vertical-align: middle; }
-    .detail-clear-alert-btn:hover { background: var(--red-light); border-color: var(--red); }
     .watch-toggle { position: relative; width: 44px; height: 24px; display: inline-block; }
     .watch-toggle input { opacity: 0; width: 0; height: 0; }
     .watch-slider { position: absolute; cursor: pointer; inset: 0; background: var(--gray-300); border-radius: 12px; transition: 0.3s; }
@@ -316,7 +312,7 @@
                                 @switch($displayStatus)
                                     @case('normal') <span class="device-status normal">正常</span> @break
                                     @case('warning') <span class="device-status warning">注意</span> @break
-                                    @case('alert') <span class="device-status alert">警告</span><button class="clear-alert-btn" onclick="confirmClearAlert('{{ $device->device_id }}', '{{ $roomNumber }}', '{{ $tenantName }}')">✕ 解除</button> @break
+                                    @case('alert') <span class="device-status alert">警告</span>@break
                                     @case('offline') <span class="device-status offline">離線</span> @break
                                     @default <span class="device-status offline">-</span>
                                 @endswitch
@@ -469,7 +465,7 @@
     <div id="detailModal" class="modal-overlay" onclick="if(event.target===this)hideModal('detailModal')">
         <div class="modal" style="max-width:560px;"><div class="modal-header"><h3>📋 デバイス詳細</h3><button class="modal-close" onclick="hideModal('detailModal')">×</button></div>
             <div class="modal-body">
-                <div class="detail-status-row"><div class="detail-status-badge normal" id="detailStatusBadge">-</div><button class="detail-clear-alert-btn" id="detailClearAlertBtn" style="display:none;" onclick="confirmClearAlertFromDetail()">✕ 警告解除</button></div>
+                <div class="detail-status-row"><div class="detail-status-badge normal" id="detailStatusBadge">-</div></div>
                 <div class="detail-section" style="margin-bottom:16px;">
                     <div style="display:flex;align-items:center;justify-content:space-between;">
                         <div style="display:flex;align-items:center;gap:12px;">
@@ -893,21 +889,7 @@ document.querySelectorAll('.bulk-qty-preset').forEach(function(btn) { btn.addEve
 // ===== デバイス削除 =====
 function confirmDelete(deviceId) { document.getElementById('deleteDeviceId').textContent = deviceId; document.getElementById('deleteForm').action = '/partner/org/devices/' + deviceId + '/remove'; showModal('deleteModal'); }
 
-// ===== 警告解除 =====
-let clearAlertDeviceId = null;
-function confirmClearAlert(deviceId, roomNumber, tenantName) {
-    clearAlertDeviceId = deviceId;
-    var label = (roomNumber ? roomNumber + ' ' : '') + (tenantName ? tenantName + ' ' : '') + '（' + deviceId + '）';
-    document.getElementById('clearAlertTarget').innerHTML = '対象: <strong class="mono">' + escapeHtml(label) + '</strong>';
-    showModal('clearAlertModal');
-}
-function confirmClearAlertFromDetail() { if (!currentDetailDeviceId) return; hideModal('detailModal'); confirmClearAlert(currentDetailDeviceId, document.getElementById('detailRoomInput').value, document.getElementById('detailTenantInput').value); }
-function executeClearAlert() {
-    if (!clearAlertDeviceId) return;
-    fetch('/partner/org/devices/' + clearAlertDeviceId + '/clear-alert', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' } })
-    .then(r => r.json()).then(d => { if (d.success) { showToast(d.message, 'success'); hideModal('clearAlertModal'); setTimeout(() => location.reload(), 500); } else showToast(d.message || 'エラー', 'error'); })
-    .catch(() => showToast('通信エラー', 'error'));
-}
+
 
 // ===== 外出モード（一覧テーブル） =====
 let pendingToggleDevice = null, pendingToggleCheckbox = null;
@@ -988,7 +970,6 @@ function showDeviceDetail(deviceId) {
         const labels = { normal: '正常稼働中', warning: '注意', alert: '未検知警告', offline: '通信途絶' };
         badge.textContent = labels[data.status] || data.status;
         badge.className = 'detail-status-badge ' + (data.status || 'offline');
-        document.getElementById('detailClearAlertBtn').style.display = data.status === 'alert' ? 'inline-flex' : 'none';
         document.getElementById('detailDeviceId').textContent = data.device_id;
         document.getElementById('detailLastDetected').textContent = data.last_human_detected || '-';
         var rssiLabel = '-';
