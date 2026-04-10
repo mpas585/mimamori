@@ -251,6 +251,10 @@ class OrgAdminController extends Controller
             'memo'                         => $device->location_memo,
             'registered_at'                => $device->created_at->format('Y/m/d'),
             'schedules'                    => $schedules,
+            'email_enabled'                => $notif ? (bool) $notif->email_enabled : true,
+            'email_1'                      => $notif ? $notif->email_1 : null,
+            'email_2'                      => $notif ? $notif->email_2 : null,
+            'email_3'                      => $notif ? $notif->email_3 : null,
             'sms_enabled'                  => $notif ? (bool) $notif->sms_enabled : false,
             'sms_phone_1'                  => $notif && $notif->sms_phone_1 ? preg_replace('/^\+81/', '0', $notif->sms_phone_1) : null,
             'sms_phone_2'                  => $notif && $notif->sms_phone_2 ? preg_replace('/^\+81/', '0', $notif->sms_phone_2) : null,
@@ -551,6 +555,10 @@ class OrgAdminController extends Controller
             ->firstOrFail();
 
         $request->validate([
+            'email_enabled' => 'nullable|boolean',
+            'email_1'       => 'nullable|email|max:255',
+            'email_2'       => 'nullable|email|max:255',
+            'email_3'       => 'nullable|email|max:255',
             'sms_enabled'   => 'nullable|boolean',
             'sms_phone_1'   => 'nullable|string|max:20',
             'sms_phone_2'   => 'nullable|string|max:20',
@@ -565,6 +573,10 @@ class OrgAdminController extends Controller
         }
 
         $data = [];
+        if ($request->has('email_enabled')) $data['email_enabled'] = (bool) $request->email_enabled;
+        if ($request->has('email_1'))       $data['email_1']       = $request->email_1 ?: null;
+        if ($request->has('email_2'))       $data['email_2']       = $request->email_2 ?: null;
+        if ($request->has('email_3'))       $data['email_3']       = $request->email_3 ?: null;
         if ($request->has('sms_enabled'))   $data['sms_enabled']   = (bool) $request->sms_enabled;
         if ($request->has('sms_phone_1'))   $data['sms_phone_1']   = PhoneHelper::normalize($request->sms_phone_1);
         if ($request->has('sms_phone_2'))   $data['sms_phone_2']   = PhoneHelper::normalize($request->sms_phone_2);

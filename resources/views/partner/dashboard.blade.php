@@ -185,7 +185,7 @@
     .bulk-opt-card:hover { border-color: var(--gray-400); }
     .bulk-opt-card.selected { border: 2px solid var(--gray-800); background: var(--beige); }
     .bulk-opt-header { display: flex; align-items: center; gap: 10px; }
-    .bulk-opt-check { width: 18px; height: 18px; border: 1.5px solid var(--gray-400); border-radius: 4px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: transparent; transition: all 0.15s; }
+    .bulk-opt-check { width: 18px; height: 18px; border: 1.5px solid var(--gray-400); border-radius: 4px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: transparent; transition: all 0.15px; }
     .bulk-opt-card.selected .bulk-opt-check { background: var(--gray-800); border-color: var(--gray-800); color: var(--white); }
     .bulk-opt-name { font-size: 14px; font-weight: 600; color: var(--gray-800); flex: 1; }
     .bulk-opt-badge { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 4px; background: var(--green-light); color: var(--green-dark); }
@@ -611,6 +611,18 @@
             <div class="modal-body">
                 <div style="font-size:12px;color:var(--gray-500);margin-bottom:16px;">対象デバイス：<span id="subModalDeviceId" class="mono" style="font-size:12px;"></span></div>
 
+                {{-- メール通知 --}}
+                <div style="border:1px solid var(--gray-200);border-radius:var(--radius);padding:14px;margin-bottom:10px;">
+                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+                        <p style="font-size:13px;font-weight:600;color:var(--gray-700);">✉️ メール通知</p>
+                    </div>
+                    <div id="detailEmailInputs">
+                        <input type="email" class="detail-form-input" id="detailEmail1" placeholder="例: taro@example.com" style="margin-bottom:6px;">
+                        <input type="email" class="detail-form-input" id="detailEmail2" placeholder="例: hanako@example.com（任意）" style="margin-bottom:6px;">
+                        <input type="email" class="detail-form-input" id="detailEmail3" placeholder="例: saburo@example.com（任意）">
+                    </div>
+                </div>
+
                 {{-- SMS通知 --}}
                 <div style="border:1px solid var(--gray-200);border-radius:var(--radius);padding:14px;margin-bottom:10px;">
                     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
@@ -949,6 +961,8 @@ function executeAwayModeOn() {
 
 // ===== デバイス詳細 =====
 let currentDetailDeviceId = null;
+let currentDetailEmailEnabled = true;
+let currentDetailEmail1 = '', currentDetailEmail2 = '', currentDetailEmail3 = '';
 let currentDetailSmsEnabled = false, currentDetailVoiceEnabled = false;
 let currentDetailSmsPhone1 = '', currentDetailSmsPhone2 = '';
 let currentDetailVoicePhone1 = '', currentDetailVoicePhone2 = '';
@@ -957,6 +971,9 @@ function showSubscriptionModal() {
     if (!currentDetailDeviceId) return;
     hideModal('detailModal');
     document.getElementById('subModalDeviceId').textContent = currentDetailDeviceId;
+    document.getElementById('detailEmail1').value = currentDetailEmail1;
+    document.getElementById('detailEmail2').value = currentDetailEmail2;
+    document.getElementById('detailEmail3').value = currentDetailEmail3;
     document.getElementById('detailSmsPhone1').value = currentDetailSmsPhone1;
     document.getElementById('detailSmsPhone2').value = currentDetailSmsPhone2;
     document.getElementById('detailVoicePhone1').value = currentDetailVoicePhone1;
@@ -1002,6 +1019,10 @@ _dpEl.style.color = (data.current_pin && data.current_pin !== data.initial_pin) 
         document.getElementById('detailNotifyLabel').textContent = notifyEnabled ? '有効' : '停止中';
 
         // SMS・AIコール状態をキャッシュ（契約プランモーダルで使用）
+        currentDetailEmailEnabled = data.email_enabled !== false;
+        currentDetailEmail1 = data.email_1 || '';
+        currentDetailEmail2 = data.email_2 || '';
+        currentDetailEmail3 = data.email_3 || '';
         currentDetailSmsEnabled = data.sms_enabled || false;
         currentDetailVoiceEnabled = data.voice_enabled || false;
         currentDetailSmsPhone1 = data.sms_phone_1 || '';
@@ -1160,6 +1181,9 @@ function toggleNotifyService(enabled) {
 function saveDetailNotification() {
     if (!currentDetailDeviceId) return;
     var payload = {
+        email_1: document.getElementById('detailEmail1').value || null,
+        email_2: document.getElementById('detailEmail2').value || null,
+        email_3: document.getElementById('detailEmail3').value || null,
         sms_phone_1: document.getElementById('detailSmsPhone1').value || null,
         sms_phone_2: document.getElementById('detailSmsPhone2').value || null,
         voice_phone_1: document.getElementById('detailVoicePhone1').value || null,
