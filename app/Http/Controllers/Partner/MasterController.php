@@ -213,7 +213,7 @@ class MasterController extends Controller
             'room_number'           => 'nullable|string|max:50',
             'tenant_name'           => 'nullable|string|max:100',
             'memo'                  => 'nullable|string|max:255',
-            'alert_threshold_hours' => 'nullable|integer|in:12,24,36,48,72',
+            'alert_threshold_hours' => 'nullable|integer|in:3,6,12,24,36,48,72',
             'install_height_cm'     => 'nullable|integer|min:100|max:300',
             'pet_exclusion_enabled' => 'nullable|boolean',
             'billing_start_date'    => 'nullable|date',
