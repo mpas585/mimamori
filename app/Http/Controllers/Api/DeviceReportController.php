@@ -106,20 +106,26 @@ class DeviceReportController extends Controller
 
         // デバイスステータス更新
         $updateData = [
-            'status'           => 'normal',
             'last_received_at' => now(),
             'battery_voltage'  => $validated['battery_v'] ?? null,
             'battery_pct'      => $validated['battery_pct'] ?? null,
             'rssi'             => $validated['rssi'] ?? null,
         ];
 
+        // alert/offline 中はステータスを上書きしない（Jobで判定・復帰）
+        // それ以外は normal に更新
+        if (!in_array($device->status, ['alert', 'offline'])) {
+            $updateData['status'] = 'normal';
+        }
+
         if ($humanCount > 0) {
             $updateData['last_human_detected_at'] = $validated['period_end'];
         }
 
-        // 電池残量低下チェック
+        // 電池残量低下チェック（alert/offline 中でも warning は上書きしない）
         $batteryPct = $validated['battery_pct'] ?? null;
-        if ($batteryPct !== null && $batteryPct <= 10) {
+        if ($batteryPct !== null && $batteryPct <= 10
+            && !in_array($device->status, ['alert', 'offline'])) {
             $updateData['status'] = 'warning';
         }
 
