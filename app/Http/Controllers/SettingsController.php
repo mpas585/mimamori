@@ -28,7 +28,7 @@ class SettingsController extends Controller
         $data = [];
 
         if ($request->has('alert_threshold_hours')) {
-            $rules['alert_threshold_hours'] = 'required|in:12,24,36,48,72';
+            $rules['alert_threshold_hours'] = 'required|in:3,6,12,24,36,48,72';
             $data['alert_threshold_hours'] = $request->alert_threshold_hours;
         }
 
