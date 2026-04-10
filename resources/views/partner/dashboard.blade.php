@@ -495,7 +495,7 @@
                 <div class="detail-section"><div class="detail-section-title">⚙️ 外出モード設定</div><div class="detail-grid">
                     <div class="detail-item"><p class="detail-item-label">アラート時間</p>
                         <select class="detail-form-input" id="detailAlertHoursInput">
-                            <option value="12">12時間</option><option value="24">24時間</option><option value="36">36時間</option><option value="48">48時間</option><option value="72">72時間</option>
+                            <option value="3">3時間</option><option value="6">6時間</option><option value="12">12時間</option><option value="24">24時間</option><option value="36">36時間</option><option value="48">48時間</option><option value="72">72時間</option>
                         </select>
                     </div>
                     <div class="detail-item"><p class="detail-item-label">設置高さ</p>
