@@ -590,6 +590,12 @@
         <div class="modal-body">
             <div style="font-size:12px;color:var(--gray-500);margin-bottom:16px;">対象デバイス: <span id="masterSubModalDeviceId" class="mono" style="font-size:12px;"></span></div>
             <div style="border:1px solid var(--gray-200);border-radius:var(--radius);padding:14px;margin-bottom:10px;">
+                <p style="font-size:13px;font-weight:600;color:var(--gray-700);margin-bottom:10px;">メール通知</p>
+                <input type="email" class="detail-form-input" id="masterDetailEmail1" placeholder="taro@example.com" style="margin-bottom:6px;">
+                <input type="email" class="detail-form-input" id="masterDetailEmail2" placeholder="hanako@example.com" style="margin-bottom:6px;">
+                <input type="email" class="detail-form-input" id="masterDetailEmail3" placeholder="saburo@example.com">
+            </div>
+            <div style="border:1px solid var(--gray-200);border-radius:var(--radius);padding:14px;margin-bottom:10px;">
                 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
                     <p style="font-size:13px;font-weight:600;color:var(--gray-700);">📱 SMS通知 <span style="font-size:11px;font-weight:400;color:var(--gray-500);">+税込100円/台/月</span></p>
                     <label class="watch-toggle"><input type="checkbox" id="masterDetailSmsEnabled"><span class="watch-slider"></span></label>
@@ -949,6 +955,9 @@ _cpEl.style.color = (d.current_pin && d.current_pin !== d.initial_pin) ? '#e6510
         const now = new Date();
         const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
         document.getElementById('masterDetailBillingStartDate').value = d.billing_start_date || nextMonth.toISOString().split('T')[0];
+        document.getElementById('masterDetailEmail1').value = d.email_1 || '';
+        document.getElementById('masterDetailEmail2').value = d.email_2 || '';
+        document.getElementById('masterDetailEmail3').value = d.email_3 || '';
         document.getElementById('masterDetailSmsEnabled').checked = d.sms_enabled || false;
         document.getElementById('masterDetailSmsPhone1').value = d.sms_phone_1 || '';
         document.getElementById('masterDetailSmsPhone2').value = d.sms_phone_2 || '';
@@ -1013,6 +1022,9 @@ async function masterSaveAssignment() {
 async function masterSaveNotification() {
     if (!masterCurrentDeviceId) return;
     const payload = {
+        email_1: document.getElementById('masterDetailEmail1').value || null,
+        email_2: document.getElementById('masterDetailEmail2').value || null,
+        email_3: document.getElementById('masterDetailEmail3').value || null,
         sms_enabled: document.getElementById('masterDetailSmsEnabled').checked ? 1 : 0,
         sms_phone_1: document.getElementById('masterDetailSmsPhone1').value || null,
         sms_phone_2: document.getElementById('masterDetailSmsPhone2').value || null,
