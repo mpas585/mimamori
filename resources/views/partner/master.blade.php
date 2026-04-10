@@ -393,7 +393,7 @@
                             </div>
                         </td>
                         <td>
-                            <button class="action-btn" onclick="showEditOrgModal({{ json_encode(['id'=>$org->id,'name'=>$org->name,'contact_name'=>$org->contact_name,'contact_email'=>$org->contact_email,'contact_phone'=>$org->contact_phone,'address'=>$org->address,'notes'=>$org->notes,'notification_email_1'=>$org->notification_email_1,'notification_email_2'=>$org->notification_email_2,'notification_email_3'=>$org->notification_email_3,'notification_sms_1'=>$org->notification_sms_1,'notification_sms_2'=>$org->notification_sms_2]) }})">編集</button>
+                            <button class="action-btn" onclick="showEditOrgModal({{ json_encode(['id'=>$org->id,'name'=>$org->name,'contact_name'=>$org->contact_name,'contact_phone'=>$org->contact_phone,'address'=>$org->address,'notes'=>$org->notes,'notification_email_1'=>$org->notification_email_1,'notification_email_2'=>$org->notification_email_2,'notification_email_3'=>$org->notification_email_3,'notification_sms_1'=>$org->notification_sms_1,'notification_sms_2'=>$org->notification_sms_2]) }})">編集</button>
                             <button class="action-btn" onclick="showOrgAccountsModal({{ $org->id }}, '{{ addslashes($org->name) }}')">アカウント</button>
                             @if($org->devices_count === 0) <button class="action-btn danger" onclick="confirmDeleteOrg({{ $org->id }}, '{{ $org->name }}')">削除</button> @endif
                         </td>
@@ -747,7 +747,7 @@
                     <div class="form-group"><label class="form-label">組織名 *</label><input type="text" name="name" class="form-input" required></div>
                     <div class="form-row-2">
                         <div class="form-group"><label class="form-label">担当者名</label><input type="text" name="contact_name" class="form-input"></div>
-                        <div class="form-group"><label class="form-label">連絡先メール</label><input type="email" name="contact_email" class="form-input"></div>
+
                     </div>
                     <div class="form-row-2">
                         <div class="form-group"><label class="form-label">連絡先電話番号</label><input type="text" name="contact_phone" class="form-input"></div>

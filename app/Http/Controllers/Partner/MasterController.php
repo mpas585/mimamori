@@ -462,7 +462,6 @@ class MasterController extends Controller
         $request->validate([
             'name'             => 'required|string|max:200',
             'contact_name'     => 'nullable|string|max:100',
-            'contact_email'    => 'nullable|email|max:255',
             'contact_phone'    => 'nullable|string|max:20',
             'address'          => 'nullable|string|max:500',
             'notes'            => 'nullable|string|max:1000',
@@ -487,7 +486,7 @@ class MasterController extends Controller
         $org = Organization::create([
             'name'            => $request->name,
             'contact_name'    => $request->contact_name,
-            'contact_email'   => $request->contact_email,
+
             'contact_phone'   => $request->contact_phone,
             'address'         => $request->address,
             'notes'           => $request->notes,
@@ -528,7 +527,7 @@ class MasterController extends Controller
         $org->update([
             'name'                 => $request->name,
             'contact_name'         => $request->contact_name,
-            'contact_email'        => $request->contact_email,
+
             'contact_phone'        => $request->contact_phone,
             'address'              => $request->address,
             'notes'                => $request->notes,
