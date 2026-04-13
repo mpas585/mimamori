@@ -114,6 +114,11 @@ class Device extends Authenticatable
         return $this->hasMany(Watcher::class, 'target_device_id');
     }
 
+    public function troubleReports(): HasMany
+    {
+        return $this->hasMany(TroubleReport::class);
+    }
+
     public function schedules(): HasMany
     {
         return $this->hasMany(DeviceSchedule::class);

@@ -17,6 +17,8 @@ use App\Http\Controllers\Partner\OrgAdminController;
 use App\Http\Middleware\PartnerAuth;
 use App\Http\Controllers\PlanController;
 use App\Http\Controllers\BillingController;
+use App\Http\Controllers\TroubleReportController;
+use App\Http\Controllers\Partner\TroubleReportController as PartnerTroubleReportController;
 
 // ============================================================
 // ユーザー画面
@@ -64,6 +66,9 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/logs', [LogController::class, 'index'])->name('logs');
     Route::apiResource('schedules', ScheduleController::class)->except(['show']);
+
+    Route::get('/trouble', [TroubleReportController::class, 'index'])->name('trouble');
+    Route::post('/trouble', [TroubleReportController::class, 'store']);
 
     Route::get('/plan', [PlanController::class, 'index'])->name('plan');
     Route::post('/plan/subscribe', [PlanController::class, 'subscribe'])->name('plan.subscribe');
@@ -123,6 +128,11 @@ Route::middleware(PartnerAuth::class)->prefix('partner')->group(function () {
     Route::put('/orgs/{orgId}/users/{userId}', [MasterController::class, 'updateOrgUser'])->name('partner.orgs.users.update');
     Route::delete('/orgs/{orgId}/users/{userId}', [MasterController::class, 'destroyOrgUser'])->name('partner.orgs.users.destroy');
     Route::post('/orgs/{orgId}/users/{userId}/reset-password', [MasterController::class, 'resetOrgUserPassword'])->name('partner.orgs.users.reset-password');
+
+    // 故障・通報管理
+    Route::get('/trouble-reports', [PartnerTroubleReportController::class, 'index'])->name('partner.trouble-reports');
+    Route::post('/trouble-reports', [PartnerTroubleReportController::class, 'store'])->name('partner.trouble-reports.store');
+    Route::put('/trouble-reports/{id}/status', [PartnerTroubleReportController::class, 'updateStatus'])->name('partner.trouble-reports.update-status');
 
     // 課金管理（master・operator 共通 — operatorは自組織のみ）
     Route::get('/billing', [BillingController::class, 'index'])->name('partner.billing.index');
