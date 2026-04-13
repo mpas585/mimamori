@@ -1318,5 +1318,41 @@ document.addEventListener('DOMContentLoaded', function() {
     @if(session('success')) showToast('{{ session("success") }}', 'success'); @endif
     @if(session('error')) showToast('{{ session("error") }}', 'error'); @endif
 });
+// ===== PINリセット =====
+function showPinResetModal() {
+    if (!currentDetailDeviceId) return;
+    hideModal('detailModal');
+    document.getElementById('pinResetDeviceId').textContent = currentDetailDeviceId;
+    document.getElementById('newPinInput').value = '';
+    showModal('pinResetModal');
+}
+async function resetPinToInitial() {
+    if (!currentDetailDeviceId) return;
+    if (!confirm('PINを初期PINにリセットしますか？')) return;
+    try {
+        var res = await fetch('/partner/org/devices/' + currentDetailDeviceId + '/reset-pin', {
+            method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' },
+            body: JSON.stringify({ mode: 'reset_to_initial' })
+        });
+        var data = await res.json();
+        if (data.success) { showToast(data.message, 'success'); hideModal('pinResetModal'); setTimeout(function(){ location.reload(); }, 800); }
+        else showToast(data.message || 'エラー', 'error');
+    } catch(e) { showToast('通信エラー', 'error'); }
+}
+async function setCustomPin() {
+    if (!currentDetailDeviceId) return;
+    var pin = document.getElementById('newPinInput').value;
+    if (!pin || !/^[0-9]{4}$/.test(pin)) { showToast('4桁の数字を入力してください', 'error'); return; }
+    try {
+        var res = await fetch('/partner/org/devices/' + currentDetailDeviceId + '/reset-pin', {
+            method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' },
+            body: JSON.stringify({ mode: 'custom', new_pin: pin })
+        });
+        var data = await res.json();
+        if (data.success) { showToast(data.message, 'success'); hideModal('pinResetModal'); setTimeout(function(){ location.reload(); }, 800); }
+        else showToast(data.message || 'エラー', 'error');
+    } catch(e) { showToast('通信エラー', 'error'); }
+}
+});
 </script>
 @endsection
