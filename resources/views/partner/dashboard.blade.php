@@ -327,7 +327,7 @@
                             </td>
                             <td class="mono">{{ $device->device_id }}</td>
 <td class="mono" style="font-size:12px;">{{ $device->initial_pin ?: '-' }}</td>
-<td class="mono" style="font-size:12px;{{ ($device->current_pin && $device->current_pin !== $device->initial_pin) ? 'color:#e65100;' : '' }}">{{ ($device->current_pin && $device->current_pin !== $device->initial_pin) ? $device->current_pin : '-' }}</td>
+<td class="mono" style="font-size:12px;">{{ ($device->current_pin && $device->current_pin !== $device->initial_pin) ? $device->current_pin : '-' }}</td>
                             <td>
                                 @if($assignment)
                                     <label class="watch-toggle away">
@@ -1034,7 +1034,7 @@ function showDeviceDetail(deviceId) {
 document.getElementById('detailInitialPin').textContent = data.initial_pin || '-';
 const _dpEl = document.getElementById('detailCurrentPin');
 _dpEl.textContent = (data.current_pin && data.current_pin !== data.initial_pin) ? data.current_pin : '-';
-_dpEl.style.color = (data.current_pin && data.current_pin !== data.initial_pin) ? '#e65100' : '';
+
         document.getElementById('detailRoomInput').value = data.room_number || '';
         document.getElementById('detailTenantInput').value = data.tenant_name || '';
         document.getElementById('detailAlertHoursInput').value = data.alert_threshold_hours || 24;
