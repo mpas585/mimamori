@@ -338,7 +338,7 @@
                                     @if($device->away_until) <span class="watch-timer-icon">⏰</span> @endif
                                 @endif
                             </td>
-                            <td style="font-size:12px;">{{ $timeSince ?: '-' }}</td>
+                            <td style="font-size:12px;{{ $displayStatus === 'alert' ? 'color:var(--red);font-weight:600;' : '' }}">{{ $timeSince ?: '-' }}</td>
                             <td class="{{ $device->battery_pct && $device->battery_pct < 20 ? 'battery-low' : '' }}" style="font-size:12px;">{{ $device->battery_pct ? $device->battery_pct . '%' : '-' }}</td>
                             <td class="{{ $rssi !== null && $rssi < -85 ? 'signal-weak' : '' }}" style="font-size:12px;">{{ $signalLabel }}</td>
                             <td>
