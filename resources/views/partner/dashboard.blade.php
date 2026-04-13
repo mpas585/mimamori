@@ -316,6 +316,7 @@
                                     @case('offline') <span class="device-status offline">離線</span> @break
                                     @default <span class="device-status offline">-</span>
                                 @endswitch
+                                <button class="notif-log-trigger" onclick="openNotifLogModal('{{ $device->device_id }}', '{{ $tenantName ?: $device->device_id }}')" title="通知履歴"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px;"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg></button>
                             </td>
                             <td>
                                 @if($roomNumber)
@@ -766,6 +767,7 @@
             <div class="modal-footer"><button class="btn btn-secondary" onclick="hideModal('pinResetModal');showDeviceDetail(currentDetailDeviceId)">閉じる</button></div>
         </div>
     </div>
+    @include('components.notification-log-modal')
     <div id="toast" class="toast"></div>
 @endsection
 

@@ -715,6 +715,14 @@
     </div>
 </div>
 
+{{-- 通知履歴 --}}
+<section class="section">
+    <div class="section-header">
+        <h3 class="section-title-new">🔔 通知履歴</h3>
+        <button class="section-action" onclick="openNotifLogModal('{{ $device->device_id }}', '{{ $device->device_id }}')" style="border:none;cursor:pointer;">確認する</button>
+    </div>
+</section>
+
 {{-- 検知ログ --}}
 <section class="section">
     <div class="section-header">
@@ -778,6 +786,8 @@
         </div>
     </div>
 </div>
+
+@include('components.notification-log-modal')
 
 {{-- ===== モーダル: 警告解除確認 ===== --}}
 <div id="dismissModal" class="modal-overlay">
