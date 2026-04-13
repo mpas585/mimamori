@@ -58,6 +58,7 @@ class MasterController extends Controller
 
         $devices = $query->orderBy('created_at', 'desc')->paginate(20);
 
+        // masterアカウントのみ
         $adminUsers = PartnerUser::where('role', 'master')->orderBy('created_at', 'desc')->get();
 
         $organizations = Organization::withCount('devices')
@@ -68,6 +69,10 @@ class MasterController extends Controller
 
         return view('partner.master', compact('stats', 'devices', 'adminUsers', 'organizations', 'salesData'));
     }
+
+    // ============================================================
+    // デバイス発番
+    // ============================================================
 
     public function issueDevice(Request $request)
     {
@@ -126,6 +131,10 @@ class MasterController extends Controller
 
         return back()->with('issued_bulk', $issued);
     }
+
+    // ============================================================
+    // デバイス詳細・編集系
+    // ============================================================
 
     public function deviceDetail(string $deviceId)
     {
@@ -186,10 +195,6 @@ class MasterController extends Controller
             'registered_at'               => $device->created_at->format('Y/m/d'),
             'billing_start_date'          => $device->billing_start_date ? $device->billing_start_date->format('Y-m-d') : null,
             'schedules'                   => $schedules,
-            'email_enabled'               => $notif ? (bool) $notif->email_enabled : true,
-            'email_1'                     => $notif ? $notif->email_1 : null,
-            'email_2'                     => $notif ? $notif->email_2 : null,
-            'email_3'                     => $notif ? $notif->email_3 : null,
             'sms_enabled'                 => $notif ? (bool) $notif->sms_enabled : false,
             'sms_phone_1'                 => $notif && $notif->sms_phone_1 ? preg_replace('/^\+81/', '0', $notif->sms_phone_1) : null,
             'sms_phone_2'                 => $notif && $notif->sms_phone_2 ? preg_replace('/^\+81/', '0', $notif->sms_phone_2) : null,
@@ -262,10 +267,6 @@ class MasterController extends Controller
         $device = Device::where('device_id', $deviceId)->firstOrFail();
 
         $request->validate([
-            'email_enabled' => 'nullable|boolean',
-            'email_1'       => 'nullable|email|max:255',
-            'email_2'       => 'nullable|email|max:255',
-            'email_3'       => 'nullable|email|max:255',
             'sms_enabled'   => 'nullable|boolean',
             'sms_phone_1'   => 'nullable|string|max:20',
             'sms_phone_2'   => 'nullable|string|max:20',
@@ -280,10 +281,6 @@ class MasterController extends Controller
         }
 
         $data = [];
-        if ($request->has('email_enabled')) $data['email_enabled'] = (bool) $request->email_enabled;
-        if ($request->has('email_1'))       $data['email_1']       = $request->email_1 ?: null;
-        if ($request->has('email_2'))       $data['email_2']       = $request->email_2 ?: null;
-        if ($request->has('email_3'))       $data['email_3']       = $request->email_3 ?: null;
         if ($request->has('sms_enabled'))   $data['sms_enabled']   = (bool) $request->sms_enabled;
         if ($request->has('sms_phone_1'))   $data['sms_phone_1']   = \App\Helpers\PhoneHelper::normalize($request->sms_phone_1);
         if ($request->has('sms_phone_2'))   $data['sms_phone_2']   = \App\Helpers\PhoneHelper::normalize($request->sms_phone_2);
@@ -306,6 +303,21 @@ class MasterController extends Controller
             'away_mode'=> (bool) $device->away_mode,
             'message'  => $device->away_mode ? '外出モードをONにしました' : '外出モードをOFFにしました',
         ]);
+    }
+
+    public function clearDeviceAlert(Request $request, string $deviceId)
+    {
+        $device = Device::where('device_id', $deviceId)->firstOrFail();
+        $device->update([
+            'status'                 => 'inactive',
+            'last_human_detected_at' => null,
+            'last_received_at'       => null,
+            'battery_voltage'        => null,
+            'battery_pct'            => null,
+            'rssi'                   => null,
+        ]);
+        $device->detectionLogs()->delete();
+        return response()->json(['success' => true, 'message' => "デバイス {$deviceId} の警告を解除しました"]);
     }
 
     public function destroyDevice(string $deviceId)
@@ -350,6 +362,10 @@ class MasterController extends Controller
         return response()->json(['success' => true, 'message' => 'スケジュールを削除しました']);
     }
 
+    // ============================================================
+    // 検知ログ
+    // ============================================================
+
     public function deviceLogs(Request $request, string $deviceId)
     {
         $device = Device::where('device_id', $deviceId)->firstOrFail();
@@ -377,6 +393,10 @@ class MasterController extends Controller
         $backUrl = '/partner';
         return view('partner.device_logs', compact('device', 'logs', 'summary', 'backUrl'));
     }
+
+    // ============================================================
+    // 管理者アカウント管理（masterのみ）
+    // ============================================================
 
     public function storeAdminUser(Request $request)
     {
@@ -442,11 +462,16 @@ class MasterController extends Controller
         return redirect('/partner?tab=admins')->with('success', '管理者アカウント「' . $name . '」を削除しました');
     }
 
+    // ============================================================
+    // 組織管理
+    // ============================================================
+
     public function storeOrg(Request $request)
     {
         $request->validate([
             'name'             => 'required|string|max:200',
             'contact_name'     => 'nullable|string|max:100',
+            'contact_email'    => 'nullable|email|max:255',
             'contact_phone'    => 'nullable|string|max:20',
             'address'          => 'nullable|string|max:500',
             'notes'            => 'nullable|string|max:1000',
@@ -471,7 +496,7 @@ class MasterController extends Controller
         $org = Organization::create([
             'name'            => $request->name,
             'contact_name'    => $request->contact_name,
-
+            'contact_email'   => $request->contact_email,
             'contact_phone'   => $request->contact_phone,
             'address'         => $request->address,
             'notes'           => $request->notes,
@@ -497,6 +522,7 @@ class MasterController extends Controller
         $request->validate([
             'name'                  => 'required|string|max:200',
             'contact_name'          => 'nullable|string|max:100',
+            'contact_email'         => 'required|email|max:255',
             'contact_phone'         => 'nullable|string|max:20',
             'address'               => 'nullable|string|max:500',
             'notes'                 => 'nullable|string|max:1000',
@@ -507,12 +533,14 @@ class MasterController extends Controller
             'notification_sms_2'    => 'nullable|string|max:20',
         ], [
             'name.required'          => '組織名を入力してください',
+            'contact_email.required' => '連絡先メールを入力してください',
+            'contact_email.email'    => '正しいメールアドレスを入力してください',
         ]);
 
         $org->update([
             'name'                 => $request->name,
             'contact_name'         => $request->contact_name,
-
+            'contact_email'        => $request->contact_email,
             'contact_phone'        => $request->contact_phone,
             'address'              => $request->address,
             'notes'                => $request->notes,
@@ -550,6 +578,10 @@ class MasterController extends Controller
             'message'         => $enabled ? '組織内全デバイスのプレミアムを有効にしました' : '組織内全デバイスのプレミアムを無効にしました',
         ]);
     }
+
+    // ============================================================
+    // パートナーアカウント管理（組織管理タブから、Ajax）
+    // ============================================================
 
     public function orgUsers(int $orgId)
     {
@@ -615,6 +647,10 @@ class MasterController extends Controller
         return response()->json(['success' => true, 'message' => 'アカウント「' . $name . '」を削除しました']);
     }
 
+    // ============================================================
+    // パートナーアカウント パスワードリセット（masterのみ）
+    // ============================================================
+
     public function resetOrgUserPassword(Request $request, int $orgId, int $userId)
     {
         $user = PartnerUser::where('id', $userId)->where('organization_id', $orgId)->where('role', 'operator')->firstOrFail();
@@ -626,6 +662,10 @@ class MasterController extends Controller
         $user->save();
         return response()->json(['success' => true, 'message' => '「' . $user->name . '」のパスワードをリセットしました']);
     }
+
+    // ============================================================
+    // ヘルパー
+    // ============================================================
 
     private function generateDeviceId(): string
     {

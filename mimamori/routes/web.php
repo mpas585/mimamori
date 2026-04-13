@@ -101,6 +101,7 @@ Route::middleware(PartnerAuth::class)->prefix('partner')->group(function () {
     Route::put('/devices/{deviceId}/assignment', [MasterController::class, 'updateDeviceAssignment'])->name('partner.devices.update-assignment');
     Route::post('/devices/{deviceId}/notification', [MasterController::class, 'updateDeviceNotification'])->name('partner.devices.update-notification');
     Route::post('/devices/{deviceId}/toggle-watch', [MasterController::class, 'toggleDeviceWatch'])->name('partner.devices.toggle-watch');
+    Route::post('/devices/{deviceId}/clear-alert', [MasterController::class, 'clearDeviceAlert'])->name('partner.devices.clear-alert');
     Route::post('/devices/{deviceId}/toggle-premium', [MasterController::class, 'toggleDevicePremium'])->name('partner.devices.toggle-premium');
     Route::post('/devices/{deviceId}/toggle-notify', [MasterController::class, 'toggleNotifyService'])->name('partner.devices.toggle-notify');
     Route::post('/devices/{deviceId}/schedules', [MasterController::class, 'storeDeviceSchedule'])->name('partner.devices.schedules.store');
@@ -122,8 +123,10 @@ Route::middleware(PartnerAuth::class)->prefix('partner')->group(function () {
     Route::put('/orgs/{orgId}/users/{userId}', [MasterController::class, 'updateOrgUser'])->name('partner.orgs.users.update');
     Route::delete('/orgs/{orgId}/users/{userId}', [MasterController::class, 'destroyOrgUser'])->name('partner.orgs.users.destroy');
     Route::post('/orgs/{orgId}/users/{userId}/reset-password', [MasterController::class, 'resetOrgUserPassword'])->name('partner.orgs.users.reset-password');
+});
 
-    // 課金管理（master・operator 共通 — operatorは自組織のみ）
+// ★ master 限定（課金管理）
+Route::middleware(PartnerAuth::class.':master')->prefix('partner')->group(function () {
     Route::get('/billing', [BillingController::class, 'index'])->name('partner.billing.index');
     Route::post('/billing', [BillingController::class, 'store'])->name('partner.billing.store');
     Route::get('/billing/tds-complete', [BillingController::class, 'tdsComplete'])->name('partner.billing.tds-complete');
@@ -141,6 +144,7 @@ Route::middleware(PartnerAuth::class.':operator')->prefix('partner/org')->group(
     Route::post('/devices/{deviceId}/remove', [OrgAdminController::class, 'removeDevice'])->name('partner.org.devices.remove');
     Route::post('/devices/{deviceId}/toggle-watch', [OrgAdminController::class, 'toggleWatch'])->name('partner.org.devices.toggle-watch');
     Route::post('/devices/{deviceId}/toggle-notify', [OrgAdminController::class, 'toggleNotifyService'])->name('partner.org.devices.toggle-notify');
+    Route::post('/devices/{deviceId}/clear-alert', [OrgAdminController::class, 'clearAlert'])->name('partner.org.devices.clear-alert');
     Route::get('/devices/{deviceId}/detail', [OrgAdminController::class, 'deviceDetail'])->name('partner.org.devices.detail');
     Route::get('/devices/{deviceId}/logs', [OrgAdminController::class, 'deviceLogs'])->name('partner.org.devices.logs');
     Route::put('/devices/{deviceId}/assignment', [OrgAdminController::class, 'updateAssignment'])->name('partner.org.devices.update-assignment');

@@ -18,6 +18,7 @@ use App\Http\Middleware\PartnerAuth;
 use App\Http\Controllers\PlanController;
 use App\Http\Controllers\BillingController;
 use App\Http\Controllers\TroubleReportController;
+use App\Http\Controllers\NotificationLogController;
 use App\Http\Controllers\Partner\TroubleReportController as PartnerTroubleReportController;
 
 // ============================================================
@@ -67,6 +68,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/logs', [LogController::class, 'index'])->name('logs');
     Route::apiResource('schedules', ScheduleController::class)->except(['show']);
 
+    Route::get('/mypage/notification-logs', [NotificationLogController::class, 'showMine']);
     Route::get('/trouble', [TroubleReportController::class, 'index'])->name('trouble');
     Route::post('/trouble', [TroubleReportController::class, 'store']);
 
@@ -101,6 +103,7 @@ Route::middleware(PartnerAuth::class)->prefix('partner')->group(function () {
     Route::post('/account-card', [PartnerPasswordController::class, 'updateCard'])->name('partner.account-card');
     Route::post('/account-delivery', [PartnerPasswordController::class, 'updateDelivery'])->name('partner.account-delivery');
 
+    Route::get('/devices/{deviceId}/notification-logs', [NotificationLogController::class, 'show']);
     Route::get('/devices/{deviceId}/detail', [MasterController::class, 'deviceDetail'])->name('partner.devices.detail');
     Route::get('/devices/{deviceId}/logs', [MasterController::class, 'deviceLogs'])->name('partner.devices.logs');
     Route::put('/devices/{deviceId}/assignment', [MasterController::class, 'updateDeviceAssignment'])->name('partner.devices.update-assignment');
@@ -155,6 +158,7 @@ Route::middleware(PartnerAuth::class.':operator')->prefix('partner/org')->group(
     Route::post('/devices/{deviceId}/toggle-notify', [OrgAdminController::class, 'toggleNotifyService'])->name('partner.org.devices.toggle-notify');
     Route::post('/devices/{deviceId}/reset-pin', [OrgAdminController::class, 'resetDevicePin'])->name('partner.org.devices.reset-pin');
     Route::post('/devices/{deviceId}/clear-alert', [OrgAdminController::class, 'clearAlert'])->name('partner.org.devices.clear-alert');
+    Route::get('/devices/{deviceId}/notification-logs', [NotificationLogController::class, 'showForOrg']);
     Route::get('/devices/{deviceId}/detail', [OrgAdminController::class, 'deviceDetail'])->name('partner.org.devices.detail');
     Route::get('/devices/{deviceId}/logs', [OrgAdminController::class, 'deviceLogs'])->name('partner.org.devices.logs');
     Route::put('/devices/{deviceId}/assignment', [OrgAdminController::class, 'updateAssignment'])->name('partner.org.devices.update-assignment');
