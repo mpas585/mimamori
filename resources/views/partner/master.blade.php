@@ -266,7 +266,7 @@
                     <tr class="{{ !$device->notification_service_enabled ? 'row-inactive' : '' }}">
                         <td class="device-id-cell">{{ $device->device_id }}</td>
 <td class="mono" style="font-size:12px;">{{ $device->initial_pin ?: '-' }}</td>
-<td class="mono" style="font-size:12px;{{ ($device->current_pin && $device->current_pin !== $device->initial_pin) ? 'color:#e65100;' : '' }}">{{ ($device->current_pin && $device->current_pin !== $device->initial_pin) ? $device->current_pin : '-' }}</td>
+<td class="mono" style="font-size:12px;">{{ ($device->current_pin && $device->current_pin !== $device->initial_pin) ? $device->current_pin : '-' }}</td>
                         <td>{{ $device->nickname ?: '-' }}</td>
                         <td>
                             <span class="status-badge status-{{ $device->status }}">
@@ -960,7 +960,7 @@ async function showDeviceDetail(deviceId) {
 document.getElementById('masterDetailInitialPin').textContent = d.initial_pin || '-';
 const _cpEl = document.getElementById('masterDetailCurrentPin');
 _cpEl.textContent = (d.current_pin && d.current_pin !== d.initial_pin) ? d.current_pin : '-';
-_cpEl.style.color = (d.current_pin && d.current_pin !== d.initial_pin) ? '#e65100' : '';
+
         document.getElementById('masterDetailMemo').value = d.memo || '';
         const now = new Date();
         const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
