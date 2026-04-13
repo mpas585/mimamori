@@ -11,6 +11,7 @@ class AiCallLog extends Model
 
     protected $fillable = [
         'device_id',
+        'direction',
         'call_sid',
         'recording_sid',
         'call_status',
@@ -34,5 +35,3 @@ class AiCallLog extends Model
         return $this->belongsTo(Device::class);
     }
 }
-
-

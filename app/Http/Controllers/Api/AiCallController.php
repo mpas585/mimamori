@@ -6,13 +6,14 @@ use App\Http\Controllers\Controller;
 use App\Models\AiCallLog;
 use App\Models\Device;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 class AiCallController extends Controller
 {
     /**
-     * TwiML: ガイダンス再生 + 録音
+     * TwiML: ガイダンス再生 + 録音（発信用）
      * GET/POST /api/ai-call/twiml
      */
     public function twiml(Request $request)
@@ -28,6 +29,61 @@ class AiCallController extends Controller
             . 'recordingStatusCallback="' . config('app.url') . '/api/ai-call/recording-webhook" '
             . 'recordingStatusCallbackMethod="POST"/>'
             . '<Say language="ja-JP" voice="Polly.Mizuki">ありがとうございました。</Say>'
+            . '</Response>';
+
+        return response($xml, 200)->header('Content-Type', 'text/xml; charset=utf-8');
+    }
+
+    /**
+     * TwiML: 折り返し着信用
+     * GET/POST /api/ai-call/inbound
+     */
+    public function inbound(Request $request)
+    {
+        $callerPhone = $request->input('From');  // E.164形式 (+81...)
+        $callSid     = $request->input('CallSid');
+
+        Log::info('AiCall inbound from: ' . $callerPhone . ' CallSid: ' . $callSid);
+
+        // 発信元の電話番号からデバイスを逆引き
+        $device = $this->findDeviceByCaller($callerPhone);
+
+        if (!$device) {
+            // 未登録番号
+            Log::warning('AiCall inbound: unregistered caller ' . $callerPhone);
+            $xml = '<?xml version="1.0" encoding="UTF-8"?>'
+                . '<Response>'
+                . '<Say language="ja-JP" voice="Polly.Mizuki">'
+                . 'こちらは見守りシステムです。'
+                . 'この電話番号は登録されていないため、ご利用いただけません。'
+                . 'お心当たりのある方は、管理者にお問い合わせください。'
+                . '</Say>'
+                . '</Response>';
+            return response($xml, 200)->header('Content-Type', 'text/xml; charset=utf-8');
+        }
+
+        // 着信ログを作成
+        $log = AiCallLog::create([
+            'device_id'   => $device->id,
+            'direction'   => 'inbound',
+            'call_sid'    => $callSid,
+            'call_status' => 'completed',
+            'called_at'   => now(),
+        ]);
+
+        // ガイダンス再生 + 録音
+        $name = $device->nickname ?: $device->device_id;
+        $xml = '<?xml version="1.0" encoding="UTF-8"?>'
+            . '<Response>'
+            . '<Say language="ja-JP" voice="Polly.Mizuki">'
+            . 'お電話ありがとうございます。見守りシステムの安否確認サービスです。'
+            . 'ピーという音の後に、今日のご体調やお気持ちをお話しください。'
+            . '30秒以内でお話しいただけます。'
+            . '</Say>'
+            . '<Record maxLength="30" timeout="5" transcribe="false" '
+            . 'recordingStatusCallback="' . config('app.url') . '/api/ai-call/recording-webhook" '
+            . 'recordingStatusCallbackMethod="POST"/>'
+            . '<Say language="ja-JP" voice="Polly.Mizuki">ありがとうございました。確認できました。</Say>'
             . '</Response>';
 
         return response($xml, 200)->header('Content-Type', 'text/xml; charset=utf-8');
@@ -53,8 +109,10 @@ class AiCallController extends Controller
                 'call_status' => 'no_answer',
                 'duration_sec' => 0,
             ]);
-            // 不在通知を送信
-            $this->sendNoAnswerNotification($log->device);
+            // 不在通知を送信（発信の場合のみ）
+            if ($log->direction !== 'inbound') {
+                $this->sendNoAnswerNotification($log->device);
+            }
         } elseif ($callStatus === 'failed') {
             $log->update([
                 'call_status' => 'failed',
@@ -115,7 +173,7 @@ class AiCallController extends Controller
 
             // 要確認・異常の場合は通知
             if (in_array($result['judgment'], ['check', 'alert'])) {
-                $this->sendJudgmentNotification($log->device, $result['judgment'], $result['transcript']);
+                $this->sendJudgmentNotification($log->device, $result['judgment'], $result['transcript'], $log->direction);
             }
 
         } catch (\Exception $e) {
@@ -127,6 +185,31 @@ class AiCallController extends Controller
         }
 
         return response('', 204);
+    }
+
+    /**
+     * 着信元の電話番号からデバイスを逆引き
+     */
+    private function findDeviceByCaller(string $phone): ?Device
+    {
+        if (empty($phone)) {
+            return null;
+        }
+
+        // E.164形式で検索（notification_settingsに格納されている形式と一致）
+        $notif = DB::table('notification_settings')
+            ->where(function ($q) use ($phone) {
+                $q->where('voice_phone_1', $phone)
+                  ->orWhere('voice_phone_2', $phone);
+            })
+            ->where('voice_enabled', true)
+            ->first();
+
+        if (!$notif) {
+            return null;
+        }
+
+        return Device::find($notif->device_id);
     }
 
     /**
@@ -237,7 +320,7 @@ class AiCallController extends Controller
     /**
      * 判定結果通知（要確認・異常）
      */
-    private function sendJudgmentNotification(Device $device, string $judgment, string $transcript): void
+    private function sendJudgmentNotification(Device $device, string $judgment, string $transcript, string $direction = 'outbound'): void
     {
         $name   = $device->nickname ?: $device->device_id;
         $notif  = $device->notificationSetting;
@@ -245,11 +328,13 @@ class AiCallController extends Controller
             return;
         }
 
-        $label   = $judgment === 'alert' ? '異常' : '要確認';
-        $subject = "[みまもりデバイス] AIコール判定：{$label}";
-        $body    = "【AIコール判定：{$label}】\n\n"
+        $label      = $judgment === 'alert' ? '異常' : '要確認';
+        $dirLabel   = $direction === 'inbound' ? '折り返し着信' : 'AIコール';
+        $subject    = "[みまもりデバイス] {$dirLabel}判定：{$label}";
+        $body       = "【{$dirLabel}判定：{$label}】\n\n"
             . "デバイス: {$name}\n"
             . "日時: " . now()->format('Y/m/d H:i') . "\n"
+            . "種別: {$dirLabel}\n"
             . "判定: {$label}\n"
             . "発言内容: {$transcript}\n\n"
             . "お早めにご確認ください。";
@@ -265,7 +350,7 @@ class AiCallController extends Controller
         }
 
         if ($notif->sms_enabled) {
-            $smsBody = "【みまもりデバイス】{$name}：AIコール判定「{$label}」。発言：{$transcript}";
+            $smsBody = "【みまもりデバイス】{$name}：{$dirLabel}判定「{$label}」。発言：{$transcript}";
             $twilio  = new \Twilio\Rest\Client(config('services.twilio.sid'), config('services.twilio.token'));
             foreach (['sms_phone_1', 'sms_phone_2'] as $field) {
                 if (!empty($notif->$field)) {
@@ -278,5 +363,3 @@ class AiCallController extends Controller
         }
     }
 }
-
-
