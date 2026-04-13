@@ -1285,14 +1285,6 @@ async function executeDeleteSchedule() {
     try {
         var res = await fetch('/partner/org/devices/' + deleteScheduleDeviceId + '/schedules/' + deleteScheduleId, { method: 'DELETE', headers: { 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' } });
         var data = await res.json();
-        if (res.ok && data.success) { showToast('外出スケジュールを削除しました', 'success'); hideModal('scheduleDeleteModal'); if (currentDetailDeviceId && document.getElementById('detailModal').classList.contains('show')) showDeviceDetail(currentDetailDeviceId); loadTimerList(); }
-        else showToast(data.message || '削除に失敗しました', 'error');
-    } catch (e) { console.error(e); showToast('通信エラーが発生しました', 'error'); }
-}
-;
-    fetch('{{ route("partner.org.notification.update") }}', {
-        method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' }, body: JSON.stringify(payload)
-    }).then(r => r.json()).then(d => {
         if (d.success) { showToast(d.message, 'success'); hideModal('notificationModal'); }
         else showToast(d.message || '保存に失敗しました', 'error');
     }).catch(() => showToast('通信エラーが発生しました', 'error'));
