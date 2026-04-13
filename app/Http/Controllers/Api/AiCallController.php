@@ -206,19 +206,25 @@ class AiCallController extends Controller
         }
 
         // E.164形式で検索（notification_settingsに格納されている形式と一致）
-        $notif = DB::table('notification_settings')
+        $notifIds = DB::table('notification_settings')
             ->where(function ($q) use ($phone) {
                 $q->where('voice_phone_1', $phone)
                   ->orWhere('voice_phone_2', $phone);
             })
             ->where('voice_enabled', true)
-            ->first();
+            ->pluck('device_id');
 
-        if (!$notif) {
+        if ($notifIds->isEmpty()) {
             return null;
         }
 
-        return Device::find($notif->device_id);
+        // alert状態のデバイスを優先（折り返し＝アラートへの応答）
+        $device = Device::whereIn('id', $notifIds)
+            ->where('status', 'alert')
+            ->first();
+
+        // alert状態がなければ最初のデバイスを返す
+        return $device ?: Device::whereIn('id', $notifIds)->first();
     }
 
     /**
