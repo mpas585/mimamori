@@ -171,6 +171,15 @@ class AiCallController extends Controller
                 'gpt_response' => $result['reason'],
             ]);
 
+            // good判定ならアラート解除（normal に戻す）
+            if ($result['judgment'] === 'good' && in_array($log->device->status, ['alert', 'offline'])) {
+                $log->device->update(['status' => 'normal']);
+                // 折り返し着信でgood判定の場合は安否確認完了通知
+                if ($log->direction === 'inbound') {
+                    $this->sendGoodNotification($log->device, $result['transcript']);
+                }
+            }
+
             // 要確認・異常の場合は通知
             if (in_array($result['judgment'], ['check', 'alert'])) {
                 $this->sendJudgmentNotification($log->device, $result['judgment'], $result['transcript'], $log->direction);
@@ -273,6 +282,48 @@ class AiCallController extends Controller
             'judgment'   => $parsed['judgment'] ?? 'unclear',
             'reason'     => $parsed['reason'] ?? '',
         ];
+    }
+
+    /**
+     * 折り返し着信で安否確認完了通知
+     */
+    private function sendGoodNotification(Device $device, string $transcript): void
+    {
+        $name = $device->nickname ?: $device->device_id;
+        $notif = $device->notificationSetting;
+        if (!$notif) { return; }
+
+        $subject = "[みまもりデバイス] 折り返し電話で安否確認できました";
+        $body = "【安否確認完了】\n\n"
+            . "デバイス: {$name}\n"
+            . "日時: " . now()->format('Y/m/d H:i') . "\n"
+            . "種別: 折り返し着信\n"
+            . "判定: 元気\n"
+            . "発言内容: {$transcript}\n\n"
+            . "折り返しの電話で安否が確認できました。アラートを解除しました。";
+
+        if ($notif->email_enabled) {
+            foreach (['email_1', 'email_2', 'email_3'] as $field) {
+                if (!empty($notif->$field)) {
+                    \Illuminate\Support\Facades\Mail::raw($body, function ($m) use ($notif, $field, $subject) {
+                        $m->to($notif->$field)->subject($subject);
+                    });
+                }
+            }
+        }
+
+        if ($notif->sms_enabled) {
+            $smsBody = "【みまもりデバイス】{$name}：折り返し電話で安否確認できました（元気）。アラートを解除しました。";
+            $twilio = new \Twilio\Rest\Client(config('services.twilio.sid'), config('services.twilio.token'));
+            foreach (['sms_phone_1', 'sms_phone_2'] as $field) {
+                if (!empty($notif->$field)) {
+                    $twilio->messages->create($notif->$field, [
+                        'from' => config('services.twilio.from'),
+                        'body' => $smsBody,
+                    ]);
+                }
+            }
+        }
     }
 
     /**
