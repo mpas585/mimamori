@@ -266,7 +266,7 @@
                     <tr class="{{ !$device->notification_service_enabled ? 'row-inactive' : '' }}">
                         <td class="device-id-cell">{{ $device->device_id }}</td>
 <td class="mono" style="font-size:12px;">{{ $device->initial_pin ?: '-' }}</td>
-<td class="mono" style="font-size:12px;{{ ($device->current_pin && $device->current_pin !== $device->initial_pin) ? 'color:#e65100;' : '' }}">{{ $device->current_pin ?: '-' }}</td>
+<td class="mono" style="font-size:12px;{{ ($device->current_pin && $device->current_pin !== $device->initial_pin) ? 'color:#e65100;' : '' }}">{{ ($device->current_pin && $device->current_pin !== $device->initial_pin) ? $device->current_pin : '-' }}</td>
                         <td>{{ $device->nickname ?: '-' }}</td>
                         <td>
                             <span class="status-badge status-{{ $device->status }}">
@@ -556,7 +556,7 @@
                         <p style="font-size:11px;color:var(--gray-500);margin-top:4px;">1NCE管理画面のICCIDを入力。22桁以内の数字。デバイスからのJSONにSIM IDが含まれる場合は自動設定されます。</p>
                     </div>
                     <div class="detail-item"><p class="detail-item-label">初期PIN</p><p class="detail-item-value mono" id="masterDetailInitialPin">-</p></div>
-<div class="detail-item"><p class="detail-item-label">現在PIN</p><p class="detail-item-value mono" id="masterDetailCurrentPin">-</p></div>
+<div class="detail-item"><p class="detail-item-label">現在PIN</p><p class="detail-item-value mono" id="masterDetailCurrentPin">-</p><button class="action-btn" style="margin-top:6px;" onclick="showMasterPinResetModal()">リセット</button></div>
 <div class="detail-item"><p class="detail-item-label">登録日</p><p class="detail-item-value" id="masterDetailRegistered">-</p></div>
                     <div class="detail-item"><p class="detail-item-label">メモ</p><input type="text" class="detail-form-input" id="masterDetailMemo" placeholder="メモを入力..." maxlength="200"></div>
                     <div class="detail-item" style="grid-column: span 2;">
@@ -849,7 +849,31 @@
     </div>
 </div>
 
-<div id="toast" class="toast"></div>
+
+    {{-- モーダル: PINリセット --}}
+    <div id="masterPinResetModal" class="modal-overlay" onclick="if(event.target===this)hideModal('masterPinResetModal')">
+        <div class="modal" style="max-width:400px;">
+            <div class="modal-header"><h3>🔑 PINリセット</h3><button class="modal-close" onclick="hideModal('masterPinResetModal')">✕</button></div>
+            <div class="modal-body">
+                <div style="font-size:12px;color:var(--gray-500);margin-bottom:16px;">対象: <span id="masterPinResetDeviceId" class="mono" style="font-size:12px;"></span></div>
+                <div style="border:1px solid var(--gray-200);border-radius:var(--radius);padding:14px;margin-bottom:12px;">
+                    <p style="font-size:13px;font-weight:600;color:var(--gray-700);margin-bottom:8px;">初期PINに戻す</p>
+                    <p style="font-size:12px;color:var(--gray-500);margin-bottom:10px;">退去時などにPINを出荷時の値に戻します。</p>
+                    <button class="btn btn-sm btn-secondary" onclick="masterResetPinToInitial()">初期PINに戻す</button>
+                </div>
+                <div style="border:1px solid var(--gray-200);border-radius:var(--radius);padding:14px;">
+                    <p style="font-size:13px;font-weight:600;color:var(--gray-700);margin-bottom:8px;">新しいPINを設定</p>
+                    <p style="font-size:12px;color:var(--gray-500);margin-bottom:10px;">入居時などに新しいPINを設定します。</p>
+                    <div style="display:flex;gap:8px;align-items:center;">
+                        <input type="text" class="detail-form-input" id="masterNewPinInput" placeholder="4桁の数字" maxlength="4" pattern="[0-9]{4}" inputmode="numeric" style="width:100px;font-family:monospace;letter-spacing:2px;text-align:center;">
+                        <button class="btn btn-sm btn-primary" onclick="masterSetCustomPin()">変更</button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer"><button class="btn btn-secondary" onclick="hideModal('masterPinResetModal');showDeviceDetail(masterCurrentDeviceId)">閉じる</button></div>
+        </div>
+    </div>
+    <div id="toast" class="toast"></div>
 
 @endsection
 
@@ -935,7 +959,7 @@ async function showDeviceDetail(deviceId) {
         document.getElementById('masterDetailRegistered').textContent = d.registered_at || '-';
 document.getElementById('masterDetailInitialPin').textContent = d.initial_pin || '-';
 const _cpEl = document.getElementById('masterDetailCurrentPin');
-_cpEl.textContent = d.current_pin || '-';
+_cpEl.textContent = (d.current_pin && d.current_pin !== d.initial_pin) ? d.current_pin : '-';
 _cpEl.style.color = (d.current_pin && d.current_pin !== d.initial_pin) ? '#e65100' : '';
         document.getElementById('masterDetailMemo').value = d.memo || '';
         const now = new Date();
@@ -1290,6 +1314,42 @@ async function submitOrgResetPassword() {
             errEl.style.display = 'block';
         }
     } catch(e) { errEl.textContent = '通信エラーが発生しました'; errEl.style.display = 'block'; }
+}
+
+// ===== PINリセット =====
+function showMasterPinResetModal() {
+    if (!masterCurrentDeviceId) return;
+    hideModal('deviceDetailModal');
+    document.getElementById('masterPinResetDeviceId').textContent = masterCurrentDeviceId;
+    document.getElementById('masterNewPinInput').value = '';
+    showModal('masterPinResetModal');
+}
+async function masterResetPinToInitial() {
+    if (!masterCurrentDeviceId) return;
+    if (!confirm('PINを初期PINにリセットしますか？')) return;
+    try {
+        var res = await fetch('/partner/devices/' + masterCurrentDeviceId + '/reset-pin', {
+            method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' },
+            body: JSON.stringify({ mode: 'reset_to_initial' })
+        });
+        var data = await res.json();
+        if (data.success) { showToast(data.message, 'success'); hideModal('masterPinResetModal'); setTimeout(function(){ location.reload(); }, 800); }
+        else showToast(data.message || 'エラー', 'error');
+    } catch(e) { showToast('通信エラー', 'error'); }
+}
+async function masterSetCustomPin() {
+    if (!masterCurrentDeviceId) return;
+    var pin = document.getElementById('masterNewPinInput').value;
+    if (!pin || !/^[0-9]{4}$/.test(pin)) { showToast('4桁の数字を入力してください', 'error'); return; }
+    try {
+        var res = await fetch('/partner/devices/' + masterCurrentDeviceId + '/reset-pin', {
+            method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' },
+            body: JSON.stringify({ mode: 'custom', new_pin: pin })
+        });
+        var data = await res.json();
+        if (data.success) { showToast(data.message, 'success'); hideModal('masterPinResetModal'); setTimeout(function(){ location.reload(); }, 800); }
+        else showToast(data.message || 'エラー', 'error');
+    } catch(e) { showToast('通信エラー', 'error'); }
 }
 </script>
 @endsection

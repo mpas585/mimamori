@@ -240,6 +240,28 @@ class OrgAdminController extends Controller
         ]);
     }
 
+
+    public function resetDevicePin(Request $request, $deviceId)
+    {
+        $organization = $this->getOrganization();
+        $device = Device::where('device_id', $deviceId)
+            ->where('organization_id', $organization->id)
+            ->firstOrFail();
+        $request->validate([
+            'mode' => 'required|in:reset_to_initial,custom',
+            'new_pin' => 'required_if:mode,custom|nullable|string|size:4|regex:/^[0-9]{4}$/',
+        ]);
+        $newPin = $request->mode === 'reset_to_initial' ? $device->initial_pin : $request->new_pin;
+        $device->update([
+            'pin_hash' => Hash::make($newPin),
+            'current_pin' => $newPin,
+        ]);
+        return response()->json([
+            'success' => true,
+            'message' => $request->mode === 'reset_to_initial' ? 'PINを初期PINにリセットしました' : 'PINを変更しました',
+            'current_pin' => $newPin,
+        ]);
+    }
     public function toggleDevicePremium(Request $request, $deviceId)
     {
         $organization = $this->getOrganization();

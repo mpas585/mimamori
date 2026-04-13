@@ -109,6 +109,7 @@ Route::middleware(PartnerAuth::class)->prefix('partner')->group(function () {
     Route::post('/devices/{deviceId}/clear-alert', [MasterController::class, 'clearDeviceAlert'])->name('partner.devices.clear-alert');
     Route::post('/devices/{deviceId}/toggle-premium', [MasterController::class, 'toggleDevicePremium'])->name('partner.devices.toggle-premium');
     Route::post('/devices/{deviceId}/toggle-notify', [MasterController::class, 'toggleNotifyService'])->name('partner.devices.toggle-notify');
+    Route::post('/devices/{deviceId}/reset-pin', [MasterController::class, 'resetDevicePin'])->name('partner.devices.reset-pin');
     Route::post('/devices/{deviceId}/schedules', [MasterController::class, 'storeDeviceSchedule'])->name('partner.devices.schedules.store');
     Route::delete('/devices/{deviceId}/schedules/{scheduleId}', [MasterController::class, 'destroyDeviceSchedule'])->name('partner.devices.schedules.destroy');
     Route::delete('/devices/{deviceId}', [MasterController::class, 'destroyDevice'])->name('partner.devices.destroy');
@@ -152,6 +153,7 @@ Route::middleware(PartnerAuth::class.':operator')->prefix('partner/org')->group(
     Route::post('/devices/{deviceId}/remove', [OrgAdminController::class, 'removeDevice'])->name('partner.org.devices.remove');
     Route::post('/devices/{deviceId}/toggle-watch', [OrgAdminController::class, 'toggleWatch'])->name('partner.org.devices.toggle-watch');
     Route::post('/devices/{deviceId}/toggle-notify', [OrgAdminController::class, 'toggleNotifyService'])->name('partner.org.devices.toggle-notify');
+    Route::post('/devices/{deviceId}/reset-pin', [OrgAdminController::class, 'resetDevicePin'])->name('partner.org.devices.reset-pin');
     Route::post('/devices/{deviceId}/clear-alert', [OrgAdminController::class, 'clearAlert'])->name('partner.org.devices.clear-alert');
     Route::get('/devices/{deviceId}/detail', [OrgAdminController::class, 'deviceDetail'])->name('partner.org.devices.detail');
     Route::get('/devices/{deviceId}/logs', [OrgAdminController::class, 'deviceLogs'])->name('partner.org.devices.logs');

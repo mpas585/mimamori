@@ -508,7 +508,7 @@
                 </div></div>
                 <div class="detail-section"><div class="detail-section-title">📝 登録情報</div><div class="detail-grid">
                     <div class="detail-item"><p class="detail-item-label">初期PIN</p><p class="detail-item-value mono" id="detailInitialPin">-</p></div>
-<div class="detail-item"><p class="detail-item-label">現在PIN</p><p class="detail-item-value mono" id="detailCurrentPin">-</p></div>
+<div class="detail-item"><p class="detail-item-label">現在PIN</p><p class="detail-item-value mono" id="detailCurrentPin">-</p><button class="action-btn" style="margin-top:6px;" onclick="showPinResetModal()">リセット</button></div>
 <div class="detail-item"><p class="detail-item-label">登録日</p><p class="detail-item-value" id="detailRegistered">-</p></div>
                     <div class="detail-item"><p class="detail-item-label">メモ</p><input type="text" class="detail-form-input" id="detailMemoInput" placeholder="メモを入力..." maxlength="200"></div>
                 </div></div>
@@ -718,6 +718,30 @@
         </div>
     </div>
 
+    
+    {{-- モーダル: PINリセット --}}
+    <div id="pinResetModal" class="modal-overlay" onclick="if(event.target===this)hideModal('pinResetModal')">
+        <div class="modal" style="max-width:400px;">
+            <div class="modal-header"><h3>🔑 PINリセット</h3><button class="modal-close" onclick="hideModal('pinResetModal')">×</button></div>
+            <div class="modal-body">
+                <div style="font-size:12px;color:var(--gray-500);margin-bottom:16px;">対象: <span id="pinResetDeviceId" class="mono" style="font-size:12px;"></span></div>
+                <div style="border:1px solid var(--gray-200);border-radius:var(--radius);padding:14px;margin-bottom:12px;">
+                    <p style="font-size:13px;font-weight:600;color:var(--gray-700);margin-bottom:8px;">初期PINに戻す</p>
+                    <p style="font-size:12px;color:var(--gray-500);margin-bottom:10px;">退去時などにPINを出荷時の値に戻します。</p>
+                    <button class="btn btn-sm btn-secondary" onclick="resetPinToInitial()">初期PINに戻す</button>
+                </div>
+                <div style="border:1px solid var(--gray-200);border-radius:var(--radius);padding:14px;">
+                    <p style="font-size:13px;font-weight:600;color:var(--gray-700);margin-bottom:8px;">新しいPINを設定</p>
+                    <p style="font-size:12px;color:var(--gray-500);margin-bottom:10px;">入居時などに新しいPINを設定します。</p>
+                    <div style="display:flex;gap:8px;align-items:center;">
+                        <input type="text" class="detail-form-input" id="newPinInput" placeholder="4桁の数字" maxlength="4" pattern="[0-9]{4}" inputmode="numeric" style="width:100px;font-family:monospace;letter-spacing:2px;text-align:center;">
+                        <button class="btn btn-sm btn-primary" onclick="setCustomPin()">変更</button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer"><button class="btn btn-secondary" onclick="hideModal('pinResetModal');showDeviceDetail(currentDetailDeviceId)">閉じる</button></div>
+        </div>
+    </div>
     <div id="toast" class="toast"></div>
 @endsection
 
