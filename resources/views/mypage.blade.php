@@ -761,7 +761,7 @@
     <div class="footer-links" style="margin-top: 8px;">
         <a href="/guide">使い方</a><span class="footer-sep">|</span>
         <a href="/terms">利用規約</a><span class="footer-sep">|</span>
-        <a href="/contact">お問い合わせ</a>
+        <a href="/contact">お問い合わせ</a><span class="footer-sep">|</span><a href="/trouble">故障・通報</a>
     </div>
 </footer>
 

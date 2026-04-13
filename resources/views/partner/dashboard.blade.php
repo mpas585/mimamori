@@ -277,7 +277,7 @@
         <div class="toolbar-right">
             <button class="toolbar-btn" onclick="showTimerListModal()">🚶 外出スケジュール一覧</button>
             <button class="toolbar-btn" onclick="showAddDeviceModal()">デバイス新規お申込み</button>
-            <a href="{{ route('partner.org.csv') }}" class="toolbar-btn">📥 CSV出力</a>
+            <a href="{{ route('partner.org.csv') }}" class="toolbar-btn">📥 CSV出力</a><a href="/partner/trouble-reports" class="toolbar-btn">🔧 故障・通報</a>
         </div>
     </div>
 

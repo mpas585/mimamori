@@ -255,7 +255,7 @@
                     <option value="{{ $org->id }}" {{ request('org') == $org->id ? 'selected' : '' }}>{{ $org->name }}</option>
                 @endforeach
             </select>
-            <button type="submit" class="btn btn-sm btn-secondary">絞り込む</button>
+            <button type="submit" class="btn btn-sm btn-secondary">絞り込む</button><a href="/partner/trouble-reports" class="btn btn-sm btn-secondary" style="text-decoration:none;margin-left:8px;">🔧 故障・通報</a>
         </form>
         <table class="device-table">
             <thead>
