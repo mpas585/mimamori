@@ -1413,6 +1413,5 @@ async function setCustomPin() {
         else showToast(data.message || 'エラー', 'error');
     } catch(e) { showToast('通信エラー', 'error'); }
 }
-});
 </script>
 @endsection
