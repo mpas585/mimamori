@@ -5,7 +5,7 @@
 @section('header')
 <header class="header">
     <div class="header-inner">
-        <a href="javascript:history.back()" class="header-btn" style="font-size: 18px; padding: 8px 10px;">←</a>
+        <a href="javascript:history.back()" class="header-btn" style="font-size: 18px; padding: 8px 10px;">&larr;</a>
         <span class="header-logo-text">利用規約</span>
         <div style="width: 36px;"></div>
     </div>
@@ -145,27 +145,28 @@
 
 @section('content')
 <h1 class="page-title">利用規約</h1>
-<p class="page-subtitle">みまもりデバイス サービス利用規約</p>
+<p class="page-subtitle">みまもりトーフ サービス利用規約</p>
 
 <div class="terms-card">
 
     {{-- 目次 --}}
     <nav class="toc">
-        <p class="toc-title">📋 目次</p>
+        <p class="toc-title">目次</p>
         <ul class="toc-list">
             <li><a href="#article1">第1条 総則</a></li>
             <li><a href="#article2">第2条 定義</a></li>
             <li><a href="#article3">第3条 サービス内容</a></li>
-            <li><a href="#article4">第4条 利用条件</a></li>
-            <li><a href="#article5">第5条 禁止事項</a></li>
-            <li><a href="#article6">第6条 通信・SIMに関する免責</a></li>
-            <li><a href="#article7">第7条 検知精度に関する免責</a></li>
-            <li><a href="#article8">第8条 製品に関する免責</a></li>
-            <li><a href="#article9">第9条 保証・故障対応</a></li>
-            <li><a href="#article10">第10条 譲渡・転売</a></li>
-            <li><a href="#article11">第11条 サービスの終了</a></li>
-            <li><a href="#article12">第12条 法人利用に関する特則</a></li>
-            <li><a href="#article13">第13条 その他</a></li>
+            <li><a href="#article4">第4条 契約・料金</a></li>
+            <li><a href="#article5">第5条 利用条件</a></li>
+            <li><a href="#article6">第6条 禁止事項</a></li>
+            <li><a href="#article7">第7条 通信・SIMに関する免責</a></li>
+            <li><a href="#article8">第8条 検知精度に関する免責</a></li>
+            <li><a href="#article9">第9条 デバイスに関する免責</a></li>
+            <li><a href="#article10">第10条 故障時の対応</a></li>
+            <li><a href="#article11">第11条 解約・デバイスの返却</a></li>
+            <li><a href="#article12">第12条 サービスの終了</a></li>
+            <li><a href="#article13">第13条 法人利用に関する特則</a></li>
+            <li><a href="#article14">第14条 その他</a></li>
         </ul>
     </nav>
 
@@ -173,7 +174,7 @@
     <article class="article" id="article1">
         <h2 class="article-title">第1条（総則）</h2>
         <div class="article-content">
-            <p>本規約は、[屋号/氏名]（以下「当方」）が提供する「みまもりデバイス」（以下「本サービス」）の利用に関する条件を定めるものです。本サービスをご利用いただく方（以下「利用者」）は、本規約に同意したものとみなします。</p>
+            <p>本規約は、ウエダ・トレーディング株式会社（以下「当社」）が提供する「みまもりトーフ」（以下「本サービス」）の利用に関する条件を定めるものです。本サービスをご利用いただく方（以下「利用者」）は、本規約に同意したものとみなします。</p>
         </div>
     </article>
 
@@ -183,10 +184,10 @@
         <div class="article-content">
             <p>本規約において使用する用語の定義は以下のとおりです。</p>
             <ol>
-                <li><strong>本製品</strong>：当方が販売する見守りセンサーデバイス「みまもりデバイス」</li>
-                <li><strong>本サービス</strong>：本製品を通じて提供される見守り通知サービス</li>
-                <li><strong>利用者</strong>：本製品を購入し、本サービスを利用する個人または法人</li>
-                <li><strong>見守り対象者</strong>：本製品が設置された場所に居住する方</li>
+                <li><strong>本デバイス</strong>：当社がレンタル提供する見守りセンサーデバイス「みまもりトーフ」</li>
+                <li><strong>本サービス</strong>：本デバイスを通じて提供される見守り通知サービス（デバイスのレンタルを含む）</li>
+                <li><strong>利用者</strong>：本サービスの利用契約を締結した個人または法人</li>
+                <li><strong>見守り対象者</strong>：本デバイスが設置された場所に居住する方</li>
                 <li><strong>ウォッチャー</strong>：利用者から見守り情報の共有を受ける第三者</li>
             </ol>
         </div>
@@ -196,7 +197,7 @@
     <article class="article" id="article3">
         <h2 class="article-title">第3条（サービス内容）</h2>
         <div class="article-content">
-            <p>本サービスは、本製品に搭載されたセンサーにより人の動きを検知し、一定時間検知がない場合に利用者へ通知を送信するサービスです。</p>
+            <p>本サービスは、本デバイスに搭載されたセンサーにより人の動きを検知し、一定時間検知がない場合に利用者へ通知を送信するサービスです。</p>
             <div class="highlight-box warning">
                 <strong>重要：</strong>本サービスは見守り対象者の安否を補助的に確認するためのものであり、安否を100%保証するものではありません。緊急通報サービスや医療サービスの代替にはなりません。
             </div>
@@ -205,28 +206,44 @@
 
     {{-- 第4条 --}}
     <article class="article" id="article4">
-        <h2 class="article-title">第4条（利用条件）</h2>
+        <h2 class="article-title">第4条（契約・料金）</h2>
         <div class="article-content">
-            <p>利用者は、以下の条件を満たした上で本サービスをご利用ください。</p>
             <ol>
-                <li>本製品の設置場所がSoftBankまたはKDDI（au）のLTE電波が届く場所であること</li>
-                <li>見守り対象者本人の同意を得ていること（利用者と見守り対象者が異なる場合）</li>
-                <li>本規約およびプライバシーポリシーに同意していること</li>
+                <li><strong>契約期間：</strong>本サービスの契約期間は2年間とします。契約期間満了時に利用者から解約の申し出がない場合、同一条件で自動的に更新されるものとします。</li>
+                <li><strong>月額料金：</strong>利用者は、本サービスの対価として月額1,100円（税込）/台をお支払いいただきます。初期費用・事務手数料はかかりません。</li>
+                <li><strong>オプション料金：</strong>SMS通知（月額100円/台）、AIコール通知（月額300円/台）を任意でご契約いただけます。オプション料金は今後改定される場合があります。</li>
+                <li><strong>支払方法：</strong>クレジットカード（VISA、Mastercard、JCB、AMEX）による毎月自動決済とします。</li>
+                <li><strong>中途解約：</strong>契約期間中の中途解約はできません。</li>
+                <li><strong>デバイスの所有権：</strong>本デバイスの所有権は当社に帰属します。利用者は、善良なる管理者の注意をもって本デバイスを使用するものとします。</li>
             </ol>
         </div>
     </article>
 
     {{-- 第5条 --}}
     <article class="article" id="article5">
-        <h2 class="article-title">第5条（禁止事項）</h2>
+        <h2 class="article-title">第5条（利用条件）</h2>
+        <div class="article-content">
+            <p>利用者は、以下の条件を満たした上で本サービスをご利用ください。</p>
+            <ol>
+                <li>本デバイスの設置場所がSoftBankまたはKDDI（au）のLTE電波が届く場所であること</li>
+                <li>見守り対象者本人の同意を得ていること（利用者と見守り対象者が異なる場合）</li>
+                <li>本規約およびプライバシーポリシーに同意していること</li>
+            </ol>
+        </div>
+    </article>
+
+    {{-- 第6条 --}}
+    <article class="article" id="article6">
+        <h2 class="article-title">第6条（禁止事項）</h2>
         <div class="article-content">
             <p>利用者は、以下の行為を行ってはなりません。</p>
             <ol>
-                <li>見守り対象者の同意なく本製品を設置する行為</li>
+                <li>見守り対象者の同意なく本デバイスを設置する行為</li>
                 <li>ストーカー行為、DV、嫌がらせ等の違法または不当な目的での使用</li>
-                <li>本製品の分解、改造、SIMカードの抜き取り・差し替え</li>
-                <li>本製品を本来の用途以外に使用する行為</li>
-                <li>当方または第三者の権利を侵害する行為</li>
+                <li>本デバイスの分解、改造、SIMカードの抜き取り・差し替え</li>
+                <li>本デバイスを本来の用途以外に使用する行為</li>
+                <li>本デバイスの譲渡、転貸、売却その他の処分</li>
+                <li>当社または第三者の権利を侵害する行為</li>
                 <li>その他、法令または公序良俗に反する行為</li>
             </ol>
             <div class="highlight-box warning">
@@ -235,47 +252,47 @@
         </div>
     </article>
 
-    {{-- 第6条 --}}
-    <article class="article" id="article6">
-        <h2 class="article-title">第6条（通信・SIMに関する免責）</h2>
+    {{-- 第7条 --}}
+    <article class="article" id="article7">
+        <h2 class="article-title">第7条（通信・SIMに関する免責）</h2>
         <div class="article-content">
-            <p>本製品は第三者のSIM事業者および通信事業者のネットワークを利用しています。以下の事由により本サービスが利用できない場合、当方は一切の責任を負いません。</p>
+            <p>本デバイスは第三者のSIM事業者および通信事業者のネットワークを利用しています。以下の事由により本サービスが利用できない場合、当社は一切の責任を負いません。</p>
             <ol>
                 <li>SIM事業者の倒産、サービス終了、契約変更</li>
                 <li>通信事業者の通信障害、メンテナンス、サービス変更</li>
                 <li>設置場所の電波状況の変化</li>
-                <li>その他当方の責に帰さない通信の不具合</li>
+                <li>その他当社の責に帰さない通信の不具合</li>
             </ol>
             <div class="highlight-box info">
-                <strong>補足：</strong>上記事由によりサービスが利用できなくなった場合でも、製品代金の返金は行いません。
-            </div>
-        </div>
-    </article>
-
-    {{-- 第7条 --}}
-    <article class="article" id="article7">
-        <h2 class="article-title">第7条（検知精度に関する免責）</h2>
-        <div class="article-content">
-            <p>本製品のセンサーは、以下の要因により検知漏れや誤検知が発生する可能性があります。当方はこれらに起因する損害について責任を負いません。</p>
-            <ol>
-                <li>見守り対象者の動きが小さい場合（就寝中、静止状態等）</li>
-                <li>センサーの検知範囲外での活動</li>
-                <li>ペットや環境要因（温度変化等）による誤検知</li>
-                <li>製品の設置位置や向きによる影響</li>
-            </ol>
-            <div class="highlight-box warning">
-                <strong>重要：</strong>通知を受け取らなかったこと、または通知の確認が遅れたことにより生じた損害について、当方は責任を負いません。通知の確認は利用者の責任において行ってください。
+                <strong>補足：</strong>上記事由によりサービスが利用できなくなった場合、当社は代替手段の確保に努めますが、状況によりサービスを終了する場合があります。その場合の取扱いは第12条に準じます。
             </div>
         </div>
     </article>
 
     {{-- 第8条 --}}
     <article class="article" id="article8">
-        <h2 class="article-title">第8条（製品に関する免責）</h2>
+        <h2 class="article-title">第8条（検知精度に関する免責）</h2>
         <div class="article-content">
-            <p>以下の事由により生じた損害について、当方は責任を負いません。</p>
+            <p>本デバイスのセンサーは、以下の要因により検知漏れや誤検知が発生する可能性があります。当社はこれらに起因する損害について責任を負いません。</p>
             <ol>
-                <li>本製品の落下による怪我、物損</li>
+                <li>見守り対象者の動きが小さい場合（就寝中、静止状態等）</li>
+                <li>センサーの検知範囲外での活動</li>
+                <li>ペットや環境要因（温度変化等）による誤検知</li>
+                <li>デバイスの設置位置や向きによる影響</li>
+            </ol>
+            <div class="highlight-box warning">
+                <strong>重要：</strong>通知を受け取らなかったこと、または通知の確認が遅れたことにより生じた損害について、当社は責任を負いません。通知の確認は利用者の責任において行ってください。
+            </div>
+        </div>
+    </article>
+
+    {{-- 第9条 --}}
+    <article class="article" id="article9">
+        <h2 class="article-title">第9条（デバイスに関する免責）</h2>
+        <div class="article-content">
+            <p>以下の事由により生じた損害について、当社は責任を負いません。</p>
+            <ol>
+                <li>本デバイスの落下による怪我、物損</li>
                 <li>電池の液漏れ、発熱による損害</li>
                 <li>利用者による誤った設置、使用方法に起因する損害</li>
                 <li>天災、火災、その他不可抗力による損害</li>
@@ -283,76 +300,75 @@
         </div>
     </article>
 
-    {{-- 第9条 --}}
-    <article class="article" id="article9">
-        <h2 class="article-title">第9条（保証・故障対応）</h2>
-        <div class="article-content">
-            <ol>
-                <li>本製品の保証期間は、購入日から1年間とします。</li>
-                <li>保証期間内の故障（初期不良含む）は、無償で代替品と交換いたします。</li>
-                <li>保証期間外の故障は、有償（¥9,800）で交換対応いたします。</li>
-                <li>故障品の返送は不要です。各自で適切に廃棄してください。</li>
-                <li>電池の消耗は保証対象外です。電池寿命は使用環境により異なります。</li>
-            </ol>
-        </div>
-    </article>
-
     {{-- 第10条 --}}
     <article class="article" id="article10">
-        <h2 class="article-title">第10条（譲渡・転売）</h2>
+        <h2 class="article-title">第10条（故障時の対応）</h2>
         <div class="article-content">
             <ol>
-                <li>本製品の譲渡・転売は自由に行うことができます。</li>
-                <li>譲渡・転売後のサポートは、元の購入者に対してのみ提供いたします。</li>
-                <li>譲渡・転売を行う場合は、本規約およびプライバシーポリシーの内容を譲受人に説明してください。</li>
+                <li>契約期間中に本デバイスが故障した場合、当社は無償で代替品と交換いたします。</li>
+                <li>利用者の故意または過失による破損・紛失の場合は、有償での交換となる場合があります。</li>
+                <li>故障品は当社へご返却いただきます。返却方法は故障受付時にご案内いたします。</li>
+                <li>電池の消耗は故障に含まれません。電池はお客様にて交換してください。</li>
             </ol>
         </div>
     </article>
 
     {{-- 第11条 --}}
     <article class="article" id="article11">
-        <h2 class="article-title">第11条（サービスの終了）</h2>
+        <h2 class="article-title">第11条（解約・デバイスの返却）</h2>
         <div class="article-content">
             <ol>
-                <li>当方は、事業上の理由により本サービスを終了することがあります。</li>
-                <li>サービス終了の場合、終了の6ヶ月前までに利用者へ通知いたします。</li>
-                <li>サービス終了に伴う製品代金の返金は行いません。</li>
+                <li>利用者は、契約期間満了時に解約を申し出ることができます。契約期間中の中途解約はできません。</li>
+                <li>解約時は、本デバイスを当社へご返却いただきます。返却先・手順は解約受付時にご案内いたします。</li>
+                <li>返送料は利用者のご負担となります。</li>
+                <li>解約後30日以内にデバイスの返却がない場合、デバイス相当額を請求する場合があります。</li>
+                <li>本デバイスの譲渡、転貸、売却はできません。</li>
             </ol>
         </div>
     </article>
 
     {{-- 第12条 --}}
     <article class="article" id="article12">
-        <h2 class="article-title">第12条（法人利用に関する特則）</h2>
+        <h2 class="article-title">第12条（サービスの終了）</h2>
         <div class="article-content">
-            <p>賃貸物件の管理会社等の法人が本製品を利用する場合、以下の特則が適用されます。</p>
             <ol>
-                <li><strong>入居者への説明義務：</strong>管理会社は、本製品の設置について入居者に対し十分な説明を行い、同意を得る義務を負います。</li>
-                <li><strong>入居者とのトラブル：</strong>本製品の設置に関する入居者とのトラブルは、管理会社の責任において解決するものとし、当方は一切関与いたしません。</li>
-                <li><strong>データの取扱い：</strong>退去時のデータ削除要望には対応いたします。削除をご希望の場合はお問い合わせください。</li>
-                <li><strong>複数台契約：</strong>10台以上のご契約の場合、別途契約書を締結することがあります。</li>
+                <li>当社は、事業上の理由により本サービスを終了することがあります。</li>
+                <li>サービス終了の場合、終了の6ヶ月前までに利用者へ通知いたします。</li>
+                <li>サービス終了の場合、終了月以降の月額料金は発生しません。デバイスの返却は不要とします。</li>
             </ol>
         </div>
     </article>
 
     {{-- 第13条 --}}
     <article class="article" id="article13">
-        <h2 class="article-title">第13条（その他）</h2>
+        <h2 class="article-title">第13条（法人利用に関する特則）</h2>
+        <div class="article-content">
+            <p>賃貸物件の管理会社等の法人が本サービスを利用する場合、以下の特則が適用されます。</p>
+            <ol>
+                <li><strong>入居者への説明義務：</strong>管理会社は、本デバイスの設置について入居者に対し十分な説明を行い、同意を得る義務を負います。</li>
+                <li><strong>入居者とのトラブル：</strong>本デバイスの設置に関する入居者とのトラブルは、管理会社の責任において解決するものとし、当社は一切関与いたしません。</li>
+                <li><strong>データの取扱い：</strong>退去時のデータ削除要望には対応いたします。削除をご希望の場合はお問い合わせください。</li>
+                <li><strong>複数台契約：</strong>10台以上のご契約の場合、別途契約書を締結することがあります。</li>
+            </ol>
+        </div>
+    </article>
+
+    {{-- 第14条 --}}
+    <article class="article" id="article14">
+        <h2 class="article-title">第14条（その他）</h2>
         <div class="article-content">
             <ol>
-                <li><strong>規約の変更：</strong>当方は、必要に応じて本規約を変更することがあります。変更後の規約は、本サービスのウェブサイトに掲載した時点で効力を生じます。</li>
+                <li><strong>規約の変更：</strong>当社は、必要に応じて本規約を変更することがあります。変更後の規約は、本サービスのウェブサイトに掲載した時点で効力を生じます。</li>
                 <li><strong>分離可能性：</strong>本規約の一部が無効となった場合でも、他の条項は引き続き有効とします。</li>
                 <li><strong>準拠法：</strong>本規約は日本法に準拠します。</li>
-                <li><strong>管轄裁判所：</strong>本規約に関する紛争は、[管轄地]地方裁判所を第一審の専属的合意管轄裁判所とします。</li>
+                <li><strong>管轄裁判所：</strong>本規約に関する紛争は、東京地方裁判所を第一審の専属的合意管轄裁判所とします。</li>
             </ol>
         </div>
     </article>
 
     <div class="update-info">
         <p>制定日：2025年1月20日</p>
-        <p>最終更新日：2026年2月13日</p>
+        <p>最終更新日：{{ date('Y年n月j日') }}</p>
     </div>
 </div>
 @endsection
-
-
