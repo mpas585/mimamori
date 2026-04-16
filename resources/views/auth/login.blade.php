@@ -201,6 +201,25 @@
         margin-top: 24px;
     }
 
+    /* フッターリンク */
+    .login-footer-links {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+        margin-top: 24px;
+        flex-wrap: wrap;
+    }
+    .login-footer-links a {
+        font-size: 12px;
+        color: var(--gray-400);
+        text-decoration: none;
+        transition: color 0.2s;
+    }
+    .login-footer-links a:hover {
+        color: var(--gray-600);
+        text-decoration: underline;
+    }
+
     @media (max-width: 480px) {
         .logo-text { font-size: 20px; }
     }
@@ -280,6 +299,12 @@
         <p class="security-note">※連続してログインに失敗すると一定時間操作できなくなります</p>
     </div>
 
+    {{-- フッターリンク --}}
+    <div class="login-footer-links">
+        <a href="{{ route('tokushoho') }}">特定商取引法に基づく表記</a>
+        <a href="{{ route('contact') }}">お問い合わせ</a>
+    </div>
+
 </div>
 @endsection
 
@@ -295,5 +320,3 @@ document.getElementById('pin').addEventListener('input', function() {
 });
 </script>
 @endsection
-
-
