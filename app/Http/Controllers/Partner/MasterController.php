@@ -195,7 +195,6 @@ class MasterController extends Controller
             'sms_phone_2'                 => $notif && $notif->sms_phone_2 ? preg_replace('/^\+81/', '0', $notif->sms_phone_2) : null,
             'voice_enabled'               => $notif ? (bool) $notif->voice_enabled : false,
             'voice_phone_1'               => $notif && $notif->voice_phone_1 ? preg_replace('/^\+81/', '0', $notif->voice_phone_1) : null,
-            'voice_phone_2'               => $notif && $notif->voice_phone_2 ? preg_replace('/^\+81/', '0', $notif->voice_phone_2) : null,
         ]);
     }
 
@@ -271,7 +270,6 @@ class MasterController extends Controller
             'sms_phone_2'   => 'nullable|string|max:20',
             'voice_enabled' => 'nullable|boolean',
             'voice_phone_1' => 'nullable|string|max:20',
-            'voice_phone_2' => 'nullable|string|max:20',
         ]);
 
         $notif = $device->notificationSetting;
@@ -289,7 +287,6 @@ class MasterController extends Controller
         if ($request->has('sms_phone_2'))   $data['sms_phone_2']   = \App\Helpers\PhoneHelper::normalize($request->sms_phone_2);
         if ($request->has('voice_enabled')) $data['voice_enabled'] = (bool) $request->voice_enabled;
         if ($request->has('voice_phone_1')) $data['voice_phone_1'] = \App\Helpers\PhoneHelper::normalize($request->voice_phone_1);
-        if ($request->has('voice_phone_2')) $data['voice_phone_2'] = \App\Helpers\PhoneHelper::normalize($request->voice_phone_2);
 
         if (!empty($data)) $notif->update($data);
 

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Http\Traits\ThrottlesLoginAttempts;
 use App\Models\Device;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -11,6 +12,13 @@ use Illuminate\Validation\ValidationException;
 
 class DeviceLoginController extends Controller
 {
+    use ThrottlesLoginAttempts;
+
+    protected function username(): string
+    {
+        return 'device_id';
+    }
+
     /**
      * ログインフォーム表示
      */
@@ -34,14 +42,23 @@ class DeviceLoginController extends Controller
             'pin.size' => 'PINは4桁です',
         ]);
 
+        // アカウントロックチェック
+        $this->checkTooManyAttempts($request);
+
         // デバイスを検索
         $device = Device::where('device_id', strtoupper($request->device_id))->first();
 
         if (!$device || !Hash::check($request->pin, $device->pin_hash)) {
+            // 失敗回数をインクリメント
+            $this->incrementAttempts($request);
+
             throw ValidationException::withMessages([
                 'device_id' => ['品番またはPINが正しくありません'],
             ]);
         }
+
+        // 成功 → カウンタクリア
+        $this->clearAttempts($request);
 
         // ログイン
         Auth::login($device, $request->boolean('remember'));
@@ -69,5 +86,3 @@ class DeviceLoginController extends Controller
         return redirect('/login');
     }
 }
-
-

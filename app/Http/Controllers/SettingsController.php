@@ -68,7 +68,7 @@ class SettingsController extends Controller
         $notif = $device->notificationSetting ?? NotificationSetting::create(['device_id' => $device->id]);
 
         // ★ プレミアムガード
-        $premiumFields = ['sms_enabled', 'sms_phone_1', 'sms_phone_2', 'voice_enabled', 'voice_phone_1', 'voice_phone_2'];
+        $premiumFields = ['sms_enabled', 'sms_phone_1', 'sms_phone_2', 'voice_enabled', 'voice_phone_1'];
         $hasPremiumField = collect($premiumFields)->some(fn($f) => $request->has($f));
 
         if ($hasPremiumField && !$device->premium_enabled) {
@@ -117,9 +117,6 @@ class SettingsController extends Controller
             $data['voice_phone_1'] = PhoneHelper::normalize($request->voice_phone_1);
         }
 
-        if ($request->has('voice_phone_2')) {
-            $data['voice_phone_2'] = PhoneHelper::normalize($request->voice_phone_2);
-        }
 
         if (!empty($rules)) {
             $request->validate($rules);

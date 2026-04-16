@@ -208,8 +208,7 @@ class AiCallController extends Controller
         // E.164形式で検索（notification_settingsに格納されている形式と一致）
         $notifIds = DB::table('notification_settings')
             ->where(function ($q) use ($phone) {
-                $q->where('voice_phone_1', $phone)
-                  ->orWhere('voice_phone_2', $phone);
+                $q->where('voice_phone_1', $phone);
             })
             ->where('voice_enabled', true)
             ->pluck('device_id');
