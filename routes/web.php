@@ -44,6 +44,7 @@ Route::get('/email-settings/verify/{token}', [EmailSettingsController::class, 'v
 
 Route::get('/terms', function () { return view('terms'); })->name('terms');
 Route::get('/tokushoho', function () { return view('tokushoho'); })->name('tokushoho');
+Route::get('/privacy', function () { return view('privacy'); })->name('privacy');
 
 Route::get('/contact', [ContactController::class, 'index'])->name('contact');
 Route::post('/contact', [ContactController::class, 'send'])->middleware('throttle:5,1');

@@ -303,6 +303,8 @@
     <div class="login-footer-links">
         <a href="{{ route('tokushoho') }}">特定商取引法に基づく表記</a>
         <a href="{{ route('contact') }}">お問い合わせ</a>
+        <a href="{{ route('privacy') }}">プライバシーポリシー</a>
+        <a href="{{ route('terms') }}">利用規約</a>
     </div>
 
 </div>
