@@ -43,6 +43,8 @@ Route::middleware('throttle:5,1')->group(function () {
 Route::get('/email-settings/verify/{token}', [EmailSettingsController::class, 'verify'])->name('email-settings.verify');
 
 Route::get('/terms', function () { return view('terms'); })->name('terms');
+Route::get('/privacy', function () { return view('privacy'); })->name('privacy');
+Route::get('/tokushoho', function () { return view('tokushoho'); })->name('tokushoho');
 Route::get('/tokushoho', function () { return view('tokushoho'); })->name('tokushoho');
 Route::get('/privacy', function () { return view('privacy'); })->name('privacy');
 
