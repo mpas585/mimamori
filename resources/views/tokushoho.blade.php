@@ -191,11 +191,11 @@
                     </tr>
                     <tr>
                         <td>SMS通知</td>
-                        <td>¥100/台</td>
+                        <td>¥300/台</td>
                     </tr>
                     <tr>
                         <td>AIコール通知</td>
-                        <td>¥300/台</td>
+                        <td>¥500/台</td>
                     </tr>
                 </table>
                 <p style="font-size:12px; color:var(--gray-500); margin-top:8px;">※オプション料金は今後改定される場合があります</p>
