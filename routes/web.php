@@ -42,6 +42,8 @@ Route::middleware('throttle:5,1')->group(function () {
 
 Route::get('/email-settings/verify/{token}', [EmailSettingsController::class, 'verify'])->name('email-settings.verify');
 
+Route::get('/lp', function () { return response()->file(resource_path('views/mockups/mimamori_lp_monitor.html')); });
+
 Route::get('/terms', function () { return view('terms'); })->name('terms');
 Route::get('/tokushoho', function () { return view('tokushoho'); })->name('tokushoho');
 Route::get('/privacy', function () { return view('privacy'); })->name('privacy');
