@@ -16,3 +16,6 @@ Schedule::command('devices:check-undetected')->everyThirtyMinutes();
 
 // 月次課金（毎月1日 午前9時）
 Schedule::command('billing:run-monthly')->monthlyOn(1, '09:00');
+
+// billing_start_date到来デバイスの課金開始フラグ（毎日 午前8時）
+Schedule::command('billing:start-scheduled')->dailyAt('08:00');
