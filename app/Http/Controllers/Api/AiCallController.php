@@ -14,17 +14,38 @@ class AiCallController extends Controller
 {
     /**
      * TwiML: ガイダンス再生 + 録音（発信用）
+     * AnsweredBy により留守電用 / 人間用でガイダンスを分岐
      * GET/POST /api/ai-call/twiml
      */
     public function twiml(Request $request)
     {
+        $callSid    = $request->input('CallSid');
+        $answeredBy = $request->input('AnsweredBy', '');
+
+        // AnsweredBy を記録（あれば）
+        if ($callSid && $answeredBy) {
+            AiCallLog::where('call_sid', $callSid)->update(['answered_by' => $answeredBy]);
+        }
+
+        // 留守電・FAX か否かでガイダンスを分岐
+        $isVoicemail = str_starts_with($answeredBy, 'machine') || $answeredBy === 'fax';
+
+        if ($isVoicemail) {
+            // 留守電用ガイダンス（折り返し誘導）
+            $sayText = 'こちらは見守りシステムです。'
+                . '定期の安否確認のお電話をいたしました。'
+                . 'お元気でしたら、この電話に折り返しください。'
+                . '折り返しがない場合は、ご家族にお知らせいたします。';
+        } else {
+            // 人間用ガイダンス（安否確認）
+            $sayText = 'こちらは見守りシステムの自動確認サービスです。'
+                . 'ピーという音の後に、今日のご体調やお気持ちをお話しください。'
+                . '30秒以内でお話しいただけます。';
+        }
+
         $xml = '<?xml version="1.0" encoding="UTF-8"?>'
             . '<Response>'
-            . '<Say language="ja-JP" voice="Polly.Mizuki">'
-            . 'こちらは見守りシステムの自動確認サービスです。'
-            . 'ピーという音の後に、今日のご体調やお気持ちをお話しください。'
-            . '30秒以内でお話しいただけます。'
-            . '</Say>'
+            . '<Say language="ja-JP" voice="Polly.Mizuki">' . $sayText . '</Say>'
             . '<Record maxLength="30" timeout="5" transcribe="false" '
             . 'recordingStatusCallback="' . config('app.url') . '/api/ai-call/recording-webhook" '
             . 'recordingStatusCallbackMethod="POST"/>'
@@ -71,6 +92,23 @@ class AiCallController extends Controller
             'called_at'   => now(),
         ]);
 
+        // 直近の未応答 outbound ログに紐付け
+        $recentOutbound = AiCallLog::where('device_id', $device->id)
+            ->where('direction', 'outbound')
+            ->where('id', '!=', $log->id)
+            ->whereNull('responded_inbound_id')
+            ->where(function ($q) {
+                $q->where('call_status', 'no_answer')
+                  ->orWhere('judgment', 'voicemail');
+            })
+            ->latest('called_at')
+            ->first();
+
+        if ($recentOutbound) {
+            $recentOutbound->update(['responded_inbound_id' => $log->id]);
+            Log::info('AiCall inbound linked to outbound #' . $recentOutbound->id);
+        }
+
         // ガイダンス再生 + 録音
         $name = $device->nickname ?: $device->device_id;
         $xml = '<?xml version="1.0" encoding="UTF-8"?>'
@@ -98,10 +136,16 @@ class AiCallController extends Controller
         $callSid    = $request->input('CallSid');
         $callStatus = $request->input('CallStatus'); // completed, no-answer, busy, failed
         $duration   = $request->input('CallDuration');
+        $answeredBy = $request->input('AnsweredBy');
 
         $log = AiCallLog::where('call_sid', $callSid)->first();
         if (!$log) {
             return response('', 204);
+        }
+
+        // AnsweredBy を記録（あれば）
+        if ($answeredBy) {
+            $log->update(['answered_by' => $answeredBy]);
         }
 
         if (in_array($callStatus, ['no-answer', 'busy'])) {
@@ -165,24 +209,32 @@ class AiCallController extends Controller
             // GPT-4o Audioで文字起こし＋判定
             $result = $this->analyzeWithGpt($mp3Data);
 
+            // 最新の answered_by を取得して最終判定
+            $log->refresh();
+            $finalJudgment = $this->decideFinalJudgment($result['judgment'], $log->answered_by);
+
             $log->update([
                 'transcript'   => $result['transcript'],
-                'judgment'     => $result['judgment'],
+                'judgment'     => $finalJudgment,
                 'gpt_response' => $result['reason'],
             ]);
 
-            // good判定ならアラート解除（normal に戻す）
-            if ($result['judgment'] === 'good' && in_array($log->device->status, ['alert', 'offline'])) {
+            // 通知分岐
+            if ($finalJudgment === 'voicemail') {
+                // 留守電判定 → 不在通知（発信の場合のみ）
+                if ($log->direction !== 'inbound') {
+                    $this->sendNoAnswerNotification($log->device);
+                }
+            } elseif ($finalJudgment === 'good' && in_array($log->device->status, ['alert', 'offline'])) {
+                // good判定ならアラート解除（normal に戻す）
                 $log->device->update(['status' => 'normal']);
                 // 折り返し着信でgood判定の場合は安否確認完了通知
                 if ($log->direction === 'inbound') {
                     $this->sendGoodNotification($log->device, $result['transcript']);
                 }
-            }
-
-            // 要確認・異常の場合は通知
-            if (in_array($result['judgment'], ['check', 'alert'])) {
-                $this->sendJudgmentNotification($log->device, $result['judgment'], $result['transcript'], $log->direction);
+            } elseif (in_array($finalJudgment, ['check', 'alert'])) {
+                // 要確認・異常の場合は通知
+                $this->sendJudgmentNotification($log->device, $finalJudgment, $result['transcript'], $log->direction);
             }
 
         } catch (\Exception $e) {
@@ -194,6 +246,26 @@ class AiCallController extends Controller
         }
 
         return response('', 204);
+    }
+
+    /**
+     * GPT判定と AnsweredBy を組み合わせて最終判定
+     */
+    private function decideFinalJudgment(string $gptJudgment, ?string $answeredBy): string
+    {
+        // GPTが voicemail と明確に判定 → 確定
+        if ($gptJudgment === 'voicemail') {
+            return 'voicemail';
+        }
+
+        // GPTが unclear で AnsweredBy が機械系なら voicemail 扱い
+        if ($gptJudgment === 'unclear' && $answeredBy !== null) {
+            if (str_starts_with($answeredBy, 'machine') || $answeredBy === 'fax') {
+                return 'voicemail';
+            }
+        }
+
+        return $gptJudgment;
     }
 
     /**
@@ -245,13 +317,14 @@ class AiCallController extends Controller
                         'あなたは高齢者の安否確認AIです。',
                         '音声を聞いて以下を行ってください：',
                         '1. 音声をそのまま文字起こしする',
-                        '2. 以下の基準で安否を判定する',
+                        '2. 以下の基準で判定する',
+                        '   - voicemail: 留守番電話の応答メッセージ（機械音声の定型アナウンス、ビープ音、電話会社のアナウンス等）',
                         '   - good: 元気そう・普通の受け答えができている',
                         '   - check: 元気がなさそう・不安な発言がある・受け答えが不自然',
                         '   - alert: 助けを求めている・痛みを訴えている・意識が混濁している',
                         '   - unclear: 無音・雑音のみ・判定不能',
                         '必ずJSON形式で返してください：',
-                        '{"transcript":"文字起こし内容","judgment":"good/check/alert/unclear","reason":"判定理由"}',
+                        '{"transcript":"文字起こし内容","judgment":"voicemail/good/check/alert/unclear","reason":"判定理由"}',
                         'JSONのみ返してください。マークダウンは不要です。',
                     ]),
                 ],

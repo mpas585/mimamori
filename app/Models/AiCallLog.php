@@ -13,6 +13,8 @@ class AiCallLog extends Model
         'device_id',
         'direction',
         'call_sid',
+        'answered_by',
+        'responded_inbound_id',
         'recording_sid',
         'call_status',
         'judgment',
