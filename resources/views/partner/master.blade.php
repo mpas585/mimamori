@@ -1,6 +1,6 @@
 @extends('layouts.partner')
 
-@section('title', 'みまもりトーフ - マスター管理')
+@section('title', 'みまもりデバイス - マスター管理')
 
 @section('styles')
 <style>

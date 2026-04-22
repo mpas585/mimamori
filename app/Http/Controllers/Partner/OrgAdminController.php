@@ -747,7 +747,7 @@ class OrgAdminController extends Controller
                 ));
 
                 $body = <<<TEXT
-【みまもりトーフ】デバイス追加申込みがありました
+【みまもりデバイス】デバイス追加申込みがありました
 
 ■ 申込み情報
 
@@ -774,7 +774,7 @@ TEXT;
 
                 Mail::raw($body, function ($message) use ($adminEmail, $organization, $count) {
                     $message->to($adminEmail)
-                            ->subject("[みまもりトーフ] デバイス追加申込み：{$organization->name} {$count}台");
+                            ->subject("[みまもりデバイス] デバイス追加申込み：{$organization->name} {$count}台");
                 });
             } catch (\Exception $e) {
                 Log::error('bulkCheckout admin mail error: ' . $e->getMessage());
