@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>みまもりデバイス｜月額1,100円の見守りセンサー</title>
+<meta name="description" content="Wi-Fi不要・コンセント不要・アプリ不要。月額1,100円でペットと人を区別する見守りセンサー。初期費用なし、LTE内蔵、電池駆動。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;600;700;800&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --cream: #f7f4ed;
+  --warm-white: #faf8f3;
+  --beige: #ede8dc;
+  --brown-100: #d4c9b4;
+  --brown-200: #b8a98e;
+  --brown-500: #8b7355;
+  --brown-700: #5e4b32;
+  --brown-900: #3a2e1e;
+  --gray-300: #c8c4bc;
+  --gray-500: #7a756c;
+  --gray-700: #4a4640;
+  --gray-900: #2a2723;
+  --accent: #c45d3e;
+  --accent-light: #f4e8e4;
+  --green: #5a8a4a;
+  --green-light: #eaf2e6;
+  --shadow-sm: 0 1px 3px rgba(58,46,30,0.08);
+  --shadow-md: 0 4px 16px rgba(58,46,30,0.10);
+  --shadow-lg: 0 8px 32px rgba(58,46,30,0.12);
+  --radius: 12px;
+  --radius-lg: 20px;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Zen Kaku Gothic New', 'Noto Sans JP', sans-serif;
+  color: var(--gray-900);
+  background: var(--cream);
+  line-height: 1.8;
+  -webkit-font-smoothing: antialiased;
+}
+img { max-width:100%; display:block; }
+a { color: inherit; text-decoration: none; }
+
+/* ===== NAV ===== */
+.nav {
+  position: fixed; top:0; left:0; right:0; z-index:100;
+  background: rgba(247,244,237,0.92);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(212,201,180,0.5);
+  transition: box-shadow 0.3s;
+}
+.nav.scrolled { box-shadow: var(--shadow-sm); }
+.nav-inner {
+  max-width: 1100px; margin:0 auto;
+  display:flex; align-items:center; justify-content:space-between;
+  padding: 14px 24px;
+}
+.nav-logo {
+  font-size: 18px; font-weight: 700; color: var(--brown-700);
+  letter-spacing: 0.02em;
+}
+.nav-logo span { font-size: 12px; font-weight: 400; color: var(--gray-500); margin-left: 8px; }
+.nav-links { display:flex; gap: 28px; align-items:center; }
+.nav-links a {
+  font-size: 13px; font-weight: 500; color: var(--gray-500);
+  transition: color 0.2s;
+}
+.nav-links a:hover { color: var(--brown-700); }
+.nav-cta {
+  background: var(--brown-700); color: #fff !important;
+  padding: 8px 20px; border-radius: 8px; font-size: 13px; font-weight: 600;
+  transition: background 0.2s, transform 0.2s;
+}
+.nav-cta:hover { background: var(--brown-900); transform: translateY(-1px); }
+
+@media (max-width: 768px) {
+  .nav-links a:not(.nav-cta) { display: none; }
+}
+
+/* ===== HERO ===== */
+.hero {
+  padding: 140px 24px 80px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.hero::before {
+  content: '';
+  position: absolute; top: -200px; left: 50%; transform: translateX(-50%);
+  width: 800px; height: 800px;
+  background: radial-gradient(circle, rgba(196,93,62,0.06) 0%, transparent 70%);
+  pointer-events: none;
+}
+.hero-label {
+  display: inline-block;
+  background: var(--green-light); color: var(--green);
+  padding: 6px 16px; border-radius: 20px;
+  font-size: 13px; font-weight: 600;
+  margin-bottom: 24px;
+}
+.hero h1 {
+  font-size: clamp(28px, 5vw, 48px);
+  font-weight: 800;
+  line-height: 1.4;
+  color: var(--brown-900);
+  margin-bottom: 20px;
+  letter-spacing: -0.02em;
+}
+.hero-sub {
+  font-size: clamp(15px, 2.5vw, 18px);
+  color: var(--gray-500);
+  max-width: 560px; margin: 0 auto 36px;
+  line-height: 1.8;
+}
+.hero-price {
+  display: inline-flex; align-items: baseline; gap: 8px;
+  background: var(--warm-white);
+  border: 2px solid var(--brown-200);
+  border-radius: var(--radius-lg);
+  padding: 20px 36px;
+  margin-bottom: 12px;
+}
+.hero-price-label { font-size: 14px; color: var(--gray-500); font-weight: 500; }
+.hero-price-amount { font-size: 42px; font-weight: 800; color: var(--accent); letter-spacing: -0.03em; }
+.hero-price-unit { font-size: 16px; color: var(--gray-700); font-weight: 500; }
+.hero-price-note {
+  font-size: 13px; color: var(--gray-500);
+  margin-bottom: 32px;
+}
+.hero-badges {
+  display: flex; flex-wrap: wrap; justify-content: center; gap: 12px;
+  margin-bottom: 36px;
+}
+.hero-badge {
+  background: var(--warm-white); border: 1px solid var(--brown-100);
+  padding: 8px 16px; border-radius: 8px;
+  font-size: 13px; font-weight: 500; color: var(--gray-700);
+}
+.hero-cta {
+  display: inline-block;
+  background: var(--accent); color: #fff;
+  padding: 16px 40px; border-radius: 12px;
+  font-size: 16px; font-weight: 700;
+  transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 4px 16px rgba(196,93,62,0.25);
+}
+.hero-cta:hover { background: #b0522f; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(196,93,62,0.35); }
+
+/* ===== SECTIONS COMMON ===== */
+.section { padding: 80px 24px; }
+.section-inner { max-width: 1000px; margin: 0 auto; }
+.section-label {
+  font-size: 11px; font-weight: 600; color: var(--brown-500);
+  text-transform: uppercase; letter-spacing: 0.15em;
+  margin-bottom: 8px;
+}
+.section-title {
+  font-size: clamp(24px, 4vw, 36px);
+  font-weight: 700; color: var(--brown-900);
+  margin-bottom: 16px; letter-spacing: -0.01em;
+}
+.section-desc {
+  font-size: 15px; color: var(--gray-500);
+  max-width: 600px; margin-bottom: 48px;
+}
+.section-desc.center { margin-left: auto; margin-right: auto; text-align: center; }
+
+/* ===== FEATURES ===== */
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+}
+.feature-card {
+  background: var(--warm-white);
+  border: 1px solid var(--beige);
+  border-radius: var(--radius-lg);
+  padding: 32px 28px;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.feature-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
+.feature-icon {
+  width: 44px; height: 44px;
+  background: var(--beige);
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px;
+  margin-bottom: 16px;
+}
+.feature-card h3 {
+  font-size: 16px; font-weight: 700; color: var(--brown-900);
+  margin-bottom: 10px;
+}
+.feature-card p {
+  font-size: 14px; color: var(--gray-500); line-height: 1.7;
+}
+.feature-tag {
+  display: inline-block;
+  background: var(--green-light); color: var(--green);
+  padding: 3px 10px; border-radius: 4px;
+  font-size: 11px; font-weight: 600;
+  margin-top: 12px;
+}
+
+/* ===== HOW IT WORKS ===== */
+.steps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 32px;
+  counter-reset: step;
+}
+.step {
+  text-align: center;
+  position: relative;
+}
+.step-num {
+  width: 48px; height: 48px;
+  background: var(--brown-700); color: #fff;
+  border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 20px; font-weight: 700;
+  margin-bottom: 16px;
+}
+.step h3 {
+  font-size: 16px; font-weight: 700; color: var(--brown-900);
+  margin-bottom: 8px;
+}
+.step p {
+  font-size: 14px; color: var(--gray-500);
+}
+
+/* ===== PROBLEMS ===== */
+.bg-white { background: var(--warm-white); }
+.problems-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px;
+  margin-bottom: 48px;
+}
+.problem-card {
+  background: var(--cream);
+  border: 1px solid var(--beige);
+  border-radius: var(--radius);
+  padding: 24px;
+}
+.problem-card .problem-type {
+  font-size: 11px; font-weight: 600; color: var(--accent);
+  text-transform: uppercase; letter-spacing: 0.08em;
+  margin-bottom: 8px;
+}
+.problem-card h3 {
+  font-size: 15px; font-weight: 700; color: var(--brown-900);
+  margin-bottom: 8px;
+}
+.problem-card p {
+  font-size: 13px; color: var(--gray-500); line-height: 1.7;
+}
+
+.solution-box {
+  background: var(--brown-900); color: #fff;
+  border-radius: var(--radius-lg);
+  padding: 48px 40px;
+  text-align: center;
+}
+.solution-box h2 {
+  font-size: clamp(22px, 3.5vw, 32px);
+  font-weight: 700; margin-bottom: 16px;
+}
+.solution-box p {
+  font-size: 15px; color: rgba(255,255,255,0.7);
+  max-width: 500px; margin: 0 auto 32px;
+}
+.solution-points {
+  display: flex; flex-wrap: wrap; justify-content: center; gap: 24px;
+}
+.solution-point {
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: var(--radius);
+  padding: 16px 24px;
+  text-align: left;
+}
+.solution-point strong { font-size: 15px; display: block; margin-bottom: 4px; }
+.solution-point small { font-size: 12px; color: rgba(255,255,255,0.6); }
+
+/* ===== COMPARISON ===== */
+.comparison-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: var(--warm-white);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--beige);
+}
+.comparison-table th, .comparison-table td {
+  padding: 16px 20px;
+  text-align: left;
+  font-size: 14px;
+  border-bottom: 1px solid var(--beige);
+}
+.comparison-table thead th {
+  background: var(--brown-900); color: #fff;
+  font-weight: 600; font-size: 13px;
+}
+.comparison-table .highlight-row {
+  background: var(--accent-light);
+}
+.comparison-table .highlight-row td {
+  font-weight: 700; color: var(--accent);
+}
+.cost-amount { font-size: 18px; font-weight: 700; }
+.cost-breakdown { font-size: 11px; color: var(--gray-500); display: block; margin-top: 2px; }
+
+/* ===== PRICING ===== */
+.pricing-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 24px;
+}
+.pricing-card {
+  background: var(--warm-white);
+  border: 1px solid var(--beige);
+  border-radius: var(--radius-lg);
+  padding: 36px 32px;
+  position: relative;
+}
+.pricing-card.featured {
+  border: 2px solid var(--accent);
+  box-shadow: var(--shadow-md);
+}
+.pricing-card.featured::before {
+  content: 'おすすめ';
+  position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
+  background: var(--accent); color: #fff;
+  padding: 4px 16px; border-radius: 20px;
+  font-size: 12px; font-weight: 600;
+}
+.pricing-card h3 {
+  font-size: 18px; font-weight: 700; color: var(--brown-900);
+  margin-bottom: 4px;
+}
+.pricing-card .price-desc { font-size: 13px; color: var(--gray-500); margin-bottom: 20px; }
+.pricing-amount {
+  font-size: 36px; font-weight: 800; color: var(--brown-900);
+  letter-spacing: -0.03em;
+}
+.pricing-amount span { font-size: 14px; font-weight: 500; color: var(--gray-500); }
+.pricing-unit { font-size: 13px; color: var(--gray-500); margin-bottom: 20px; }
+.pricing-features { list-style: none; margin-bottom: 24px; }
+.pricing-features li {
+  padding: 8px 0;
+  font-size: 14px; color: var(--gray-700);
+  border-bottom: 1px solid var(--beige);
+  display: flex; align-items: center; gap: 8px;
+}
+.pricing-features li::before { content: '✓'; color: var(--green); font-weight: 700; }
+.pricing-btn {
+  display: block; text-align: center;
+  padding: 12px; border-radius: 10px;
+  font-size: 14px; font-weight: 600;
+  transition: all 0.2s;
+}
+.pricing-btn.primary {
+  background: var(--accent); color: #fff;
+}
+.pricing-btn.primary:hover { background: #b0522f; }
+.pricing-btn.secondary {
+  background: var(--beige); color: var(--brown-700);
+}
+.pricing-btn.secondary:hover { background: var(--brown-100); }
+
+/* ===== USE CASES ===== */
+.usecases-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px;
+}
+.usecase-card {
+  background: var(--warm-white);
+  border: 1px solid var(--beige);
+  border-radius: var(--radius-lg);
+  padding: 28px 24px;
+  text-align: center;
+}
+.usecase-icon { font-size: 32px; margin-bottom: 12px; }
+.usecase-card h3 {
+  font-size: 15px; font-weight: 700; color: var(--brown-900);
+  margin-bottom: 8px;
+}
+.usecase-card p {
+  font-size: 13px; color: var(--gray-500); line-height: 1.7;
+}
+
+/* ===== FAQ ===== */
+.faq-list { max-width: 700px; margin: 0 auto; }
+.faq-item {
+  border-bottom: 1px solid var(--beige);
+}
+.faq-q {
+  width: 100%; background: none; border: none;
+  text-align: left; cursor: pointer;
+  padding: 20px 0;
+  font-size: 15px; font-weight: 600; color: var(--brown-900);
+  font-family: inherit;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.faq-q::after {
+  content: '+'; font-size: 20px; color: var(--brown-500);
+  transition: transform 0.3s;
+}
+.faq-item.open .faq-q::after { content: '−'; }
+.faq-a {
+  max-height: 0; overflow: hidden;
+  transition: max-height 0.3s ease, padding 0.3s;
+}
+.faq-item.open .faq-a {
+  max-height: 300px;
+  padding-bottom: 20px;
+}
+.faq-a p {
+  font-size: 14px; color: var(--gray-500); line-height: 1.8;
+}
+
+/* ===== CTA SECTION ===== */
+.cta-section {
+  text-align: center;
+  padding: 80px 24px;
+  background: linear-gradient(180deg, var(--cream) 0%, var(--beige) 100%);
+}
+.cta-section h2 {
+  font-size: clamp(24px, 4vw, 36px);
+  font-weight: 700; color: var(--brown-900);
+  margin-bottom: 12px;
+}
+.cta-section p {
+  font-size: 15px; color: var(--gray-500);
+  margin-bottom: 32px;
+}
+.cta-section .hero-cta { margin-bottom: 12px; }
+.cta-note { font-size: 13px; color: var(--gray-500); }
+
+/* ===== FOOTER ===== */
+.footer {
+  background: var(--brown-900); color: rgba(255,255,255,0.6);
+  padding: 40px 24px;
+}
+.footer-inner {
+  max-width: 1000px; margin: 0 auto;
+  display: flex; justify-content: space-between; align-items: center;
+  flex-wrap: wrap; gap: 16px;
+}
+.footer-links { display: flex; gap: 24px; }
+.footer-links a {
+  font-size: 13px; color: rgba(255,255,255,0.5);
+  transition: color 0.2s;
+}
+.footer-links a:hover { color: #fff; }
+.footer-copy { font-size: 12px; }
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 600px) {
+  .hero { padding: 120px 20px 60px; }
+  .hero-price { padding: 16px 24px; flex-wrap: wrap; justify-content: center; }
+  .hero-price-amount { font-size: 32px; }
+  .section { padding: 60px 20px; }
+  .solution-box { padding: 32px 24px; }
+  .comparison-table { font-size: 13px; }
+  .comparison-table th, .comparison-table td { padding: 12px 14px; }
+  .pricing-cards { grid-template-columns: 1fr; }
+  .footer-inner { flex-direction: column; text-align: center; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav" id="nav">
+  <div class="nav-inner">
+    <div class="nav-logo">みまもりデバイス</div>
+    <div class="nav-links">
+      <a href="#features">特徴</a>
+      <a href="#how-it-works">使い方</a>
+      <a href="#pricing">料金</a>
+      <a href="#faq">FAQ</a>
+      <a href="/contact" class="nav-cta">お問い合わせ</a>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-label">初期費用なし・2年契約・送料無料</div>
+  <h1>毎日電話できなくても、<br>ちゃんと見守れます。</h1>
+  <p class="hero-sub">何かあれば、すぐにお知らせします。<br>Wi-Fi不要・コンセント不要・アプリ不要。</p>
+  <div class="hero-price">
+    <span class="hero-price-label">月額</span>
+    <span class="hero-price-amount">¥1,100</span>
+    <span class="hero-price-unit">/台（税込）</span>
+  </div>
+  <p class="hero-price-note">初期費用なし・デバイス無料レンタル・通信費込み</p>
+  <div class="hero-badges">
+    <span class="hero-badge">🐾 ペット除外</span>
+    <span class="hero-badge">🔋 停電でも安心</span>
+    <span class="hero-badge">📡 LTE内蔵</span>
+    <span class="hero-badge">📎 貼るだけ設置</span>
+  </div>
+  <a href="/contact" class="hero-cta">お問い合わせ・お申し込み</a>
+</section>
+
+<!-- FEATURES -->
+<section class="section" id="features">
+  <div class="section-inner">
+    <p class="section-label">Features</p>
+    <h2 class="section-title">みまもりデバイスの特徴</h2>
+    <p class="section-desc">複雑な機能は必要ありません。本当に必要なことだけを、確実に。</p>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">🐾</div>
+        <h3>人だけを検知、ペットは無視</h3>
+        <p>高さ検知センサー（ToF）搭載。ドア枠からの距離を測定し、高さ1m未満の動きはペットとして除外します。</p>
+        <span class="feature-tag">猫・小型犬OK</span>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🔋</div>
+        <h3>災害に強い、抜かれない</h3>
+        <p>電池駆動だから停電・災害時でも動作継続。コンセント式と違い、第三者に故意にプラグを抜かれる心配もありません。</p>
+        <span class="feature-tag">停電時も稼働</span>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">💰</div>
+        <h3>初期費用なし</h3>
+        <p>デバイスは無料レンタル。月額1,100円に通信費も含まれているので、追加コストを気にせず始められます。</p>
+        <span class="feature-tag">デバイス無料</span>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📎</div>
+        <h3>工事不要、貼るだけ</h3>
+        <p>ドア枠に両面テープで貼るだけ。賃貸でも安心。電気工事も壁に穴を開ける必要もありません。</p>
+        <span class="feature-tag">5分で設置完了</span>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📡</div>
+        <h3>Wi-Fi不要、LTE内蔵</h3>
+        <p>LTE通信モジュール内蔵。Wi-Fi環境がない場所でも、携帯電波があれば動作します。アプリも不要。</p>
+        <span class="feature-tag">ブラウザでOK</span>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🔒</div>
+        <h3>カメラなし・個人情報不要</h3>
+        <p>カメラは一切なし。端末IDと通知先メールだけで運用。氏名・住所・生年月日などの個人情報は不要です。</p>
+        <span class="feature-tag">プライバシー安心</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="section bg-white" id="how-it-works">
+  <div class="section-inner" style="text-align:center;">
+    <p class="section-label">How It Works</p>
+    <h2 class="section-title" style="text-align:center;">かんたん3ステップ</h2>
+    <p class="section-desc center">届いたその日から、すぐに見守りを始められます</p>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <h3>ドア枠に貼る</h3>
+        <p>よく通るドアの枠に、付属の両面テープで貼り付けます。5分で完了。</p>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <h3>QRコードでログイン</h3>
+        <p>本体のQRコードを読み取るだけ。アカウント作成も設定も不要です。</p>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <h3>通知先を登録</h3>
+        <p>メールアドレスを登録すれば完了。異常があればすぐにお知らせします。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROBLEMS & SOLUTION -->
+<section class="section" id="problems">
+  <div class="section-inner">
+    <p class="section-label">Why Mimamori Tofu</p>
+    <h2 class="section-title">既存製品との違い</h2>
+    <p class="section-desc">見守り機器導入検討中なら、知っておいてほしいことがあります。</p>
+    <div class="problems-grid">
+      <div class="problem-card">
+        <p class="problem-type">電球型</p>
+        <h3>電球を使わない人は検知できない</h3>
+        <p>日中は電気をつけない、LED常夜灯を使っている、シーリングライトの家…現代の生活スタイルには合わないケースが多い。</p>
+      </div>
+      <div class="problem-card">
+        <p class="problem-type">ドア開閉型</p>
+        <h3>ドアを開けない日は検知できない</h3>
+        <p>特定のドアの開閉を検知する方式。そのドアを使わない日があると、異常と誤判定されてしまう。</p>
+      </div>
+      <div class="problem-card">
+        <p class="problem-type">人感センサー型</p>
+        <h3>ペットに反応して誤検知</h3>
+        <p>猫が動くたびに「正常」と判定。飼い主が倒れていても、ペットが動いている限り異常を検知できない。</p>
+      </div>
+      <div class="problem-card">
+        <p class="problem-type">Wi-Fi必須型</p>
+        <h3>Wi-Fi環境がないと使えない</h3>
+        <p>親御さんの家にWi-Fiはありますか？新規契約すると月5,000円、10年で60万円の追加コストに。</p>
+      </div>
+    </div>
+    <div class="solution-box">
+      <h2>みまもりデバイスは<br>すべてを解決します</h2>
+      <p>人感センサー + 高さ検知の組み合わせで、生活習慣に依存せず、ペットも除外。Wi-Fi不要でLTE内蔵。</p>
+      <div class="solution-points">
+        <div class="solution-point">
+          <strong>ドアを通るだけで検知</strong>
+          <small>電球・冷蔵庫は関係なし</small>
+        </div>
+        <div class="solution-point">
+          <strong>高さ1m未満は除外</strong>
+          <small>猫・小型犬は無視</small>
+        </div>
+        <div class="solution-point">
+          <strong>LTE内蔵で通信</strong>
+          <small>Wi-Fi環境不要</small>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- COMPARISON -->
+<section class="section bg-white" id="comparison">
+  <div class="section-inner" style="text-align:center;">
+    <p class="section-label">Cost Comparison</p>
+    <h2 class="section-title" style="text-align:center;">2年間のコスト比較</h2>
+    <p class="section-desc center">見守りサービスは長く使うもの。2年間の総コストで比べてみてください。</p>
+    <table class="comparison-table">
+      <thead>
+        <tr>
+          <th>サービス</th>
+          <th>タイプ</th>
+          <th>2年間の総額（税込）</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>C社</td>
+          <td>人感センサー型</td>
+          <td>
+            <span class="cost-amount">¥63,800</span>
+            <span class="cost-breakdown">初期費用 + 月額 × 24ヶ月</span>
+          </td>
+        </tr>
+        <tr>
+          <td>A社</td>
+          <td>電球型</td>
+          <td>
+            <span class="cost-amount">¥25,870</span>
+            <span class="cost-breakdown">初期費用 + 月額 × 24ヶ月</span>
+          </td>
+        </tr>
+        <tr>
+          <td>B社</td>
+          <td>ドア開閉型</td>
+          <td>
+            <span class="cost-amount">¥15,840</span>
+            <span class="cost-breakdown">初期費用 + 月額 × 24ヶ月</span>
+          </td>
+        </tr>
+        <tr class="highlight-row">
+          <td><strong>みまもりデバイス</strong></td>
+          <td>人感 + 高さ検知</td>
+          <td>
+            <span class="cost-amount" style="color: var(--accent);">¥26,400</span>
+            <span class="cost-breakdown" style="color: var(--gray-500);">初期費用なし・¥1,100 × 24ヶ月</span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <p style="font-size: 12px; color: var(--gray-500); margin-top: 16px; text-align: right;">※ 価格は税込。競合価格は2025年時点の公開情報に基づく参考値です。</p>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="section" id="pricing">
+  <div class="section-inner" style="text-align:center;">
+    <p class="section-label">Pricing</p>
+    <h2 class="section-title" style="text-align:center;">料金プラン</h2>
+    <p class="section-desc center">すべてのプランに通信費・デバイスレンタル料が含まれています。</p>
+    <div class="pricing-cards">
+      <div class="pricing-card featured">
+        <h3>基本プラン</h3>
+        <p class="price-desc">デバイスレンタル + 見守り通知</p>
+        <div class="pricing-amount">¥1,100<span>/台/月（税込）</span></div>
+        <p class="pricing-unit">2年契約・初期費用なし・送料無料</p>
+        <ul class="pricing-features">
+          <li>デバイス無料レンタル</li>
+          <li>LTE通信費込み</li>
+          <li>メール通知</li>
+          <li>ブラウザ管理画面</li>
+          <li>未検知アラート（12〜72時間設定可能）</li>
+          <li>ペット除外機能</li>
+          <li>故障時無償交換</li>
+        </ul>
+        <a href="/contact" class="pricing-btn primary">お問い合わせ・お申し込み</a>
+      </div>
+      <div class="pricing-card">
+        <h3>オプション</h3>
+        <p class="price-desc">必要に応じて追加できます</p>
+        <div class="pricing-amount" style="font-size: 24px;">+¥300〜<span>/台/月</span></div>
+        <p class="pricing-unit">基本プランに追加</p>
+        <ul class="pricing-features">
+          <li>SMS通知（+¥300/台/月）</li>
+          <li>AIコール通知（+¥500/台/月）</li>
+        </ul>
+        <p style="font-size: 13px; color: var(--gray-500); margin-top: 12px; line-height: 1.7;">
+          SMS通知は携帯電話番号宛、AIコール通知は固定電話にも対応。スマホを使わない方にも確実に届きます。
+        </p>
+        <a href="/contact" class="pricing-btn secondary" style="margin-top: 16px;">詳しく聞く</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- USE CASES -->
+<section class="section bg-white" id="usecases">
+  <div class="section-inner" style="text-align:center;">
+    <p class="section-label">Use Cases</p>
+    <h2 class="section-title" style="text-align:center;">こんな使い方も</h2>
+    <p class="section-desc center">個人のご家庭から法人まで、さまざまな場面でご利用いただけます。</p>
+    <div class="usecases-grid">
+      <div class="usecase-card">
+        <div class="usecase-icon">🏠</div>
+        <h3>離れて暮らす親御さんに</h3>
+        <p>毎日電話できなくても、動きがなければ通知が届きます。さりげなく見守れます。</p>
+      </div>
+      <div class="usecase-card">
+        <div class="usecase-icon">🏢</div>
+        <h3>賃貸物件の管理会社に</h3>
+        <p>高齢入居者の見守りに。管理画面で複数台を一括管理。入退去時のPINリセットも簡単。</p>
+      </div>
+      <div class="usecase-card">
+        <div class="usecase-icon">🏡</div>
+        <h3>空き家の管理に</h3>
+        <p>長期不在の実家に設置。誰かが入った時だけ通知。不法侵入の早期発見にも。</p>
+      </div>
+      <div class="usecase-card">
+        <div class="usecase-icon">🏥</div>
+        <h3>福祉施設・自治体に</h3>
+        <p>独居高齢者の見守りサービスとして。カメラ不使用でプライバシーに配慮。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="section" id="faq">
+  <div class="section-inner">
+    <div style="text-align:center;">
+      <p class="section-label">FAQ</p>
+      <h2 class="section-title" style="text-align:center;">よくある質問</h2>
+    </div>
+    <div class="faq-list">
+      <div class="faq-item">
+        <button class="faq-q">料金に含まれるものは？</button>
+        <div class="faq-a"><p>月額1,100円（税込）にデバイスのレンタル料、LTE通信費、メール通知、ブラウザ管理画面の利用料がすべて含まれています。初期費用・事務手数料はかかりません。</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q">契約期間はどのくらいですか？</button>
+        <div class="faq-a"><p>2年間の契約です。契約満了時に解約のお申し出がない場合、同一条件で自動更新されます。契約期間中の中途解約はできません。</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q">ペットがいても大丈夫ですか？</button>
+        <div class="faq-a"><p>はい。高さ検知センサー（ToF）を搭載しており、ドア枠からの距離を測定します。高さ1m未満の動きはペットとして除外できます。猫や小型〜中型犬であれば問題ありません。</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q">携帯の電波が届かない場所でも使えますか？</button>
+        <div class="faq-a"><p>LTE-M方式を採用しており、SoftBank/au回線エリアで使用可能です。設置時に電波状況を確認できるLEDインジケーターがあります。電波が届かない場合はご利用いただけません。</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q">異常があった場合、どのように通知されますか？</button>
+        <div class="faq-a"><p>メール通知に対応しています。設定した時間（12〜72時間から選択可能）人の動きが検知されない場合にお知らせします。オプションでSMS通知やAIコール通知も追加できます。</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q">故障した場合はどうなりますか？</button>
+        <div class="faq-a"><p>契約期間中であれば無償で代替品と交換いたします。故障品の返送は不要です。Webフォームからお申し込みいただければ、新しい端末をお届けします。</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q">カメラで監視されるのは抵抗があります</button>
+        <div class="faq-a"><p>みまもりデバイスにカメラは一切ついていません。人感センサーで「人がいるかどうか」だけを検知するシンプルな仕組みです。端末IDと通知先メールアドレスだけで運用するため、氏名・住所・生年月日などの個人情報は一切お預かりしません。</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q">解約時にデバイスはどうすればいいですか？</button>
+        <div class="faq-a"><p>デバイスは当社からのレンタルです。解約時にはご返却いただきます。返却先・手順は解約受付時にご案内いたします。返送料はお客様のご負担となります。</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q">複数台の導入や法人利用は可能ですか？</button>
+        <div class="faq-a"><p>はい。賃貸物件の管理会社様向けに、複数台の一括管理機能をご用意しています。管理画面から全デバイスのステータスを確認でき、入退去に応じたPINリセットも可能です。お気軽にお問い合わせください。</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <h2>離れていても、そばにいる安心を</h2>
+  <p>毎日電話できなくても大丈夫。<br>何かあれば、すぐにお知らせします。</p>
+  <a href="/contact" class="hero-cta">お問い合わせ・お申し込み</a>
+  <p class="cta-note" style="margin-top: 16px;">月額¥1,100（税込）・初期費用なし・送料無料</p>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="footer-links">
+      <a href="/terms">利用規約</a>
+      <a href="/privacy">プライバシーポリシー</a>
+      <a href="/tokushoho">特定商取引法に基づく表記</a>
+    </div>
+    <p class="footer-copy">&copy; 2026 ウエダ・トレーディング株式会社</p>
+  </div>
+</footer>
+
+<script>
+// Nav scroll effect
+window.addEventListener('scroll', () => {
+  document.getElementById('nav').classList.toggle('scrolled', window.scrollY > 10);
+});
+
+// FAQ accordion
+document.querySelectorAll('.faq-q').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const item = btn.parentElement;
+    document.querySelectorAll('.faq-item').forEach(i => {
+      if (i !== item) i.classList.remove('open');
+    });
+    item.classList.toggle('open');
+  });
+});
+</script>
+</body>
+</html>
