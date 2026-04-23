@@ -30,15 +30,13 @@ Route::middleware('guest')->group(function () {
     Route::post('/login', [DeviceLoginController::class, 'login']);
 });
 
-Route::middleware('throttle:5,1')->group(function () {
-    Route::get('/pin-reset', [PinResetController::class, 'showForm'])->name('pin-reset');
-    Route::post('/pin-reset', [PinResetController::class, 'verifyDevice']);
-    Route::post('/pin-reset/send-email', [PinResetController::class, 'sendResetEmail']);
-    Route::get('/pin-reset/initial', [PinResetController::class, 'showInitialPinForm']);
-    Route::post('/pin-reset/initial', [PinResetController::class, 'resetWithInitialPin']);
-    Route::get('/pin-reset/token/{token}', [PinResetController::class, 'showNewPinForm']);
-    Route::post('/pin-reset/token/{token}', [PinResetController::class, 'resetWithToken']);
-});
+Route::get('/pin-reset', [PinResetController::class, 'showForm'])->name('pin-reset');
+Route::post('/pin-reset', [PinResetController::class, 'verifyDevice']);
+Route::post('/pin-reset/send-email', [PinResetController::class, 'sendResetEmail']);
+Route::get('/pin-reset/initial', [PinResetController::class, 'showInitialPinForm']);
+Route::post('/pin-reset/initial', [PinResetController::class, 'resetWithInitialPin']);
+Route::get('/pin-reset/token/{token}', [PinResetController::class, 'showNewPinForm']);
+Route::post('/pin-reset/token/{token}', [PinResetController::class, 'resetWithToken']);
 
 Route::get('/email-settings/verify/{token}', [EmailSettingsController::class, 'verify'])->name('email-settings.verify');
 

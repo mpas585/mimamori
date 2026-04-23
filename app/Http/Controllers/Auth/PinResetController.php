@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 
 class PinResetController extends Controller
@@ -25,9 +26,22 @@ class PinResetController extends Controller
 
     /**
      * Step 1 → Step 2: デバイスIDを検証して方法選択画面へ
+     *
+     * ブルートフォース対策: デバイスID不一致（認証失敗）時のみカウント。
+     * 5回連続失敗で60秒ロック。成功時はカウンタをリセット。
      */
     public function verifyDevice(Request $request)
     {
+        $rateLimitKey = 'pin-reset-device:' . $request->ip();
+
+        // 既に上限に達している場合はロックメッセージ
+        if (RateLimiter::tooManyAttempts($rateLimitKey, 5)) {
+            $seconds = RateLimiter::availableIn($rateLimitKey);
+            return back()->withErrors([
+                'device_id' => "試行回数が多すぎます。{$seconds}秒後に再度お試しください。",
+            ])->withInput();
+        }
+
         $request->validate([
             'device_id' => 'required|string|size:6',
         ], [
@@ -39,8 +53,13 @@ class PinResetController extends Controller
         $device   = Device::where('device_id', $deviceId)->first();
 
         if (!$device) {
+            // 認証失敗時のみカウント（60秒間保持）
+            RateLimiter::hit($rateLimitKey, 60);
             return back()->withErrors(['device_id' => '登録情報と一致しません'])->withInput();
         }
+
+        // 成功時はカウンタをリセット
+        RateLimiter::clear($rateLimitKey);
 
         $notif    = $device->notificationSetting;
         $hasEmail = $notif && $notif->email_1;
