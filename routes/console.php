@@ -22,3 +22,6 @@ Schedule::command('billing:start-scheduled')->dailyAt('08:00');
 
 // 古いログの削除（毎日 午前3時）- プライバシーポリシー第5条に基づく90日保管
 Schedule::command('logs:prune')->dailyAt('03:00');
+
+// past_due契約の猶予経過チェック：Day15リマインダー + Day30停止処理（毎日 午前9時）
+Schedule::command('billing:process-overdue')->dailyAt('09:00');

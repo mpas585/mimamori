@@ -53,6 +53,15 @@ class DeviceReportController extends Controller
             return response()->json(['error' => 'device_id or sim_id is required'], 422);
         }
 
+        // サービス停止中チェック（課金失敗30日経過でsuspended_atが立つ）
+        if ($device->suspended_at) {
+            Log::warning('Suspended device report rejected', [
+                'device_id'    => $device->device_id,
+                'suspended_at' => $device->suspended_at,
+            ]);
+            return response()->json(['error' => 'device_suspended'], 403);
+        }
+
         // ICCID検証（送信された場合）
         if (!empty($validated['iccid'] ?? null) && $device->simBinding) {
             if ($device->simBinding->iccid !== $validated['iccid']) {

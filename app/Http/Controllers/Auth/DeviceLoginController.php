@@ -57,6 +57,13 @@ class DeviceLoginController extends Controller
             ]);
         }
 
+        // サービス停止中チェック（課金失敗30日経過でsuspended_atが立つ）
+        if ($device->suspended_at) {
+            throw ValidationException::withMessages([
+                'device_id' => ['このデバイスはお支払い未確認のためサービスを停止しています。お問い合わせフォームよりご連絡ください。'],
+            ]);
+        }
+
         // 成功 → カウンタクリア
         $this->clearAttempts($request);
 
