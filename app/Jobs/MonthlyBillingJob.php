@@ -8,6 +8,8 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\BillingFailedMail;
 use App\Models\BillingContract;
 use App\Models\BillingLog;
 
@@ -90,6 +92,29 @@ class MonthlyBillingJob implements ShouldQueue
             $contract->markPastDue($e->getMessage());
 
             Log::error("MonthlyBillingJob: contract {$this->contractId} failed: " . $e->getMessage());
+
+            // 課金失敗通知メール送信（送信失敗してもJob自体は失敗させない）
+            $this->sendFailureNotification($contract);
+        }
+    }
+
+    /**
+     * 課金失敗通知メールを送信する
+     */
+    private function sendFailureNotification(BillingContract $contract): void
+    {
+        $email = $contract->getNotificationEmail();
+
+        if (!$email) {
+            Log::warning("MonthlyBillingJob: contract {$contract->id} has no notification email, skip mail");
+            return;
+        }
+
+        try {
+            Mail::to($email)->send(new BillingFailedMail($contract));
+            Log::info("MonthlyBillingJob: contract {$contract->id} failure notification sent to {$email}");
+        } catch (\Exception $mailEx) {
+            Log::error("MonthlyBillingJob: contract {$contract->id} failure mail send failed: " . $mailEx->getMessage());
         }
     }
 }

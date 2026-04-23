@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\BillingFailedMail;
 use App\Models\Device;
 use App\Models\Subscription;
 use App\Models\BillingContract;
@@ -287,8 +289,23 @@ class PlanController extends Controller
             $customerId = $event['data']['object']['customer'] ?? null;
             if ($customerId) {
                 $contract = BillingContract::where('payjp_customer_id', $customerId)->first();
-                // past_due遷移（premium_enabled停止・Subscription同期はmarkPastDue内で処理）
-                $contract?->markPastDue('Payjp webhook: charge.failed (customer: ' . $customerId . ')');
+                if ($contract) {
+                    // past_due遷移（premium_enabled停止・Subscription同期はmarkPastDue内で処理）
+                    $contract->markPastDue('Payjp webhook: charge.failed (customer: ' . $customerId . ')');
+
+                    // 課金失敗通知メール送信（送信失敗してもwebhookは200で返す）
+                    $email = $contract->getNotificationEmail();
+                    if ($email) {
+                        try {
+                            Mail::to($email)->send(new BillingFailedMail($contract));
+                            Log::info("Payjp webhook: contract {$contract->id} failure notification sent to {$email}");
+                        } catch (\Exception $mailEx) {
+                            Log::error("Payjp webhook: contract {$contract->id} failure mail send failed: " . $mailEx->getMessage());
+                        }
+                    } else {
+                        Log::warning("Payjp webhook: contract {$contract->id} has no notification email, skip mail");
+                    }
+                }
             }
         }
 
