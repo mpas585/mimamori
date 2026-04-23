@@ -160,13 +160,6 @@
                 </ul>
             </div>
 
-            @if(isset($debug_token))
-                <div class="debug-box">
-                    ⚠️ 開発モード：メール送信は未実装です<br>
-                    リセットリンク：<a href="{{ $debug_url }}">{{ $debug_url }}</a>
-                </div>
-            @endif
-
             <div style="margin-top: 24px;">
                 <a href="/login" class="btn btn-secondary">ログインページに戻る</a>
             </div>
@@ -174,5 +167,3 @@
     </div>
 </body>
 </html>
-
-

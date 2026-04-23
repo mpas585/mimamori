@@ -3,10 +3,13 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Mail\PinResetMail;
 use App\Models\Device;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 
 class PinResetController extends Controller
@@ -83,17 +86,22 @@ class PinResetController extends Controller
             'expires_at' => now()->addHours(1),
         ]);
 
-        // TODO: 実際のメール送信（Phase1後半で実装）
-        // $resetUrl = url('/pin-reset/token/' . $token);
-        // Mail::to($notif->email_1)->send(new PinResetMail($device, $resetUrl));
+        $resetUrl   = url('/pin-reset/token/' . $token);
+        $deviceName = $device->nickname ?: $device->device_id;
+
+        try {
+            Mail::to($notif->email_1)->send(new PinResetMail($resetUrl, $deviceName));
+        } catch (\Exception $e) {
+            Log::error('PIN再設定メール送信失敗: ' . $e->getMessage(), [
+                'device_id' => $device->device_id,
+            ]);
+            return redirect('/pin-reset')->with('error', 'メール送信に失敗しました。しばらく時間をおいて再度お試しください。');
+        }
 
         $request->session()->forget(['pin_reset_device_id', 'pin_reset_expires']);
 
         return view('auth.pin-reset-email-sent', [
             'masked_email' => $this->maskEmail($notif->email_1),
-            // デバッグ用（本番では削除）
-            'debug_token' => $token,
-            'debug_url'   => url('/pin-reset/token/' . $token),
         ]);
     }
 
