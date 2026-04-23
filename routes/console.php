@@ -19,3 +19,6 @@ Schedule::command('billing:run-monthly')->monthlyOn(1, '09:00');
 
 // billing_start_date到来デバイスの課金開始フラグ（毎日 午前8時）
 Schedule::command('billing:start-scheduled')->dailyAt('08:00');
+
+// 古いログの削除（毎日 午前3時）- プライバシーポリシー第5条に基づく90日保管
+Schedule::command('logs:prune')->dailyAt('03:00');
