@@ -120,6 +120,8 @@ class BillingContract extends Model
      * past_due 状態に遷移
      *   - contract.status = past_due
      *   - past_due_at = now()（既に設定済みの場合は維持、猶予起点はブレさせない）
+     *   - 対象デバイスの現在の premium_enabled を premium_enabled_before_past_due に退避
+     *     （既に退避済みの場合は上書きしない = 再遷移で上書きしない）
      *   - 対象デバイスの premium_enabled = false
      *   - B2C の場合は Subscription.status も past_due に同期
      */
@@ -131,10 +133,23 @@ class BillingContract extends Model
                 'past_due_at' => $this->past_due_at ?: now(),
             ]);
 
-            // 対象デバイスの premium_enabled を false に
+            // 対象デバイスの premium_enabled を退避してから false に
             foreach ($this->getTargetDevices() as $device) {
+                $updates = [];
+
+                // 退避：まだ退避されていない（NULL）場合のみ、現在値を保存
+                // past_due → markPastDue再呼び出し時に上書きしないための条件
+                if ($device->premium_enabled_before_past_due === null) {
+                    $updates['premium_enabled_before_past_due'] = $device->premium_enabled;
+                }
+
+                // premium停止
                 if ($device->premium_enabled) {
-                    $device->update(['premium_enabled' => false]);
+                    $updates['premium_enabled'] = false;
+                }
+
+                if (!empty($updates)) {
+                    $device->update($updates);
                 }
             }
 
@@ -153,7 +168,10 @@ class BillingContract extends Model
     /**
      * active 状態に遷移（復帰処理含む）
      *   - contract.status = active / past_due_at = null / next_billing_date 更新
-     *   - 対象デバイスの premium_enabled = true、suspended_at = null（復帰）
+     *   - 対象デバイスの premium_enabled を退避値(premium_enabled_before_past_due)から復元
+     *     （退避値がNULL = past_due経由でない場合はtrue、NULLでない場合はその値）
+     *   - 退避カラム premium_enabled_before_past_due は復元後NULLに戻す
+     *   - suspended_at はクリア（復帰）
      *   - B2C の場合は Subscription.status = active + current_period 更新
      */
     public function markActive(): void
@@ -165,11 +183,17 @@ class BillingContract extends Model
                 'next_billing_date' => now()->addMonth()->startOfMonth()->toDateString(),
             ]);
 
-            // 対象デバイスの premium_enabled を true に、suspended状態なら復帰
             foreach ($this->getTargetDevices() as $device) {
+                // 退避値があればそれを、なければ true を適用
+                // （退避値なし = past_due経由ではないactive遷移、例えば初回契約のchargeNow等）
+                $restore = ($device->premium_enabled_before_past_due !== null)
+                    ? (bool) $device->premium_enabled_before_past_due
+                    : true;
+
                 $device->update([
-                    'premium_enabled' => true,
-                    'suspended_at'    => null,
+                    'premium_enabled'                 => $restore,
+                    'premium_enabled_before_past_due' => null,
+                    'suspended_at'                    => null,
                 ]);
             }
 
@@ -189,6 +213,7 @@ class BillingContract extends Model
      * suspended 状態に遷移（30日猶予経過後のデバイス停止）
      *   - contract.status = suspended
      *   - 対象デバイスの suspended_at = now() + premium_enabled = false
+     *   - premium_enabled_before_past_due は退避のまま残す（復帰時に使う）
      *   - B2C の場合は Subscription も canceled 扱い
      */
     public function markSuspended(): void
