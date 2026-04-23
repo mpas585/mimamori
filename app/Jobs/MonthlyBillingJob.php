@@ -28,8 +28,10 @@ class MonthlyBillingJob implements ShouldQueue
             return;
         }
 
-        if ($contract->status !== 'active') {
-            Log::info("MonthlyBillingJob: contract {$this->contractId} is not active, skip");
+        // active と past_due を課金対象とする
+        // （past_due からの復帰を可能にするため・chargeNow 経由で手動リトライ可能）
+        if (!in_array($contract->status, ['active', 'past_due'], true)) {
+            Log::info("MonthlyBillingJob: contract {$this->contractId} is not billable (status: {$contract->status}), skip");
             return;
         }
 
@@ -66,11 +68,9 @@ class MonthlyBillingJob implements ShouldQueue
                 'billed_at'            => now(),
             ]);
 
-            $contract->update([
-                'amount'            => $amount,
-                'status'            => 'active',
-                'next_billing_date' => now()->addMonth()->startOfMonth()->toDateString(),
-            ]);
+            // amount を更新した上で active 遷移（past_due からの復帰も含む）
+            $contract->update(['amount' => $amount]);
+            $contract->markActive();
 
             Log::info("MonthlyBillingJob: contract {$this->contractId} charged ¥{$amount} (charge: {$charge->id})");
 
@@ -86,7 +86,8 @@ class MonthlyBillingJob implements ShouldQueue
                 'billed_at'            => now(),
             ]);
 
-            $contract->update(['status' => 'past_due']);
+            // past_due 遷移（premium停止、Subscription同期）
+            $contract->markPastDue($e->getMessage());
 
             Log::error("MonthlyBillingJob: contract {$this->contractId} failed: " . $e->getMessage());
         }

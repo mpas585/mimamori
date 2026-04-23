@@ -287,12 +287,8 @@ class PlanController extends Controller
             $customerId = $event['data']['object']['customer'] ?? null;
             if ($customerId) {
                 $contract = BillingContract::where('payjp_customer_id', $customerId)->first();
-                $contract?->update(['status' => 'past_due']);
-
-                $sub = Subscription::where('stripe_customer_id', $customerId)->first();
-                $sub?->update(['status' => 'past_due']);
-
-                Log::warning('Payjp charge failed for customer: ' . $customerId);
+                // past_due遷移（premium_enabled停止・Subscription同期はmarkPastDue内で処理）
+                $contract?->markPastDue('Payjp webhook: charge.failed (customer: ' . $customerId . ')');
             }
         }
 
