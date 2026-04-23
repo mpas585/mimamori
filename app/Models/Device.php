@@ -34,6 +34,8 @@ class Device extends Authenticatable
         'away_until',
         'organization_id',
         'premium_enabled',
+        'premium_enabled_before_past_due',
+        'suspended_at',
         'billing_start_date',
         'billing_started_at',
         'activated_at',
@@ -58,11 +60,13 @@ class Device extends Authenticatable
             'warranty_expires_at'    => 'date',
             'billing_start_date'     => 'date',
             'billing_started_at'     => 'datetime',
+            'suspended_at'           => 'datetime',
             'deleted_at'             => 'datetime',
             'pet_exclusion_enabled'  => 'boolean',
             'away_mode'              => 'boolean',
-            'premium_enabled'                => 'boolean',
-            'notification_service_enabled'   => 'boolean',
+            'premium_enabled'                  => 'boolean',
+            'premium_enabled_before_past_due'  => 'boolean',
+            'notification_service_enabled'     => 'boolean',
         ];
     }
 
