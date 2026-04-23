@@ -19,7 +19,6 @@ class NotificationSetting extends Model
         'sms_phone_2',
         'sms_enabled',
         'voice_phone_1',
-        'voice_phone_2',
         'voice_enabled',
     ];
 
@@ -39,5 +38,3 @@ class NotificationSetting extends Model
         return $this->belongsTo(Device::class);
     }
 }
-
-

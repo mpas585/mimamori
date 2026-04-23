@@ -466,10 +466,12 @@
 <div class="phone-modal-overlay" id="phoneModalOverlay" onclick="closePhoneModal(event)">
     <div class="phone-modal">
         <p class="phone-modal-title" id="phoneModalTitle">SMS通知先を設定</p>
-        <p class="phone-modal-hint">電話番号1（必須）</p>
+        <p class="phone-modal-hint" id="phoneInput1Hint">電話番号1（必須）</p>
         <input type="tel" class="form-input" id="phoneInput1" placeholder="+819012345678" style="margin-bottom:12px;">
-        <p class="phone-modal-hint">電話番号2（任意）</p>
-        <input type="tel" class="form-input" id="phoneInput2" placeholder="+819012345678">
+        <div id="phoneInput2Wrapper">
+            <p class="phone-modal-hint">電話番号2（任意）</p>
+            <input type="tel" class="form-input" id="phoneInput2" placeholder="+819012345678">
+        </div>
 
         <div class="phone-modal-actions">
             <button class="btn-cancel" onclick="closePhoneModal()">キャンセル</button>
@@ -588,6 +590,16 @@ function openPhoneModal(type) {
     document.getElementById('phoneModalTitle').textContent = title;
     document.getElementById('phoneInput1').value = '';
     document.getElementById('phoneInput2').value = '';
+    // AIコールは本人1つのみ。SMSのみ2つ目を表示
+    const wrapper2 = document.getElementById('phoneInput2Wrapper');
+    const hint1 = document.getElementById('phoneInput1Hint');
+    if (type === 'voice') {
+        wrapper2.style.display = 'none';
+        hint1.textContent = '電話番号（必須）';
+    } else {
+        wrapper2.style.display = '';
+        hint1.textContent = '電話番号1（必須）';
+    }
     document.getElementById('phoneModalOverlay').classList.add('open');
 }
 
@@ -601,13 +613,17 @@ function savePhone() {
     const phone1 = document.getElementById('phoneInput1').value.trim();
     const phone2 = document.getElementById('phoneInput2').value.trim();
 
-    const field1 = currentPhoneType === 'sms' ? 'sms_phone_1' : 'voice_phone_1';
-    const field2 = currentPhoneType === 'sms' ? 'sms_phone_2' : 'voice_phone_2';
+    let body;
+    if (currentPhoneType === 'sms') {
+        body = { sms_phone_1: phone1, sms_phone_2: phone2 };
+    } else {
+        body = { voice_phone_1: phone1 };
+    }
 
     fetch('/settings/notification', {
         method: 'POST',
         headers: headers,
-        body: JSON.stringify({ [field1]: phone1, [field2]: phone2 })
+        body: JSON.stringify(body)
     })
     .then(r => r.json())
     .then(() => {
@@ -808,5 +824,4 @@ if (document.getElementById('petSettings') && !document.getElementById('petSetti
 }
 </script>
 @endsection
-
 

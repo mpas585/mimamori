@@ -639,7 +639,6 @@
                     </div>
                     <div id="detailVoiceInputs">
                         <input type="tel" class="detail-form-input" id="detailVoicePhone1" placeholder="09012345678" style="margin-bottom:6px;">
-                        <input type="tel" class="detail-form-input" id="detailVoicePhone2" placeholder="09012345678（任意）">
                     </div>
                 </div>
             </div>
@@ -995,7 +994,7 @@ let currentDetailEmailEnabled = true;
 let currentDetailEmail1 = '', currentDetailEmail2 = '', currentDetailEmail3 = '';
 let currentDetailSmsEnabled = false, currentDetailVoiceEnabled = false;
 let currentDetailSmsPhone1 = '', currentDetailSmsPhone2 = '';
-let currentDetailVoicePhone1 = '', currentDetailVoicePhone2 = '';
+let currentDetailVoicePhone1 = '';
 
 function showSubscriptionModal() {
     if (!currentDetailDeviceId) return;
@@ -1007,7 +1006,6 @@ function showSubscriptionModal() {
     document.getElementById('detailSmsPhone1').value = currentDetailSmsPhone1;
     document.getElementById('detailSmsPhone2').value = currentDetailSmsPhone2;
     document.getElementById('detailVoicePhone1').value = currentDetailVoicePhone1;
-    document.getElementById('detailVoicePhone2').value = currentDetailVoicePhone2;
     renderSmsAction(currentDetailSmsEnabled);
     renderVoiceAction(currentDetailVoiceEnabled);
     showModal('subscriptionModal');
@@ -1057,7 +1055,6 @@ _dpEl.textContent = (data.current_pin && data.current_pin !== data.initial_pin) 
         currentDetailSmsPhone1 = data.sms_phone_1 || '';
         currentDetailSmsPhone2 = data.sms_phone_2 || '';
         currentDetailVoicePhone1 = data.voice_phone_1 || '';
-        currentDetailVoicePhone2 = data.voice_phone_2 || '';
 
         renderDetailSchedules(data.schedules || [], data.device_id);
         showModal('detailModal');
@@ -1115,7 +1112,7 @@ function renderVoiceAction(enabled) {
 async function toggleVoiceOption(enabled) {
     if (!currentDetailDeviceId) return;
     var payload = { voice_enabled: enabled ? 1 : 0 };
-    if (!enabled) { payload.voice_phone_1 = null; payload.voice_phone_2 = null; }
+    if (!enabled) { payload.voice_phone_1 = null; }
     try {
         var res = await fetch('/partner/org/devices/' + currentDetailDeviceId + '/notification', {
             method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' },
@@ -1216,7 +1213,6 @@ function saveDetailNotification() {
         sms_phone_1: document.getElementById('detailSmsPhone1').value || null,
         sms_phone_2: document.getElementById('detailSmsPhone2').value || null,
         voice_phone_1: document.getElementById('detailVoicePhone1').value || null,
-        voice_phone_2: document.getElementById('detailVoicePhone2').value || null,
     };
     fetch('/partner/org/devices/' + currentDetailDeviceId + '/notification', {
         method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken, 'Accept': 'application/json' }, body: JSON.stringify(payload)

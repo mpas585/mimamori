@@ -606,7 +606,6 @@
                     <label class="watch-toggle"><input type="checkbox" id="masterDetailVoiceEnabled"><span class="watch-slider"></span></label>
                 </div>
                 <input type="tel" class="detail-form-input" id="masterDetailVoicePhone1" placeholder="09012345678" style="margin-bottom:6px;">
-                <input type="tel" class="detail-form-input" id="masterDetailVoicePhone2" placeholder="09012345678（任意）">
             </div>
         </div>
         <div class="modal-footer">
@@ -975,7 +974,6 @@ _cpEl.textContent = (d.current_pin && d.current_pin !== d.initial_pin) ? d.curre
         document.getElementById('masterDetailSmsPhone2').value = d.sms_phone_2 || '';
         document.getElementById('masterDetailVoiceEnabled').checked = d.voice_enabled || false;
         document.getElementById('masterDetailVoicePhone1').value = d.voice_phone_1 || '';
-        document.getElementById('masterDetailVoicePhone2').value = d.voice_phone_2 || '';
         masterRenderSchedules(d.schedules || []);
     } catch(e) { showToast('詳細の取得に失敗しました', 'error'); }
 }
@@ -1042,7 +1040,6 @@ async function masterSaveNotification() {
         sms_phone_2: document.getElementById('masterDetailSmsPhone2').value || null,
         voice_enabled: document.getElementById('masterDetailVoiceEnabled').checked ? 1 : 0,
         voice_phone_1: document.getElementById('masterDetailVoicePhone1').value || null,
-        voice_phone_2: document.getElementById('masterDetailVoicePhone2').value || null,
     };
     try {
         const res = await fetch('/partner/devices/' + masterCurrentDeviceId + '/notification', {

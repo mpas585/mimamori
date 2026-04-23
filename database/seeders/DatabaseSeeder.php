@@ -308,7 +308,6 @@ class DatabaseSeeder extends Seeder
             'sms_phone_2'   => null,
             'sms_enabled'   => 0,
             'voice_phone_1' => null,
-            'voice_phone_2' => null,
             'voice_enabled' => 0,
             'created_at'    => now(),
             'updated_at'    => now(),
@@ -326,7 +325,6 @@ class DatabaseSeeder extends Seeder
             'sms_phone_2'   => null,
             'sms_enabled'   => 0,
             'voice_phone_1' => null,
-            'voice_phone_2' => null,
             'voice_enabled' => 0,
             'created_at'    => now(),
             'updated_at'    => now(),
@@ -378,5 +376,3 @@ class DatabaseSeeder extends Seeder
         $this->command->info('');
     }
 }
-
-
