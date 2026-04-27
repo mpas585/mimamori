@@ -3,11 +3,14 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Mail\IccidMismatchAlertMail;
 use App\Models\Device;
 use App\Models\DetectionLog;
+use App\Models\PartnerUser;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 class DeviceReportController extends Controller
 {
@@ -70,6 +73,12 @@ class DeviceReportController extends Controller
                     'expected'  => $device->simBinding->iccid,
                     'received'  => $validated['iccid'],
                 ]);
+                $this->notifyIccidMismatch(
+                    $device,
+                    (string) $device->simBinding->iccid,
+                    (string) $validated['iccid'],
+                    $request->ip()
+                );
                 return response()->json(['error' => 'iccid_mismatch'], 403);
             }
         }
@@ -146,5 +155,39 @@ class DeviceReportController extends Controller
             'human_count' => $humanCount,
             'pet_count'   => $petCount,
         ], 201);
+    }
+
+    /**
+     * ICCID不一致を partner_admins の master 全員にメール通知
+     * 失敗してもAPIレスポンス（403）は止めない
+     */
+    private function notifyIccidMismatch(Device $device, string $expectedIccid, string $receivedIccid, ?string $clientIp): void
+    {
+        $masterEmails = PartnerUser::where('role', 'master')
+            ->whereNotNull('email')
+            ->where('email', '!=', '')
+            ->pluck('email')
+            ->unique()
+            ->values()
+            ->toArray();
+
+        if (empty($masterEmails)) {
+            Log::warning('ICCID mismatch alert mail skipped: no master admin with email found', [
+                'device_id' => $device->device_id,
+            ]);
+            return;
+        }
+
+        foreach ($masterEmails as $email) {
+            try {
+                Mail::to($email)->send(new IccidMismatchAlertMail($device, $expectedIccid, $receivedIccid, $clientIp));
+            } catch (\Throwable $e) {
+                Log::error('ICCID mismatch alert mail failed', [
+                    'device_id' => $device->device_id,
+                    'recipient' => $email,
+                    'error'     => mb_substr($e->getMessage(), 0, 500),
+                ]);
+            }
+        }
     }
 }
