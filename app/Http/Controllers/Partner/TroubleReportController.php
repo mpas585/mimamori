@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Partner;
 use App\Http\Controllers\Controller;
 use App\Mail\TroubleReportNotificationMail;
 use App\Models\Device;
+use App\Models\PartnerUser;
 use App\Models\TroubleReport;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -143,25 +144,35 @@ class TroubleReportController extends Controller
     }
 
     /**
-     * 運営宛に申請通知メールを送信（失敗してもメインフローを止めない）
+     * partner_admins の master 全員に通知メールを送信（失敗してもメインフローを止めない）
      */
     private function notifyAdmin(TroubleReport $report, string $reporterRole, ?string $reporterName): void
     {
-        $adminEmail = config('services.admin.notification_email');
-        if (empty($adminEmail)) {
-            Log::warning('TroubleReport admin notification skipped: ADMIN_NOTIFICATION_EMAIL is not set', [
+        $masterEmails = PartnerUser::where('role', 'master')
+            ->whereNotNull('email')
+            ->where('email', '!=', '')
+            ->pluck('email')
+            ->unique()
+            ->values()
+            ->toArray();
+
+        if (empty($masterEmails)) {
+            Log::warning('TroubleReport admin notification skipped: no master admin with email found', [
                 'report_id' => $report->id,
             ]);
             return;
         }
 
-        try {
-            Mail::to($adminEmail)->send(new TroubleReportNotificationMail($report, $reporterRole, $reporterName));
-        } catch (\Throwable $e) {
-            Log::error('TroubleReport admin notification mail failed', [
-                'report_id' => $report->id,
-                'error'     => mb_substr($e->getMessage(), 0, 500),
-            ]);
+        foreach ($masterEmails as $email) {
+            try {
+                Mail::to($email)->send(new TroubleReportNotificationMail($report, $reporterRole, $reporterName));
+            } catch (\Throwable $e) {
+                Log::error('TroubleReport admin notification mail failed', [
+                    'report_id' => $report->id,
+                    'recipient' => $email,
+                    'error'     => mb_substr($e->getMessage(), 0, 500),
+                ]);
+            }
         }
     }
 }
