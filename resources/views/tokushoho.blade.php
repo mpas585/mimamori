@@ -202,16 +202,28 @@
             </td>
         </tr>
         <tr>
+            <th>商品代金以外の必要料金</th>
+            <td>振込手数料：お客様負担<br><span style="font-size:12px; color:var(--gray-500);">※銀行振込をご利用の場合、振込手数料はお客様にご負担いただきます。</span></td>
+        </tr>
+        <tr>
             <th>契約期間</th>
             <td>2年間（契約満了後は同条件で自動更新）</td>
         </tr>
         <tr>
             <th>支払方法</th>
-            <td>クレジットカード（VISA、Mastercard、JCB、AMEX）</td>
+            <td>
+                <ul>
+                    <li>クレジットカード（VISA、Mastercard、JCB、AMEX）</li>
+                    <li>銀行振込</li>
+                </ul>
+            </td>
         </tr>
         <tr>
             <th>支払時期</th>
-            <td>毎月自動決済</td>
+            <td>
+                クレジットカード：初回はお申込時、次回以降は毎月同日自動決済<br>
+                銀行振込：初回申し込みから3日以内、次月以降毎月1日
+            </td>
         </tr>
         <tr>
             <th>デバイスの配送</th>
